@@ -1,3 +1,5 @@
+kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. '/etpro'
+
 KMODversion = "Beta 1.5"
 KMODversion2 = "1.5"
 k_commandprefix = "!" -- change this to your desired prefix
@@ -1819,7 +1821,8 @@ function loadmapspreerecord()
 	et.trap_FS_FCloseFile( fd ) 
 end
 
-function et_ConsoleCommand() 
+function et_ConsoleCommand()
+    params = {}
 		if string.lower(et.trap_Argv(0)) == k_commandprefix.."setlevel" then  
 			if (et.trap_Argc() < 2) then 
 				et.G_Print("Setlevel is used to set admin status to a player.\n") 
@@ -2101,7 +2104,8 @@ function et_ConsoleCommand()
 				end
 			end
   		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."spec999" ) then
-			spec999()
+			dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+            execute_command(params)
 		elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."gib" then  
 			if (et.trap_Argc() < 2) then 
 				et.G_Print("Gib is used to instantly kill a player\n") 
@@ -2796,21 +2800,6 @@ function getPlayernameToId(name)
    else
 	return slot
    end
-end
-
-function spec999()
-	local matches = 0
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		local team = tonumber(et.gentity_get(i,"sess.sessionTeam"))
-		local ping = tonumber(et.gentity_get(i,"ps.ping"))
-		if team ~= 3 and team ~= 0 then
-			if ping >= 999 then
-				matches = matches + 1
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. i .. "\n" )
-			end
-		end
-	end
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Spec999: ^7Moving ^1" ..matches.. " ^7players to spectator\n" )
 end
 
 function et_ClientBegin( clientNum )
@@ -3963,7 +3952,8 @@ function randomClientFinder()
 end
 
 function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
-	local admin_req = k_maxAdminLevels + 1
+	params = {}
+    local admin_req = k_maxAdminLevels + 1
 
 	local fd,len = et.trap_FS_FOpenFile( "commands.cfg", et.FS_READ )
 	if len > 0 then
@@ -4082,7 +4072,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldspree2) .."\n" )
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldmapspree2) .."\n" )
 		elseif (string.lower(BangCommand) == k_commandprefix.."spec999" ) then
-			spec999()
+			dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+            execute_command(params)
 		elseif (string.lower(BangCommand) == k_commandprefix.."tk_index" ) then
 			local status = ""
 			local name = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" )
