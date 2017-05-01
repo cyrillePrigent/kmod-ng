@@ -1836,13 +1836,16 @@ function et_ConsoleCommand()
 			setlevel(et.trap_Argv(1), et.trap_Argv(2)) 
 		return 1
 		elseif string.lower(et.trap_Argv(0)) == "goto" then
-			if (et.trap_Argc() < 2) then 
-				et.G_Print("Goto is used to teleport one player to another player\n") 
-				et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
-			return 1 
-			end 
-			goto(et.trap_Argv(1), et.trap_Argv(2))
-		return 1
+            if (et.trap_Argc() < 2) then
+                et.G_Print("Goto is used to teleport one player to another player\n") 
+                et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
+                return 1
+            end
+            params.playerID = et.trap_Argv(1)
+            params.target   = et.trap_Argv(2)
+            dofile(kmod_ng_path .. '/kmod/command/goto.lua')
+            execute_command(params)
+            return 1
 		elseif string.lower(et.trap_Argv(0)) == "iwant" then
 			if (et.trap_Argc() < 2) then 
 				et.G_Print("Iwant is used to teleport one player to another player\n") 
@@ -3187,30 +3190,6 @@ function log_chat( PlayerID, mode, text, PMID )
 
 	et.trap_FS_Write( LOG, string.len(LOG) ,fdadm )
 	et.trap_FS_FCloseFile( fdadm )
-end
-
-function goto(PlayerID, target)
-	target = part2id(target)
-	if target == nil then
-		--durt
-	else
---		local target_origin = et.gentity_get(target, "r.currentOrigin")
-		if et.gentity_get(PlayerID,"pers.connected") == 2 then
-			if et.gentity_get(PlayerID,"sess.sessionTeam") >= 3 or et.gentity_get(PlayerID,"sess.sessionTeam") < 1 then
-			else
-				local target_origin = et.gentity_get(target, "origin")
-				target_origin[2] = target_origin[2] + 40
-				et.gentity_set(PlayerID, "origin", target_origin)
-			end
-		end
-
---		et.gentity_set(PlayerID, "r.currentOrigin", target_origin)
-	end
-
-
-
---   		pos[30]=et.gentity_get(et.trap_Argv(2),"origin")
---   		et.gentity_set(et.trap_Argv(1), "origin", pos[30])
 end
 
 function iwant(PlayerID, target)
