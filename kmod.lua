@@ -1857,9 +1857,10 @@ function et_ConsoleCommand()
             dofile(kmod_ng_path .. '/kmod/command/iwant.lua')
             execute_command(params)
             return 1
-		elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."showadmins" then  
-			showAdmins() 
-		return 1
+        elseif string.lower(et.trap_Argv(0)) == k_commandprefix .. "showadmins" then
+            dofile(kmod_ng_path .. '/kmod/command/showadmins.lua')
+            execute_command(params)
+            return 1
 		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."panzerwar" ) then
 			if Cvarct < 3 then
 				et.G_Print("^3Panzerwar:^7 Disable or enable panzerwar \[0-1\]\n" )
@@ -2529,22 +2530,6 @@ function AdminUserLevel(PlayerID)
 --		return 1
 --	end
 	return 0
-end
-
-function showAdmins()
-	local fd,len = et.trap_FS_FOpenFile( "shrubbot.cfg", et.FS_READ )
-	if len <= 0 then
-		et.G_Print("WARNING: No Admins's Defined! \n")
-	else
-		local filestr = et.trap_FS_Read( fd, len )
-
-		for level,guid,Name in string.gfind(filestr, "(%d)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-			-- upcase for exact matches
-			GUID = string.upper(guid)
-			et.G_Print( "Name  = " ..Name.. "\nLevel = " ..level.. "\n\n")
-		end
-	end
-	et.trap_FS_FCloseFile( fd ) 
 end
 
 function loadAdmins()
