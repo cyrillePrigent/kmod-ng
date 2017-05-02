@@ -2591,29 +2591,6 @@ function loadAdmins()
 	et.trap_FS_FCloseFile( fd ) 
 end
 
-function getPlayernameToIdburn(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-     		 if s and e then 
-			matchcount = matchcount + 1
-				slot = i
-        	 end 
-      end 
-   end 
-   if matchcount >= 2 then
-	return nil
-   else
-	return slot
-   end
-end
-
 function getPlayernameToId(name) 
    local i = 0
    local slot = nil

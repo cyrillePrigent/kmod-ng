@@ -1,6 +1,6 @@
 
 
--- getPlayernameToIdburn
+-- getPlayernameToId
 
 function execute_command(params)
     local clientNum = tonumber(params.client)
@@ -34,7 +34,7 @@ function execute_command(params)
                 end
                 return
             else
-                clientNum = getPlayernameToIdburn(params.client)
+                clientNum = getPlayernameToId(params.client)
             end
         end
 
