@@ -3815,60 +3815,58 @@ end
 --  levelTime is the current level time in milliseconds.
 --  randomSeed is a number that can be used to seed random number generators.
 --  restart indicates if et_InitGame() is being called due to a map restart (1) or not (0).
-function et_InitGame( levelTime, randomSeed, restart )
-	k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
+function et_InitGame(levelTime, randomSeed, restart)
+    k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
+    initTime = levelTime
 
-	initTime = levelTime
-	loadAdmins()
+    loadAdmins()
+    loadspreerecord()
+    loadmapspreerecord()
+    loadMutes()
 
-	loadspreerecord()
-	loadmapspreerecord()
---	loadcommands()
-	loadMutes()
+    local currentver = et.trap_Cvar_Get("mod_version")
+    et.RegisterModname("KMOD version " .. KMODversion .. " " .. et.FindSelf())
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentver .. " - KMOD" .. KMODversion2 .. "\"\n")
 
-	local currentver = et.trap_Cvar_Get("mod_version")
-	et.RegisterModname( "KMOD version " .. KMODversion .. " " .. et.FindSelf() )
-	et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentver .. " - KMOD" .. KMODversion2 .. "\"" .. "\n" )
+    k_panzersperteam = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 
-	k_panzersperteam = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
+    for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+        killingspree[i] = 0
+        flakmonkey[i] = 0
+        deathspree[i] = 0
+        multikill[i] = 0
+        muted[i] = 0
+        nummutes[i] = 0
+        antiloopadr1[i] = 0
+        antiloopadr2[i] = 0
+        adrenaline[i] = 0
+        adrnum[i] = 0
+        adrnum2[i] = 0
+        adrtime[i] = 0
+        adrtime2[i] = 0
+        adrendummy[i] = 0
+        clientrespawn[i] = 0
+        invincDummy[i] = 0
+        switchteam[i] = 0
+        gibbed[i] = 0
 
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		killingspree[i] = 0
-		flakmonkey[i] = 0
-		deathspree[i] = 0
-		multikill[i] = 0
-		muted[i] = 0
-		nummutes[i] = 0
-		antiloopadr1[i] = 0
-		antiloopadr2[i] = 0
-		adrenaline[i] = 0
-		adrnum[i] = 0
-		adrnum2[i] = 0
-		adrtime[i] = 0
-		adrtime2[i] = 0
-		adrendummy[i] = 0
-		clientrespawn[i] = 0
-		invincDummy[i] = 0
-		switchteam[i] = 0
-		gibbed[i] = 0
+        playerwhokilled[i] = 1022
+        killedwithweapk[i] = ""
+        killedwithweapv[i] = ""
+        playerlastkilled[i] = 1022
+        selfkills[i] = 0
+        teamkillr[i] = 0
+        khp[i] = 0
+        AdminName[i] = ""
+        originalclass[i] = ""
+        originalweap[i] = ""
 
-		playerwhokilled[i] = 1022
-		killedwithweapk[i] = ""
-		killedwithweapv[i] = ""
-		playerlastkilled[i] = 1022
-		selfkills[i] = 0
-		teamkillr[i] = 0
-		khp[i] = 0
-		AdminName[i] = ""
-		originalclass[i] = ""
-		originalweap[i] = ""
+        killr[i] = 0
+    end
 
-		killr[i] = 0
-	end
+    readconfig()
 
-	readconfig()
-
-	et.G_Print( "KMOD version " .. KMODversion .. " has been initialized...\n" )
+    et.G_Print("KMOD version " .. KMODversion .. " has been initialized...\n")
 end
 
 -- Called when qagame shuts down.
