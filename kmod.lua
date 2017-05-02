@@ -2120,14 +2120,18 @@ function et_ConsoleCommand()
 			end 
 			Gib(et.trap_Argv(1)) 
 		return 1 
-		elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."slap" then 
-			if (et.trap_Argc() < 2) then 
-				et.G_Print("Slap is used to slap a player\n")
-				et.G_Print("useage: slap \[name/PID\]\n")
-			return 1 
-			end  
-			burn(et.trap_Argv(1)) -- the command was originally !burn
-		return 1
+        elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."slap" then
+            if (et.trap_Argc() < 2) then
+                et.G_Print("Slap is used to slap a player\n")
+                et.G_Print("useage: slap \[name/PID\]\n")
+                return 1
+            end
+            params.client = et.trap_Argv(1)
+            params.commandSaid = commandSaid
+            params.say = say_parms
+            dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+            execute_command(params)
+            return 1
 		elseif string.lower(et.trap_Argv(0)) == "k_commandprefix" then 
 			et.G_Print("Unknown command in line k_commandprefix\n")
 		return 1
@@ -2583,97 +2587,6 @@ function loadAdmins()
 	et.trap_FS_FCloseFile( fd ) 
 end
 
-function burn(client) 
-   local clientnum = tonumber(client) 
-   if clientnum then 
-      if (clientnum >= 0) and (clientnum < 64) then 
-         if et.gentity_get(clientnum,"pers.connected") ~= 2 then 
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7There is no client associated with this slot number\n" )
-			commandSaid = false
-		else
-            	et.G_Print("There is no client associated with this slot number\n") 
-		end
-         return 
-         end 
-         if et.gentity_get(clientnum,"sess.sessionTeam") >= 3 or et.gentity_get(clientnum,"sess.sessionTeam") < 1 then
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Client is not actively playing\n" )
-			commandSaid = false
-		else
-	            et.G_Print("Client is not actively playing\n") 
-		end
-         return 
-         end 
-	   if et.gentity_get(clientnum,"health") <= 0 then
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Client is currently dead\n" )
-			commandSaid = false
-		else
-	  	    	et.G_Print("Client is currently dead\n") 
-		end
-	   return
-	   end
-      else              
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Please enter a slot number between 0 and 63\n" )
-			commandSaid = false
-		else 
-         		et.G_Print("Please enter a slot number between 0 and 63\n") 
-		end
-      return 
-      end 
-   else 
-      if client then 
-	   s,e=string.find(client, client)
-	   if e <= 2 then
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Player name requires more than 2 characters\n" )
-			commandSaid = false
-		else
-			et.G_Print("Player name requires more than 2 characters\n")
-		end
-	   return
-	   else
-         	clientnum = getPlayernameToIdburn(client)
-	   end
-      end 
-         if not clientnum then 
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Try name again or use slot number\n" )
-			commandSaid = false
-		else
-         		et.G_Print("Try name again or use slot number\n") 
-		end
-         return 
-         end 
-   end 
-         if et.gentity_get(clientnum,"sess.sessionTeam") >= 3 or et.gentity_get(clientnum,"sess.sessionTeam") < 1 then 
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Client is not actively playing\n" )
-			commandSaid = false
-		else
-	            et.G_Print("Client is not actively playing\n") 
-		end
-         return 
-         end 
-	   if et.gentity_get(clientnum,"health") <= 0 then
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap: ^7Client is currently dead\n" )
-			commandSaid = false
-		else
-	  	    	et.G_Print("Client is currently dead\n") 
-		end
-	   return
-	   end
-        et.gentity_set(clientnum,"health",(et.gentity_get(clientnum,"health")-5))
-		local	slapsound = "sound/player/hurt_barbwire.wav"
-		soundindex = et.G_SoundIndex(slapsound)
-		et.G_Sound( clientnum,  soundindex)
-
-	   et.trap_SendServerCommand(-1, ("b 16 \"^7" .. et.gentity_get(clientnum,"pers.netname") .. " ^7was Slapped^7")) 
-end 
-
 function getPlayernameToIdburn(name) 
    local i = 0
    local slot = nil
@@ -3036,16 +2949,21 @@ function curse_filter( PlayerID )
 			end
 		end
 	end
-	if (k_cursemode - 8) >= 0 then
-		k_cursemode = k_cursemode - 16
-		if et.gentity_get(PlayerID,"pers.connected") == 2 then
-			if et.gentity_get(PlayerID,"sess.sessionTeam") >= 3 or et.gentity_get(PlayerID,"sess.sessionTeam") < 1 then
-			else
-				burn(PlayerID)
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto slapped for language!\n" )
-			end
-		end
-	end
+    if (k_cursemode - 8) >= 0 then
+        k_cursemode = k_cursemode - 16
+        if et.gentity_get(PlayerID, "pers.connected") == 2 then
+            local team = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+
+            if sessionTeam > 0 or sessionTeam < 4 then
+                params.client = et.PlayerID
+                params.commandSaid = commandSaid
+                params.say = say_parms
+                dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+                execute_command(params)
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
+            end
+        end
+    end
 	if (k_cursemode - 4) >= 0 then
 		-- Override kill and slap
 		if (k_cursemode - 4) > 0 then
@@ -4069,12 +3987,15 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."slap" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			burn(Cvar1)
-		end
+        if Cvarct < 3 then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Slap:^7 \[partname/id#\]\n")
+        else
+            params.client = Cvar1
+            params.commandSaid = true
+            params.say = say_parms
+            dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+            execute_command(params)
+        end
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 command unavailible due to lack of required admin status!\n" )
 --	end
