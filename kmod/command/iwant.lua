@@ -3,15 +3,15 @@
 -- part2id
 
 function execute_command(params)
-    target = part2id(params.target)
+    playerId = part2id(params.playerId)
 
-    if target ~= nil then
+    if playerId ~= nil then
         local sessionTeam = et.gentity_get(params.playerId, "sess.sessionTeam")
 
         if et.gentity_get(params.playerId, "pers.connected") == 2 and (sessionTeam > 0 or sessionTeam < 4) then
-            local targetOrigin = et.gentity_get(target, "origin")
-            targetOrigin[2] = targetOrigin[2] + 40
-            et.gentity_set(params.playerId, "origin", targetOrigin)
+            local playerIdOrigin = et.gentity_get(playerId, "origin")
+            playerIdOrigin[2] = playerIdOrigin[2] + 40
+            et.gentity_set(params.target, "origin", playerIdOrigin)
         end
     end
 end
