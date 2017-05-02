@@ -3871,47 +3871,50 @@ end
 
 -- Called when qagame shuts down.
 --  restart indicates if the shutdown is being called due to a map_restart (1) or not (0).
-function et_ShutdownGame ( restart )
-	if panzdv == 1 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
-	elseif frenzdv == 1 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
-	elseif grendv == 1 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
-	elseif snipdv == 1 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
-	end
+function et_ShutdownGame(restart)
+    if panzdv == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
+    elseif frenzdv == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
+    elseif grendv == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
+    elseif snipdv == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
+    end
 
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxpanzers ".. k_panzersperteam .."\n" )
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
 
-	if panzdv == 1 then
-		for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-			if et.gentity_get(p,"sess.sessionTeam") == 1 or et.gentity_get(p,"sess.sessionTeam") == 2 then
-					et.gentity_set(p,"sess.latchPlayerType",originalclass[p])
-					et.gentity_set(p,"sess.latchPlayerWeapon",originalweap[p])
-			end
-		end
-	end
+    if panzdv == 1 then
+        for p = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+            local team = et.gentity_get(p, "sess.sessionTeam")
 
-	if k_logchat == 1 then
-		log_chat( "DV", "START", "DV" )
-	end
+            if team == 1 or team == 2 then
+                et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
+                et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
+            end
+        end
+    end
 
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		if et.gentity_get(i,"pers.connected") == 2 then
-			if muted[i] > 0 then
-				local muteDur = (muted[i]-mtime)/1000
-				setMute(i, muteDur)
-			elseif muted[i] == 0 then
-				IP = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "ip" )
-				s,e,IP = string.find(IP,"(%d+%.%d+%.%d+%.%d+)")
-				if muteDuration[IP] ~= 0 then
-					local muteDur = 0
-					setMute(i, muteDur)
-				end
-			end
-		end
-	end
+    if k_logchat == 1 then
+        log_chat("DV", "START", "DV")
+    end
+
+    for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+        if et.gentity_get(i, "pers.connected") == 2 then
+            if muted[i] > 0 then
+                local muteDur = (muted[i] - mtime) / 1000
+                setMute(i, muteDur)
+            elseif muted[i] == 0 then
+                IP = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
+                s, e, IP = string.find(IP, "(%d+%.%d+%.%d+%.%d+)")
+
+                if muteDuration[IP] ~= 0 then
+                    local muteDur = 0
+                    setMute(i, muteDur)
+                end
+            end
+        end
+    end
 end
 
 -- Called when qagame runs a server frame.
