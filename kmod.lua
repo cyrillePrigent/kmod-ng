@@ -3841,17 +3841,17 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 	if AdminUserLevel(PlayerID) >= admin_req then
 		if (string.lower(BangCommand) == k_commandprefix.."admintest") then
 			adminStatus(PlayerID)
-		elseif (string.lower(BangCommand) == k_commandprefix.."time" ) then
-		 	local time = os.date("%I:%M:%S%p")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." The server time is " ..time.. "\n" )
-		elseif (string.lower(BangCommand) == k_commandprefix.."date" ) then
-			local date = os.date("%x %I:%M:%S%p")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." The server date is " ..date.. "\n" )
+        elseif (string.lower(BangCommand) == k_commandprefix .. "time") then
+            dofile(kmod_ng_path .. '/kmod/command/time.lua')
+            execute_command(params)
+        elseif (string.lower(BangCommand) == k_commandprefix .. "date") then
+            dofile(kmod_ng_path .. '/kmod/command/date.lua')
+            execute_command(params)
 		elseif (string.lower(BangCommand) == k_commandprefix.."spree_record" ) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldspree2) .."\n" )
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldmapspree2) .."\n" )
-		elseif (string.lower(BangCommand) == k_commandprefix.."spec999" ) then
-			dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+		elseif (string.lower(BangCommand) == k_commandprefix .. "spec999") then
+            dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
             execute_command(params)
 		elseif (string.lower(BangCommand) == k_commandprefix.."tk_index" ) then
 			local status = ""
@@ -3872,7 +3872,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 
 --Admin commands
 	--level 3
-  if (string.lower(BangCommand) == k_commandprefix.."gib" ) then
+  if (string.lower(BangCommand) == k_commandprefix.."gib") then
 --	if AdminUserLevel(PlayerID) == 3 then
         if Cvarct < 3 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gib:^7 \[partname/id#\]\n")
