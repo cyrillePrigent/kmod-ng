@@ -2160,7 +2160,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldspree2) .."\n" )
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldmapspree2) .."\n" )
 		elseif (string.lower(BangCommand) == k_commandprefix .. "spec999") then
-            dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+            dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
             execute_command(params)
 		elseif (string.lower(BangCommand) == k_commandprefix.."tk_index" ) then
 			local status = ""
@@ -4671,7 +4671,7 @@ function et_ConsoleCommand()
         dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
         execute_command(params)
     elseif (arg0 == k_commandprefix .. "spec999" ) then
-        dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+        dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
         execute_command(params)
     elseif arg0 == k_commandprefix .. "gib" then
         dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
