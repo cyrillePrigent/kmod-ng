@@ -4725,219 +4725,221 @@ end
 --  command is the command. The mod should return 1 if the command was intercepted by the mod,
 --  and 0 if the command was ignored by the mod and should be passed through
 --  to the server (and other mods in the chain).
-function et_ClientCommand( clientNum, command )
-	local name2 = et.gentity_get(clientNum,"pers.netname")
-	local name2 = et.Q_CleanStr( name2 )
-	local arg0 = string.lower(et.trap_Argv(0))
-	local arg1 = string.lower(et.trap_Argv(1))
-	local muted = et.gentity_get(clientNum, "sess.muted")
-	if muted == 0 then
-	if arg0 == "say" then
-		if k_logchat == 1 then
-			log_chat( clientNum, et.SAY_ALL, et.ConcatArgs(1))
-		end
+function et_ClientCommand(clientNum, command)
+    local name2 = et.gentity_get(clientNum, "pers.netname")
+    local name2 = et.Q_CleanStr(name2)
+    local arg0 = string.lower(et.trap_Argv(0))
+    local arg1 = string.lower(et.trap_Argv(1))
+    local muted = et.gentity_get(clientNum, "sess.muted")
 
-		say_parms = "qsay"
+    if muted == 0 then
+        if arg0 == "say" then
+            if k_logchat == 1 then
+                log_chat(clientNum, et.SAY_ALL, et.ConcatArgs(1))
+            end
 
-		et_ClientSay( clientNum, et.SAY_ALL, et.ConcatArgs(1))
-	elseif arg0 == "say_team" then
-		if k_logchat == 1 then
-			log_chat( clientNum, et.SAY_TEAM, et.ConcatArgs(1))
-		end
+            say_parms = "qsay"
+            et_ClientSay( clientNum, et.SAY_ALL, et.ConcatArgs(1))
+        elseif arg0 == "say_team" then
+            if k_logchat == 1 then
+                log_chat(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
+            end
 
-		say_parms = "qsay"
+            say_parms = "qsay"
+            et_ClientSay(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
+        elseif arg0 == "st" then
+            speaker_test(clientNum, et.ConcatArgs(1))
+            return 1
+        elseif arg0 == "say_buddy" then
+            if k_logchat == 1 then
+                log_chat(clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
+            end
 
-		et_ClientSay( clientNum, et.SAY_TEAM, et.ConcatArgs(1))
-	elseif arg0 == "st" then
-		--speaker_test( clientNum, et.ConcatArgs(1))
-		speaker_test( clientNum, et.ConcatArgs(1))
-		return 1
-	elseif arg0 == "say_buddy" then
-		if k_logchat == 1 then
-			log_chat( clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
-		end
+            say_parms = "qsay"
+            et_ClientSay( clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
+        elseif arg0 == "say_teamnl" then
+            if k_logchat == 1 then
+                log_chat(clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
+            end
 
-		say_parms = "qsay"
+            say_parms = "qsay"
+            et_ClientSay( clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
+        elseif arg0 == "sc" then
+            if AdminUserLevel(clientNum) == 3 then
+                local name = et.gentity_get(clientNum, "pers.netname")
 
-		et_ClientSay( clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
-	elseif arg0 == "say_teamnl" then
-		if k_logchat == 1 then
-			log_chat( clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
-		end
+                if k_advancedpms == 1 then
+                    say_parms = "m2 " .. clientNum
+                else
+                    say_parms = "m " .. name
+                end
 
-		say_parms = "qsay"
+                et_ClientSay(clientNum, SC, et.ConcatArgs(1))
+                return 1
+            end
+        elseif arg0 == "vsay" then
+            if k_logchat == 1 then
+                log_chat(clientNum, "VSAY_ALL", et.ConcatArgs(1))
+            end
+        elseif arg0 == "vsay_team" then
+            if k_logchat == 1 then
+                log_chat(clientNum, "VSAY_TEAM", et.ConcatArgs(1))
+            end
+        elseif arg0 == "vsay_buddy" then
+            if k_logchat == 1 then
+                log_chat(clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
+            end
+        end
+    end
 
-		et_ClientSay( clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
-	elseif arg0 == "sc" then
-		if AdminUserLevel(clientNum) == 3 then
-			local name = et.gentity_get(clientNum,"pers.netname")
+    if arg0 == "dmg_test" then
+        dmg_test(clientNum)
+        return 1
+    end
 
-			if k_advancedpms == 1 then
-				say_parms = "m2 ".. clientNum
-			else
-				say_parms = "m "..name
-			end
+    if arg0 == "m" or arg0 == "pm"  then
+        if k_logchat == 1 then
+            log_chat(clientNum, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
+        end
+    elseif arg0 == "ma" or arg0 == "pma" or arg0 == "msg" then
+        if k_logchat == 1 then
+            log_chat(clientNum, "PMADMINS", et.ConcatArgs(1))
+        end
+    end
 
-			et_ClientSay( clientNum, SC, et.ConcatArgs(1))
-			return 1
-		end
-	elseif arg0 == "vsay" then
-		if k_logchat == 1 then
-			log_chat( clientNum, "VSAY_ALL", et.ConcatArgs(1))
-		end
-	elseif arg0 == "vsay_team" then
-		if k_logchat == 1 then
-			log_chat( clientNum, "VSAY_TEAM", et.ConcatArgs(1))
-		end
-	elseif arg0 == "vsay_buddy" then
-		if k_logchat == 1 then
-			log_chat( clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
-		end
-	end
-	end
+    if k_advplayers == 1 then
+        if string.lower(command) == "players" then
+            advPlayers(clientNum)
+            return 1
+        end
 
-	if arg0 == "dmg_test" then
-		dmg_test(clientNum)
-		return 1
-	end
+        if AdminUserLevel(clientNum) >= 2 then
+            if string.lower(command) == "admins" then
+                admins(clientNum)
+                return 1
+            end
+        end
+    end
 
-	if arg0 == "m" or arg0 == "pm"  then
-		if k_logchat == 1 then
-			log_chat( clientNum, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1) )
-		end
-	elseif arg0 == "ma" or arg0 == "pma" or arg0 == "msg" then
-		if k_logchat == 1 then
-			log_chat( clientNum, "PMADMINS", et.ConcatArgs(1))
-		end
-	end
+    local ref = tonumber(et.gentity_get(clientNum, "sess.referee"))
 
-	if k_advplayers == 1 then
-		if string.lower(command) == "players" then
-   			advPlayers(clientNum)
-		return 1 
-		end
-		if AdminUserLevel(clientNum) >= 2 then
-			if string.lower(command) == "admins" then
-   				admins(clientNum)
-			return 1
-  			end
-		end
-	end
+    if tonumber(et.gentity_get(clientNum, "sess.sessionTeam")) == 3 then
+        if et.trap_Argv(0) == "team" and et.trap_Argv(1) then
+            switchteam[clientNum] = 1
+        end
+    end
 
-		local ref = tonumber(et.gentity_get(clientNum,"sess.referee"))
+    if votedis == 1 then
+        local vote = et.trap_Argv(1)
 
-	if tonumber(et.gentity_get(clientNum,"sess.sessionTeam")) == 3 then
-		if et.trap_Argv(0) == "team" and et.trap_Argv(1) then
-			switchteam[clientNum] = 1
-		end
-	end
+        if AdminUserLevel(clientNum) < 3 then
+            if et.trap_Argv(0) == "callvote" then
+                if vote == "shuffleteamsxp" or vote == "shuffleteamsxp_norestart" or vote == "nextmap" or vote == "swapteams" or vote == "matchreset" or vote == "maprestart" or vote == "map" then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
+                end
+            end
+        end
+    end
 
-	if votedis == 1 then
-		local vote = et.trap_Argv(1)
+    local vote = et.trap_Argv(1)
 
-		if AdminUserLevel(clientNum) < 3 then
-			if et.trap_Argv(0) == "callvote" then
-				if vote == "shuffleteamsxp" or vote == "shuffleteamsxp_norestart" or vote == "nextmap" or vote == "swapteams" or vote == "matchreset" or vote == "maprestart" or vote == "map" then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
-				end
-			end
-		end
+    if k_antiunmute == 1 then
+        if vote == "unmute" then
+            local client = et.trap_Argv(2)
+            local clientnumber = part2id(client)
+            local targetmuted = et.gentity_get(clientnumber, "sess.muted")
 
-	end
+            if targetmuted == 1 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Cannot vote to unmute a muted person!\n")
+            end
+        end
+    end
 
-	local vote = et.trap_Argv(1)
-	if k_antiunmute == 1 then
-		if vote == "unmute" then
-			local client = et.trap_Argv(2)
-			local clientnumber = part2id(client)
-			local targetmuted = et.gentity_get(clientnumber, "sess.muted")
-			if targetmuted == 1 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "cancelvote ; qsay Cannot vote to unmute a muted person!\n")
-			end
-		end
-	end
+    if arg0 == "ref" and arg1 == "pause" and pausedv == 0 then
+        GAMEPAUSED = 1
+        dummypause = mtime
+    elseif arg0 == "ref" and arg1 == "unpause" and pausedv == 1 then
+        if ((mtime - dummypause) / 1000) >= 5 then
+            GAMEPAUSED = 0
+        end
+    end
 
-	if arg0 == "ref" and arg1 == "pause" and pausedv == 0 then
-		GAMEPAUSED = 1
-		dummypause = mtime
-	elseif arg0 == "ref" and arg1 == "unpause" and pausedv == 1 then
-		if ((mtime - dummypause)/1000) >= 5 then
-			GAMEPAUSED = 0
-		end
-	end
+    if k_advancedpms == 1 then
+        if string.lower(command) == "m" or string.lower(command) == "msg" or string.lower(command) == "pm" then
+            if et.trap_Argv(1) == nil or et.trap_Argv(1) == "" or et.trap_Argv(1) == " " then
+                et.trap_SendServerCommand(clientNum, string.format("print \"Useage:  /m \[pname/ID\] \[message\]\n"))
+            else
+                commandSaid = true
+                private_message(clientNum, et.trap_Argv(1), et.ConcatArgs(2))
+                return 1
+            end
+        end
+    end
 
-	if k_advancedpms == 1 then
-		if string.lower(command) == "m" or string.lower(command) == "msg" or string.lower(command) == "pm" then
-			if et.trap_Argv(1) == nil or et.trap_Argv(1) == "" or et.trap_Argv(1) == " " then 
-				et.trap_SendServerCommand(clientNum, string.format("print \"Useage:  /m \[pname/ID\] \[message\]\n"))
-			else
-				commandSaid = true
-				private_message(clientNum, et.trap_Argv(1), et.ConcatArgs(2))
-				return 1
-			end
-		end
-	end
+    if string.lower(command) == "ma" or string.lower(command) == "pma" then
+        for i = 0, clientsLimit, 1 do
+            if AdminUserLevel(i) >= 2 then
+                local name = et.gentity_get(clientNum, "pers.netname") 
+                et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
 
-	if string.lower(command) == "ma" or string.lower(command) == "pma" then
-		for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do
-			if AdminUserLevel(i) >= 2 then
-				local name = et.gentity_get(clientNum,"pers.netname") 
-				et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from "..name.."^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-				if k_advancedpms == 1 then
-					et.G_ClientSound(i, pmsound)
-				end
-			end
-		end
-		if AdminUserLevel(clientNum) < 2 then
-			et.trap_SendServerCommand(clientNum, ("b 8 \"^dPm to admins has been sent^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-			if k_advancedpms == 1 then
-				et.G_ClientSound(clientNum, pmsound)
-			end
-		end
-		return 1
-	end
+                if k_advancedpms == 1 then
+                    et.G_ClientSound(i, pmsound)
+                end
+            end
+        end
 
-	if k_slashkilllimit == 1 then
-		local name = et.gentity_get(clientNum,"pers.netname")
-		local teamnumber = tonumber(et.gentity_get(clientNum,"sess.sessionTeam"))
-		if string.lower(command) == "kill" then
-			if teamnumber ~= 3 then
-				if et.gentity_get(clientNum,"health") > 0 then
-					if selfkills[clientNum] < k_slashkills then
-						selfkills[clientNum] = selfkills[clientNum] + 1
-						if selfkills[clientNum] == k_slashkills then
-							if k_advancedpms == 1 then
---								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n" )
-								et.G_ClientSound(clientNum, pmsound)
-							else
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n" )
-							end
-						elseif selfkills[clientNum] == (k_slashkills - 1) then
-							if k_advancedpms == 1 then
---								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. name .. " ^7You have ^11^7 /kill left for this map.\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have ^11^7 /kill left for this map.\n" )
-								et.G_ClientSound(clientNum, pmsound)
-							else
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n" )
-							end
-						end
-					else
-						if k_advancedpms == 1 then
---							et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. name .. " ^7You may no longer /kill for the rest of this map!\n" )
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You may no longer /kill for the rest of this map!\n" )
-							et.G_ClientSound(clientNum, pmsound)
-						else
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n" )
-						end
-						return 1
-					end
-				end
-			end
-		end
-	end
+        if AdminUserLevel(clientNum) < 2 then
+            et.trap_SendServerCommand(clientNum, ("b 8 \"^dPm to admins has been sent^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
 
-	return 0
+            if k_advancedpms == 1 then
+                et.G_ClientSound(clientNum, pmsound)
+            end
+        end
+
+        return 1
+    end
+
+    if k_slashkilllimit == 1 then
+        local name = et.gentity_get(clientNum, "pers.netname")
+        local teamnumber = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
+
+        if string.lower(command) == "kill" then
+            if teamnumber ~= 3 then
+                if et.gentity_get(clientNum, "health") > 0 then
+                    if selfkills[clientNum] < k_slashkills then
+                        selfkills[clientNum] = selfkills[clientNum] + 1
+
+                        if selfkills[clientNum] == k_slashkills then
+                            if k_advancedpms == 1 then
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
+                                et.G_ClientSound(clientNum, pmsound)
+                            else
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
+                            end
+                        elseif selfkills[clientNum] == (k_slashkills - 1) then
+                            if k_advancedpms == 1 then
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have ^11^7 /kill left for this map.\n")
+                                et.G_ClientSound(clientNum, pmsound)
+                            else
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n")
+                            end
+                        end
+                    else
+                        if k_advancedpms == 1 then
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You may no longer /kill for the rest of this map!\n")
+                            et.G_ClientSound(clientNum, pmsound)
+                        else
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n")
+                        end
+
+                        return 1
+                    end
+                end
+            end
+        end
+    end
+
+    return 0
 end
 
 -- Called when a command is entered on the server console.
