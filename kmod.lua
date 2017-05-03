@@ -3841,7 +3841,6 @@ function setWeaponAmmo(weaponList, clientId)
     end
 end
 
-
 -- Enemy Territory callbacks
 
 -- qagame execution
@@ -4947,367 +4946,419 @@ end
 -- and 0 if the command was ignored by the mod and should be passed through
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
+    arg0 = string.lower(et.trap_Argv(0))
     params = {}
-		if string.lower(et.trap_Argv(0)) == k_commandprefix.."setlevel" then  
-			if (et.trap_Argc() < 2) then 
-				et.G_Print("Setlevel is used to set admin status to a player.\n") 
-				et.G_Print("useage: !setlevel \[name/PID\] \[level 0-3\]\n")
-			return 1 
-			end 
-			commandSaid = false
-			sldv = 1
-			setlevel(et.trap_Argv(1), 0) 
-			sldv = 0
-			setlevel(et.trap_Argv(1), et.trap_Argv(2)) 
-		return 1
-		elseif string.lower(et.trap_Argv(0)) == "goto" then
-            if (et.trap_Argc() < 2) then
-                et.G_Print("Goto is used to teleport one player to another player\n") 
-                et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
-                return 1
-            end
-            params.playerId = et.trap_Argv(1)
-            params.target   = et.trap_Argv(2)
-            dofile(kmod_ng_path .. '/kmod/command/goto.lua')
-            execute_command(params)
-            return 1
-        elseif string.lower(et.trap_Argv(0)) == "iwant" then
-            if (et.trap_Argc() < 2) then 
-                et.G_Print("Iwant is used to teleport one player to another player\n") 
-                et.G_Print("useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
-                return 1
-            end
-            params.playerId = et.trap_Argv(1)
-            params.target   = et.trap_Argv(2)
-            dofile(kmod_ng_path .. '/kmod/command/iwant.lua')
-            execute_command(params)
-            return 1
-        elseif string.lower(et.trap_Argv(0)) == k_commandprefix .. "showadmins" then
-            dofile(kmod_ng_path .. '/kmod/command/showadmins.lua')
-            execute_command(params)
-            return 1
-        elseif string.lower(et.trap_Argv(0)) == k_commandprefix .. "readconfig" then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "exec kmod.cfg\n")
-            et.G_Print("^3ReadConfig:^7 Config reloaded\n")
-            readconfig()
-        elseif string.lower(et.trap_Argv(0)) == k_commandprefix .. "spree_restart" then
-            spreerecord_reset()
-		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."panzerwar" ) then
-			if Cvarct < 3 then
-				et.G_Print("^3Panzerwar:^7 Disable or enable panzerwar \[0-1\]\n" )
-			else
-				local panz = tonumber(et.trap_Argv(1))
-				local dspeed = (speed*2)
-				if panz >= 0 and panz <= 1 then
-					if panz == 1 then
-						if panzdv == 0 then
-							if frenzdv == 1 then
-								et.G_Print("^3Panzerwar:^7 Frenzy mode must be disabled first\n" )
-							elseif grendv == 1 then
-								et.G_Print("^3Panzerwar:^7 Grenadewar must be disabled first\n" )
-							elseif snipdv == 1 then
-								et.G_Print("^3Panzerwar:^7 Sniperwar must be disabled first\n" )
-							else
-								et.G_Print("^3Panzerwar:^7 Panzerwar has been Enabled\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. dspeed .. " ; forcecvar g_soldierchargetime 0\n" )
-								panzdv = 1
-								for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-									if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-										originalclass[p] = tonumber(et.gentity_get(p,"sess.latchPlayerType"))
-										originalweap[p] = tonumber(et.gentity_get(p,"sess.latchPlayerWeapon"))
-										if et.gentity_get(p,"health") > 0 then
-											et.G_Damage(p, p, 1022, 400, 24, 0)
-											et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-										end
-									end
-									et.gentity_set(p,"sess.latchPlayerType",0)
-									et.gentity_set(p,"sess.latchPlayerWeapon",5)
-								end
-							end
-						else
-							et.G_Print("^3Panzerwar:^7 Panzerwar is already active\n" )
-						end
-					else
-						if panzdv == 1 then
-							et.G_Print("^3Panzerwar:^7 Panzerwar has been Disabled.\n" )
-							panzerwar_reset()
-							panzdv = 0
-							for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-								if et.gentity_get(p,"sess.sessionTeam") == 1 or et.gentity_get(p,"sess.sessionTeam") == 2 then
-									if et.gentity_get(p,"health") >= 0 then
-										et.G_Damage(p, p, 1022, 400, 24, 0)
-										et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-										et.gentity_set(p,"sess.latchPlayerType",originalclass[p])
-										et.gentity_set(p,"sess.latchPlayerWeapon",originalweap[p])
-									end
-								end
-							end
-						else
-							et.G_Print("^3Panzerwar:^7 Panzerwar has already been disabled\n" )
-						end
-					end
-				else
-					et.G_Print("^3Panzerwar:^7 Valid values are \[0-1\]\n" )
-				end
-			end
-  		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."frenzy" ) then
-			if Cvarct < 3 then
-				et.G_Print("^3Frenzy:^7 Disable or enable frenzy \[0-1\]\n" )
-			else
-				local frenz = tonumber(et.trap_Argv(1))
-				if frenz >= 0 and frenz <= 1 then
-					if frenz == 1 then
-						if frenzdv == 0 then
-							if panzdv == 1 then
-								et.G_Print("^3Frenzy:^7 Panzerwar must be disabled first\n" )
-							elseif grendv == 1 then
-								et.G_Print("^3Frenzy:^7 Grenadewar must be disabled first\n" )
-							elseif snipdv == 1 then
-								et.G_Print("^3Frenzy:^7 Sniperwar must be disabled first\n" )
-							else
-								et.G_Print("^3Frenzy:^7 Frenzy has been Enabled\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n" )
-								frenzdv = 1
-								for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-									if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-										if et.gentity_get(p,"health") > 0 then
-											et.G_Damage(p, p, 1022, 400, 24, 0)
-											et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-										end
-									end
-								end
-							end
-						else
-							et.G_Print("^3Frenzy:^7 Frenzy is already active\n" )
-						end
-					else
-						if frenzdv == 1 then
-							et.G_Print("^3Frenzy:^7 Frenzy has been Disabled.\n" )
-							frenzdv = 0
-							frenzy_reset()
-							for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-								if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-									if et.gentity_get(p,"health") > 0 then
-										et.G_Damage(p, p, 1022, 400, 24, 0)
-										et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-									end
-								end
-							end
-						else
-							et.G_Print("^3Frenzy:^7 Frenzy has already been disabled\n" )
-						end
-					end
-				else
-					et.G_Print("^3Frenzy:^7 Valid values are \[0-1\]\n" )
-				end
-			end
-  		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."grenadewar" ) then
-			if Cvarct < 3 then
-				et.G_Print("^3Grenadewar:^7 Disable or enable Grenadewar \[0-1\]\n" )
-			else
-				local gren = tonumber(et.trap_Argv(1))
-				if gren >= 0 and gren <= 1 then
-					if gren == 1 then
-						if grendv == 0 then
-							if panzdv == 1 then
-								et.G_Print("^3Grenadewar:^7 Panzerwar must be disabled first\n" )
-							elseif frenzdv == 1 then
-								et.G_Print("^3Grenadewar:^7 Frenzy must be disabled first\n" )
-							elseif snipdv == 1 then
-								et.G_Print("^3Grenadewar:^7 Sniperwar must be disabled first\n" )
-							else
-								et.G_Print("^3Grenadewar:^7 Grenadewar has been Enabled\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n" )
-								grendv = 1
-								for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-									if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-										if et.gentity_get(p,"health") > 0 then
-											et.G_Damage(p, p, 1022, 400, 24, 0)
-											et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-										end
-									end
-								end
-							end
-						else
-							et.G_Print("^3Grenadewar:^7 Grenadewar is already active\n" )
-						end
-					else
-						if grendv == 1 then
-							et.G_Print("^3Grenadewar:^7 Grenadewar has been Disabled.\n" )
-							grendv = 0
-							grenadewar_reset()
-							for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-								if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-									if et.gentity_get(p,"health") > 0 then
-										et.G_Damage(p, p, 1022, 400, 24, 0)
-										et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-									end
-								end
-							end
-						else
-							et.G_Print("^3Grenadewar:^7 Grenadewar has already been disabled\n" )
-						end
-					end
-				else
-					et.G_Print("^3Grenadewar:^7 Valid values are \[0-1\]\n" )
-				end
-			end
-  		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."sniperwar" ) then
-			if Cvarct < 3 then
-				et.G_Print("^3Sniperwar:^7 Disable or enable Sniperwar \[0-1\]\n" )
-			else
-				local snip = tonumber(et.trap_Argv(1))
-				if snip >= 0 and snip <= 1 then
-					if snip == 1 then
-						if snipdv == 0 then
-							if panzdv == 1 then
-								et.G_Print("^3Sniperwar:^7 Panzerwar must be disabled first\n" )
-							elseif frenzdv == 1 then
-								et.G_Print("^3Sniperwar:^7 Frenzy must be disabled first\n" )
-							elseif grendv == 1 then
-								et.G_Print("^3Sniperwar:^7 Grenadewar must be disabled first\n" )
-							else
-								et.G_Print("^3Sniperwar:^7 Sniperwar has been Enabled\n" )
-								et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n" )
-								snipdv = 1
-								for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-										originalclass[p] = tonumber(et.gentity_get(p,"sess.latchPlayerType"))
-										originalweap[p] = tonumber(et.gentity_get(p,"sess.latchPlayerWeapon"))
-									if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-										if et.gentity_get(p,"health") > 0 then
-											et.G_Damage(p, p, 1022, 400, 24, 0)
-											et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-										end
-									end
-								end
-							end
-						else
-							et.G_Print("^3Sniperwar:^7 Sniperwar is already active\n" )
-						end
-					else
-						if snipdv == 1 then
-							et.G_Print("^3Sniperwar:^7 Sniperwar has been Disabled.\n" )
-							snipdv = 0
-							sniperwar_reset()
-							for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-								if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-									if et.gentity_get(p,"health") > 0 then
-										et.G_Damage(p, p, 1022, 400, 24, 0)
-										et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-									end
-										et.gentity_set(p,"sess.latchPlayerType",originalclass[p])
-										et.gentity_set(p,"sess.latchPlayerWeapon",originalweap[p])
-								end
-							end
-						else
-							et.G_Print("^3Sniperwar:^7 Sniperwar has already been disabled\n" )
-						end
-					end
-				else
-					et.G_Print("^3Sniperwar:^7 Valid values are \[0-1\]\n" )
-				end
-			end
-		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."crazygravity" ) then
-			if Cvarct < 3 then
-				et.G_Print("^3Crazygravity:^7 Disable or enable crazygravity \[0-1\]\n" )
-			else
-				local crazy = tonumber(et.trap_Argv(1))
-				if crazy >= 0 and crazy <= 1 then
-					if crazy == 1 then
-						if CGactive == 0 then
-							et.G_Print("^3Crazygravity:^7 Crazygravity has been Enabled\n" )
-							crazygravity = true
-							crazydv = 1
-						else
-							et.G_Print("^3Crazygravity:^7 Crazygravity is already active\n" )
-						end
-					else
-						if CGactive == 1 then
-							et.G_Print("^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n" )
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_gravity 800\n" )
-							crazygravity = false
-							crazydv = 0
-						else
-							et.G_Print("^3Crazygravity:^7 Crazygravity has already been disabled\n" )
-						end
-					end
-				else
-					et.G_Print("^3Crazygravity:^7 Valid values are \[0-1\]\n" )
-				end
-			end
-  		elseif (string.lower(et.trap_Argv(0)) == k_commandprefix.."spec999" ) then
-			dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
-            execute_command(params)
-        elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."gib" then
-            if (et.trap_Argc() < 2) then
-                et.G_Print("Gib is used to instantly kill a player\n")
-                et.G_Print("useage: gib \[name/PID\]\n")
-                return 1
-            end
-            params.client = et.trap_Argv(1)
-            params.commandSaid = commandSaid
-            params.say = say_parms
-            dofile(kmod_ng_path .. '/kmod/command/gib.lua')
-            execute_command(params)
-            return 1
-        elseif string.lower(et.trap_Argv(0)) == k_commandprefix.."slap" then
-            if (et.trap_Argc() < 2) then
-                et.G_Print("Slap is used to slap a player\n")
-                et.G_Print("useage: slap \[name/PID\]\n")
-                return 1
-            end
-            params.client = et.trap_Argv(1)
-            params.commandSaid = commandSaid
-            params.say = say_parms
-            dofile(kmod_ng_path .. '/kmod/command/burn.lua')
-            execute_command(params)
-            return 1
-		elseif string.lower(et.trap_Argv(0)) == "k_commandprefix" then 
-			et.G_Print("Unknown command in line k_commandprefix\n")
-		return 1
-		elseif string.lower(et.trap_Argv(0)) == "m2" then  -- used when advancedpms is enabled
-			if k_advancedpms == 1 then
-				if (et.trap_Argc() < 2) then 
-					et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")
-					return 1
-				else
-					private_message(1022, et.trap_Argv(1), et.ConcatArgs(2))
-				end
+    params.command = 'console'
 
-				if k_logchat == 1 then
-					log_chat( 1022, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1) )
-				end
-			end
-		return 1
-		elseif string.lower(et.trap_Argv(0)) == "m" or string.lower(et.trap_Argv(0)) == "pm" or string.lower(et.trap_Argv(0)) == "msg" then
-			if k_advancedpms == 0 then
-				if k_logchat == 1 then
-					log_chat( 1022, "PMESSAGE", et.ConcatArgs(2),  et.trap_Argv(1) )
-				end
-			end
-		return 1
-		elseif string.lower(et.trap_Argv(0)) == "ma" or string.lower(et.trap_Argv(0)) == "pma" then
-				for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do
-					if AdminUserLevel(i) >= 2 then
-						et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from ^1SERVER^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-						et.G_ClientSound(i, pmsound)
-					end
-				end
-				if k_logchat == 1 then
-					log_chat( 1022, "PMADMINS", et.ConcatArgs(1))
-				end
-				et.G_Print("Private message sent to admins\n")
-				return 1
-		elseif string.lower(et.trap_Argv(0)) == "ref" and string.lower(et.trap_Argv(1)) == "pause" and pausedv == 0 then
-			GAMEPAUSED = 1
-			dummypause = mtime
-			return 0
-		elseif string.lower(et.trap_Argv(0)) == "ref" and string.lower(et.trap_Argv(1)) == "unpause" and pausedv == 1 then
-			GAMEPAUSED = 0
-			return 0
-		else
-      		return 0 
-      	end 
+    if arg0 == k_commandprefix .. "setlevel" then
+        if (et.trap_Argc() < 2) then
+            et.G_Print("Setlevel is used to set admin status to a player.\n")
+            et.G_Print("useage: !setlevel \[name/PID\] \[level 0-3\]\n")
+            return 1
+        end
+
+        commandSaid = false
+        sldv = 1
+        setlevel(et.trap_Argv(1), 0)
+        sldv = 0
+        setlevel(et.trap_Argv(1), et.trap_Argv(2))
+        return 1
+    elseif arg0 == "goto" then
+        if (et.trap_Argc() < 2) then
+            et.G_Print("Goto is used to teleport one player to another player\n") 
+            et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
+            return 1
+        end
+
+        params.playerId = et.trap_Argv(1)
+        params.target   = et.trap_Argv(2)
+        dofile(kmod_ng_path .. '/kmod/command/goto.lua')
+        execute_command(params)
+        return 1
+    elseif arg0 == "iwant" then
+        if (et.trap_Argc() < 2) then
+            et.G_Print("Iwant is used to teleport one player to another player\n")
+            et.G_Print("useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
+            return 1
+        end
+
+        params.playerId = et.trap_Argv(1)
+        params.target   = et.trap_Argv(2)
+        dofile(kmod_ng_path .. '/kmod/command/iwant.lua')
+        execute_command(params)
+        return 1
+    elseif arg0 == k_commandprefix .. "showadmins" then
+        dofile(kmod_ng_path .. '/kmod/command/showadmins.lua')
+        execute_command(params)
+        return 1
+    elseif arg0 == k_commandprefix .. "readconfig" then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "exec kmod.cfg\n")
+        et.G_Print("^3ReadConfig:^7 Config reloaded\n")
+        readconfig()
+    elseif arg0 == k_commandprefix .. "spree_restart" then
+        spreerecord_reset()
+    elseif (arg0 == k_commandprefix .. "panzerwar") then
+        if Cvarct < 3 then
+            et.G_Print("^3Panzerwar:^7 Disable or enable panzerwar \[0-1\]\n")
+        else
+            local panz = tonumber(et.trap_Argv(1))
+            local dspeed = (speed * 2)
+
+            if panz >= 0 and panz <= 1 then
+                if panz == 1 then
+                    if panzdv == 0 then
+                        if frenzdv == 1 then
+                            et.G_Print("^3Panzerwar:^7 Frenzy mode must be disabled first\n")
+                        elseif grendv == 1 then
+                            et.G_Print("^3Panzerwar:^7 Grenadewar must be disabled first\n")
+                        elseif snipdv == 1 then
+                            et.G_Print("^3Panzerwar:^7 Sniperwar must be disabled first\n")
+                        else
+                            et.G_Print("^3Panzerwar:^7 Panzerwar has been Enabled\n")
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. dspeed .. " ; forcecvar g_soldierchargetime 0\n")
+                            panzdv = 1
+
+                            for p = 0, clientsLimit, 1 do
+                                local team = et.gentity_get(p, "sess.sessionTeam")
+
+                                if team >= 1 and team < 3 then
+                                    originalclass[p] = tonumber(et.gentity_get(p, "sess.latchPlayerType"))
+                                    originalweap[p] = tonumber(et.gentity_get(p, "sess.latchPlayerWeapon"))
+
+                                    if et.gentity_get(p, "health") > 0 then
+                                        et.G_Damage(p, p, 1022, 400, 24, 0)
+                                        -- in case they recently spawned and are protected by spawn shield
+                                        et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                    end
+                                end
+
+                                et.gentity_set(p, "sess.latchPlayerType", 0)
+                                et.gentity_set(p, "sess.latchPlayerWeapon", 5)
+                            end
+                        end
+                    else
+                        et.G_Print("^3Panzerwar:^7 Panzerwar is already active\n")
+                    end
+                else
+                    if panzdv == 1 then
+                        et.G_Print("^3Panzerwar:^7 Panzerwar has been Disabled.\n")
+                        panzerwar_reset()
+                        panzdv = 0
+
+                        for p = 0, clientsLimit, 1 do
+                            local team = et.gentity_get(p, "sess.sessionTeam")
+
+                            if team == 1 or team == 2 then
+                                if et.gentity_get(p, "health") >= 0 then
+                                    et.G_Damage(p, p, 1022, 400, 24, 0)
+                                    -- in case they recently spawned and are protected by spawn shield
+                                    et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                    et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
+                                    et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Panzerwar:^7 Panzerwar has already been disabled\n" )
+                    end
+                end
+            else
+                et.G_Print("^3Panzerwar:^7 Valid values are \[0-1\]\n" )
+            end
+        end
+    elseif (arg0 == k_commandprefix .. "frenzy") then
+        if Cvarct < 3 then
+            et.G_Print("^3Frenzy:^7 Disable or enable frenzy \[0-1\]\n" )
+        else
+            local frenz = tonumber(et.trap_Argv(1))
+
+            if frenz >= 0 and frenz <= 1 then
+                if frenz == 1 then
+                    if frenzdv == 0 then
+                        if panzdv == 1 then
+                            et.G_Print("^3Frenzy:^7 Panzerwar must be disabled first\n")
+                        elseif grendv == 1 then
+                            et.G_Print("^3Frenzy:^7 Grenadewar must be disabled first\n")
+                        elseif snipdv == 1 then
+                            et.G_Print("^3Frenzy:^7 Sniperwar must be disabled first\n")
+                        else
+                            et.G_Print("^3Frenzy:^7 Frenzy has been Enabled\n")
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                            frenzdv = 1
+
+                            for p = 0, clientsLimit, 1 do
+                                local team = et.gentity_get(p, "sess.sessionTeam")
+
+                                if team >= 1 and team < 3 then
+                                    if et.gentity_get(p, "health") > 0 then
+                                        et.G_Damage(p, p, 1022, 400, 24, 0)
+                                        -- in case they recently spawned and are protected by spawn shield
+                                        et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Frenzy:^7 Frenzy is already active\n")
+                    end
+                else
+                    if frenzdv == 1 then
+                        et.G_Print("^3Frenzy:^7 Frenzy has been Disabled.\n")
+                        frenzdv = 0
+                        frenzy_reset()
+
+                        for p = 0, clientsLimit, 1 do
+                            local team = et.gentity_get(p, "sess.sessionTeam")
+
+                            if team >= 1 and team < 3 then
+                                if et.gentity_get(p, "health") > 0 then
+                                    et.G_Damage(p, p, 1022, 400, 24, 0)
+                                    -- in case they recently spawned and are protected by spawn shield
+                                    et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Frenzy:^7 Frenzy has already been disabled\n")
+                    end
+                end
+            else
+                et.G_Print("^3Frenzy:^7 Valid values are \[0-1\]\n")
+            end
+        end
+    elseif (arg0 == k_commandprefix .. "grenadewar") then
+        if Cvarct < 3 then
+            et.G_Print("^3Grenadewar:^7 Disable or enable Grenadewar \[0-1\]\n")
+        else
+            local gren = tonumber(et.trap_Argv(1))
+
+            if gren >= 0 and gren <= 1 then
+                if gren == 1 then
+                    if grendv == 0 then
+                        if panzdv == 1 then
+                            et.G_Print("^3Grenadewar:^7 Panzerwar must be disabled first\n")
+                        elseif frenzdv == 1 then
+                            et.G_Print("^3Grenadewar:^7 Frenzy must be disabled first\n")
+                        elseif snipdv == 1 then
+                            et.G_Print("^3Grenadewar:^7 Sniperwar must be disabled first\n")
+                        else
+                            et.G_Print("^3Grenadewar:^7 Grenadewar has been Enabled\n")
+                            et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                            grendv = 1
+
+                            for p = 0, clientsLimit, 1 do
+                                local team = et.gentity_get(p, "sess.sessionTeam")
+
+                                if team >= 1 and team < 3 then
+                                    if et.gentity_get(p, "health") > 0 then
+                                        et.G_Damage(p, p, 1022, 400, 24, 0)
+                                        -- in case they recently spawned and are protected by spawn shield
+                                        et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Grenadewar:^7 Grenadewar is already active\n")
+                    end
+                else
+                    if grendv == 1 then
+                        et.G_Print("^3Grenadewar:^7 Grenadewar has been Disabled.\n")
+                        grendv = 0
+                        grenadewar_reset()
+
+                        for p = 0, clientsLimit, 1 do
+                            local team = et.gentity_get(p, "sess.sessionTeam")
+
+                            if team >= 1 and team < 3 then
+                                if et.gentity_get(p, "health") > 0 then
+                                    et.G_Damage(p, p, 1022, 400, 24, 0)
+                                    -- in case they recently spawned and are protected by spawn shield
+                                    et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Grenadewar:^7 Grenadewar has already been disabled\n")
+                    end
+                end
+            else
+                et.G_Print("^3Grenadewar:^7 Valid values are \[0-1\]\n")
+            end
+        end
+    elseif (arg0 == k_commandprefix .. "sniperwar" ) then
+        if Cvarct < 3 then
+            et.G_Print("^3Sniperwar:^7 Disable or enable Sniperwar \[0-1\]\n")
+        else
+            local snip = tonumber(et.trap_Argv(1))
+
+            if snip >= 0 and snip <= 1 then
+                if snip == 1 then
+                    if snipdv == 0 then
+                        if panzdv == 1 then
+                            et.G_Print("^3Sniperwar:^7 Panzerwar must be disabled first\n")
+                        elseif frenzdv == 1 then
+                            et.G_Print("^3Sniperwar:^7 Frenzy must be disabled first\n")
+                        elseif grendv == 1 then
+                            et.G_Print("^3Sniperwar:^7 Grenadewar must be disabled first\n")
+                        else
+                            et.G_Print("^3Sniperwar:^7 Sniperwar has been Enabled\n")
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                            snipdv = 1
+
+                            for p = 0, clientsLimit, 1 do
+                                local team = et.gentity_get(p, "sess.sessionTeam")
+
+                                originalclass[p] = tonumber(et.gentity_get(p, "sess.latchPlayerType"))
+                                originalweap[p] = tonumber(et.gentity_get(p, "sess.latchPlayerWeapon"))
+
+                                if team >= 1 and team < 3 then
+                                    if et.gentity_get(p, "health") > 0 then
+                                        et.G_Damage(p, p, 1022, 400, 24, 0)
+                                        -- in case they recently spawned and are protected by spawn shield
+                                        et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                    end
+                                end
+                            end
+                        end
+                    else
+                        et.G_Print("^3Sniperwar:^7 Sniperwar is already active\n")
+                    end
+                else
+                    if snipdv == 1 then
+                        et.G_Print("^3Sniperwar:^7 Sniperwar has been Disabled.\n")
+                        snipdv = 0
+                        sniperwar_reset()
+
+                        for p = 0, clientsLimit, 1 do
+                            local team = et.gentity_get(p, "sess.sessionTeam")
+
+                            if team >= 1 and team < 3 then
+                                if et.gentity_get(p, "health") > 0 then
+                                    et.G_Damage(p, p, 1022, 400, 24, 0)
+                                    -- in case they recently spawned and are protected by spawn shield
+                                    et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
+                                end
+                                    et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
+                                    et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
+                            end
+                        end
+                    else
+                        et.G_Print("^3Sniperwar:^7 Sniperwar has already been disabled\n")
+                    end
+                end
+            else
+                et.G_Print("^3Sniperwar:^7 Valid values are \[0-1\]\n")
+            end
+        end
+    elseif (arg0 == k_commandprefix .. "crazygravity") then
+        if Cvarct < 3 then
+            et.G_Print("^3Crazygravity:^7 Disable or enable crazygravity \[0-1\]\n")
+        else
+            local crazy = tonumber(et.trap_Argv(1))
+
+            if crazy >= 0 and crazy <= 1 then
+                if crazy == 1 then
+                    if CGactive == 0 then
+                        et.G_Print("^3Crazygravity:^7 Crazygravity has been Enabled\n")
+                        crazygravity = true
+                        crazydv = 1
+                    else
+                        et.G_Print("^3Crazygravity:^7 Crazygravity is already active\n")
+                    end
+                else
+                    if CGactive == 1 then
+                        et.G_Print("^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n")
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
+                        crazygravity = false
+                        crazydv = 0
+                    else
+                        et.G_Print("^3Crazygravity:^7 Crazygravity has already been disabled\n")
+                    end
+                end
+            else
+                et.G_Print("^3Crazygravity:^7 Valid values are \[0-1\]\n")
+            end
+        end
+    elseif (arg0 == k_commandprefix .. "spec999" ) then
+        dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
+        execute_command(params)
+    elseif arg0 == k_commandprefix .. "gib" then
+        if (et.trap_Argc() < 2) then
+            et.G_Print("Gib is used to instantly kill a player\n")
+            et.G_Print("useage: gib \[name/PID\]\n")
+            return 1
+        end
+
+        params.client = et.trap_Argv(1)
+        params.commandSaid = commandSaid
+        params.say = say_parms
+        dofile(kmod_ng_path .. '/kmod/command/gib.lua')
+        execute_command(params)
+        return 1
+    elseif arg0 == k_commandprefix .. "slap" then
+        if (et.trap_Argc() < 2) then
+            et.G_Print("Slap is used to slap a player\n")
+            et.G_Print("useage: slap \[name/PID\]\n")
+            return 1
+        end
+
+        params.client = et.trap_Argv(1)
+        params.commandSaid = commandSaid
+        params.say = say_parms
+        dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+        execute_command(params)
+        return 1
+    elseif arg0 == "k_commandprefix" then
+        et.G_Print("Unknown command in line k_commandprefix\n")
+        return 1
+    elseif arg0 == "m2" then  -- used when advancedpms is enabled
+        if k_advancedpms == 1 then
+            if (et.trap_Argc() < 2) then 
+                et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")
+                return 1
+            else
+                private_message(1022, et.trap_Argv(1), et.ConcatArgs(2))
+            end
+
+            if k_logchat == 1 then
+                log_chat(1022, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
+            end
+        end
+
+        return 1
+    elseif arg0 == "m" or arg0 == "pm" or arg0 == "msg" then
+        if k_advancedpms == 0 then
+            if k_logchat == 1 then
+                log_chat(1022, "PMESSAGE", et.ConcatArgs(2),  et.trap_Argv(1))
+            end
+        end
+
+        return 1
+    elseif arg0 == "ma" or arg0 == "pma" then
+            for i = 0, clientsLimit, 1 do
+                if AdminUserLevel(i) >= 2 then
+                    et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from ^1SERVER^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
+                    et.G_ClientSound(i, pmsound)
+                end
+            end
+
+            if k_logchat == 1 then
+                log_chat(1022, "PMADMINS", et.ConcatArgs(1))
+            end
+
+            et.G_Print("Private message sent to admins\n")
+            return 1
+    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "pause" and pausedv == 0 then
+        GAMEPAUSED = 1
+        dummypause = mtime
+        return 0
+    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "unpause" and pausedv == 1 then
+        GAMEPAUSED = 0
+        return 0
+    else
+        return 0
+    end
 end
 
 -- miscellaneous
