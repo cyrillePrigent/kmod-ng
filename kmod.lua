@@ -875,69 +875,6 @@ function loadmapspreerecord()
 	et.trap_FS_FCloseFile( fd ) 
 end
 
-function setlevel(client, level2) 
-   local clientnum = tonumber(client) 
-   local level = tonumber(level2)
-   if clientnum then 
-      if (clientnum >= 0) and (clientnum < 64) then 
-         if et.gentity_get(clientnum,"pers.connected") ~= 2 then 
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^Setlevel: ^7There is no client associated with this slot number\n" )
-			commandSaid = false
-		else
-            	et.G_Print("There is no client associated with this slot number\n") 
-		end
-         return 
-         end 
-
-      else              
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7Please enter a slot number between 0 and 63\n" )
-			commandSaid = false
-		else 
-         		et.G_Print("Please enter a slot number between 0 and 63\n") 
-		end
-      return 
-      end 
-   else 
-      if client then 
-	   s,e=string.find(client, client)
-	   if e <= 2 then
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7Player name requires more than 2 characters\n" )
-			commandSaid = false
-		else
-			et.G_Print("Player name requires more than 2 characters\n")
-		end
-	   return
-	   else
-         	clientnum = getsetlvlidfname(client)
-	   end
-      end 
-         if not clientnum then 
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7Try name again or use slot number\n" )
-			commandSaid = false
-		else
-         		et.G_Print("Try name again or use slot number\n") 
-		end
-         return 
-         end 
-   end 
-   if level < 0 or level > k_maxAdminLevels then
-	if commandSaid then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7Admin level does not exist! \[0-3\]\n" )
-		commandSaid = false
-	else
-	    	et.G_Print("Admin level does not exist! \[0-".. k_maxAdminLevels .."\]\n") 
-	end
-   return
-   end
-
- 	setAdmin(clientnum, level)
-
-end 
-
 function getsetlvlidfname(name) 
    local i = 0
    local slot = nil
@@ -2110,6 +2047,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
     params.command = 'client'
     params.nbArg   = Cvarct
     params["arg1"] = Cvar1
+    params["arg2"] = Cvar2
 
     params.commandSaid = true
     params.say = say_parms
@@ -2261,24 +2199,17 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gib:^7 command unavailible due to lack of required admin status!\n" )
 --	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."slap" ) then
+  elseif (string.lower(BangCommand) == k_commandprefix.."slap") then
 --	if AdminUserLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 command unavailible due to lack of required admin status!\n" )
 --	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."setlevel" ) then
+  elseif (string.lower(BangCommand) == k_commandprefix .. "setlevel") then
 --	if AdminUserLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel:^7 \[partname/id#\] \[level\]\n" )
-		else
-			commandSaid = true
-			sldv = 1
-			setlevel(Cvar1, 0)
-			sldv = 0
-			setlevel(Cvar1, Cvar2)
-		end
+        dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4709,22 +4640,12 @@ function et_ConsoleCommand()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
 
-    params.commandSaid = commandSaid
+    params.commandSaid = false
     params.say = say_parms
 
     if arg0 == k_commandprefix .. "setlevel" then
-        if (et.trap_Argc() < 2) then
-            et.G_Print("Setlevel is used to set admin status to a player.\n")
-            et.G_Print("useage: !setlevel \[name/PID\] \[level 0-3\]\n")
-            return 1
-        end
-
-        commandSaid = false
-        sldv = 1
-        setlevel(et.trap_Argv(1), 0)
-        sldv = 0
-        setlevel(et.trap_Argv(1), et.trap_Argv(2))
-        return 1
+        dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+        execute_command(params)
     elseif arg0 == "goto" then
         dofile(kmod_ng_path .. '/kmod/command/console/goto.lua')
         execute_command(params)
@@ -4766,7 +4687,7 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "slap" then
-        dofile(kmod_ng_path .. '/kmod/command/both/burn.lua')
+        dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
         execute_command(params)
         return 1
     elseif arg0 == "k_commandprefix" then
