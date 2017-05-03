@@ -5367,28 +5367,27 @@ end
 -- WARNING! text may contain a player name + their chat message.
 -- This makes it very easy to spoof.
 -- DO NOT TRUST STRINGS OBTAINED IN THIS WAY
-function et_Print( text )
-	local t = ParseString(text)
+function et_Print(text)
+    local t = ParseString(text)
 
-	if t[1] == "saneClientCommand:" and t[3] == "callvote" then
-		local caller = tonumber(t[2])
-		local vote = t[4]
-		local target = tonumber(t[5])
+    if t[1] == "saneClientCommand:" and t[3] == "callvote" then
+        local caller = tonumber(t[2])
+        local vote = t[4]
+        local target = tonumber(t[5])
 
-		if vote == "kick" or vote == "mute" then
-			if AdminUserLevel(caller) < AdminUserLevel(target) then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n")
-			end
-		end
-	end
+        if (vote == "kick" or vote == "mute") and AdminUserLevel(caller) < AdminUserLevel(target) then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n")
+        end
+    end
 
-	if t[1] == "Medic_Revive:" then
-		local reviver = tonumber(t[2])
-		teamkillr[reviver] = teamkillr[reviver] + 1
-		if teamkillr[reviver] > k_tklimit_high then
-			teamkillr[reviver] = k_tklimit_high
-		end
-	end
+    if t[1] == "Medic_Revive:" then
+        local reviver = tonumber(t[2])
+        teamkillr[reviver] = teamkillr[reviver] + 1
+
+        if teamkillr[reviver] > k_tklimit_high then
+            teamkillr[reviver] = k_tklimit_high
+        end
+    end
 end
 
 -- Called whenever a player is killed.
