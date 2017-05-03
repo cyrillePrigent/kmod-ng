@@ -4677,42 +4677,45 @@ end
 
 -- Called when a client begins (becomes active, and enters the gameworld).
 --  clientNum is the client slot id.
-function et_ClientBegin( clientNum )
-	local name=et.Info_ValueForKey( et.trap_GetUserinfo( clientNum ), "name" )
+function et_ClientBegin(clientNum)
+    local name = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
 
-	ModInfo(clientNum)
-	loadAdmins()
---	AdminUserLevel(clientNum)
+    ModInfo(clientNum)
+    loadAdmins()
 
-	teamkillr[clientNum] = 0
-	selfkills[clientNum] = 0
-	muted[clientNum] = 0
-	loadMutes()
-	MuteCheck(clientNum)
+    teamkillr[clientNum] = 0
+    selfkills[clientNum] = 0
+    muted[clientNum] = 0
+    loadMutes()
+    MuteCheck(clientNum)
 
-	Bname[clientNum] = name
+    Bname[clientNum] = name
 
-	if k_logchat == 1 then
-		log_chat(clientNum, "CONN", "DV")
-	end
+    if k_logchat == 1 then
+        log_chat(clientNum, "CONN", "DV")
+    end
 end
 
 -- Called when a client is spawned.
 --  clientNum is the client slot id.
 --  revived is 1 if the client was spawned by being revived.
 function et_ClientSpawn(clientNum, revived)
-	if panzdv == 1 then
-		local doublehealth = tonumber(et.gentity_get(clientNum,"health"))*2
-		if et.gentity_get(clientNum,"sess.sessionTeam") >= 1 and et.gentity_get(clientNum,"sess.sessionTeam") < 3 then
-			et.gentity_set(clientNum,"health", doublehealth)
-		end
-	end
+    if panzdv == 1 then
+        local doublehealth = tonumber(et.gentity_get(clientNum, "health")) * 2
+        local team = et.gentity_get(clientNum, "sess.sessionTeam")
 
-	if revived == 0 then
-		if et.gentity_get(clientNum,"sess.sessionTeam") >= 1 and et.gentity_get(clientNum,"sess.sessionTeam") < 3 then
-			clientrespawn[clientNum] = 1
-		end
-	end
+        if team >= 1 and team < 3 then
+            et.gentity_set(clientNum, "health", doublehealth)
+        end
+    end
+
+    if revived == 0 then
+        local team = et.gentity_get(clientNum, "sess.sessionTeam")
+
+        if team >= 1 and team < 3 then
+            clientrespawn[clientNum] = 1
+        end
+    end
 end
 
 -- commands
