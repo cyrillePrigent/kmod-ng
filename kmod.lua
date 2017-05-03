@@ -2204,8 +2204,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."readconfig" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "exec kmod.cfg ; qsay ^3ReadConfig:^7 Config reloaded\n" )
-		readconfig()
+        dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3ReadConfig:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4649,9 +4649,8 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "readconfig" then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "exec kmod.cfg\n")
-        et.G_Print("^3ReadConfig:^7 Config reloaded\n")
-        readconfig()
+        dofile(kmod_ng_path .. '/kmod/command/console/readconfig.lua')
+        execute_command(params)
     elseif arg0 == k_commandprefix .. "spree_restart" then
         dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
         execute_command(params)
