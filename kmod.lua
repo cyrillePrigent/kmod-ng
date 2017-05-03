@@ -4635,51 +4635,46 @@ function et_ConsoleCommand()
 
     if arg0 == k_commandprefix .. "setlevel" then
         dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
-        execute_command(params)
+        return execute_command(params)
     elseif arg0 == "goto" then
         dofile(kmod_ng_path .. '/kmod/command/console/goto.lua')
-        execute_command(params)
-        return 1
+        return execute_command(params)
     elseif arg0 == "iwant" then
         dofile(kmod_ng_path .. '/kmod/command/console/iwant.lua')
-        execute_command(params)
-        return 1
+        return execute_command(params)
     elseif arg0 == k_commandprefix .. "showadmins" then
         dofile(kmod_ng_path .. '/kmod/command/console/showadmins.lua')
-        execute_command(params)
-        return 1
+        return execute_command(params)
     elseif arg0 == k_commandprefix .. "readconfig" then
         dofile(kmod_ng_path .. '/kmod/command/console/readconfig.lua')
-        execute_command(params)
+        return execute_command(params)
     elseif arg0 == k_commandprefix .. "spree_restart" then
         dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "panzerwar") then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "panzerwar" then
         dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "frenzy") then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "frenzy" then
         dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "grenadewar") then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "grenadewar" then
         dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "sniperwar" ) then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "sniperwar" then
         dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "crazygravity") then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "crazygravity" then
         dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
-        execute_command(params)
-    elseif (arg0 == k_commandprefix .. "spec999" ) then
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "spec999" then
         dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
-        execute_command(params)
+        return execute_command(params)
     elseif arg0 == k_commandprefix .. "gib" then
         dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
-        execute_command(params)
-        return 1
+        return execute_command(params)
     elseif arg0 == k_commandprefix .. "slap" then
         dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
-        execute_command(params)
-        return 1
+        return execute_command(params)
     elseif arg0 == "k_commandprefix" then
         et.G_Print("Unknown command in line k_commandprefix\n")
         return 1
