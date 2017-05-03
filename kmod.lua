@@ -2659,138 +2659,7 @@ function lstcomds( PlayerID )
 end
 
 function kills(victim, killer, meansOfDeath, weapon)
-
-	if (meansOfDeath==0) then
-		weapon="UNKNOWN"
-	elseif (meansOfDeath==1) then
-		weapon="MACHINEGUN"
-	elseif (meansOfDeath==2) then
-		weapon="BROWNING"
-	elseif (meansOfDeath==3) then
-		weapon="MG42"
-	elseif (meansOfDeath==4) then
-		weapon="GRENADE"
-	elseif (meansOfDeath==5) then
-		weapon="ROCKET"
-	elseif (meansOfDeath==6) then
-		weapon="KNIFE"
-	elseif (meansOfDeath==7) then
-		weapon="LUGER"
-	elseif (meansOfDeath==8) then
-		weapon="COLT"
-	elseif (meansOfDeath==9) then
-		weapon="MP40"
-	elseif (meansOfDeath==10) then
-		weapon="THOMPSON"
-	elseif (meansOfDeath==11) then
-		weapon="STEN"
-	elseif (meansOfDeath==12) then
-		weapon="GARAND"
-	elseif (meansOfDeath==13) then
-		weapon="SNOOPERSCOPE"
-	elseif (meansOfDeath==14) then
-		weapon="SILENCER"
-	elseif (meansOfDeath==15) then
-		weapon="FG42"
-	elseif (meansOfDeath==16) then
-		weapon="FG42SCOPE"
-	elseif (meansOfDeath==17) then
-		weapon="PANZERFAUST"
-	elseif (meansOfDeath==18) then
-		weapon="GRENADE_LAUNCHER"
-	elseif (meansOfDeath==19) then
-		weapon="FLAMETHROWER"
-	elseif (meansOfDeath==20) then
-		weapon="GRENADE_PINEAPPLE"
-	elseif (meansOfDeath==21) then
-		weapon="CROSS"
-	elseif (meansOfDeath==22) then
-		weapon="MAPMORTAR"
-	elseif (meansOfDeath==23) then
-		weapon="MAPMORTAR_SPLASH"
-	elseif (meansOfDeath==24) then
-		weapon="KICKED"
-	elseif (meansOfDeath==25) then
-		weapon="GRABBER"
-	elseif (meansOfDeath==26) then
-		weapon="DYNAMITE"
-	elseif (meansOfDeath==27) then
-		weapon="AIRSTRIKE"
-	elseif (meansOfDeath==28) then
-		weapon="SYRINGE"
-	elseif (meansOfDeath==29) then
-		weapon="AMMO"
-	elseif (meansOfDeath==30) then
-		weapon="ARTY"
-	elseif (meansOfDeath==31) then
-		weapon="WATER"
-	elseif (meansOfDeath==32) then
-		weapon="SLIME"
-	elseif (meansOfDeath==33) then
-		weapon="LAVA"
-	elseif (meansOfDeath==34) then
-		weapon="CRUSH"
-	elseif (meansOfDeath==35) then
-		weapon="TELEFRAG"
-	elseif (meansOfDeath==36) then
-		weapon="FALLING"
-	elseif (meansOfDeath==37) then
-		weapon = "SUICIDE"
-	elseif (meansOfDeath==38) then
-		weapon="TARGET_LASER"
-	elseif (meansOfDeath==39) then
-		weapon="TRIGGER_HURT"
-	elseif (meansOfDeath==40) then
-		weapon="EXPLOSIVE"
-	elseif (meansOfDeath==41) then
-		weapon="CARBINE"
-	elseif (meansOfDeath==42) then
-		weapon="KAR98"
-	elseif (meansOfDeath==43) then
-		weapon="GPG40"
-	elseif (meansOfDeath==44) then
-		weapon="M7"
-	elseif (meansOfDeath==45) then
-		weapon="LANDMINE"
-	elseif (meansOfDeath==46) then
-		weapon="SATCHEL"
-	elseif (meansOfDeath==47) then
-		weapon="TRIPMINE"
-	elseif (meansOfDeath==48) then
-		weapon="SMOKEBOMB"
-	elseif (meansOfDeath==49) then
-		weapon="MOBILE_MG42"
-	elseif (meansOfDeath==50) then
-		weapon="SILENCED_COLT"
-	elseif (meansOfDeath==51) then
-		weapon="GARAND_SCOPE"
-	elseif (meansOfDeath==52) then
-		weapon="CRUSH_CONSTRUCTION"
-	elseif (meansOfDeath==53) then
-		weapon="CRUSH_CONSTRUCTIONDEATH"
-	elseif (meansOfDeath==54) then
-		weapon="CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
-	elseif (meansOfDeath==55) then
-		weapon="K43"
-	elseif (meansOfDeath==56) then
-		weapon="K43_SCOPE"
-	elseif (meansOfDeath==57) then
-		weapon="MORTAR"
-	elseif (meansOfDeath==58) then
-		weapon="AKIMBO_COLT"
-	elseif (meansOfDeath==59) then
-		weapon="AKIMBO_LUGER"
-	elseif (meansOfDeath==60) then
-		weapon="AKIMBO_SILENCEDCOLT"
-	elseif (meansOfDeath==61) then
-		weapon="AKIMBO_SILENCEDLUGER"
-	elseif (meansOfDeath==62) then
-		weapon="SMOKEGRENADE"
-	elseif (meansOfDeath==63) then
-		weapon="SWAP_SPACES"
-	elseif (meansOfDeath==64) then
-		weapon="SWITCH_TEAM"
-	end
+    weapon = getMeansOfDeathName(meansOfDeath)
 
 	local kil = tonumber(killer)
 	local killername = ""
@@ -3207,138 +3076,7 @@ end
 end
 
 function deaths(victim, killer, meansOfDeath, weapon)
-
-	if (meansOfDeath==0) then
-		weapon="UNKNOWN"
-	elseif (meansOfDeath==1) then
-		weapon="MACHINEGUN"
-	elseif (meansOfDeath==2) then
-		weapon="BROWNING"
-	elseif (meansOfDeath==3) then
-		weapon="MG42"
-	elseif (meansOfDeath==4) then
-		weapon="GRENADE"
-	elseif (meansOfDeath==5) then
-		weapon="ROCKET"
-	elseif (meansOfDeath==6) then
-		weapon="KNIFE"
-	elseif (meansOfDeath==7) then
-		weapon="LUGER"
-	elseif (meansOfDeath==8) then
-		weapon="COLT"
-	elseif (meansOfDeath==9) then
-		weapon="MP40"
-	elseif (meansOfDeath==10) then
-		weapon="THOMPSON"
-	elseif (meansOfDeath==11) then
-		weapon="STEN"
-	elseif (meansOfDeath==12) then
-		weapon="GARAND"
-	elseif (meansOfDeath==13) then
-		weapon="SNOOPERSCOPE"
-	elseif (meansOfDeath==14) then
-		weapon="SILENCER"
-	elseif (meansOfDeath==15) then
-		weapon="FG42"
-	elseif (meansOfDeath==16) then
-		weapon="FG42SCOPE"
-	elseif (meansOfDeath==17) then
-		weapon="PANZERFAUST"
-	elseif (meansOfDeath==18) then
-		weapon="GRENADE_LAUNCHER"
-	elseif (meansOfDeath==19) then
-		weapon="FLAMETHROWER"
-	elseif (meansOfDeath==20) then
-		weapon="GRENADE_PINEAPPLE"
-	elseif (meansOfDeath==21) then
-		weapon="CROSS"
-	elseif (meansOfDeath==22) then
-		weapon="MAPMORTAR"
-	elseif (meansOfDeath==23) then
-		weapon="MAPMORTAR_SPLASH"
-	elseif (meansOfDeath==24) then
-		weapon="KICKED"
-	elseif (meansOfDeath==25) then
-		weapon="GRABBER"
-	elseif (meansOfDeath==26) then
-		weapon="DYNAMITE"
-	elseif (meansOfDeath==27) then
-		weapon="AIRSTRIKE"
-	elseif (meansOfDeath==28) then
-		weapon="SYRINGE"
-	elseif (meansOfDeath==29) then
-		weapon="AMMO"
-	elseif (meansOfDeath==30) then
-		weapon="ARTY"
-	elseif (meansOfDeath==31) then
-		weapon="WATER"
-	elseif (meansOfDeath==32) then
-		weapon="SLIME"
-	elseif (meansOfDeath==33) then
-		weapon="LAVA"
-	elseif (meansOfDeath==34) then
-		weapon="CRUSH"
-	elseif (meansOfDeath==35) then
-		weapon="TELEFRAG"
-	elseif (meansOfDeath==36) then
-		weapon="FALLING"
-	elseif (meansOfDeath==37) then
-		weapon = "SUICIDE"
-	elseif (meansOfDeath==38) then
-		weapon="TARGET_LASER"
-	elseif (meansOfDeath==39) then
-		weapon="TRIGGER_HURT"
-	elseif (meansOfDeath==40) then
-		weapon="EXPLOSIVE"
-	elseif (meansOfDeath==41) then
-		weapon="CARBINE"
-	elseif (meansOfDeath==42) then
-		weapon="KAR98"
-	elseif (meansOfDeath==43) then
-		weapon="GPG40"
-	elseif (meansOfDeath==44) then
-		weapon="M7"
-	elseif (meansOfDeath==45) then
-		weapon="LANDMINE"
-	elseif (meansOfDeath==46) then
-		weapon="SATCHEL"
-	elseif (meansOfDeath==47) then
-		weapon="TRIPMINE"
-	elseif (meansOfDeath==48) then
-		weapon="SMOKEBOMB"
-	elseif (meansOfDeath==49) then
-		weapon="MOBILE_MG42"
-	elseif (meansOfDeath==50) then
-		weapon="SILENCED_COLT"
-	elseif (meansOfDeath==51) then
-		weapon="GARAND_SCOPE"
-	elseif (meansOfDeath==52) then
-		weapon="CRUSH_CONSTRUCTION"
-	elseif (meansOfDeath==53) then
-		weapon="CRUSH_CONSTRUCTIONDEATH"
-	elseif (meansOfDeath==54) then
-		weapon="CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
-	elseif (meansOfDeath==55) then
-		weapon="K43"
-	elseif (meansOfDeath==56) then
-		weapon="K43_SCOPE"
-	elseif (meansOfDeath==57) then
-		weapon="MORTAR"
-	elseif (meansOfDeath==58) then
-		weapon="AKIMBO_COLT"
-	elseif (meansOfDeath==59) then
-		weapon="AKIMBO_LUGER"
-	elseif (meansOfDeath==60) then
-		weapon="AKIMBO_SILENCEDCOLT"
-	elseif (meansOfDeath==61) then
-		weapon="AKIMBO_SILENCEDLUGER"
-	elseif (meansOfDeath==62) then
-		weapon="SMOKEGRENADE"
-	elseif (meansOfDeath==63) then
-		weapon="SWAP_SPACES"
-	elseif (meansOfDeath==64) then
-		weapon="SWITCH_TEAM"
-	end
+    weapon = getMeansOfDeathName(meansOfDeath)
 
 	local kil = tonumber(killer)
 	local killername = ""
@@ -3514,6 +3252,142 @@ function setWeaponAmmo(weaponList, clientId)
             et.gentity_set(clientId, "ps.ammoclip", i, 999)
             et.gentity_set(clientId, "ps.ammo", i, 999)
         end
+    end
+end
+
+-- et_Obituary
+
+function getMeansOfDeathName(meansOfDeath)
+    if (meansOfDeath==0) then
+        weapon="UNKNOWN"
+    elseif (meansOfDeath==1) then
+        weapon="MACHINEGUN"
+    elseif (meansOfDeath==2) then
+        weapon="BROWNING"
+    elseif (meansOfDeath==3) then
+        weapon="MG42"
+    elseif (meansOfDeath==4) then
+        weapon="GRENADE"
+    elseif (meansOfDeath==5) then
+        weapon="ROCKET"
+    elseif (meansOfDeath==6) then
+        weapon="KNIFE"
+    elseif (meansOfDeath==7) then
+        weapon="LUGER"
+    elseif (meansOfDeath==8) then
+        weapon="COLT"
+    elseif (meansOfDeath==9) then
+        weapon="MP40"
+    elseif (meansOfDeath==10) then
+        weapon="THOMPSON"
+    elseif (meansOfDeath==11) then
+        weapon="STEN"
+    elseif (meansOfDeath==12) then
+        weapon="GARAND"
+    elseif (meansOfDeath==13) then
+        weapon="SNOOPERSCOPE"
+    elseif (meansOfDeath==14) then
+        weapon="SILENCER"
+    elseif (meansOfDeath==15) then
+        weapon="FG42"
+    elseif (meansOfDeath==16) then
+        weapon="FG42SCOPE"
+    elseif (meansOfDeath==17) then
+        weapon="PANZERFAUST"
+    elseif (meansOfDeath==18) then
+        weapon="GRENADE_LAUNCHER"
+    elseif (meansOfDeath==19) then
+        weapon="FLAMETHROWER"
+    elseif (meansOfDeath==20) then
+        weapon="GRENADE_PINEAPPLE"
+    elseif (meansOfDeath==21) then
+        weapon="CROSS"
+    elseif (meansOfDeath==22) then
+        weapon="MAPMORTAR"
+    elseif (meansOfDeath==23) then
+        weapon="MAPMORTAR_SPLASH"
+    elseif (meansOfDeath==24) then
+        weapon="KICKED"
+    elseif (meansOfDeath==25) then
+        weapon="GRABBER"
+    elseif (meansOfDeath==26) then
+        weapon="DYNAMITE"
+    elseif (meansOfDeath==27) then
+        weapon="AIRSTRIKE"
+    elseif (meansOfDeath==28) then
+        weapon="SYRINGE"
+    elseif (meansOfDeath==29) then
+        weapon="AMMO"
+    elseif (meansOfDeath==30) then
+        weapon="ARTY"
+    elseif (meansOfDeath==31) then
+        weapon="WATER"
+    elseif (meansOfDeath==32) then
+        weapon="SLIME"
+    elseif (meansOfDeath==33) then
+        weapon="LAVA"
+    elseif (meansOfDeath==34) then
+        weapon="CRUSH"
+    elseif (meansOfDeath==35) then
+        weapon="TELEFRAG"
+    elseif (meansOfDeath==36) then
+        weapon="FALLING"
+    elseif (meansOfDeath==37) then
+        weapon = "SUICIDE"
+    elseif (meansOfDeath==38) then
+        weapon="TARGET_LASER"
+    elseif (meansOfDeath==39) then
+        weapon="TRIGGER_HURT"
+    elseif (meansOfDeath==40) then
+        weapon="EXPLOSIVE"
+    elseif (meansOfDeath==41) then
+        weapon="CARBINE"
+    elseif (meansOfDeath==42) then
+        weapon="KAR98"
+    elseif (meansOfDeath==43) then
+        weapon="GPG40"
+    elseif (meansOfDeath==44) then
+        weapon="M7"
+    elseif (meansOfDeath==45) then
+        weapon="LANDMINE"
+    elseif (meansOfDeath==46) then
+        weapon="SATCHEL"
+    elseif (meansOfDeath==47) then
+        weapon="TRIPMINE"
+    elseif (meansOfDeath==48) then
+        weapon="SMOKEBOMB"
+    elseif (meansOfDeath==49) then
+        weapon="MOBILE_MG42"
+    elseif (meansOfDeath==50) then
+        weapon="SILENCED_COLT"
+    elseif (meansOfDeath==51) then
+        weapon="GARAND_SCOPE"
+    elseif (meansOfDeath==52) then
+        weapon="CRUSH_CONSTRUCTION"
+    elseif (meansOfDeath==53) then
+        weapon="CRUSH_CONSTRUCTIONDEATH"
+    elseif (meansOfDeath==54) then
+        weapon="CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
+    elseif (meansOfDeath==55) then
+        weapon="K43"
+    elseif (meansOfDeath==56) then
+        weapon="K43_SCOPE"
+    elseif (meansOfDeath==57) then
+        weapon="MORTAR"
+    elseif (meansOfDeath==58) then
+        weapon="AKIMBO_COLT"
+    elseif (meansOfDeath==59) then
+        weapon="AKIMBO_LUGER"
+    elseif (meansOfDeath==60) then
+        weapon="AKIMBO_SILENCEDCOLT"
+    elseif (meansOfDeath==61) then
+        weapon="AKIMBO_SILENCEDLUGER"
+    elseif (meansOfDeath==62) then
+        weapon="SMOKEGRENADE"
+    elseif (meansOfDeath==63) then
+        weapon="SWAP_SPACES"
+    elseif (meansOfDeath==64) then
+        weapon="SWITCH_TEAM"
     end
 end
 
@@ -4758,225 +4632,92 @@ end
 
 -- Called whenever a player is killed.
 function et_Obituary( victim, killer, meansOfDeath )
-	local killername= ""
+    local killername= ""
+    local killedname=et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
+    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
+    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+    weapon = ""
 
-	local killedname=et.Info_ValueForKey( et.trap_GetUserinfo( victim ), "name" )
-      local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam")) 
-      local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
-	weapon = ""
+    if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
+        killername  = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+        lastblood   = killername
+        khp[killer] = (mtime + 5000)
 
-	if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
-		killername=et.Info_ValueForKey( et.trap_GetUserinfo( killer ), "name" )
-		lastblood = killername
-		khp[killer] = (mtime + 5000)
-		if khp[victim] == nil then
-			khp[victim] = 0
-		end
-	end
+        if khp[victim] == nil then
+            khp[victim] = 0
+        end
+    end
 
-	if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
-		if killer ~= victim then
-			if firstblood == 0 then
-				firstblood = 1
-					if k_firstblood == 1 then
-						local str = string.gsub(k_fb_message, "#killer#", killername)
+    if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
+        if killer ~= victim then
+            if firstblood == 0 then
+                firstblood = 1
 
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..fb_location.." "..str.."\n" )
-						if k_firstbloodsound == 1 then
-							if k_noisereduction == 1 then
-								et.G_ClientSound(killer, firstbloodsound)
-							else
-								et.G_globalSound(firstbloodsound)
-							end
-						end
-					end
-			end
-		end
- 
-      	local killerhp = et.gentity_get(killer, "health") 
-		if k_killerhpdisplay == 1 then
-			if khp[victim] < mtime then
-				if (killerhp>=75) then
---         				et.trap_SendServerCommand(victim, ("b 8 \"^" .. k_color .. "You got owned!"))
-					et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" ..killerhp .. "^" .. k_color .. ")"))
-					if adrenaline[killer] == 1 then
-						et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-					end
-   				elseif (killerhp>=50 and killerhp<=74) then
---					et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "You're not a total newb."))
-					et.trap_SendServerCommand(victim, string.format("b 8 \"^7" ..killername .. "^" .. k_color .. "'s hp (^o" ..killerhp.. "^" .. k_color .. ")"))
-					if adrenaline[killer] == 1 then
-						et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-					end
-				elseif (killerhp>=25 and killerhp<=49) then
---					et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "Try Harder!"))
-					et.trap_SendServerCommand(victim, string.format("b 8 \"^7" ..killername.. "^" .. k_color .. "'s hp (^o" ..killerhp.. "^" .. k_color .. ")"))
-					if adrenaline[killer] == 1 then
-						et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-					end
-				elseif (killerhp>0 and killerhp<=24) then
---					et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "Almost!"))
-					et.trap_SendServerCommand(victim, string.format("b 8 \"^7" ..killername.. "^" .. k_color .. "'s hp (^o" ..killerhp.. "^" .. k_color .. ")"))
-					if adrenaline[killer] == 1 then
-						et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-					end
-				end 
-			end
-				if (killerhp<=0) then
-					if meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 18 or meansOfDeath == 26 or meansOfDeath == 27 or meansOfDeath == 30 or meansOfDeath == 44 or meansOfDeath == 43 then
-						et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "You were owned by ^7" .. killername .. "^" .. k_color .. "'s explosive inheritance"))
-					end
-				end
-		end
-	end
+                if k_firstblood == 1 then
+                    local str = string.gsub(k_fb_message, "#killer#", killername)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, fb_location .. " " .. str .. "\n")
 
-	kills(victim, killer, meansOfDeath, weapon)
-	deaths(victim, killer, meansOfDeath, weapon)
+                    if k_firstbloodsound == 1 then
+                        if k_noisereduction == 1 then
+                            et.G_ClientSound(killer, firstbloodsound)
+                        else
+                            et.G_globalSound(firstbloodsound)
+                        end
+                    end
+                end
+            end
+        end
 
-	if meansOfDeath == 64 or meansOfDeath == 63 then
-		switchteam[victim] = 1
-	else
-		switchteam[victim] = 0
-	end
+        local killerhp = et.gentity_get(killer, "health")
 
---Weapons used!
+        if k_killerhpdisplay == 1 then
+            if khp[victim] < mtime then
+                if killerhp >= 75 then
+                    et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
 
-	if (meansOfDeath==0) then
-		weapon="UNKNOWN"
-	elseif (meansOfDeath==1) then
-		weapon="MACHINEGUN"
-	elseif (meansOfDeath==2) then
-		weapon="BROWNING"
-	elseif (meansOfDeath==3) then
-		weapon="MG42"
-	elseif (meansOfDeath==4) then
-		weapon="GRENADE"
-	elseif (meansOfDeath==5) then
-		weapon="ROCKET"
-	elseif (meansOfDeath==6) then
-		weapon="KNIFE"
-	elseif (meansOfDeath==7) then
-		weapon="LUGER"
-	elseif (meansOfDeath==8) then
-		weapon="COLT"
-	elseif (meansOfDeath==9) then
-		weapon="MP40"
-	elseif (meansOfDeath==10) then
-		weapon="THOMPSON"
-	elseif (meansOfDeath==11) then
-		weapon="STEN"
-	elseif (meansOfDeath==12) then
-		weapon="GARAND"
-	elseif (meansOfDeath==13) then
-		weapon="SNOOPERSCOPE"
-	elseif (meansOfDeath==14) then
-		weapon="SILENCER"
-	elseif (meansOfDeath==15) then
-		weapon="FG42"
-	elseif (meansOfDeath==16) then
-		weapon="FG42SCOPE"
-	elseif (meansOfDeath==17) then
-		weapon="PANZERFAUST"
-	elseif (meansOfDeath==18) then
-		weapon="GRENADE_LAUNCHER"
-	elseif (meansOfDeath==19) then
-		weapon="FLAMETHROWER"
-	elseif (meansOfDeath==20) then
-		weapon="GRENADE_PINEAPPLE"
-	elseif (meansOfDeath==21) then
-		weapon="CROSS"
-	elseif (meansOfDeath==22) then
-		weapon="MAPMORTAR"
-	elseif (meansOfDeath==23) then
-		weapon="MAPMORTAR_SPLASH"
-	elseif (meansOfDeath==24) then
-		weapon="KICKED"
-	elseif (meansOfDeath==25) then
-		weapon="GRABBER"
-	elseif (meansOfDeath==26) then
-		weapon="DYNAMITE"
-	elseif (meansOfDeath==27) then
-		weapon="AIRSTRIKE"
-	elseif (meansOfDeath==28) then
-		weapon="SYRINGE"
-	elseif (meansOfDeath==29) then
-		weapon="AMMO"
-	elseif (meansOfDeath==30) then
-		weapon="ARTY"
-	elseif (meansOfDeath==31) then
-		weapon="WATER"
-	elseif (meansOfDeath==32) then
-		weapon="SLIME"
-	elseif (meansOfDeath==33) then
-		weapon="LAVA"
-	elseif (meansOfDeath==34) then
-		weapon="CRUSH"
-	elseif (meansOfDeath==35) then
-		weapon="TELEFRAG"
-	elseif (meansOfDeath==36) then
-		weapon="FALLING"
-	elseif (meansOfDeath==37) then
-		weapon = "SUICIDE"
-	elseif (meansOfDeath==38) then
-		weapon="TARGET_LASER"
-	elseif (meansOfDeath==39) then
-		weapon="TRIGGER_HURT"
-	elseif (meansOfDeath==40) then
-		weapon="EXPLOSIVE"
-	elseif (meansOfDeath==41) then
-		weapon="CARBINE"
-	elseif (meansOfDeath==42) then
-		weapon="KAR98"
-	elseif (meansOfDeath==43) then
-		weapon="GPG40"
-	elseif (meansOfDeath==44) then
-		weapon="M7"
-	elseif (meansOfDeath==45) then
-		weapon="LANDMINE"
-	elseif (meansOfDeath==46) then
-		weapon="SATCHEL"
-	elseif (meansOfDeath==47) then
-		weapon="TRIPMINE"
-	elseif (meansOfDeath==48) then
-		weapon="SMOKEBOMB"
-	elseif (meansOfDeath==49) then
-		weapon="MOBILE_MG42"
-	elseif (meansOfDeath==50) then
-		weapon="SILENCED_COLT"
-	elseif (meansOfDeath==51) then
-		weapon="GARAND_SCOPE"
-	elseif (meansOfDeath==52) then
-		weapon="CRUSH_CONSTRUCTION"
-	elseif (meansOfDeath==53) then
-		weapon="CRUSH_CONSTRUCTIONDEATH"
-	elseif (meansOfDeath==54) then
-		weapon="CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
-	elseif (meansOfDeath==55) then
-		weapon="K43"
-	elseif (meansOfDeath==56) then
-		weapon="K43_SCOPE"
-	elseif (meansOfDeath==57) then
-		weapon="MORTAR"
-	elseif (meansOfDeath==58) then
-		weapon="AKIMBO_COLT"
-	elseif (meansOfDeath==59) then
-		weapon="AKIMBO_LUGER"
-	elseif (meansOfDeath==60) then
-		weapon="AKIMBO_SILENCEDCOLT"
-	elseif (meansOfDeath==61) then
-		weapon="AKIMBO_SILENCEDLUGER"
-	elseif (meansOfDeath==62) then
-		weapon="SMOKEGRENADE"
-	elseif (meansOfDeath==63) then
-		weapon="SWAP_SPACES"
-	elseif (meansOfDeath==64) then
-		weapon="SWITCH_TEAM"
-	end
+                    if adrenaline[killer] == 1 then
+                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
+                    end
+                elseif killerhp >= 50 and killerhp <= 74 then
+                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
 
---et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay <<<<<<INSERT OBITUARY HERE>>>>>>\n" )
---return 1
---et.trap_SendServerCommand(-1, string.format("play sound/misc/ludicrouskill.wav"))
---return
+                    if adrenaline[killer] == 1 then
+                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
+                    end
+                elseif killerhp >= 25 and killerhp <= 49 then
+                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
+
+                    if adrenaline[killer] == 1 then
+                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
+                    end
+                elseif killerhp > 0 and killerhp <= 24 then
+                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
+
+                    if adrenaline[killer] == 1 then
+                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
+                    end
+                end
+            end
+
+            if killerhp <= 0 then
+                if meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 18 or meansOfDeath == 26 or meansOfDeath == 27 or meansOfDeath == 30 or meansOfDeath == 44 or meansOfDeath == 43 then
+                    et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "You were owned by ^7" .. killername .. "^" .. k_color .. "'s explosive inheritance"))
+                end
+            end
+        end
+    end
+
+    kills(victim, killer, meansOfDeath, weapon)
+    deaths(victim, killer, meansOfDeath, weapon)
+
+    if meansOfDeath == 64 or meansOfDeath == 63 then
+        switchteam[victim] = 1
+    else
+        switchteam[victim] = 0
+    end
+
+    --Weapons used!
+    weapon = getMeansOfDeathName(meansOfDeath)
 end
 
 -- et_ClientSay has been removed
