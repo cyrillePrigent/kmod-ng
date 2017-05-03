@@ -796,17 +796,6 @@ function spreerecord(PlayerID, kills2)
 	loadspreerecord()
 end
 
-function spreerecord_reset()
-	local fdadm,len = et.trap_FS_FOpenFile( "sprees/spree_record.dat", et.FS_WRITE )
-
-	SPREE = ""
-
-	et.trap_FS_Write( SPREE, string.len(SPREE) ,fdadm )
-	et.trap_FS_FCloseFile( fdadm )
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Spree record: ^7Spree record has been reset!\n" )
-	loadspreerecord()
-end
-
 function loadspreerecord()
 	local fd,len = et.trap_FS_FOpenFile( "sprees/spree_record.dat", et.FS_READ )
 	local kills = 0
@@ -2222,7 +2211,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."spree_restart" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-		spreerecord_reset()
+        dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Spree reset:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4663,7 +4653,8 @@ function et_ConsoleCommand()
         et.G_Print("^3ReadConfig:^7 Config reloaded\n")
         readconfig()
     elseif arg0 == k_commandprefix .. "spree_restart" then
-        spreerecord_reset()
+        dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+        execute_command(params)
     elseif (arg0 == k_commandprefix .. "panzerwar") then
         dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
         execute_command(params)
