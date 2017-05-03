@@ -753,10 +753,6 @@ function ParseString(inputString)
 	return t
 end
 
-function frenzy_reset()
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
-end
-
 function grenadewar_reset()
 	et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n" )
 end
@@ -2558,56 +2554,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."frenzy" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Disable or enable frenzy \[0-1\]\n" )
-		else
-			local frenz = tonumber(Cvar1)
-			if frenz >= 0 and frenz <= 1 then
-				if frenz == 1 then
-					if frenzdv == 0 then
-						if panzdv == 1 then
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Panzerwar must be disabled first\n" )
-						elseif grendv == 1 then
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Grenadewar must be disabled first\n" )
-						elseif snipdv == 1 then
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Sniperwar must be disabled first\n" )
-						else
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Frenzy has been Enabled\n" )
-							et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n" )
-							frenzdv = 1
-							for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-								if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-									if et.gentity_get(p,"health") > 0 then
-										et.G_Damage(p, p, 1022, 400, 24, 0)
-										et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-									end
-								end
-							end
-						end
-					else
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Frenzy is already active\n" )
-					end
-				else
-					if frenzdv == 1 then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Frenzy has been Disabled.\n" )
-						frenzdv = 0
-						frenzy_reset()
-						for p=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-							if et.gentity_get(p,"sess.sessionTeam") >= 1 and et.gentity_get(p,"sess.sessionTeam") < 3 then
-								if et.gentity_get(p,"health") > 0 then
-									et.G_Damage(p, p, 1022, 400, 24, 0)
-									et.gentity_set(p,"health",(et.gentity_get(p,"health")-400)) -- in case they recently spawned and are protected by spawn shield
-								end
-							end
-						end
-					else
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Frenzy has already been disabled\n" )
-					end
-				end
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 Valid values are \[0-1\]\n" )
-			end
-		end
+        dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4955,65 +4903,8 @@ function et_ConsoleCommand()
         dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
         execute_command(params)
     elseif (arg0 == k_commandprefix .. "frenzy") then
-        if Cvarct < 3 then
-            et.G_Print("^3Frenzy:^7 Disable or enable frenzy \[0-1\]\n" )
-        else
-            local frenz = tonumber(et.trap_Argv(1))
-
-            if frenz >= 0 and frenz <= 1 then
-                if frenz == 1 then
-                    if frenzdv == 0 then
-                        if panzdv == 1 then
-                            et.G_Print("^3Frenzy:^7 Panzerwar must be disabled first\n")
-                        elseif grendv == 1 then
-                            et.G_Print("^3Frenzy:^7 Grenadewar must be disabled first\n")
-                        elseif snipdv == 1 then
-                            et.G_Print("^3Frenzy:^7 Sniperwar must be disabled first\n")
-                        else
-                            et.G_Print("^3Frenzy:^7 Frenzy has been Enabled\n")
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
-                            frenzdv = 1
-
-                            for p = 0, clientsLimit, 1 do
-                                local team = et.gentity_get(p, "sess.sessionTeam")
-
-                                if team >= 1 and team < 3 then
-                                    if et.gentity_get(p, "health") > 0 then
-                                        et.G_Damage(p, p, 1022, 400, 24, 0)
-                                        -- in case they recently spawned and are protected by spawn shield
-                                        et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
-                                    end
-                                end
-                            end
-                        end
-                    else
-                        et.G_Print("^3Frenzy:^7 Frenzy is already active\n")
-                    end
-                else
-                    if frenzdv == 1 then
-                        et.G_Print("^3Frenzy:^7 Frenzy has been Disabled.\n")
-                        frenzdv = 0
-                        frenzy_reset()
-
-                        for p = 0, clientsLimit, 1 do
-                            local team = et.gentity_get(p, "sess.sessionTeam")
-
-                            if team >= 1 and team < 3 then
-                                if et.gentity_get(p, "health") > 0 then
-                                    et.G_Damage(p, p, 1022, 400, 24, 0)
-                                    -- in case they recently spawned and are protected by spawn shield
-                                    et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
-                                end
-                            end
-                        end
-                    else
-                        et.G_Print("^3Frenzy:^7 Frenzy has already been disabled\n")
-                    end
-                end
-            else
-                et.G_Print("^3Frenzy:^7 Valid values are \[0-1\]\n")
-            end
-        end
+        dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+        execute_command(params)
     elseif (arg0 == k_commandprefix .. "grenadewar") then
         if Cvarct < 3 then
             et.G_Print("^3Grenadewar:^7 Disable or enable Grenadewar \[0-1\]\n")
