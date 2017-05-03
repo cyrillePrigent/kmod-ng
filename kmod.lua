@@ -2263,15 +2263,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."slap" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-        if Cvarct < 3 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Slap:^7 \[partname/id#\]\n")
-        else
-            params.client = Cvar1
-            params.commandSaid = true
-            params.say = say_parms
-            dofile(kmod_ng_path .. '/kmod/command/burn.lua')
-            execute_command(params)
-        end
+        dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4773,16 +4766,7 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "slap" then
-        if (et.trap_Argc() < 2) then
-            et.G_Print("Slap is used to slap a player\n")
-            et.G_Print("useage: slap \[name/PID\]\n")
-            return 1
-        end
-
-        params.client = et.trap_Argv(1)
-        params.commandSaid = commandSaid
-        params.say = say_parms
-        dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+        dofile(kmod_ng_path .. '/kmod/command/both/burn.lua')
         execute_command(params)
         return 1
     elseif arg0 == "k_commandprefix" then
