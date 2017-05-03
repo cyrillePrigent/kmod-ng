@@ -2507,33 +2507,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."crazygravity" ) then
 --	if AdminUserLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Disable or enable crazygravity \[0-1\]\n" )
-		else
-			local crazy = tonumber(Cvar1)
-			if crazy >= 0 and crazy <= 1 then
-				if crazy == 1 then
-					if CGactive == 0 then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Crazygravity has been Enabled\n" )
-						crazygravity = true
-						crazydv = 1
-					else
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Crazygravity is already active\n" )
-					end
-				else
-					if CGactive == 1 then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n" )
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_gravity 800\n" )
-						crazygravity = false
-						crazydv = 0
-					else
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Crazygravity has already been disabled\n" )
-					end
-				end
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 Valid values are \[0-1\]\n" )
-			end
-		end
+        dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4804,34 +4779,8 @@ function et_ConsoleCommand()
         dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
         execute_command(params)
     elseif (arg0 == k_commandprefix .. "crazygravity") then
-        if Cvarct < 3 then
-            et.G_Print("^3Crazygravity:^7 Disable or enable crazygravity \[0-1\]\n")
-        else
-            local crazy = tonumber(et.trap_Argv(1))
-
-            if crazy >= 0 and crazy <= 1 then
-                if crazy == 1 then
-                    if CGactive == 0 then
-                        et.G_Print("^3Crazygravity:^7 Crazygravity has been Enabled\n")
-                        crazygravity = true
-                        crazydv = 1
-                    else
-                        et.G_Print("^3Crazygravity:^7 Crazygravity is already active\n")
-                    end
-                else
-                    if CGactive == 1 then
-                        et.G_Print("^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
-                        crazygravity = false
-                        crazydv = 0
-                    else
-                        et.G_Print("^3Crazygravity:^7 Crazygravity has already been disabled\n")
-                    end
-                end
-            else
-                et.G_Print("^3Crazygravity:^7 Valid values are \[0-1\]\n")
-            end
-        end
+        dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+        execute_command(params)
     elseif (arg0 == k_commandprefix .. "spec999" ) then
         dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
         execute_command(params)
