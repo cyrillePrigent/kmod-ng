@@ -4655,7 +4655,7 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "showadmins" then
-        dofile(kmod_ng_path .. '/kmod/command/showadmins.lua')
+        dofile(kmod_ng_path .. '/kmod/command/console/showadmins.lua')
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "readconfig" then
