@@ -4619,60 +4619,60 @@ end
 
 -- Called when a client disconnects.
 --  clientNum is the client slot id.
-function et_ClientDisconnect( clientNum)
-		killingspree[clientNum] = 0
-		flakmonkey[clientNum] = 0
-		deathspree[clientNum] = 0
-		multikill[clientNum] = 0
-		nummutes[clientNum] = 0
-		antiloopadr1[clientNum] = 0
-		antiloopadr2[clientNum] = 0
-		adrenaline[clientNum] = 0
-		adrnum[clientNum] = 0
-		adrnum2[clientNum] = 0
-		adrtime[clientNum] = 0
-		adrtime2[clientNum] = 0
-		adrendummy[clientNum] = 0
-		clientrespawn[clientNum] = 0
-		invincDummy[clientNum] = 0
-		switchteam[clientNum] = 0
-		gibbed[clientNum] = 0
+function et_ClientDisconnect(clientNum)
+    killingspree[clientNum] = 0
+    flakmonkey[clientNum] = 0
+    deathspree[clientNum] = 0
+    multikill[clientNum] = 0
+    nummutes[clientNum] = 0
+    antiloopadr1[clientNum] = 0
+    antiloopadr2[clientNum] = 0
+    adrenaline[clientNum] = 0
+    adrnum[clientNum] = 0
+    adrnum2[clientNum] = 0
+    adrtime[clientNum] = 0
+    adrtime2[clientNum] = 0
+    adrendummy[clientNum] = 0
+    clientrespawn[clientNum] = 0
+    invincDummy[clientNum] = 0
+    switchteam[clientNum] = 0
+    gibbed[clientNum] = 0
 
-		playerwhokilled[clientNum] = 1022
-		killedwithweapk[clientNum] = ""
-		killedwithweapv[clientNum] = ""
-		playerlastkilled[clientNum] = 1022
-		selfkills[clientNum] = 0
-		teamkillr[clientNum] = 0
-		khp[clientNum] = 0
-		AdminName[clientNum] = ""
-		originalclass[clientNum] = ""
-		originalweap[clientNum] = ""
+    playerwhokilled[clientNum] = 1022
+    killedwithweapk[clientNum] = ""
+    killedwithweapv[clientNum] = ""
+    playerlastkilled[clientNum] = 1022
+    selfkills[clientNum] = 0
+    teamkillr[clientNum] = 0
+    khp[clientNum] = 0
+    AdminName[clientNum] = ""
+    originalclass[clientNum] = ""
+    originalweap[clientNum] = ""
 
-		killr[clientNum] = 0
+    killr[clientNum] = 0
 
-	kill1[clientNum] = ""
-	kill2[clientNum] = ""
-	kill3[clientNum] = ""
-	kill4[clientNum] = ""
-	kill5[clientNum] = ""
-	kill6[clientNum] = ""
+    kill1[clientNum] = ""
+    kill2[clientNum] = ""
+    kill3[clientNum] = ""
+    kill4[clientNum] = ""
+    kill5[clientNum] = ""
+    kill6[clientNum] = ""
 
-	PlayerName[clientNum] = ""
+    PlayerName[clientNum] = ""
 
-	if k_logchat == 1 then
-		log_chat(clientNum, "DISCONNECT", "DV2")
-	end
+    if k_logchat == 1 then
+        log_chat(clientNum, "DISCONNECT", "DV2")
+    end
 
-	if muted[clientNum] > 0 then
-		local muteDur = (muted[clientNum]-mtime)/1000
-		setMute(clientNum, muteDur)
-		muted[clientNum] = 0
-	elseif muted[clientNum] == 0 then
-		local muteDur = 0
-		setMute(clientNum, muteDur)
-		muted[clientNum] = 0
-	end
+    if muted[clientNum] > 0 then
+        local muteDur = (muted[clientNum] - mtime) / 1000
+        setMute(clientNum, muteDur)
+        muted[clientNum] = 0
+    elseif muted[clientNum] == 0 then
+        local muteDur = 0
+        setMute(clientNum, muteDur)
+        muted[clientNum] = 0
+    end
 end
 
 -- Called when a client begins (becomes active, and enters the gameworld).
