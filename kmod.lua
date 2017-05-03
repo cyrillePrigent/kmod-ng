@@ -4738,14 +4738,6 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == "iwant" then
-        if (et.trap_Argc() < 2) then
-            et.G_Print("Iwant is used to teleport one player to another player\n")
-            et.G_Print("useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
-            return 1
-        end
-
-        params.playerId = et.trap_Argv(1)
-        params.target   = et.trap_Argv(2)
         dofile(kmod_ng_path .. '/kmod/command/iwant.lua')
         execute_command(params)
         return 1

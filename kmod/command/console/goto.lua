@@ -5,7 +5,7 @@
 -- params["arg1"] => player ID
 -- params["arg2"] => target
 function execute_command(params)
-    if et.trap_Argc() < 2 then
+    if params.nbArg < 2 then
         et.G_Print("Goto is used to teleport one player to another player\n") 
         et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
         return 1
