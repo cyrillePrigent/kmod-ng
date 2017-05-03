@@ -2,8 +2,21 @@
 
 -- getPlayernameToId
 
+
+-- params["arg1"] => client
 function execute_command(params)
-    local clientNum = tonumber(params.client)
+    if params.nbArg < 2 then
+        if params.command == 'console' then
+            et.G_Print("Gib is used to instantly kill a player\n")
+            et.G_Print("useage: gib \[name/PID\]\n")
+        elseif params.command == 'client' then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gib:^7 \[partname/id#\]\n")
+        end
+
+        return 1
+    end
+
+    local clientNum = tonumber(params["arg1"])
 
     if clientNum then
         if clientNum >= 0 and clientNum < 64 then
@@ -24,8 +37,8 @@ function execute_command(params)
             return
         end
     else
-        if params.client then
-            s, e = string.find(params.client, params.client)
+        if params["arg1"] then
+            s, e = string.find(params["arg1"], params["arg1"])
 
             if e <= 2 then
                 if params.commandSaid then
@@ -35,7 +48,7 @@ function execute_command(params)
                 end
                 return
             else
-                clientNum = getPlayernameToId(params.client)
+                clientNum = getPlayernameToId(params["arg1"])
             end
         end
 

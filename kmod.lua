@@ -2111,6 +2111,9 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
     params.nbArg   = Cvarct
     params["arg1"] = Cvar1
 
+    params.commandSaid = true
+    params.say = say_parms
+
     local admin_req = k_maxAdminLevels + 1
 
 	local fd,len = et.trap_FS_FOpenFile( "commands.cfg", et.FS_READ )
@@ -2253,15 +2256,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 	--level 3
   if (string.lower(BangCommand) == k_commandprefix.."gib") then
 --	if AdminUserLevel(PlayerID) == 3 then
-        if Cvarct < 3 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gib:^7 \[partname/id#\]\n")
-        else
-            params.client = Cvar1
-            params.commandSaid = true
-            params.say = say_parms
-            dofile(kmod_ng_path .. '/kmod/command/gib.lua')
-            execute_command(params)
-        end
+        dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
+        execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gib:^7 command unavailible due to lack of required admin status!\n" )
 --	end
@@ -4720,6 +4716,9 @@ function et_ConsoleCommand()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
 
+    params.commandSaid = commandSaid
+    params.say = say_parms
+
     if arg0 == k_commandprefix .. "setlevel" then
         if (et.trap_Argc() < 2) then
             et.G_Print("Setlevel is used to set admin status to a player.\n")
@@ -4738,7 +4737,7 @@ function et_ConsoleCommand()
         execute_command(params)
         return 1
     elseif arg0 == "iwant" then
-        dofile(kmod_ng_path .. '/kmod/command/iwant.lua')
+        dofile(kmod_ng_path .. '/kmod/command/console/iwant.lua')
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "showadmins" then
@@ -4770,16 +4769,7 @@ function et_ConsoleCommand()
         dofile(kmod_ng_path .. '/kmod/command/spec999.lua')
         execute_command(params)
     elseif arg0 == k_commandprefix .. "gib" then
-        if (et.trap_Argc() < 2) then
-            et.G_Print("Gib is used to instantly kill a player\n")
-            et.G_Print("useage: gib \[name/PID\]\n")
-            return 1
-        end
-
-        params.client = et.trap_Argv(1)
-        params.commandSaid = commandSaid
-        params.say = say_parms
-        dofile(kmod_ng_path .. '/kmod/command/gib.lua')
+        dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
         execute_command(params)
         return 1
     elseif arg0 == k_commandprefix .. "slap" then
