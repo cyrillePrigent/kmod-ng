@@ -4718,6 +4718,7 @@ function et_ConsoleCommand()
     params.command = 'console'
     params.nbArg   = et.trap_Argc()
     params["arg1"] = et.trap_Argv(1)
+    params["arg2"] = et.trap_Argv(2)
 
     if arg0 == k_commandprefix .. "setlevel" then
         if (et.trap_Argc() < 2) then
@@ -4733,15 +4734,7 @@ function et_ConsoleCommand()
         setlevel(et.trap_Argv(1), et.trap_Argv(2))
         return 1
     elseif arg0 == "goto" then
-        if (et.trap_Argc() < 2) then
-            et.G_Print("Goto is used to teleport one player to another player\n") 
-            et.G_Print("useage: goto \[name/PID\] \[name/PID\]\n")
-            return 1
-        end
-
-        params.playerId = et.trap_Argv(1)
-        params.target   = et.trap_Argv(2)
-        dofile(kmod_ng_path .. '/kmod/command/goto.lua')
+        dofile(kmod_ng_path .. '/kmod/command/console/goto.lua')
         execute_command(params)
         return 1
     elseif arg0 == "iwant" then
