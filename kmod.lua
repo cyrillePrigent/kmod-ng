@@ -1062,6 +1062,13 @@ function loadMapSpreeRecord()
     et.trap_FS_FCloseFile(fd)
 end
 
+-- Miscellaneous
+
+function printModInfo(clientNum)
+    et.trap_SendServerCommand(clientNum, "cpm \"This server is running the new KMOD version " .. KMODversion .. "\n\"")
+    et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
+end
+
 --
 
 function ParseString(inputString)
@@ -1113,9 +1120,40 @@ function getPlayernameToId(name)
     end
 end
 
-function ModInfo(PlayerID)
-	et.trap_SendServerCommand( PlayerID,"cpm \"This server is running the new KMOD version " .. KMODversion .. "\n\"")
-	et.trap_SendServerCommand( PlayerID,"cpm \"Created by Clutch152.\n\"")
+-- goto.lua
+-- iwant.lua
+-- log_chat
+-- ClientUserCommand
+-- et_ClientCommand
+function part2id(client)
+    local clientNum = tonumber(client)
+
+    if clientNum then
+        if clientNum >= 0 and clientNum < 64 then
+            if et.gentity_get(clientNum, "pers.connected") ~= 2 then
+                return nil
+            end
+
+            return clientNum
+        end
+    else
+        local client = string.lower(et.Q_CleanStr(client))
+
+        if client then
+            s, e = string.find(client, client)
+                if e <= 2 then
+                    return nil
+                else
+                    clientNum = getPlayernameToId(client)
+                end
+        end
+
+        if not clientNum then
+            return nil
+        end
+    end
+
+    return clientNum
 end
 
 function curse_filter( PlayerID )
@@ -1481,34 +1519,6 @@ function comds(client, cvar1, caller)
 		commandSaid = false
 	end
 
-
-end
-
-function part2id(client)
-	local clientnum = tonumber(client) 
-	if clientnum then 
-		if (clientnum >= 0) and (clientnum < 64) then 
-      		if et.gentity_get(clientnum,"pers.connected") ~= 2 then 
-      			return nil
-         		end 
-	    	  return clientnum
-      	end 
-	else 
-		local client = string.lower(et.Q_CleanStr( client ))
-      	if client then 
-			s,e=string.find(client, client)
-				if e <= 2 then
-		   			return nil
-				else
-			         	clientnum = getPlayernameToId(client)
-				end
-      	end 
-         	if not clientnum then 
-	         	return nil
-         	end 
-   	end 
-
-	return clientnum
 
 end
 
@@ -3592,7 +3602,7 @@ end
 function et_ClientBegin(clientNum)
     local name = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
 
-    ModInfo(clientNum)
+    printModInfo(clientNum)
     loadAdmins()
 
     teamkillr[clientNum] = 0
