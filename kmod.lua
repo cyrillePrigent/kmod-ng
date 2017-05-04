@@ -835,6 +835,21 @@ function setAdmin(PlayerID, levelv)
     end
 end
 
+function addAdmin(GUID)
+    s, e, level,GUID = string.find(GUID, "(%d)%s%-%s(%x+)")
+    level = tonumber(level)
+
+    for i = 0, k_maxAdminLevels, 1 do
+        if level == i then
+            for q = 1, i, 1 do
+                AdminLV[q][GUID] = true
+            end
+
+            break
+        end
+    end
+end
+
 function ParseString(inputString)
 	local i = 1
 	local t = {}
@@ -983,32 +998,6 @@ function getsetlvlidfname(name)
    else
 	return slot
    end
-end
-
-function addAdmin(GUID)
-	s,e,level,GUID = string.find(GUID, "(%d)%s%-%s(%x+)") 
-	level=tonumber(level)
-	for i=0, k_maxAdminLevels, 1 do
-		if level == i then
-			for q=1, i, 1 do
-				AdminLV[q][GUID] = true
-			end
-			break
-		end
-	end
-
-
-
---	if level == 1 then
---		AdminLV1[GUID] = true
---	elseif level == 2 then
---		AdminLV1[GUID] = true
---		AdminLV2[GUID] = true
---	elseif level == 3 then
---		AdminLV1[GUID] = true
---		AdminLV2[GUID] = true
---		AdminLV3[GUID] = true
---	end
 end
 
 function adminStatus(PlayerID)
