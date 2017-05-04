@@ -1189,50 +1189,6 @@ function advPlayers(PlayerID)
 		et.trap_SendServerCommand(PlayerID, string.format("print \"\n^3 " ..playercount.. " ^7total players\n"))
 end
 
-function admins(PlayerID)
-	et.trap_SendServerCommand(PlayerID, string.format("print \"^3 ID ^1:^3 Player                   ^1: ^3 Level ^1 : ^3 AdminName\n"))
-	et.trap_SendServerCommand(PlayerID, string.format("print \"^1----------------------------------------------------------------\n"))
-	local pteam = { "^1X" , "^4L" , " " }
-	local playercount = 0
-	local spa = 23
-	local adname = ""
-
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		guis = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "cl_guid" )
-		GUID = string.upper( guis )
-		local teamnumber = tonumber(et.gentity_get(i,"sess.sessionTeam"))
-		local cname = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "name" )
-		local nudge = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "cl_timenudge" )
-		local pitch = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "m_pitch" )
-		local name = string.lower(et.Q_CleanStr( cname ))
-		local namel = tonumber(string.len(name))-1
-		local namespa = spa - namel
-		local space = string.rep( " ", namespa)
-		local fps = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "com_maxfps" )
-		local sens = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "sensitivity" )
-		local fov = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "cg_fov" )
-		local pmove = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "pmove_fixed" )
-		local level = getAdminLevel(i)
-
-		adname = AdminName[GUID]
-
-		if getAdminLevel(i) == nil or getAdminLevel(i) == " " or getAdminLevel(i) < 1 then
-		else
-			if et.gentity_get(i,"pers.connected") ~= 2 then
-			else
-			et.trap_SendServerCommand(PlayerID, string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"',pteam[teamnumber], i, name, space, level, adname))
-			playercount = playercount + 1
-
---string.format('print "%2d : %6s : %s\n"',i, team, et.gentity_get(i,'pers.netname'))) 
-			end
-
-		end
-	end
-
-		et.trap_SendServerCommand(PlayerID, string.format("print \"\n^3 " ..playercount.. " ^7total admins\n"))
-return 1
-end
-
 function private_message(PlayerID,client,message) 
    local clientnum = ""
    local clientnum = tonumber(client) 
@@ -4216,6 +4172,7 @@ function et_ClientCommand(clientNum, command)
     local arg0 = string.lower(et.trap_Argv(0))
     local arg1 = string.lower(et.trap_Argv(1))
     local muted = et.gentity_get(clientNum, "sess.muted")
+    local cmd = string.lower(command)
 
     if muted == 0 then
         if arg0 == "say" then
@@ -4293,16 +4250,17 @@ function et_ClientCommand(clientNum, command)
     end
 
     if k_advplayers == 1 then
-        if string.lower(command) == "players" then
+        if cmd == "players" then
             advPlayers(clientNum)
             return 1
         end
 
-        if getAdminLevel(clientNum) >= 2 then
-            if string.lower(command) == "admins" then
-                admins(clientNum)
-                return 1
-            end
+        if getAdminLevel(clientNum) >= 2 and cmd == "admins" then
+            params         = {}
+            params.command = 'client'
+            params["arg1"] = clientNum
+            dofile(kmod_ng_path .. '/kmod/command/client/admins.lua')
+            return execute_command(params)
         end
     end
 
@@ -4350,7 +4308,7 @@ function et_ClientCommand(clientNum, command)
     end
 
     if k_advancedpms == 1 then
-        if string.lower(command) == "m" or string.lower(command) == "msg" or string.lower(command) == "pm" then
+        if cmd == "m" or cmd == "msg" or cmd == "pm" then
             if et.trap_Argv(1) == nil or et.trap_Argv(1) == "" or et.trap_Argv(1) == " " then
                 et.trap_SendServerCommand(clientNum, string.format("print \"Useage:  /m \[pname/ID\] \[message\]\n"))
             else
@@ -4361,7 +4319,7 @@ function et_ClientCommand(clientNum, command)
         end
     end
 
-    if string.lower(command) == "ma" or string.lower(command) == "pma" then
+    if cmd == "ma" or cmd == "pma" then
         for i = 0, clientsLimit, 1 do
             if getAdminLevel(i) >= 2 then
                 local name = et.gentity_get(clientNum, "pers.netname") 
@@ -4388,7 +4346,7 @@ function et_ClientCommand(clientNum, command)
         local name = et.gentity_get(clientNum, "pers.netname")
         local teamnumber = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
-        if string.lower(command) == "kill" then
+        if cmd == "kill" then
             if teamnumber ~= 3 then
                 if et.gentity_get(clientNum, "health") > 0 then
                     if selfkills[clientNum] < k_slashkills then
