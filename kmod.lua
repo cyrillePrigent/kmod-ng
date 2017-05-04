@@ -1019,6 +1019,20 @@ function loadSpreeRecord()
     et.trap_FS_FCloseFile(fd)
 end
 
+function setMapSpreeRecord(PlayerID, kills2)
+    local mapname = tostring(et.trap_Cvar_Get("mapname"))
+    local fdadm,len = et.trap_FS_FOpenFile("sprees/" .. mapname .. ".record", et.FS_WRITE)
+    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
+    local date = os.date("%x %I:%M:%S%p")
+    local kills = tonumber(kills2)
+
+    SPREE = kills .. "@" .. date .. "@" .. Name
+
+    et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
+    et.trap_FS_FCloseFile(fdadm)
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills on " .. mapname .."  ^7" .. tostring(oldmapspree) .. "\n")
+    loadmapspreerecord()
+end
 
 function ParseString(inputString)
 	local i = 1
@@ -1033,21 +1047,6 @@ end
 function floodprotector()
 	floodprotect = 1
 	fpProt = tonumber(mtime)
-end
-
-function mapspreerecord(PlayerID, kills2)
-	local mapname = tostring(et.trap_Cvar_Get("mapname"))
-	local fdadm,len = et.trap_FS_FOpenFile( "sprees/"..mapname..".record", et.FS_WRITE )
-	local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" ))
-	local date = os.date("%x %I:%M:%S%p")
-	local kills = tonumber(kills2)
-
-	SPREE = kills .. "@" .. date .. "@" .. Name
-
-	et.trap_FS_Write( SPREE, string.len(SPREE) ,fdadm )
-	et.trap_FS_FCloseFile( fdadm )
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" ..Name.. " ^7with^3 " ..kills.. "^7 kills on "..mapname.."  ^7" ..tostring(oldmapspree).. "\n" )
-	loadmapspreerecord()
 end
 
 function loadmapspreerecord()
@@ -2712,7 +2711,7 @@ function kills(victim, killer, meansOfDeath, weapon)
             end
 
             if killr[victim] > mapspreerecordkills then
-                mapspreerecord(victim, killr[victim])
+                setMapSpreeRecord(victim, killr[victim])
                 killr[victim] = 0
             else
                 killr[victim] = 0
@@ -2843,11 +2842,11 @@ function kills(victim, killer, meansOfDeath, weapon)
 
             if k_spreerecord == 1 then
                 if killr[victim] > spreerecordkills then
-                    spreerecord(victim, killr[victim])
+                    setSpreeRecord(victim, killr[victim])
                 end
 
                 if killr[victim] > mapspreerecordkills then
-                    mapspreerecord(victim, killr[victim])
+                    setMapSpreeRecord(victim, killr[victim])
                     killr[victim] = 0
                 else
                     killr[victim] = 0
@@ -2920,11 +2919,11 @@ function deaths(victim, killer, meansOfDeath, weapon)
 
     if k_spreerecord == 1 then
         if killr[victim] > spreerecordkills then
-            spreerecord(victim, killr[victim])
+            setSpreeRecord(victim, killr[victim])
         end
 
         if killr[victim] > mapspreerecordkills then
-            mapspreerecord(victim, killr[victim])
+            setMapSpreeRecord(victim, killr[victim])
             killr[victim] = 0
         else
             killr[victim] = 0
