@@ -653,65 +653,66 @@ function loadMutes()
 end
 
 function setMute(PlayerID, muteTime)
-	local time = math.ceil(muteTime)
-	local fdadm,len = et.trap_FS_FOpenFile( "mutes.cfg", et.FS_APPEND )
-	local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" ))
-	local IP = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-	s,e,IP = string.find(IP,"(%d+%.%d+%.%d+%.%d+)")
-	local dv = 0
+    local time = math.ceil(muteTime)
+    local fdadm,len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
+    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
+    local IP = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
+    s, e, IP = string.find(IP, "(%d+%.%d+%.%d+%.%d+)")
+    local dv = 0
 
-	if len == -1 then
-		confirm2 = 1
-		et.trap_FS_FCloseFile( fdadm )
-	else 
-		local fdread,length = et.trap_FS_FOpenFile( "mutes.cfg", et.FS_READ )
-		local n = 0
-		if length ~= 0 then
-			local filestr = et.trap_FS_Read( fdread, length )
-			for ip in string.gfind(filestr, "%-*%d+%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-				n = n + 1
-			end
-		end
-		et.trap_FS_FCloseFile( fdread )
+    if len == -1 then
+        confirm2 = 1
+        et.trap_FS_FCloseFile(fdadm)
+    else
+        local fdread, length = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+        local n = 0
+
+        if length ~= 0 then
+            local filestr = et.trap_FS_Read(fdread, length)
+
+            for ip in string.gfind(filestr, "%-*%d+%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
+                n = n + 1
+            end
+        end
+
+        et.trap_FS_FCloseFile(fdread)
+        -- Close the mutes file so that removeMute() can open the mutes.cfg
+        et.trap_FS_FCloseFile(fdadm)
+
+        for i = 0, n, 1 do
+            if chkIP[i] == IP then
+                dv = 1
+
+                if dv == 1 then
+                    removeMute(PlayerID)
+                end
+
+                break
+            end
+        end
 
 
-		et.trap_FS_FCloseFile( fdadm ) -- Close the mutes file so that removeMute() can open the mutes.cfg
+        if muted[PlayerID] > 0 or muted[PlayerID] == -1 then
+            confirm2 = 1
+        else
+            confirm2 = 0
+        end
+    end
 
-		for i=0, n, 1 do
-			if chkIP[i] == IP then
---				et.trap_FS_FCloseFile( fdadm )
-				dv = 1
+    if confirm2 == 1 then
+        fdadm, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
 
-				if dv == 1 then
-					removeMute(PlayerID)
-				end
-				break
-			end
-		end
+        if muted[PlayerID] ~= 0 then
+            ADMIN = time .. " - " .. IP .. " - " .. Name .. "\n"
+            confirm2 = 0
+            et.trap_FS_Write(ADMIN, string.len(ADMIN) ,fdadm)
+        else
+            loadMutes()
+        end
 
-
-		if muted[PlayerID] > 0 or muted[PlayerID] == -1 then
-			confirm2 = 1
-		else
-			confirm2 = 0
-		end
-	end
-	if confirm2 == 1 then
-		fdadm,len = et.trap_FS_FOpenFile( "mutes.cfg", et.FS_APPEND )
-		if muted[PlayerID] ~= 0 then
-			ADMIN = time .. " - " .. IP .. " - " .. Name .. "\n"
-			confirm2 = 0
-			et.trap_FS_Write( ADMIN, string.len(ADMIN) ,fdadm )
-		else
-			loadMutes()
-		end
-		et.trap_FS_FCloseFile( fdadm )
-		loadMutes()
---		return 1
-	else
---		et.trap_FS_FCloseFile( fdadm )
---		return 1
-	end
+        et.trap_FS_FCloseFile(fdadm)
+        loadMutes()
+    end
 end
 
 function MuteCheck(PlayerID)
