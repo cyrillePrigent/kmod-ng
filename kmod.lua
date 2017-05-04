@@ -1558,514 +1558,387 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
     params.say = say_parms
 
     local admin_req = k_maxAdminLevels + 1
+    local fd,len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
+    local lowBangCmd = string.lower(BangCommand)
 
-	local fd,len = et.trap_FS_FOpenFile( "commands.cfg", et.FS_READ )
-	if len > 0 then
-		local filestr = et.trap_FS_Read( fd, len )
-		for level,comm,str in string.gfind(filestr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
-			local strnumber = {}
-			local strnumber = ParseString(str)
+    if len > 0 then
+        local filestr = et.trap_FS_Read(fd, len)
 
-			local comm2 = k_commandprefix..comm
-			local t = tonumber(et.gentity_get(PlayerID,"sess.sessionTeam"))
-			local c = tonumber(et.gentity_get(PlayerID,"sess.latchPlayerType"))
-			local player_last_victim_name = ""
-			local player_last_killer_name = ""
-			local player_last_victim_cname = ""
-			local player_last_killer_cname = ""
-			if playerlastkilled[PlayerID] == 1022 then
-				player_last_victim_name = "NO ONE"
-				player_last_victim_cname = "NO ONE"
-			else
-				player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerlastkilled[PlayerID],"pers.netname"))
-				player_last_victim_cname = et.gentity_get(playerlastkilled[PlayerID],"pers.netname")
-			end
-			if playerwhokilled[PlayerID] == 1022 then
-				player_last_killer_name = "NO ONE"
-				player_last_killer_cname = "NO ONE"
-			else
-				player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerwhokilled[PlayerID],"pers.netname"))
-				player_last_killer_cname = et.gentity_get(playerwhokilled[PlayerID],"pers.netname")
-			end
+        for level,comm,str in string.gfind(filestr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
+            local strnumber = {}
+            local strnumber = ParseString(str)
 
-			local pnameID = part2id(Cvar1)
-			if not pnameID then
-				pnameID = 1021
-			end
-			local PBpnameID = pnameID + 1
-			local PBID = PlayerID + 1
+            local comm2 = k_commandprefix .. comm
+            local t = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+            local c = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
+            local player_last_victim_name = ""
+            local player_last_killer_name = ""
+            local player_last_victim_cname = ""
+            local player_last_killer_cname = ""
 
-			local randomC = randomClientFinder()
-			local randomTeam = team[tonumber(et.gentity_get(randomC,"sess.sessionTeam"))]
-			local randomCName = et.gentity_get(randomC,"pers.netname")
-			local randomName = et.Q_CleanStr(et.gentity_get(randomC,"pers.netname"))
-			local randomClass = class[tonumber(et.gentity_get(randomC,"sess.latchPlayerType"))]
+            if playerlastkilled[PlayerID] == 1022 then
+                player_last_victim_name = "NO ONE"
+                player_last_victim_cname = "NO ONE"
+            else
+                player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerlastkilled[PlayerID], "pers.netname"))
+                player_last_victim_cname = et.gentity_get(playerlastkilled[PlayerID], "pers.netname")
+            end
 
-			local str = string.gsub(str, "<CLIENT_ID>", PlayerID)
-			local str = string.gsub(str, "<GUID>", et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-			local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(PlayerID,"pers.netname"))
-			local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(PlayerID))
-			local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(PlayerID,"pers.netname")))
-			local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
-			local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
-			local str = string.gsub(str, "<PARAMETER>", Cvar1..Cvar2)
-			local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[PlayerID])
-			local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
-			local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
-			local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedwithweapv[PlayerID])
-			local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerlastkilled[PlayerID])
-			local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
-			local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
-			local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedwithweapk[PlayerID])
-			local str = string.gsub(str, "<PNAME2ID>", pnameID)
-			local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
-			local str = string.gsub(str, "<PB_ID>", PBID)
-			local str = string.gsub(str, "<RANDOM_ID>", randomC)
-			local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
-			local str = string.gsub(str, "<RANDOM_NAME>", randomName)
-			local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
-			local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
-			local teamnumber = tonumber(et.gentity_get(PlayerID,"sess.sessionTeam"))
-			local classnumber = tonumber(et.gentity_get(PlayerID,"sess.latchPlayerType"))
+            if playerwhokilled[PlayerID] == 1022 then
+                player_last_killer_name = "NO ONE"
+                player_last_killer_cname = "NO ONE"
+            else
+                player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerwhokilled[PlayerID], "pers.netname"))
+                player_last_killer_cname = et.gentity_get(playerwhokilled[PlayerID], "pers.netname")
+            end
 
+            local pnameID = part2id(Cvar1)
 
-			if (string.lower(BangCommand) == comm2 ) then
-				if tonumber(level) <= getAdminLevel(PlayerID) then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, "".. str .. "\n" )
-					if strnumber[1] == "forcecvar" then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3etpro svcmd: ^7forcing client cvar ["..strnumber[2].."] to [".. Cvar1 .."]\n" )
-					end						
-				else
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^7Insufficient Admin status\n" )
-				end
-			end
-		end
-	end
-	et.trap_FS_FCloseFile( fd )
+            if not pnameID then
+                pnameID = 1021
+            end
+
+            local PBpnameID = pnameID + 1
+            local PBID = PlayerID + 1
+
+            local randomC = randomClientFinder()
+            local randomTeam = team[tonumber(et.gentity_get(randomC, "sess.sessionTeam"))]
+            local randomCName = et.gentity_get(randomC, "pers.netname")
+            local randomName = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
+            local randomClass = class[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
+
+            local str = string.gsub(str, "<CLIENT_ID>", PlayerID)
+            local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+            local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(PlayerID, "pers.netname"))
+            local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(PlayerID))
+            local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname")))
+            local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
+            local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
+            local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedwithweapv[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerlastkilled[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedwithweapk[PlayerID])
+            local str = string.gsub(str, "<PNAME2ID>", pnameID)
+            local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
+            local str = string.gsub(str, "<PB_ID>", PBID)
+            local str = string.gsub(str, "<RANDOM_ID>", randomC)
+            local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
+            local str = string.gsub(str, "<RANDOM_NAME>", randomName)
+            local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
+            local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
+            local teamnumber = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+            local classnumber = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
 
 
-	for i=0, k_maxAdminLevels, 1 do
-		for q=1, lvlsc[i], 1 do
---			if type(lvls[i][q]) ~= "string" then
---				et.G_Print("i and q = " .. i .. " and " .. q .. " = nil\n")
---			else
---				et.G_Print("i and q = " .. i .. " and " .. q .. " = " .. lvls[i][q] .. "\n")
---			end
---et.G_Print(lvls[i][q] .. " and it is " .. string.len(lvls[i][q]) .. " long\n")
---et.G_Print(BangCommand .. " and it is " .. string.len(BangCommand) .. " long\n")
-			if lvls[i][q] == BangCommand then
-				admin_req = i
-				break
-			end
-		end
-	end
+            if lowBangCmd == comm2 then
+                if tonumber(level) <= getAdminLevel(PlayerID) then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, str .. "\n")
 
---et.G_Print("******************************    " .. getAdminLevel(PlayerID) .. "\n")
---et.G_Print("******************************    " .. admin_req .. "\n")
+                    if strnumber[1] == "forcecvar" then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3etpro svcmd: ^7forcing client cvar [" .. strnumber[2] .. "] to [" .. Cvar1 .. "]\n")
+                    end
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^7Insufficient Admin status\n")
+                end
+            end
+        end
+    end
 
-	if getAdminLevel(PlayerID) >= admin_req then
-		if (string.lower(BangCommand) == k_commandprefix.."admintest") then
-			adminStatus(PlayerID)
-        elseif (string.lower(BangCommand) == k_commandprefix .. "time") then
+    et.trap_FS_FCloseFile(fd)
+
+
+    for i = 0, k_maxAdminLevels, 1 do
+        for q = 1, lvlsc[i], 1 do
+            if lvls[i][q] == BangCommand then
+                admin_req = i
+                break
+            end
+        end
+    end
+
+    if getAdminLevel(PlayerID) >= admin_req then
+        if lowBangCmd == k_commandprefix .. "admintest" then
+            adminStatus(PlayerID)
+        elseif lowBangCmd == k_commandprefix .. "time" then
             dofile(kmod_ng_path .. '/kmod/command/time.lua')
             execute_command(params)
-        elseif (string.lower(BangCommand) == k_commandprefix .. "date") then
+        elseif lowBangCmd == k_commandprefix .. "date" then
             dofile(kmod_ng_path .. '/kmod/command/date.lua')
             execute_command(params)
-		elseif (string.lower(BangCommand) == k_commandprefix.."spree_record" ) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldspree2) .."\n" )
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ".. tostring(oldmapspree2) .."\n" )
-		elseif (string.lower(BangCommand) == k_commandprefix .. "spec999") then
+        elseif lowBangCmd == k_commandprefix.."spree_record" then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " " .. tostring(oldspree2) .. "\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " " .. tostring(oldmapspree2) .. "\n")
+        elseif lowBangCmd == k_commandprefix .. "spec999" then
             dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
             execute_command(params)
-		elseif (string.lower(BangCommand) == k_commandprefix.."tk_index" ) then
-			local status = ""
-			local name = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" )
-			if teamkillr[PlayerID] < -1 then
-				status = "^1NOT OK"
-			else
-				status = "^2OK"
-			end
+        elseif lowBangCmd == k_commandprefix .. "tk_index" then
+            local status = ""
+            local name = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name")
 
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Tk_index: ^7" .. name .. "^7 has a tk index of ^3" ..teamkillr[PlayerID] .. "^7 \[" .. status .. "^7\] \n" )
-        elseif string.lower(BangCommand) == k_commandprefix .. "listcmds" then
+            if teamkillr[PlayerID] < -1 then
+                status = "^1NOT OK"
+            else
+                status = "^2OK"
+            end
+
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Tk_index: ^7" .. name .. "^7 has a tk index of ^3" .. teamkillr[PlayerID] .. "^7 \[" .. status .. "^7\] \n")
+        elseif lowBangCmd == k_commandprefix .. "listcmds" then
             dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
             execute_command(params)
-		elseif (string.lower(BangCommand) == k_commandprefix.."durt" ) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." k_panzersperteam = " .. k_panzersperteam .. " " .. k_panzersperteam2 .. "\n" )
-		end
---	end
+        elseif lowBangCmd == k_commandprefix .. "durt" then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " k_panzersperteam = " .. k_panzersperteam .. " " .. k_panzersperteam2 .. "\n")
+        end
 
---Admin commands
-	--level 3
-  if (string.lower(BangCommand) == k_commandprefix.."gib") then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gib:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."slap") then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix .. "setlevel") then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."readconfig" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3ReadConfig:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."spree_restart" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Spree reset:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."ban" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Ban:^7 \[partname/id#\] \[reason\]\n" )
-		else
-			commandSaid = true
-			ban = true
-			fullcom = "Ban"
-			comds(Cvar1, Cvar2)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Ban:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."getip" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getip:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			getip = true
-			fullcom = "Getip"
-			comds(Cvar1, PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getip:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."getguid" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getguid:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			getguid = true
-			fullcom = "Getguid"
-			comds(Cvar1, PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getguid:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."makeshoutcaster" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makeshoutcaster:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			makeshoutcaster = true
-			fullcom = "Makeshoutcaster"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makeshoutcaster:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."removeshoutcaster" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removeshoutcaster:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			removeshoutcaster = true
-			fullcom = "Removeshoutcaster"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removeshoutcaster:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."makereferee" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makereferee:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			makereferee = true
-			fullcom = "Makereferee"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makereferee:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."removereferee" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removereferee:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			removereferee = true
-			fullcom = "Removereferee"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removereferee:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."gravity" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 Changes the gravity \[default = 800\]\n" )
-		else
-			local grav = tonumber(Cvar1)
-			if grav then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_gravity " .. grav .. "\n" )
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 Gravity has been changed to " .. grav .. "\n" )
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 Please enter in only numbers\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."knifeonly" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7 Disable or enable g_knifeonly \[0-1\]\n" )
-		else
-			local knife = tonumber(Cvar1)
-			if knife >= 0 and knife <= 1 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_knifeonly " .. knife .. "\n" )
-				if knife == 1 then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7Knifeonly has been Enabled\n" )
-				else
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7Knifeonly has been Disabled\n" )
-				end
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7 Valid values are \[0-1\]\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."speed" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Changes game speed \[default = 320\]\n" )
-		else
-			local speed2 = tonumber(Cvar1)
-			if speed then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_speed " .. speed2 .. "\n" )
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Game speed has been changed to " .. speed2 .. "\n" )
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Please enter in only numbers\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."knockback" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Changes knockback \[default = 1000\]\n" )
-		else
-			local knock = tonumber(Cvar1)
-			if knock then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_knockback " .. knock .. "\n" )
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Knockback has been changed to " .. knock .. "\n" )
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Please enter in only numbers\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."cheats" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Disable or enable cheats \[0-1\]\n" )
-		else
-			local cheat = tonumber(Cvar1)
-			if cheat >= 0 and cheat <= 1 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar sv_cheats " .. cheat .. "\n" )
-				if cheat == 1 then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Enabled\n" )
-				else
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Disabled\n" )
-				end
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Valid values are \[0-1\]\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."laser" ) then
---	if getAdminLevel(PlayerID) == 3 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Disable or enable g_debugbullets \[0-1\]\n" )
-		else
-			local laser = tonumber(Cvar1)
-			if laser >= 0 and laser <= 1 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar g_debugbullets " .. laser .. "\n" )
-				if laser == 1 then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Enabled\n" )
-				else
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Disabled\n" )
-				end
-			else
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Valid values are \[0-1\]\n" )
-			end
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."crazygravity" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."panzerwar" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Panzerwar:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."frenzy" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."grenadewar" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Grenadewar:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."sniperwar" ) then
---	if getAdminLevel(PlayerID) == 3 then
-        dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
-        execute_command(params)
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Sniperwar:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  end
+        if lowBangCmd == k_commandprefix .. "gib" then
+            dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "slap" then
+            dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "setlevel" then
+            dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "readconfig" then
+            dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "spree_restart" then
+            dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "ban" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Ban:^7 \[partname/id#\] \[reason\]\n")
+            else
+                commandSaid = true
+                ban = true
+                fullcom = "Ban"
+                comds(Cvar1, Cvar2)
+            end
+        elseif lowBangCmd == k_commandprefix .. "getip" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Getip:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                getip = true
+                fullcom = "Getip"
+                comds(Cvar1, PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "getguid" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Getguid:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                getguid = true
+                fullcom = "Getguid"
+                comds(Cvar1, PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Makeshoutcaster:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                makeshoutcaster = true
+                fullcom = "Makeshoutcaster"
+                comds(Cvar1)
+            end
+        elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Removeshoutcaster:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                removeshoutcaster = true
+                fullcom = "Removeshoutcaster"
+                comds(Cvar1)
+            end
+        elseif lowBangCmd == k_commandprefix .. "makereferee" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Makereferee:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                makereferee = true
+                fullcom = "Makereferee"
+                comds(Cvar1)
+            end
+        elseif lowBangCmd == k_commandprefix .. "removereferee" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Removereferee:^7 \[partname/id#\]\n")
+            else
+                commandSaid = true
+                removereferee = true
+                fullcom = "Removereferee"
+                comds(Cvar1)
+            end
+        elseif lowBangCmd == k_commandprefix .. "gravity" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Changes the gravity \[default = 800\]\n")
+            else
+                local grav = tonumber(Cvar1)
+                if grav then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity " .. grav .. "\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Gravity has been changed to " .. grav .. "\n")
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Please enter in only numbers\n")
+                end
+            end
+        elseif lowBangCmd == k_commandprefix .. "knifeonly" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7 Disable or enable g_knifeonly \[0-1\]\n")
+            else
+                local knife = tonumber(Cvar1)
 
+                if knife >= 0 and knife <= 1 then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_knifeonly " .. knife .. "\n" )
 
+                    if knife == 1 then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7Knifeonly has been Enabled\n")
+                    else
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7Knifeonly has been Disabled\n")
+                    end
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7 Valid values are \[0-1\]\n")
+                end
+            end
+        elseif lowBangCmd == k_commandprefix .. "speed" then
+                if Cvarct < 3 then
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Changes game speed \[default = 320\]\n" )
+                else
+                    local speed2 = tonumber(Cvar1)
+                    if speed then
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_speed " .. speed2 .. "\n" )
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Game speed has been changed to " .. speed2 .. "\n" )
+                    else
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Please enter in only numbers\n" )
+                    end
+                end
+        elseif lowBangCmd == k_commandprefix .. "knockback" then
+                if Cvarct < 3 then
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Changes knockback \[default = 1000\]\n" )
+                else
+                    local knock = tonumber(Cvar1)
+                    if knock then
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_knockback " .. knock .. "\n" )
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Knockback has been changed to " .. knock .. "\n" )
+                    else
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Please enter in only numbers\n" )
+                    end
+                end
+        elseif lowBangCmd == k_commandprefix .. "cheats" then
+                if Cvarct < 3 then
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Disable or enable cheats \[0-1\]\n" )
+                else
+                    local cheat = tonumber(Cvar1)
+                    if cheat >= 0 and cheat <= 1 then
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar sv_cheats " .. cheat .. "\n" )
+                        if cheat == 1 then
+                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Enabled\n" )
+                        else
+                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Disabled\n" )
+                        end
+                    else
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Valid values are \[0-1\]\n" )
+                    end
+                end
+        elseif lowBangCmd == k_commandprefix .. "laser" then
+                if Cvarct < 3 then
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Disable or enable g_debugbullets \[0-1\]\n" )
+                else
+                    local laser = tonumber(Cvar1)
+                    if laser >= 0 and laser <= 1 then
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar g_debugbullets " .. laser .. "\n" )
+                        if laser == 1 then
+                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Enabled\n" )
+                        else
+                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Disabled\n" )
+                        end
+                    else
+                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Valid values are \[0-1\]\n" )
+                    end
+                end
+        elseif lowBangCmd == k_commandprefix .. "crazygravity" then
+            dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "panzerwar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "frenzy" then
+            dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "grenadewar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "sniperwar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
+            execute_command(params)
+        end
 
-
-
-	--level 2
-  if (string.lower(BangCommand) == k_commandprefix.."kick" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n" )
-		else
-			commandSaid = true
-			kick = true
-			fullcom = "Kick"
-			comds(Cvar1, Cvar2, PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."warn" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 \[partname/id#\] \[reason\]\n" )
-		else
-			commandSaid = true
-			warn = true
-			fullcom = "Warn"
-			comds(Cvar1, Cvar2, PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."mute" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			mute = true
-			fullcom = "Mute"
-			comds(Cvar1, "dv", PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."pmute" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			pmute = true
-			fullcom = "Pmute"
-			comds(Cvar1, "dv", PlayerID)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."timelimit" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		local timel = tonumber(Cvar1)
-		if timel then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "timelimit " .. timel .. "\n" )
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Timelimit has been changed to " .. timel .. "\n" )
-		else
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Please enter in only numbers\n" )
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unlock:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."unmute" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			unmute = true
-			fullcom = "Unmute"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  elseif (string.lower(BangCommand) == k_commandprefix.."finger" ) then
---	if getAdminLevel(PlayerID) >= 2 then
-		if Cvarct < 3 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger:^7 \[partname/id#\]\n" )
-		else
-			commandSaid = true
-			finger = true
-			fullcom = "Finger"
-			comds(Cvar1)
-		end
---	else
---		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Map_restart:^7 command unavailible due to lack of required admin status!\n" )
---	end
-  end
-end
+        if lowBangCmd == k_commandprefix .. "kick" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n" )
+            else
+                commandSaid = true
+                kick = true
+                fullcom = "Kick"
+                comds(Cvar1, Cvar2, PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "warn" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 \[partname/id#\] \[reason\]\n" )
+            else
+                commandSaid = true
+                warn = true
+                fullcom = "Warn"
+                comds(Cvar1, Cvar2, PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "mute" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 \[partname/id#\]\n" )
+            else
+                commandSaid = true
+                mute = true
+                fullcom = "Mute"
+                comds(Cvar1, "dv", PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "pmute" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 \[partname/id#\]\n" )
+            else
+                commandSaid = true
+                pmute = true
+                fullcom = "Pmute"
+                comds(Cvar1, "dv", PlayerID)
+            end
+        elseif lowBangCmd == k_commandprefix .. "timelimit" then
+            local timel = tonumber(Cvar1)
+            if timel then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, "timelimit " .. timel .. "\n" )
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Timelimit has been changed to " .. timel .. "\n" )
+            else
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Please enter in only numbers\n" )
+            end
+        elseif lowBangCmd == k_commandprefix .. "unmute" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 \[partname/id#\]\n" )
+            else
+                commandSaid = true
+                unmute = true
+                fullcom = "Unmute"
+                comds(Cvar1)
+            end
+        elseif lowBangCmd == k_commandprefix .. "finger" then
+            if Cvarct < 3 then
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger:^7 \[partname/id#\]\n" )
+            else
+                commandSaid = true
+                finger = true
+                fullcom = "Finger"
+                comds(Cvar1)
+            end
+        end
+    end
 end
 
 function et.G_ClientSound(clientnum, soundfile)
