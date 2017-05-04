@@ -753,6 +753,88 @@ function checkMute(PlayerID)
     et.trap_FS_FCloseFile(fd)
 end
 
+-- Admin function
+
+function setAdmin(PlayerID, levelv)
+    -- gets file length
+    local fdadm,len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
+    et.trap_FS_FCloseFile(fdadm)
+    local level = tonumber(levelv)
+    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
+    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+    local dv = 0
+    local dvi = 0
+
+    if len == -1 then
+        confirm = 1
+    else
+        for i = 0, tonumber(table.getn(chkGUID)), 1 do
+            if chkGUID[i] == GUID then
+                dv = 1
+
+                if dv == 1 then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
+                    adminchange(PlayerID, level)
+                end
+
+                break
+            end
+
+            dvi = i
+        end
+
+        if dvi == tonumber(table.getn(chkGUID)) then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
+            confirm = 1
+        end
+    end
+
+    local fdadm, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
+
+    if confirm == 1 then
+        for i = 0, k_maxAdminLevels, 1 do
+            if level == 0 then
+                if sldv == 0 then
+                    if commandSaid then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a regular ^7user!\n")
+                        commandSaid = false
+                    else
+                        et.G_Print(Name .. "^7 is now a regular ^7user!\n")
+                        confirm = 0
+                    end
+                end
+
+                loadAdmins()
+                return
+            elseif level == i and level > 0 then
+                for q = 0, i, 1 do
+                    AdminLV[q][GUID] = true
+                    ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
+                    confirm = 0
+                end
+
+                break
+            end
+        end
+
+        et.trap_FS_Write(ADMIN, string.len(ADMIN), fdadm)
+        et.trap_FS_FCloseFile(fdadm)
+
+        if commandSaid then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+            commandSaid = false
+        else
+            et.G_Print(Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+        end
+
+        loadAdmins()
+        return 1
+    else
+        et.trap_FS_FCloseFile(fdadm)
+        return 1
+    end
+end
+
 function ParseString(inputString)
 	local i = 1
 	local t = {}
@@ -901,113 +983,6 @@ function getsetlvlidfname(name)
    else
 	return slot
    end
-end
-
-function setAdmin(PlayerID, levelv)
-	-- gets file length
-	local fdadm,len = et.trap_FS_FOpenFile( "shrubbot.cfg", et.FS_APPEND )
-	et.trap_FS_FCloseFile( fdadm )
-	local level = tonumber(levelv)
-	local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" ))
-	local GUID = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-	local dv = 0
-	local dvi = 0
-
-	if len == -1 then
-		confirm = 1
-	else 
-		for i=0, tonumber(table.getn(chkGUID)), 1 do
-			if chkGUID[i] == GUID then
---				et.trap_FS_FCloseFile( fdadm )
-				dv = 1
-
-				if dv == 1 then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay changing admin!\n" )
-					adminchange(PlayerID, level)
-				end
-				break
-			end
-				dvi = i
-		end
-		if dvi == tonumber(table.getn(chkGUID)) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay setting admin!\n" )
-			confirm = 1
-		end
-	end
-
-	local fdadm,len = et.trap_FS_FOpenFile( "shrubbot.cfg", et.FS_APPEND )
-
-if confirm == 1 then
-	for i=0, k_maxAdminLevels, 1 do
-		if level == 0 then
-			if sldv == 0 then
-				if commandSaid then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7" .. Name .. "^7 is now a regular ^7user!\n" )
-	  				commandSaid = false
-				else
-					et.G_Print( Name .. "^7 is now a regular ^7user!\n" )
-					confirm = 0
-				end
-			end
-			loadAdmins()
-			return
-		elseif level == i and level > 0 then
-			for q=0, i, 1 do
-				AdminLV[q][GUID] = true
-				--AdminLV0[GUID] = true
-				--AdminLV1[GUID] = true
-				ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
-				confirm = 0
-			end
-			break
-		end
-	end
-
---	if level == 0 then
---		if sldv == 0 then
---			if commandSaid then
---				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7" .. Name .. "^7 is now a regular ^7user!\n" )
---	  			commandSaid = false
---			else
---				et.G_Print( Name .. "^7 is now a regular ^7user!\n" )
---				confirm = 0
---			end
---		end
---		loadAdmins()
---		return
---	elseif level == 1 then
---		AdminLV0[GUID] = true
---		AdminLV1[GUID] = true
---		ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
---		confirm = 0
---	elseif level == 2 then
---		AdminLV0[GUID] = true
---		AdminLV1[GUID] = true
---		AdminLV2[GUID] = true
---		ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
---		confirm = 0
---	elseif level == 3 then
---		AdminLV0[GUID] = true
---		AdminLV1[GUID] = true
---		AdminLV2[GUID] = true
---		AdminLV3[GUID] = true
---		ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
---		confirm = 0
---	end
-	et.trap_FS_Write( ADMIN, string.len(ADMIN) ,fdadm )
-	et.trap_FS_FCloseFile( fdadm )
-	if commandSaid then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel: ^7" .. Name .. "^7 is now a level ^1" .. level .. " ^7user!\n" )
-  		commandSaid = false
-	else
-		et.G_Print( Name .. "^7 is now a level ^1" .. level .. " ^7user!\n" )
-	end
-	loadAdmins()
-	return 1
-else
-	et.trap_FS_FCloseFile( fdadm )
-	return 1
-end
 end
 
 function addAdmin(GUID)
