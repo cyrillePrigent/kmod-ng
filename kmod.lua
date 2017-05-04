@@ -1081,11 +1081,6 @@ function ParseString(inputString)
 	return t
 end
 
-function floodprotector()
-	floodprotect = 1
-	fpProt = tonumber(mtime)
-end
-
 function getPlayernameToId(name)
     local i = 0
     local slot = nil
