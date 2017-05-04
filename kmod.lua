@@ -1527,12 +1527,6 @@ function comds(client, cvar1, caller)
 		end
 		pmute = false
 		commandSaid = false
- 	elseif unmute then
-		local name = et.gentity_get(clientnum,"pers.netname")
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref unmute " .. clientnum .. "\n" )
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Unmute: ^7" ..name.. " ^7has been unmuted\n" )
-		unmute = false
-		commandSaid = false
  	elseif putaxis then
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref putaxis " .. clientnum .. "\n" )
 		putaxis = false
@@ -1545,8 +1539,6 @@ function comds(client, cvar1, caller)
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. clientnum .. "\n" )
 		putspec = false
 		commandSaid = false
- 	elseif finger then
-		adminStatus(clientnum)
  	elseif getip then
 		local IP   = et.Info_ValueForKey( et.trap_GetUserinfo( clientnum ), "ip" )
 		local cvar1 = tonumber(cvar1)
@@ -1935,23 +1927,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Please enter in only numbers\n" )
             end
         elseif lowBangCmd == k_commandprefix .. "unmute" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 \[partname/id#\]\n" )
-            else
-                commandSaid = true
-                unmute = true
-                fullcom = "Unmute"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/unmute.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "finger" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger:^7 \[partname/id#\]\n" )
-            else
-                commandSaid = true
-                finger = true
-                fullcom = "Finger"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/finger.lua')
+            execute_command(params)
         end
     end
 end
