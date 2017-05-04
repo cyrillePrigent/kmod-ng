@@ -1136,72 +1136,6 @@ function ModInfo(PlayerID)
 	et.trap_SendServerCommand( PlayerID,"cpm \"Created by Clutch152.\n\"")
 end
 
-function private_message(PlayerID,client,message) 
-   local clientnum = ""
-   local clientnum = tonumber(client) 
-   if clientnum then 
-      if (clientnum >= 0) and (clientnum < 64) then 
-         if et.gentity_get(clientnum,"pers.connected") ~= 2 then 
-			if commandSaid then
-				et.trap_SendServerCommand(PlayerID, string.format("print \"There is no client associated with this slot number\n"))
-				commandSaid = false
-			else
-				et.G_Print("There is no client associated with this slot number\n")
-			end
-         return 
-         end 
-      else    
-		if commandSaid then          
-			et.trap_SendServerCommand(PlayerID, string.format("print \"Please enter a slot number between 0 and 63\n"))
-			commandSaid = false
-		else
-			et.G_Print("Please enter a slot number between 0 and 63\n")
-		end
-      return 
-      end 
-   else 
-      if client then 
-	   s,e=string.find(client, client)
-	   if e <= 2 then
-			if commandSaid then
-				et.trap_SendServerCommand(PlayerID, string.format("print \"Player name requires more than 2 characters\n"))
-				commandSaid = false
-			else
-				et.G_Print("Player name requires more than 2 characters\n")
-			end
-	   return
-	   else
-         	clientnum = name2IDPM(client)
-	   end
-      end 
-         if not clientnum then
-		if commandSaid then
-			et.trap_SendServerCommand(PlayerID, string.format("print \"Try name again or use slot number\n"))
-			commandSaid = false
-		else
-			et.G_Print("Try name again or use slot number\n")
-		end
-         return 
-         end 
-   end 
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local rname = et.gentity_get(clientnum,"pers.netname")
-		if PlayerID == 1022 then
-			name = "^1SERVER"
-		end
-	   if commandSaid then
-		if PlayerID ~= 1022 then
-			et.trap_SendServerCommand(PlayerID, ("b 8 \"^dPrivate message sent to "..rname.."^d --> ^3" .. message .. "^7"))
-		   	et.G_ClientSound(PlayerID, pmsound)
-		end
-	      commandSaid = false
-	   else 
-	  	et.G_Print("Private message sent to "..rname.."^d --> ^3" .. message .. "^7\n")
-	   end
-	   et.trap_SendServerCommand(clientnum, ("b 8 \"^dPrivate message from "..name.."^d --> ^3" .. message .. "^7"))
-	   et.G_ClientSound(clientnum, pmsound)
-end 
-
 function name2IDPM(name) 
    local i = 0
    local slot = nil
@@ -3995,9 +3929,14 @@ function et_ClientCommand(clientNum, command)
             if et.trap_Argv(1) == nil or et.trap_Argv(1) == "" or et.trap_Argv(1) == " " then
                 et.trap_SendServerCommand(clientNum, string.format("print \"Useage:  /m \[pname/ID\] \[message\]\n"))
             else
-                commandSaid = true
-                private_message(clientNum, et.trap_Argv(1), et.ConcatArgs(2))
-                return 1
+                params         = {}
+                params.command = 'client'
+                params.commandSaid = true
+                params["arg1"] = et.trap_Argv(1)
+                params["arg2"] = clientNum
+                params["arg3"] = et.ConcatArgs(2)
+                dofile(kmod_ng_path .. '/kmod/command/both/private_message.lua')
+                return execute_command(params)
             end
         end
     end
@@ -4135,7 +4074,10 @@ function et_ConsoleCommand()
                 et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")
                 return 1
             else
-                private_message(1022, et.trap_Argv(1), et.ConcatArgs(2))
+                params["arg2"] = 1022
+                params["arg3"] = et.ConcatArgs(2)
+                dofile(kmod_ng_path .. '/kmod/command/both/private_message.lua')
+                return execute_command(params)
             end
 
             if k_logchat == 1 then
