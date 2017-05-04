@@ -2412,423 +2412,6 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 end
 end
 
-function kills(victim, killer, meansOfDeath, weapon)
-    weapon = getMeansOfDeathName(meansOfDeath)
-
-	local kil = tonumber(killer)
-	local killername = ""
-
-	victimname=et.Info_ValueForKey( et.trap_GetUserinfo( victim ), "name" )
-	playerlastkilled[killer] = victim
-	killedwithweapk[killer] = tostring(weapon)
-	local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam")) 
-	local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
-
-	if killer == 1022 then
-		killername="The World"
-		if k_sprees == 1 then
-			if gibbed[victim] == 0 then
-				if (killingspree[victim]>=5) then
-					local str = string.gsub(k_end_message3, "#victim#", victimname)
-					local str = string.gsub(str, "#kills#", killingspree[victim])
-					local str = string.gsub(str, "#killer#", killername)
-
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-					killingspree[victim]=0
-				else
-					killingspree[victim]=0
-				end
-			else
-				gibbed[victim] = 0
-			end
-		end
-
-		if k_spreerecord == 1 then
-			if killr[victim] > spreerecordkills then
-				spreerecord(victim, killr[victim])
-				--killr[victim] = 0
-			else
-				--killr[victim] = 0
-			end
-			if killr[victim] > mapspreerecordkills then
-				mapspreerecord(victim, killr[victim])
-				killr[victim] = 0
-			else
-				killr[victim] = 0
-			end
-		end
-
-
---		multikill[victim]=0
-		flakmonkey[victim]=0
-	else
-		killername=et.Info_ValueForKey( et.trap_GetUserinfo( killer ), "name" )
-	end
-
-	if (killer~=victim) then
-		if k_sprees == 1 then
-			deathspree[killer]=0
-		end
-	else
-	end
-
-if Gamestate == 0 then
-	if k_teamkillrestriction == 1 then
-		if victimteam == killerteam and killer ~= victim and killer ~= 1022 then
-			if getAdminLevel(killer) < k_tk_protect then
-
-				local warning = (k_tklimit_low + 1)
-				local pbkiller = killer + 1
-				if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 or meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 57 or meansOfDeath == 30  or meansOfDeath == 27 or meansOfDeath == 49 or meansOfDeath == 3 then
-					teamkillr[killer] = teamkillr[killer] - 0.75
-				elseif meansOfDeath == 30  or meansOfDeath == 27 then
-					teamkillr[killer] = teamkillr[killer] - 0.65
-				elseif meansOfDeath == 45 then    -- Mines do nothing!
-				else
-					teamkillr[killer] = teamkillr[killer] - 1
-				end
-				if warning > teamkillr[killer] and k_tklimit_low < teamkillr[killer] then
-					if k_advancedpms == 1 then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "m2 " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n" )
-						et.G_ClientSound(killer, pmsound)
-					else
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "m " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n" )
-					end
-				elseif teamkillr[killer] <= k_tklimit_low then
-					et.trap_SendConsoleCommand( et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n" )
-				end
-			end
-		else
-			if killer ~= victim then
-				if killer ~= 1022 then
-					teamkillr[killer] = teamkillr[killer] + 1
-					if teamkillr[killer] > k_tklimit_high then
-						teamkillr[killer] = k_tklimit_high
-					end
-				end
-			end
-		end
-	end
-end
-
-
-	
-if k_multikills == 1 then
-	if killer ~= victim and victimteam ~= killerteam and killer ~= 1022 then
-		local dvtime = (k_multikill_time * 1000)
-
-		multikill[killer]=multikill[killer]+1
-
-		if (multikill[killer]==1) then 
-			kill1[killer]=mtime
-
-		elseif (multikill[killer]==2) then 
-			kill2[killer]=mtime
-			local mktime=((kill2[killer]-kill1[killer])/1000)
-
-			if ((kill2[killer]-kill1[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message1, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, doublekillsound)
-					else
-						et.G_globalSound(doublekillsound) 
-					end
-				end
-			else 
-				multikill[killer]=0
-				multikill[killer]=multikill[killer]+1 
-				kill1[killer]=mtime
-			end 
-		elseif (multikill[killer]==3) then 
-			kill3[killer]=tonumber(mtime)
-			local mktime=((kill3[killer]-kill2[killer])/1000) 
-
-			if ((kill3[killer]-kill2[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message2, "#killer#", killername)
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, multikillsound)
-					else
-						et.G_globalSound(multikillsound) 
-					end
-				end
-			else 
-				multikill[killer]=0 
-				multikill[killer]=multikill[killer]+1
-				kill1[killer]=mtime
-			end
-		elseif (multikill[killer]==4) then 
-			kill4[killer]=tonumber(mtime)
-			local mktime=((kill4[killer]-kill3[killer])/1000) 
-
-			if ((kill4[killer]-kill3[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message3, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, megakillsound)
-					else
-						et.G_globalSound(megakillsound) 
-					end
-				end
-			else 
-				multikill[killer]=0 
-				multikill[killer]=multikill[killer]+1
-				kill1[killer]=mtime
-			end
-		elseif (multikill[killer]==5) then 
-			kill5[killer]=tonumber(mtime)
-			local mktime=((kill5[killer]-kill4[killer])/1000) 
-
-			if ((kill5[killer]-kill4[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message4, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, ultrakillsound)
-					else
-						et.G_globalSound(ultrakillsound) 
-					end
-				end
-			else 
-				multikill[killer]=0 
-				multikill[killer]=multikill[killer]+1
-				kill1[killer]=mtime
-			end
-		elseif (multikill[killer]==6) then 
-			kill6[killer]=tonumber(mtime)
-			local mktime=((kill6[killer]-kill5[killer])/1000) 
-
-			if ((kill6[killer]-kill5[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message5, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, monsterkillsound)
-					else
-						et.G_globalSound(monsterkillsound)
-					end
-				end
-			else 
-				multikill[killer]=0
-				multikill[killer]=multikill[killer]+1 
-				kill1[killer]=mtime
-			end
-		elseif (multikill[killer]==7) then 
-			kill7[killer]=tonumber(mtime)
-			local mktime=((kill7[killer]-kill6[killer])/1000) 
-
-			if ((kill6[killer]-kill5[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message6, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, ludicrouskillsound)
-					else
-						et.G_globalSound(ludicrouskillsound)
-					end
-				end
-			else 
-				multikill[killer]=0
-				multikill[killer]=multikill[killer]+1 
-				kill1[killer]=mtime
-			end
-		elseif (multikill[killer]==8) then 
-			kill8[killer]=tonumber(mtime)
-			local mktime=((kill8[killer]-kill7[killer])/1000) 
-
-			if ((kill6[killer]-kill5[killer])<=dvtime) then 
-				local str = string.gsub(k_mk_message7, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..mk_location.." "..str.."\n")
-				if k_multikillsounds == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, holyshitsound)
-					else
-						et.G_globalSound(holyshitsound)
-					end
-				end
-
-				multikill[killer]=0
-			else 
-				multikill[killer]=0
-				multikill[killer]=multikill[killer]+1 
-				kill1[killer]=mtime
-			end
-		end
-	else
-		multikill[killer]=0
-	end
-end
-
-
-if killer ~= 1022 then
-if killer ~= victim and victimteam ~= killerteam then
-	if k_spreerecord == 1 then
-		killr[killer] = killr[killer] + 1
-	end
-
-	if k_sprees == 1 then
-		killingspree[killer]=killingspree[killer]+1
-
-		if (killingspree[killer]==k_spree1_amount) then
-			local str = string.gsub(k_ks_message1, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1KILLINGSPREE!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, killingspreesound)
-				else
-					et.G_globalSound(killingspreesound)
-				end
-			end
-		elseif (killingspree[killer]==k_spree2_amount) then
-			local str = string.gsub(k_ks_message2, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1RAMPAGE!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, rampagesound)
-				else
-					et.G_globalSound(rampagesound)
-				end
-			end
-		elseif (killingspree[killer]==k_spree3_amount) then
-			local str = string.gsub(k_ks_message3, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1DOMINATION!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, dominatingsound)
-				else
-					et.G_globalSound(dominatingsound)
-				end
-			end
-		elseif (killingspree[killer]==k_spree4_amount) then
-			local str = string.gsub(k_ks_message4, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1UNSTOPABLE!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, unstopablesound)
-				else
-					et.G_globalSound(unstopablesound)
-				end
-			end
-		elseif (killingspree[killer]==k_spree5_amount) then
-			local str = string.gsub(k_ks_message5, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1GODLIKE!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, godlikesound)
-				else
-					et.G_globalSound(godlikesound)
-				end
-			end
-		elseif (killingspree[killer]==k_spree6_amount) then
-			local str = string.gsub(k_ks_message6, "#killer#", killername)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-
---			et.trap_SendServerCommand( killer,"cp \"^1WICKED SICK!\"\n")
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			if k_spreesounds == 1 then
-				if k_noisereduction == 1 then
-					et.G_ClientSound(killer, wickedsicksound)
-				else
-					et.G_globalSound(wickedsicksound)
-				end
-			end
-		end
-
-	end
-else
-	if (killingspree[killer]>=5) then
-		if killer == victim then
-			local str = string.gsub(k_end_message2, "#victim#", victimname)
-			local str = string.gsub(str, "#kills#", killingspree[victim])
-			local str = string.gsub(str, "#killer#", killername)
-
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			killingspree[killer]=0
-		else
-			local str = string.gsub(k_end_message4, "#victim#", victimname)
-			local str = string.gsub(str, "#kills#", killingspree[killer])
-			local str = string.gsub(str, "#killer#", killername)
-
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-			killingspree[killer]=0
-		end
-	else
-		killingspree[killer]=0
-	end
-
-	if k_spreerecord == 1 then
-		if killr[victim] > spreerecordkills then
-			spreerecord(victim, killr[victim])
-			--killr[victim] = 0
-		else
-			--killr[victim] = 0
-		end
-		if killr[victim] > mapspreerecordkills then
-			mapspreerecord(victim, killr[victim])
-			killr[victim] = 0
-		else
-			killr[victim] = 0
-		end
-	end
-end
-end
-
-if k_flakmonkey == 1 then
-	if (meansOfDeath==17 or meansOfDeath==43 or meansOfDeath==44) then
-		if killer ~= victim and victimteam ~= killerteam then
-			flakmonkey[killer]=flakmonkey[killer]+1
-
-			if (flakmonkey[killer]==3) then
-				local str = string.gsub(k_fm_message, "#killer#", killername)
-
---				et.trap_SendServerCommand( killer,"cp \"^1FLAKMONKEY!\"\n")
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..fm_location.." "..str.."\n" )
-				if k_flakmonkeysound == 1 then
-					if k_noisereduction == 1 then
-						et.G_ClientSound(killer, flakmonkeysound)
-					else
-						et.G_globalSound(flakmonkeysound)
-					end
-				end
-
-				flakmonkey[killer]=0
-			end
-
-		else
-				flakmonkey[killer]=0
-		end
-	else
-				flakmonkey[killer]=0
-	end
-end
-
-end
-
 function deaths(victim, killer, meansOfDeath, weapon)
     weapon = getMeansOfDeathName(meansOfDeath)
 
@@ -3142,6 +2725,256 @@ function getMeansOfDeathName(meansOfDeath)
         weapon="SWAP_SPACES"
     elseif (meansOfDeath==64) then
         weapon="SWITCH_TEAM"
+    end
+end
+
+function multikillProcess(dvtime, currentKillTable, lastKillTable, msg, sound, reset)
+    currentKillTable[killer] = mtime
+
+    if (currentKillTable[killer] - lastKillTable[killer]) <= dvtime then
+        local str = string.gsub(msg, "#killer#", killername)
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, mk_location .. " " .. str .. "\n")
+
+        if k_multikillsounds == 1 then
+            if k_noisereduction == 1 then
+                et.G_ClientSound(killer, sound)
+            else
+                et.G_globalSound(sound)
+            end
+        end
+
+        if reset then
+            multikill[killer] = 0
+        end
+    else
+        multikill[killer] = 0
+        multikill[killer] = multikill[killer] + 1
+        lastKillTable[killer] = mtime
+    end
+end
+
+function killingSpreeProcess(msg, sound)
+    local str = string.gsub(msg, "#killer#", killername)
+    local str = string.gsub(str, "#kills#", killingspree[killer])
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
+
+    if k_spreesounds == 1 then
+        if k_noisereduction == 1 then
+            et.G_ClientSound(killer, sound)
+        else
+            et.G_globalSound(sound)
+        end
+    end
+end
+
+function kills(victim, killer, meansOfDeath, weapon)
+    weapon = getMeansOfDeathName(meansOfDeath)
+
+    local kil = tonumber(killer)
+    local killername = ""
+
+    victimname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
+    playerlastkilled[killer] = victim
+    killedwithweapk[killer] = tostring(weapon)
+    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
+    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+
+    if killer == 1022 then
+        killername = "The World"
+
+        if k_sprees == 1 then
+            if gibbed[victim] == 0 then
+                if killingspree[victim] >= 5 then
+                    local str = string.gsub(k_end_message3, "#victim#", victimname)
+                    local str = string.gsub(str, "#kills#", killingspree[victim])
+                    local str = string.gsub(str, "#killer#", killername)
+
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
+                    killingspree[victim]=0
+                else
+                    killingspree[victim]=0
+                end
+            else
+                gibbed[victim] = 0
+            end
+        end
+
+        if k_spreerecord == 1 then
+            if killr[victim] > spreerecordkills then
+                spreerecord(victim, killr[victim])
+            end
+
+            if killr[victim] > mapspreerecordkills then
+                mapspreerecord(victim, killr[victim])
+                killr[victim] = 0
+            else
+                killr[victim] = 0
+            end
+        end
+
+        flakmonkey[victim]=0
+    else
+        killername=et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+    end
+
+    if killer ~= victim and k_sprees == 1 then
+        deathspree[killer]=0
+    end
+
+    if Gamestate == 0 then
+        if k_teamkillrestriction == 1 then
+            if victimteam == killerteam and killer ~= victim and killer ~= 1022 then
+                if getAdminLevel(killer) < k_tk_protect then
+                    local warning = (k_tklimit_low + 1)
+                    local pbkiller = killer + 1
+
+                    if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 or meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 57 or meansOfDeath == 30  or meansOfDeath == 27 or meansOfDeath == 49 or meansOfDeath == 3 then
+                        teamkillr[killer] = teamkillr[killer] - 0.75
+                    elseif meansOfDeath == 30  or meansOfDeath == 27 then
+                        teamkillr[killer] = teamkillr[killer] - 0.65
+                    elseif meansOfDeath == 45 then
+                        -- Mines do nothing!
+                    else
+                        teamkillr[killer] = teamkillr[killer] - 1
+                    end
+
+                    if warning > teamkillr[killer] and k_tklimit_low < teamkillr[killer] then
+                        if k_advancedpms == 1 then
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
+                            et.G_ClientSound(killer, pmsound)
+                        else
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
+                        end
+                    elseif teamkillr[killer] <= k_tklimit_low then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n")
+                    end
+                end
+            else
+                if killer ~= victim then
+                    if killer ~= 1022 then
+                        teamkillr[killer] = teamkillr[killer] + 1
+
+                        if teamkillr[killer] > k_tklimit_high then
+                            teamkillr[killer] = k_tklimit_high
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if k_multikills == 1 then
+        if killer ~= victim and victimteam ~= killerteam and killer ~= 1022 then
+            local dvtime = (k_multikill_time * 1000)
+
+            multikill[killer] = multikill[killer] + 1
+
+            if multikill[killer] == 1 then
+                kill1[killer] = mtime
+            elseif multikill[killer] == 2 then
+                multikillProcess(dvtime, kill2, kill1, k_mk_message1, doublekillsound)
+            elseif multikill[killer] == 3 then
+                multikillProcess(dvtime, kill3, kill2, k_mk_message2, multikillsound)
+            elseif multikill[killer] == 4 then
+                multikillProcess(dvtime, kill4, kill3, k_mk_message3, megakillsound)
+            elseif multikill[killer] == 5 then
+                multikillProcess(dvtime, kill5, kill4, k_mk_message4, ultrakillsound)
+            elseif multikill[killer] == 6 then
+                multikillProcess(dvtime, kill6, kill5, k_mk_message5, monsterkillsound)
+            elseif multikill[killer] == 7 then
+                multikillProcess(dvtime, kill7, kill6, k_mk_message6, ludicrouskillsound)
+            elseif multikill[killer] == 8 then
+                multikillProcess(dvtime, kill8, kill7, k_mk_message7, holyshitsound, true)
+            end
+        else
+            multikill[killer] = 0
+        end
+    end
+
+    if killer ~= 1022 then
+        if killer ~= victim and victimteam ~= killerteam then
+            if k_spreerecord == 1 then
+                killr[killer] = killr[killer] + 1
+            end
+
+            if k_sprees == 1 then
+                killingspree[killer] = killingspree[killer] + 1
+
+                if killingspree[killer] == k_spree1_amount then
+                    killingSpreeProcess(k_ks_message1, killingspreesound)
+                elseif killingspree[killer] == k_spree2_amount then
+                    killingSpreeProcess(k_ks_message2, rampagesound)
+                elseif killingspree[killer] == k_spree3_amount then
+                    killingSpreeProcess(k_ks_message3, dominatingsound)
+                elseif killingspree[killer] == k_spree4_amount then
+                    killingSpreeProcess(k_ks_message4, unstopablesound)
+                elseif killingspree[killer] == k_spree5_amount then
+                    killingSpreeProcess(k_ks_message5, godlikesound)
+                elseif killingspree[killer] == k_spree6_amount then
+                    killingSpreeProcess(k_ks_message6, wickedsicksound)
+                end
+
+            end
+        else
+            if killingspree[killer] >= 5 then
+                if killer == victim then
+                    local str = string.gsub(k_end_message2, "#victim#", victimname)
+                    local str = string.gsub(str, "#kills#", killingspree[victim])
+                    local str = string.gsub(str, "#killer#", killername)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
+                    killingspree[killer] = 0
+                else
+                    local str = string.gsub(k_end_message4, "#victim#", victimname)
+                    local str = string.gsub(str, "#kills#", killingspree[killer])
+                    local str = string.gsub(str, "#killer#", killername)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
+                    killingspree[killer] = 0
+                end
+            else
+                killingspree[killer] = 0
+            end
+
+            if k_spreerecord == 1 then
+                if killr[victim] > spreerecordkills then
+                    spreerecord(victim, killr[victim])
+                end
+
+                if killr[victim] > mapspreerecordkills then
+                    mapspreerecord(victim, killr[victim])
+                    killr[victim] = 0
+                else
+                    killr[victim] = 0
+                end
+            end
+        end
+    end
+
+    if k_flakmonkey == 1 then
+        if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 then
+            if killer ~= victim and victimteam ~= killerteam then
+                flakmonkey[killer] = flakmonkey[killer] + 1
+
+                if flakmonkey[killer] == 3 then
+                    local str = string.gsub(k_fm_message, "#killer#", killername)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, fm_location .. " " .. str .. "\n")
+
+                    if k_flakmonkeysound == 1 then
+                        if k_noisereduction == 1 then
+                            et.G_ClientSound(killer, flakmonkeysound)
+                        else
+                            et.G_globalSound(flakmonkeysound)
+                        end
+                    end
+
+                    flakmonkey[killer] = 0
+                end
+
+            else
+                flakmonkey[killer] = 0
+            end
+        else
+            flakmonkey[killer] = 0
+        end
     end
 end
 
