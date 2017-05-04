@@ -591,36 +591,6 @@ qwerty = 0
 
 -- Mute function
 
-function removeMute(PlayerID)
-    local fdin, lenin = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
-    local fdout, lenout = et.trap_FS_FOpenFile("mutestmp.cfg", et.FS_WRITE)
-    local IP2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
-    s, e, IP2 = string.find(IP2, "(%d+%.%d+%.%d+%.%d+)")
-    local i = 0
-
-    if lenin <= 0 then
-        et.G_Print("There is no Mutes to remove \n")
-    else
-        local filestr = et.trap_FS_Read(fdin, lenin)
-
-        for time, ip, name in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
-            if ip ~= IP2 then
-                mute = time .. " - " .. ip .. " - " .. name .. "\n"
-                et.trap_FS_Write(mute, string.len(mute), fdout)
-            end
-
-            i = i + 1
-
-        end
-    end
-
-    confirm2 = 1
-    et.trap_FS_FCloseFile(fdin)
-    et.trap_FS_FCloseFile(fdout)
-    et.trap_FS_Rename("mutestmp.cfg", "mutes.cfg")
-    loadMutes()
-end
-
 function loadMutes()
     local i = 0
     local i2 = 0
@@ -715,6 +685,36 @@ function setMute(PlayerID, muteTime)
     end
 end
 
+function removeMute(PlayerID)
+    local fdin, lenin = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+    local fdout, lenout = et.trap_FS_FOpenFile("mutestmp.cfg", et.FS_WRITE)
+    local IP2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
+    s, e, IP2 = string.find(IP2, "(%d+%.%d+%.%d+%.%d+)")
+    local i = 0
+
+    if lenin <= 0 then
+        et.G_Print("There is no Mutes to remove \n")
+    else
+        local filestr = et.trap_FS_Read(fdin, lenin)
+
+        for time, ip, name in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
+            if ip ~= IP2 then
+                mute = time .. " - " .. ip .. " - " .. name .. "\n"
+                et.trap_FS_Write(mute, string.len(mute), fdout)
+            end
+
+            i = i + 1
+
+        end
+    end
+
+    confirm2 = 1
+    et.trap_FS_FCloseFile(fdin)
+    et.trap_FS_FCloseFile(fdout)
+    et.trap_FS_Rename("mutestmp.cfg", "mutes.cfg")
+    loadMutes()
+end
+
 function checkMute(PlayerID)
     local ip = ""
     local name = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name")
@@ -755,6 +755,42 @@ end
 
 -- Admin function
 
+function loadAdmins()
+    local i = 0
+    local i2 = 0
+    local dv = 1
+    local dv2 = 1
+    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+
+    if len <= 0 then
+        et.G_Print("WARNING: No Admins's Defined! \n")
+    else
+        local filestr = et.trap_FS_Read(fd, len)
+        local i = 0
+
+        for guid in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*") do
+            -- upcase for exact matches
+            chkGUID[i] = string.upper(guid)
+
+            if dv == 1 then
+                i = i + 1
+            end
+        end
+
+        for guid2 in string.gfind(filestr, "(%d%s%-%s%x+)%s%-%s*") do
+            -- upcase for exact matches
+            guid2 = string.upper(guid2)
+            addAdmin(guid2)
+        end
+
+        for guid3, Name in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*([^%\n]*)") do
+            AdminName[guid3] = Name
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
+end
+
 function setAdmin(PlayerID, levelv)
     -- gets file length
     local fdadm,len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
@@ -774,7 +810,7 @@ function setAdmin(PlayerID, levelv)
 
                 if dv == 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
-                    adminchange(PlayerID, level)
+                    removeAdmin(PlayerID)
                 end
 
                 break
@@ -850,38 +886,7 @@ function addAdmin(GUID)
     end
 end
 
-function adminStatus(PlayerID)
-    local IP   = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
-    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
-
-    for i = k_maxAdminLevels, 0, -1 do
-        if finger then
-            local name = et.gentity_get(PlayerID, "pers.netname")
-
-            if AdminLV[i][GUID] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
-                finger = false
-                commandSaid = false
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
-                finger = false
-                commandSaid = false
-                break
-            end
-        else
-            if AdminLV[i][GUID] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
-                break
-            end
-        end
-    end
-end
-
-function adminchange(PlayerID, level)
+function removeAdmin(PlayerID)
     local fdin, lenin = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
     local fdout, lenout = et.trap_FS_FOpenFile("shrubbottmp.cfg", et.FS_WRITE)
     local GUID2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
@@ -921,6 +926,38 @@ function adminchange(PlayerID, level)
         loadAdmins()
     end
 end
+
+function adminStatus(PlayerID)
+    local IP   = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
+    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+
+    for i = k_maxAdminLevels, 0, -1 do
+        if finger then
+            local name = et.gentity_get(PlayerID, "pers.netname")
+
+            if AdminLV[i][GUID] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
+                finger = false
+                commandSaid = false
+                break
+            elseif i == 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
+                finger = false
+                commandSaid = false
+                break
+            end
+        else
+            if AdminLV[i][GUID] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
+                break
+            elseif i == 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
+                break
+            end
+        end
+    end
+end
+
 
 
 function ParseString(inputString)
@@ -1096,50 +1133,6 @@ function AdminUserLevel(PlayerID)
 --		return 1
 --	end
 	return 0
-end
-
-function loadAdmins()
-	local i = 0
-	local i2 = 0
-	local dv = 1
-	local dv2 = 1
-	local fd,len = et.trap_FS_FOpenFile( "shrubbot.cfg", et.FS_READ )
-
---	table.setn(chkGUID, 0)
---	table.setn(AdminName, 0)
-
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
---		chkGUID[i] = 0
---		AdminName[i] = ""
-	end
-	if len <= 0 then
-		et.G_Print("WARNING: No Admins's Defined! \n")
-	else
-		local filestr = et.trap_FS_Read( fd, len )
-		local i = 0
-
-		for guid in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*") do
-			-- upcase for exact matches
-			chkGUID[i] = string.upper(guid)
-
---			table.insert(chkGUID, string.upper(guid))
-			if dv == 1 then
-				i=i+1
-			end
-		end
-		for guid2 in string.gfind(filestr, "(%d%s%-%s%x+)%s%-%s*") do
-			-- upcase for exact matches
-			guid2 = string.upper(guid2)
-			addAdmin(guid2)
-		end
-
-		for guid3,Name in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-			AdminName[guid3] = Name
-
---			table.insert(AdminName, Name)
-		end
-	end
-	et.trap_FS_FCloseFile( fd ) 
 end
 
 function getPlayernameToId(name) 
