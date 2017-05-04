@@ -1156,39 +1156,6 @@ function ModInfo(PlayerID)
 	et.trap_SendServerCommand( PlayerID,"cpm \"Created by Clutch152.\n\"")
 end
 
-function advPlayers(PlayerID)
-	et.trap_SendServerCommand(PlayerID, string.format("print \"^3 ID ^1: ^3Player                     Rate  Snaps\n"))
-	et.trap_SendServerCommand(PlayerID, string.format("print \"^1--------------------------------------------\n"))
-	local pteam = { "^1X" , "^4L" , " " }
-	local playercount = 0
-	local spa = 24
-
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		local teamnumber = tonumber(et.gentity_get(i,"sess.sessionTeam"))
-		local cname = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "name" )
-		local rate = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "rate" )
-		local snaps = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "snaps" )
-		local name = string.lower(et.Q_CleanStr( cname ))
-		local namel = tonumber(string.len(name))-1
-		local namespa = spa - namel
-		local space = string.rep( " ", namespa)
-		local ref = tonumber(et.gentity_get(PlayerID,"sess.referee"))
-		if ref == 0 then
-			ref = ""
-		else
-			ref = "^3REF"
-		end
-
-		if et.gentity_get(i,"pers.connected") ~= 2 then
-		else
-			et.trap_SendServerCommand(PlayerID, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"',pteam[teamnumber], i, name, space, rate, snaps, ref))
-			playercount = playercount + 1
-		end
-	end
-
-		et.trap_SendServerCommand(PlayerID, string.format("print \"\n^3 " ..playercount.. " ^7total players\n"))
-end
-
 function private_message(PlayerID,client,message) 
    local clientnum = ""
    local clientnum = tonumber(client) 
@@ -4251,8 +4218,11 @@ function et_ClientCommand(clientNum, command)
 
     if k_advplayers == 1 then
         if cmd == "players" then
-            advPlayers(clientNum)
-            return 1
+            params         = {}
+            params.command = 'client'
+            params["arg1"] = clientNum
+            dofile(kmod_ng_path .. '/kmod/command/client/players.lua')
+            return execute_command(params)
         end
 
         if getAdminLevel(clientNum) >= 2 and cmd == "admins" then
