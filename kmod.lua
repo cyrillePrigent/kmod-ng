@@ -881,6 +881,47 @@ function adminStatus(PlayerID)
     end
 end
 
+function adminchange(PlayerID, level)
+    local fdin, lenin = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+    local fdout, lenout = et.trap_FS_FOpenFile("shrubbottmp.cfg", et.FS_WRITE)
+    local GUID2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+    local i = 0
+    local IPRemove = ""
+    local fname = ""
+    local dv = 1
+
+    if lenin == -1 then
+        et.G_Print("There is no Power User IP to remove \n")
+    else
+        local filestr = et.trap_FS_Read(fdin, lenin)
+
+        for lvl, guid, name in string.gfind(filestr, "(%d)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
+            if guid == GUID2 then
+                guid = string.upper(guid)
+                fname = name
+
+                for q = 0, k_maxAdminLevels, 1 do
+                    AdminLV[q][GUID2] = false
+                end
+            else
+                guid = lvl .. " - " .. guid .. " - " .. name .. "\n"
+                et.trap_FS_Write(guid, string.len(guid), fdout)
+            end
+
+            i = i + 1
+        end
+    end
+
+    confirm = 1
+    et.trap_FS_FCloseFile(fdin)
+    et.trap_FS_FCloseFile(fdout)
+    et.trap_FS_Rename("shrubbottmp.cfg", "shrubbot.cfg")
+
+    if dv == 1 then
+        loadAdmins()
+    end
+end
+
 
 function ParseString(inputString)
 	local i = 1
@@ -1030,46 +1071,6 @@ function getsetlvlidfname(name)
    else
 	return slot
    end
-end
-
-function adminchange(PlayerID, level)
-	local fdin,lenin = et.trap_FS_FOpenFile( "shrubbot.cfg", et.FS_READ )
-	local fdout,lenout = et.trap_FS_FOpenFile( "shrubbottmp.cfg", et.FS_WRITE )
-	local GUID2 = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-	local i = 0
-	local IPRemove = ""
-	local fname = ""
-	local dv = 1
-	if lenin == -1 then
-		et.G_Print("There is no Power User IP to remove \n")
-	else
-		local filestr = et.trap_FS_Read( fdin, lenin )
-		for lvl,guid,name in string.gfind(filestr, "(%d)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-			if (guid==GUID2) then
-				guid = string.upper(guid)
-				fname = name
-				for q=0, k_maxAdminLevels, 1 do
-					AdminLV[q][GUID2] = false
-				end
---				AdminLV0[GUID2] = false
---				AdminLV1[GUID2] = false
---				AdminLV2[GUID2] = false
---				AdminLV3[GUID2] = false
-			else
-				guid = lvl .. " - " .. guid .. " - " .. name .. "\n"
-				et.trap_FS_Write( guid, string.len(guid) ,fdout )
-			end
-			i=i+1
-
-		end
-	end
-	confirm = 1
-	et.trap_FS_FCloseFile( fdin ) 
-	et.trap_FS_FCloseFile( fdout )
-	et.trap_FS_Rename( "shrubbottmp.cfg", "shrubbot.cfg" )
-	if dv == 1 then
-		loadAdmins()
-	end
 end
 
 function AdminUserLevel(PlayerID)
