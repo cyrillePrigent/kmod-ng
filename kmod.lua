@@ -1892,10 +1892,11 @@ end
 
 function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
     params = {}
-    params.command = 'client'
-    params.nbArg   = Cvarct
-    params["arg1"] = Cvar1
-    params["arg2"] = Cvar2
+    params.command   = 'client'
+    params.nbArg     = Cvarct
+    params.clientNum = PlayerID
+    params["arg1"]   = Cvar1
+    params["arg2"]   = Cvar2
 
     params.commandSaid = true
     params.say = say_parms
@@ -2031,8 +2032,9 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 			end
 
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Tk_index: ^7" .. name .. "^7 has a tk index of ^3" ..teamkillr[PlayerID] .. "^7 \[" .. status .. "^7\] \n" )
-		elseif (string.lower(BangCommand) == k_commandprefix.."listcmds" ) then
-			lstcomds( PlayerID )
+        elseif string.lower(BangCommand) == k_commandprefix .. "listcmds" then
+            dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
+            execute_command(params)
 		elseif (string.lower(BangCommand) == k_commandprefix.."durt" ) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." k_panzersperteam = " .. k_panzersperteam .. " " .. k_panzersperteam2 .. "\n" )
 		end
@@ -2408,113 +2410,6 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --	end
   end
 end
-end
-
-function lstcomds( PlayerID )
-	for i=0, k_maxAdminLevels, 1 do
-		if getAdminLevel(PlayerID) >= i then
-			et.trap_SendServerCommand(PlayerID, string.format("print \"Level " .. i .. " Commands\n"))
-			et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
-			for q=1, tonumber(lvlsc[i]), 3 do
-				local b = q
-				local m = q + 1
-				local e = q + 2
-				if lvls[i][b] == nil then
-					lvls[i][b] = " "
-				end
-				if lvls[i][m] == nil then
-					lvls[i][m] = " "
-				end
-				if lvls[i][e] == nil then
-					lvls[i][e] = " "
-				end
-				et.trap_SendServerCommand(PlayerID, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', lvls[i][b], lvls[i][m], lvls[i][e]))
-			end
-			et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
-		end
-	end
-
-
---	if getAdminLevel(PlayerID) >= 0 then
---		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 0 Commands\n"))
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
---		for q=1, tonumber(lvl0c), 3 do
---			local b = q
---			local m = q + 1
---			local e = q + 2
---			if lvl0[b] == nil then
---				lvl0[b] = " "
---			end
---			if lvl0[m] == nil then
---				lvl0[m] = " "
---			end
---			if lvl0[e] == nil then
---				lvl0[e] = " "
---			end
---			et.trap_SendServerCommand(PlayerID, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', lvl0[b], lvl0[m], lvl0[e]))
---		end
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
---	end
---	if getAdminLevel(PlayerID) >= 1 then
---		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 1 Commands \[PROTECTED USER\]\n"))
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
---		for w=1, tonumber(lvl1c), 3 do
---			local b = w
---			local m = w + 1
---			local e = w + 2
---			if lvl1[b] == nil then
---				lvl1[b] = " "
---			end
---			if lvl1[m] == nil then
---				lvl1[m] = " "
---			end
---			if lvl1[e] == nil then
---				lvl1[e] = " "
---			end
---			et.trap_SendServerCommand(PlayerID, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', lvl1[b], lvl1[m], lvl1[e]))
---		end
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
---	end
---	if getAdminLevel(PlayerID) >= 2 then
---		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 2 Commands\n"))
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
---		for r=1, tonumber(lvl2c), 3 do
---			local b = r
---			local m = r + 1
---			local e = r + 2
---			if lvl2[b] == nil then
---				lvl2[b] = " "
---			end
---			if lvl2[m] == nil then
---				lvl2[m] = " "
---			end
---			if lvl2[e] == nil then
---				lvl2[e] = " "
---			end
---			et.trap_SendServerCommand(PlayerID, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', lvl2[b], lvl2[m], lvl2[e]))
---		end
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
---	end
---	if getAdminLevel(PlayerID) == 3 then
---		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 3 Commands \[SILENT COMMANDS WITH /sc \(command\)\]\n"))
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
---		for t=1, tonumber(lvl3c), 3 do
---			local b = t
---			local m = t + 1
---			local e = t + 2
---			if lvl3[b] == nil then
---				lvl3[b] = " "
---			end
---			if lvl3[m] == nil then
---				lvl3[m] = " "
---			end
---			if lvl3[e] == nil then
---				lvl3[e] = " "
---			end
---			et.trap_SendServerCommand(PlayerID, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', lvl3[b], lvl3[m], lvl3[e]))
---		end
---		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
---	end
 end
 
 function kills(victim, killer, meansOfDeath, weapon)
