@@ -1159,6 +1159,34 @@ function printModInfo(clientNum)
     et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
 end
 
+function loadCommands()
+    local fd, len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
+
+    if len > 0 then
+        local filestr = et.trap_FS_Read(fd, len)
+        local counter = {}
+        local d = {}
+
+        for i = 0, k_maxAdminLevels, 1 do
+            counter[i] = 0
+            d[i] = lvlsc[i]
+        end
+
+        for level, comm in string.gfind(filestr, "[^%#](%d)%s*%-%s*(%w+)%s*%=%s*[^%\n]*") do
+            local comm2 = k_commandprefix .. comm
+
+            for i = 0, k_maxAdminLevels, 1 do
+                if tonumber(level) == i then
+                    lvlsc[i] = lvlsc[i] + 1
+                    lvls[i][lvlsc[i]] = comm2
+                end
+            end
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
+end
+
 --
 
 function ParseString(inputString)
@@ -1515,54 +1543,6 @@ function comds(client, cvar1, caller)
 
 end
 
-function loadcommands()
-	local fd,len = et.trap_FS_FOpenFile( "commands.cfg", et.FS_READ )
-	if len > 0 then
-		local filestr = et.trap_FS_Read( fd, len )
-		local counter = {}
-		local d = {}
-		for i=0, k_maxAdminLevels, 1 do
-			counter[i] = 0
-			d[i] = lvlsc[i]
-		end
---		local counter0 = 0
---		local counter1 = 0
---		local counter2 = 0
---		local counter3 = 0
-		for level,comm in string.gfind(filestr, "[^%#](%d)%s*%-%s*(%w+)%s*%=%s*[^%\n]*") do
-			local comm2 = k_commandprefix..comm
-
-			for i=0, k_maxAdminLevels, 1 do
-				if tonumber(level) == i then
---					counter[i] = counter[i] + 1
---					lvlsc[i] = d[i] + counter[i]
-					lvlsc[i] = lvlsc[i] + 1
-					lvls[i][lvlsc[i]] = comm2
-				end
-			end
-
---			if tonumber(level) == 0 then
---				counter0 = counter0 + 1
---				lvl0c = d0 + counter0
---				lvl0[lvl0c] = comm2
---			elseif tonumber(level) == 1 then
---				counter1 = counter1 + 1
---				lvl1c = d1 + counter1
---				lvl1[lvl1c] = comm2
---			elseif tonumber(level) == 2 then
---				counter2 = counter2 + 1
---				lvl2c = d2 + counter2
---				lvl2[lvl2c] = comm2
---			elseif tonumber(level) == 3 then
---				counter3 = counter3 + 1
---				lvl3c = d3 + counter3
---				lvl3[lvl3c] = comm2
---			end
-		end
-	end
-	et.trap_FS_FCloseFile( fd )
-end
-
 function readconfig()
 
 	loadAdmins()
@@ -1642,7 +1622,7 @@ function readconfig()
 	}
 --]]
 
-	loadcommands()
+	loadCommands()
 end
 
 function randomClientFinder()
