@@ -40,7 +40,7 @@ function execute_command(params)
 
                 return
             else
-                clientnum = name2IDPM(params["arg1"])
+                clientnum = getPlayernameToId(params["arg1"])
             end
         end
 

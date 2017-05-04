@@ -63,7 +63,7 @@ function execute_command(params)
 
                 return
             else
-                clientnum = getsetlvlidfname(client)
+                clientnum = getPlayernameToId(client)
             end
         end
 

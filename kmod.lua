@@ -1079,84 +1079,43 @@ function floodprotector()
 	fpProt = tonumber(mtime)
 end
 
-function getsetlvlidfname(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-	    if s and e then 
-		matchcount = matchcount + 1
-			slot = i
-          end 
-      end 
-   end 
-   if matchcount >= 2 then
-	if commandSaid then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" ..name.. "\"\n" )
-		commandSaid = false
-	else
-  	    	et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" ..name.. "\"\n") 
-	end
-	return nil
-   else
-	return slot
-   end
-end
+function getPlayernameToId(name)
+    local i = 0
+    local slot = nil
+    local matchcount = 0
+    local cleanname = string.lower(et.Q_CleanStr(name))
+    local playerp = ""
 
-function getPlayernameToId(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-     		 if s and e then 
-			matchcount = matchcount + 1
-				slot = i
-        	 end 
-      end 
-   end 
-   if matchcount >= 2 then
-	return nil
-   else
-	return slot
-   end
+    for i = 0, clientsLimit, 1 do
+        if PlayerName[i] then
+            playerp = string.lower(et.Q_CleanStr(PlayerName[i]))
+            s, e = string.find(playerp, cleanname)
+
+            if s and e then
+                matchcount = matchcount + 1
+                slot = i
+            end
+        end
+    end
+
+    if matchcount >= 2 then
+-- set level
+--         if commandSaid then
+--             et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
+--             commandSaid = false
+--         else
+--             et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
+--         end
+
+        return nil
+    else
+        return slot
+    end
 end
 
 function ModInfo(PlayerID)
 	et.trap_SendServerCommand( PlayerID,"cpm \"This server is running the new KMOD version " .. KMODversion .. "\n\"")
 	et.trap_SendServerCommand( PlayerID,"cpm \"Created by Clutch152.\n\"")
-end
-
-function name2IDPM(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-     		 if s and e then 
-			matchcount = matchcount + 1
-				slot = i
-        	 end 
-      end 
-   end 
-   if matchcount >= 2 then
-	return nil
-   else
-	return slot
-   end
 end
 
 function curse_filter( PlayerID )
@@ -1372,7 +1331,7 @@ function dmg_test( PlayerID )
 	et.trap_SendServerCommand("print \"damage = " .. damage .. "\nsdmgflags = " .. sdmgflags .. "\nsessdamage_given = " .. sessdamage_given .. "\nsessdamage_received = " .. sessdamage_received .. "\n\"")
 end
 
-function comds(client, cvar1, caller) 
+function comds(client, cvar1, caller)
 	local clientnum = tonumber(client) 
 	if clientnum then 
 	local wname = ""
@@ -1408,7 +1367,7 @@ function comds(client, cvar1, caller)
 					end
 	   			return
 				else
-			         	clientnum = getsetlvlidfpname(client)
+			         	clientnum = getPlayernameToId(client)
 					wname = clientnum
 				end
       	end 
@@ -1523,60 +1482,9 @@ function comds(client, cvar1, caller)
 	end
 
 
-end 
-
---[[
-function getsetlvlidfpname(name) 
-   	local i 
-   	local matchcount = 0
-   	local cleanname = string.lower(et.Q_CleanStr( name ))
-   	for i=0,63,1 do 
-   	playeri = et.gentity_get(i,"pers.netname")
-      	if playeri then 
- 	   	playerp = string.lower(et.Q_CleanStr( playeri ))
- 	   	s,e=string.find(playerp, cleanname)
-		 	if s and e then 
-				matchcount = matchcount + 1
-				if matchcount == 1 then
-					slot = i
-				else
-					slot = nil
-				end
-        	 	end 
-      	end 
-   	end 
-   	if matchcount >= 2 then
-		return nil
-   	else
-		return slot
-   	end
-end
---]]
-
-function getsetlvlidfpname(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-     		 if s and e then 
-			matchcount = matchcount + 1
-				slot = i
-        	 end 
-      end 
-   end 
-   if matchcount >= 2 then
-	return nil
-   else
-	return slot
-   end
 end
 
-function part2id(client) 
+function part2id(client)
 	local clientnum = tonumber(client) 
 	if clientnum then 
 		if (clientnum >= 0) and (clientnum < 64) then 
@@ -1592,7 +1500,7 @@ function part2id(client)
 				if e <= 2 then
 		   			return nil
 				else
-			         	clientnum = nameforID(client)
+			         	clientnum = getPlayernameToId(client)
 				end
       	end 
          	if not clientnum then 
@@ -1602,57 +1510,6 @@ function part2id(client)
 
 	return clientnum
 
-end 
-
---[[
-function nameforID(name) 
-   	local i 
-   	local matchcount = 0
-   	local cleanname = string.lower(et.Q_CleanStr( name ))
-   	for i=0,63,1 do 
-   	playeri = et.gentity_get(i,"pers.netname")
-      	if playeri then 
- 	   	playerp = string.lower(et.Q_CleanStr( playeri ))
- 	   	s,e=string.find(playerp, cleanname)
-		 	if s and e then 
-				matchcount = matchcount + 1
-				if matchcount == 1 then
-					slot = i
-				else
-					slot = nil
-				end
-        	 	end 
-      	end 
-   	end 
-   	if matchcount >= 2 then
-		return nil
-   	else
-		return slot
-   	end
-end
---]]
-
-function nameforID(name) 
-   local i = 0
-   local slot = nil
-   local matchcount = 0
-   local cleanname = string.lower(et.Q_CleanStr( name ))
-   local playerp = ""
-   for i=0,tonumber(et.trap_Cvar_Get("sv_maxclients"))-1,1 do 
-	if PlayerName[i] then
- 	   playerp = string.lower(et.Q_CleanStr( PlayerName[i] ))
- 	   s,e=string.find(playerp, cleanname)
-     		 if s and e then 
-			matchcount = matchcount + 1
-				slot = i
-        	 end 
-      end 
-   end 
-   if matchcount >= 2 then
-	return nil
-   else
-	return slot
-   end
 end
 
 function loadcommands()
