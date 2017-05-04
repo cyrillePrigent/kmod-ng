@@ -715,41 +715,42 @@ function setMute(PlayerID, muteTime)
     end
 end
 
-function MuteCheck(PlayerID)
-	local ip = ""
-	local name = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" )
-	local ref = tonumber(et.gentity_get(PlayerID,"sess.referee"))
-	if(PlayerID~=-1) then
-		ip = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" )
-		s,e,ip = string.find(ip,"(%d+%.%d+%.%d+%.%d+)")
-	else
-		ip=-1
-	end
+function checkMute(PlayerID)
+    local ip = ""
+    local name = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name")
+    local ref = tonumber(et.gentity_get(PlayerID, "sess.referee"))
 
-	local fd,len = et.trap_FS_FOpenFile( "mutes.cfg", et.FS_READ )
+    if PlayerID ~= -1 then
+        ip = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
+        s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+    else
+        ip = -1
+    end
 
-	if len > 0 then
-		local filestr = et.trap_FS_Read( fd, len )
-		local i = 0
+    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
 
-		for time in string.gfind(filestr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
-			if chkIP[i] == ip then
-				if ref == 0 then
-					if tonumber(muteDuration[ip]) > 0 then
-						muted[PlayerID] = mtime + tonumber((muteDuration[ip])*1000)
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7"..name.."^7 has not yet finished his mute sentance.  (^1".. muteDuration[ip] .."^7) seconds.\n" )
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute "..PlayerID.."\n" )
-					elseif tonumber(muteDuration[ip]) == -1 then
-						muted[PlayerID] = -1
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7"..name.."^7 has been permanently muted\n" )
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute "..PlayerID.."\n" )
-					end
-				end
-			end
-			i=i+1
-		end
-	end
-	et.trap_FS_FCloseFile( fd )
+    if len > 0 then
+        local filestr = et.trap_FS_Read(fd, len)
+        local i = 0
+
+        for time in string.gfind(filestr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
+            if chkIP[i] == ip and ref == 0 then
+                if tonumber(muteDuration[ip]) > 0 then
+                    muted[PlayerID] = mtime + tonumber((muteDuration[ip]) * 1000)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has not yet finished his mute sentance.  (^1" .. muteDuration[ip] .. "^7) seconds.\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
+                elseif tonumber(muteDuration[ip]) == -1 then
+                    muted[PlayerID] = -1
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has been permanently muted\n")
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n")
+                end
+            end
+
+            i = i + 1
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
 end
 
 function ParseString(inputString)
@@ -4245,7 +4246,7 @@ function et_ClientBegin(clientNum)
     selfkills[clientNum] = 0
     muted[clientNum] = 0
     loadMutes()
-    MuteCheck(clientNum)
+    checkMute(clientNum)
 
     Bname[clientNum] = name
 
