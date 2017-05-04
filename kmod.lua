@@ -1062,6 +1062,96 @@ function loadMapSpreeRecord()
     et.trap_FS_FCloseFile(fd)
 end
 
+-- Log function
+
+function logMessage(clientNum, msg, msgType)
+    local clientInfo = et.trap_GetUserinfo(clientNum)
+    local ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+    local guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+    local name = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
+    local LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
+
+    if msgType then
+        return LOG .. " (" .. msgType .. "): " .. msg .. "\n"
+    else
+        return LOG .. ": " .. msg .. "\n"
+    end
+end
+
+function logChat(PlayerID, mode, text, PMID)
+    local text = et.Q_CleanStr(text)
+    local fdadm, len = et.trap_FS_FOpenFile("chat_log.log", et.FS_APPEND)
+    local time = os.date("%x %I:%M:%S%p")
+    local ip
+    local guid
+    local LOG
+
+    if mode == et.SAY_ALL then
+        LOG = logMessage(PlayerID, text)
+    elseif mode == et.SAY_TEAM then
+        LOG = logMessage(PlayerID, text, 'TEAM')
+    elseif mode == et.SAY_BUDDY then
+        LOG = logMessage(PlayerID, text, 'BUDDY')
+    elseif mode == et.SAY_TEAMNL then
+        LOG = logMessage(PlayerID, text, 'TEAM')
+    elseif mode == "VSAY_TEAM" then
+        LOG = logMessage(PlayerID, text, 'VSAY_TEAM')
+    elseif mode == "VSAY_BUDDY" then
+        LOG = logMessage(PlayerID, text, 'VSAY_BUDDY')
+    elseif mode == "VSAY_ALL" then
+        LOG = logMessage(PlayerID, text, 'VSAY')
+    elseif mode == "PMESSAGE" then
+        local clientInfo = et.trap_GetUserinfo(PlayerID)
+        ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+        local from = "SERVER"
+
+        if PlayerID ~= 1022 then
+            from = et.gentity_get(PlayerID, "pers.netname")
+        end
+
+        local rec1 = part2id(PMID)
+
+        if rec1 then
+            local recipiant = et.gentity_get(rec1,"pers.netname")
+            LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. text .. "\n"
+        end
+    elseif mode == "PMADMINS" then
+        local from = "SERVER"
+
+        if PlayerID ~= 1022 then
+            local clientInfo = et.trap_GetUserinfo(PlayerID)
+            ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+            guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+            from = et.gentity_get(PlayerID, "pers.netname")
+        else
+            ip = "127.0.0.1"
+            guid = "NONE!"
+        end
+
+        local recipiant = "ADMINS"
+        LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. text .. "\n"
+    elseif mode == "CONN" then
+        local clientInfo = et.trap_GetUserinfo(PlayerID)
+        ip = string.upper(et.Info_ValueForKey(clientInfo, "ip" ))
+        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid" ))
+        local name = et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname"))
+
+        LOG = "*** " .. name .. " HAS ENTERED THE GAME  (IP: " .. ip .. " GUID: " .. guid .. ") ***\n"
+    elseif mode == "NAME_CHANGE" then
+        LOG = "*** " .. PlayerID .. " HAS RENAMED TO " .. text .. " ***\n"
+    elseif mode == "DISCONNECT" then
+        local name = et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname"))
+
+        LOG = "*** " .. name .. " HAS DISCONNECTED ***\n"
+    elseif mode == "START" then
+        LOG = "\n	***SERVER RESTART OR MAP CHANGE***\n\n"
+    end
+
+    et.trap_FS_Write(LOG, string.len(LOG) ,fdadm)
+    et.trap_FS_FCloseFile(fdadm)
+end
+
 -- Miscellaneous
 
 function printModInfo(clientNum)
@@ -1117,7 +1207,7 @@ end
 
 -- goto.lua
 -- iwant.lua
--- log_chat
+-- logChat
 -- ClientUserCommand
 -- et_ClientCommand
 function part2id(client)
@@ -1261,98 +1351,6 @@ function curse_filter( PlayerID )
 --			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto muted for ^1".. nummutes[PlayerID] .."^7 minute(s)!\n" )
 --		end
 --	end
-end
-
-function log_chat( PlayerID, mode, text, PMID )
-	local text = et.Q_CleanStr(text)
-	local fdadm,len = et.trap_FS_FOpenFile( "chat_log.log", et.FS_APPEND )
-	local time = os.date("%x %I:%M:%S%p")
-	local ip
-	local guid
-	if mode == et.SAY_ALL then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. ": " .. text.. "\n"
-	elseif mode == et.SAY_TEAM then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.." (TEAM): " ..text.. "\n"
-	elseif mode == et.SAY_BUDDY then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. " (BUDDY): " ..text.. "\n"
-	elseif mode == et.SAY_TEAMNL then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. " (TEAM): " ..text.. "\n"
-	elseif mode == "VSAY_TEAM" then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. " (VSAY_TEAM): " ..text.. "\n"
-	elseif mode == "VSAY_BUDDY" then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. " (VSAY_BUDDY): " ..text.. "\n"
-	elseif mode == "VSAY_ALL" then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..name.. " (VSAY): " ..text.. "\n"
-	elseif mode == "PMESSAGE" then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local from = "SERVER"
-		if PlayerID ~= 1022 then
-			from = et.gentity_get(PlayerID,"pers.netname")
-		end
-		local rec1 = part2id(PMID)
-		if rec1 then
-			local recipiant = et.gentity_get(rec1,"pers.netname")
-			LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..from.." to "..recipiant.." (PRIVATE): " ..text.. "\n"
-		end
-	elseif mode == "PMADMINS" then
-		local from = "SERVER"
-		if PlayerID ~= 1022 then
-			ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-			guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-			from = et.gentity_get(PlayerID,"pers.netname")
-		else
-			ip = "127.0.0.1"
-			guid = "NONE!"
-		end
-		local recipiant = "ADMINS"
-		LOG = "("..time..") (IP: " .. ip .. " GUID: " .. guid .. ") "..from.." to "..recipiant.." (PRIVATE): " ..text.. "\n"
-	elseif mode == "CONN" then
-		ip = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" ))
-		guid = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "*** " ..name.. " HAS ENTERED THE GAME  (IP: " .. ip .. " GUID: " .. guid .. ") ***\n"
-	elseif mode == "NAME_CHANGE" then
-		LOG = "*** " ..PlayerID.. " HAS RENAMED TO "..text.." ***\n"
-	elseif mode == "DISCONNECT" then
-		local name = et.gentity_get(PlayerID,"pers.netname")
-		local name = et.Q_CleanStr( name )
-		LOG = "*** " ..name.. " HAS DISCONNECTED ***\n"
-	elseif mode == "START" then
-		LOG = "\n	***SERVER RESTART OR MAP CHANGE***\n\n"
-	end
-
-	et.trap_FS_Write( LOG, string.len(LOG) ,fdadm )
-	et.trap_FS_FCloseFile( fdadm )
 end
 
 function dmg_test( PlayerID )
@@ -2848,7 +2846,7 @@ function et_ShutdownGame(restart)
     end
 
     if k_logchat == 1 then
-        log_chat("DV", "START", "DV")
+        logChat("DV", "START", "DV")
     end
 
     for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
@@ -3285,7 +3283,7 @@ function et_RunFrame(levelTime)
 
     for i = 0, clientsLimit, 1 do
         if et.gentity_get(i, "pers.connected") == 2 and PlayerName[i] ~= Bname[i] then
-            log_chat(Bname[i], "NAME_CHANGE", PlayerName[i])
+            logChat(Bname[i], "NAME_CHANGE", PlayerName[i])
             Bname[i] = PlayerName[i]
         end
     end
@@ -3578,7 +3576,7 @@ function et_ClientDisconnect(clientNum)
     PlayerName[clientNum] = ""
 
     if k_logchat == 1 then
-        log_chat(clientNum, "DISCONNECT", "DV2")
+        logChat(clientNum, "DISCONNECT", "DV2")
     end
 
     if muted[clientNum] > 0 then
@@ -3609,7 +3607,7 @@ function et_ClientBegin(clientNum)
     Bname[clientNum] = name
 
     if k_logchat == 1 then
-        log_chat(clientNum, "CONN", "DV")
+        logChat(clientNum, "CONN", "DV")
     end
 end
 
@@ -3653,14 +3651,14 @@ function et_ClientCommand(clientNum, command)
     if muted == 0 then
         if arg0 == "say" then
             if k_logchat == 1 then
-                log_chat(clientNum, et.SAY_ALL, et.ConcatArgs(1))
+                logChat(clientNum, et.SAY_ALL, et.ConcatArgs(1))
             end
 
             say_parms = "qsay"
             et_ClientSay( clientNum, et.SAY_ALL, et.ConcatArgs(1))
         elseif arg0 == "say_team" then
             if k_logchat == 1 then
-                log_chat(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
+                logChat(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
             end
 
             say_parms = "qsay"
@@ -3670,14 +3668,14 @@ function et_ClientCommand(clientNum, command)
             return 1
         elseif arg0 == "say_buddy" then
             if k_logchat == 1 then
-                log_chat(clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
+                logChat(clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
             end
 
             say_parms = "qsay"
             et_ClientSay( clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
         elseif arg0 == "say_teamnl" then
             if k_logchat == 1 then
-                log_chat(clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
+                logChat(clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
             end
 
             say_parms = "qsay"
@@ -3697,15 +3695,15 @@ function et_ClientCommand(clientNum, command)
             end
         elseif arg0 == "vsay" then
             if k_logchat == 1 then
-                log_chat(clientNum, "VSAY_ALL", et.ConcatArgs(1))
+                logChat(clientNum, "VSAY_ALL", et.ConcatArgs(1))
             end
         elseif arg0 == "vsay_team" then
             if k_logchat == 1 then
-                log_chat(clientNum, "VSAY_TEAM", et.ConcatArgs(1))
+                logChat(clientNum, "VSAY_TEAM", et.ConcatArgs(1))
             end
         elseif arg0 == "vsay_buddy" then
             if k_logchat == 1 then
-                log_chat(clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
+                logChat(clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
             end
         end
     end
@@ -3717,11 +3715,11 @@ function et_ClientCommand(clientNum, command)
 
     if arg0 == "m" or arg0 == "pm"  then
         if k_logchat == 1 then
-            log_chat(clientNum, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
+            logChat(clientNum, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
         end
     elseif arg0 == "ma" or arg0 == "pma" or arg0 == "msg" then
         if k_logchat == 1 then
-            log_chat(clientNum, "PMADMINS", et.ConcatArgs(1))
+            logChat(clientNum, "PMADMINS", et.ConcatArgs(1))
         end
     end
 
@@ -3943,7 +3941,7 @@ function et_ConsoleCommand()
             end
 
             if k_logchat == 1 then
-                log_chat(1022, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
+                logChat(1022, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
             end
         end
 
@@ -3951,7 +3949,7 @@ function et_ConsoleCommand()
     elseif arg0 == "m" or arg0 == "pm" or arg0 == "msg" then
         if k_advancedpms == 0 then
             if k_logchat == 1 then
-                log_chat(1022, "PMESSAGE", et.ConcatArgs(2),  et.trap_Argv(1))
+                logChat(1022, "PMESSAGE", et.ConcatArgs(2),  et.trap_Argv(1))
             end
         end
 
@@ -3965,7 +3963,7 @@ function et_ConsoleCommand()
             end
 
             if k_logchat == 1 then
-                log_chat(1022, "PMADMINS", et.ConcatArgs(1))
+                logChat(1022, "PMADMINS", et.ConcatArgs(1))
             end
 
             et.G_Print("Private message sent to admins\n")
