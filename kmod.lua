@@ -2483,7 +2483,6 @@ function getMessageLocation(location)
     end
 end
 
-
 function setWeaponAmmo(weaponList, clientId)
     for i = 1, (et.MAX_WEAPONS - 1), 1 do
         if not weaponList[i] then
@@ -2655,6 +2654,8 @@ function multikillProcess(dvtime, currentKillTable, lastKillTable, msg, sound, r
         multikill[killer] = multikill[killer] + 1
         lastKillTable[killer] = mtime
     end
+
+    return currentKillTable, lastKillTable
 end
 
 function killingSpreeProcess(msg, sound)
@@ -2776,19 +2777,19 @@ function kills(victim, killer, meansOfDeath, weapon)
             if multikill[killer] == 1 then
                 kill1[killer] = mtime
             elseif multikill[killer] == 2 then
-                multikillProcess(dvtime, kill2, kill1, k_mk_message1, doublekillsound)
+                kill2, kill1 = multikillProcess(dvtime, kill2, kill1, k_mk_message1, doublekillsound)
             elseif multikill[killer] == 3 then
-                multikillProcess(dvtime, kill3, kill2, k_mk_message2, multikillsound)
+                kill3, kill2 = multikillProcess(dvtime, kill3, kill2, k_mk_message2, multikillsound)
             elseif multikill[killer] == 4 then
-                multikillProcess(dvtime, kill4, kill3, k_mk_message3, megakillsound)
+                kill4, kill3 = multikillProcess(dvtime, kill4, kill3, k_mk_message3, megakillsound)
             elseif multikill[killer] == 5 then
-                multikillProcess(dvtime, kill5, kill4, k_mk_message4, ultrakillsound)
+                kill5, kill4 = multikillProcess(dvtime, kill5, kill4, k_mk_message4, ultrakillsound)
             elseif multikill[killer] == 6 then
-                multikillProcess(dvtime, kill6, kill5, k_mk_message5, monsterkillsound)
+                kill6, kill5 = multikillProcess(dvtime, kill6, kill5, k_mk_message5, monsterkillsound)
             elseif multikill[killer] == 7 then
-                multikillProcess(dvtime, kill7, kill6, k_mk_message6, ludicrouskillsound)
+                kill7, kill6 = multikillProcess(dvtime, kill7, kill6, k_mk_message6, ludicrouskillsound)
             elseif multikill[killer] == 8 then
-                multikillProcess(dvtime, kill8, kill7, k_mk_message7, holyshitsound, true)
+                kill8, kill7 = multikillProcess(dvtime, kill8, kill7, k_mk_message7, holyshitsound, true)
             end
         else
             multikill[killer] = 0
