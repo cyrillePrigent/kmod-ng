@@ -850,6 +850,38 @@ function addAdmin(GUID)
     end
 end
 
+function adminStatus(PlayerID)
+    local IP   = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
+    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+
+    for i = k_maxAdminLevels, 0, -1 do
+        if finger then
+            local name = et.gentity_get(PlayerID, "pers.netname")
+
+            if AdminLV[i][GUID] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
+                finger = false
+                commandSaid = false
+                break
+            elseif i == 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
+                finger = false
+                commandSaid = false
+                break
+            end
+        else
+            if AdminLV[i][GUID] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
+                break
+            elseif i == 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
+                break
+            end
+        end
+    end
+end
+
+
 function ParseString(inputString)
 	local i = 1
 	local t = {}
@@ -998,63 +1030,6 @@ function getsetlvlidfname(name)
    else
 	return slot
    end
-end
-
-function adminStatus(PlayerID)
---	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1CODE HAS GOTTEN THIS FAR!!!\n" )
-	local IP   = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "ip" )
-	local GUID = string.upper(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
-	for i=k_maxAdminLevels, 0, -1 do
-		if finger then
---	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1FINGER\n" )
-			local name = et.gentity_get(PlayerID,"pers.netname")
-			if ( AdminLV[i][GUID] ) and i ~= 0 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is an admin \[lvl ".. i .."\]\n" )
-				finger = false
-				commandSaid = false
-				break
-			elseif i == 0 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n" )
-				finger = false
-				commandSaid = false
-				break
-			end
-		else
---	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1ADMINTEST\n" )
-			if ( AdminLV[i][GUID] ) and i ~= 0 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are an admin \[lvl ".. i .."\]\n" )
-				break
-			elseif i == 0 then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are a guest \[lvl 0\]\n" )
-				break
-			end
-		end
-	end
-
---	if finger then
---		local name = et.gentity_get(PlayerID,"pers.netname")
---		if ( AdminLV3[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is an admin \[lvl 3\]\n" )
---		elseif ( AdminLV2[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is an admin \[lvl 2\]\n" )
---		elseif ( AdminLV1[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is an admin \[lvl 1\]\n" )
---		else
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n" )
---		end
---		finger = false
---		commandSaid = false
---	else
---		if ( AdminLV3[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are an admin \[lvl 3\]\n" )
---		elseif ( AdminLV2[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are an admin \[lvl 2\]\n" )
---		elseif ( AdminLV1[GUID] ) then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are an admin \[lvl 1\]\n" )
---		else
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Admintest: ^7You are a guest \[lvl 0\]\n" )
---		end
---	end
 end
 
 function adminchange(PlayerID, level)
