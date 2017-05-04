@@ -589,6 +589,8 @@ k_Admin = {}
 
 qwerty = 0
 
+-- Mute function
+
 function removeMute(PlayerID)
     local fdin, lenin = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
     local fdout, lenout = et.trap_FS_FOpenFile("mutestmp.cfg", et.FS_WRITE)
@@ -620,31 +622,34 @@ function removeMute(PlayerID)
 end
 
 function loadMutes()
-	local i = 0
-	local i2 = 0
-	local dv = 1
-	local dv2 = 1
-	chkIP = {}
-	local fd,len = et.trap_FS_FOpenFile( "mutes.cfg", et.FS_READ )
+    local i = 0
+    local i2 = 0
+    local dv = 1
+    local dv2 = 1
+    chkIP = {}
+    local fd,len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
 
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		chkIP[i] = 0
-	end
-	if len <= 0 then
-		et.G_Print("WARNING: No Mutes Defined! \n")
-	else
-		local filestr = et.trap_FS_Read( fd, len )
-		local i = 0
+    for i = 0, clientsLimit, 1 do
+        chkIP[i] = 0
+    end
 
-		for time,ip in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-			muteDuration[ip] = time
-			chkIP[i] = ip
-			if dv == 1 then
-				i=i+1
-			end
-		end
-	end
-	et.trap_FS_FCloseFile( fd ) 
+    if len <= 0 then
+        et.G_Print("WARNING: No Mutes Defined! \n")
+    else
+        local filestr = et.trap_FS_Read(fd, len)
+        local i = 0
+
+        for time, ip in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
+            muteDuration[ip] = time
+            chkIP[i] = ip
+
+            if dv == 1 then
+                i = i + 1
+            end
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
 end
 
 function setMute(PlayerID, muteTime)
