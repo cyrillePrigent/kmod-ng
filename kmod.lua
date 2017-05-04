@@ -958,7 +958,25 @@ function adminStatus(PlayerID)
     end
 end
 
+function getAdminLevel(PlayerID)
+    local guid = ""
 
+    if PlayerID ~= -1 then
+        guid = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid")
+    else
+        guid = -1
+    end
+
+    for i = k_maxAdminLevels, 1, -1 do
+        if AdminLV[i][guid] then
+            return i
+        end
+    end
+
+    return 0
+end
+
+--
 
 function ParseString(inputString)
 	local i = 1
@@ -1110,31 +1128,6 @@ function getsetlvlidfname(name)
    end
 end
 
-function AdminUserLevel(PlayerID)
-	local guid = ""
-	if(PlayerID~=-1) then
-		guid = et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" )
-	else
-		guid=-1
-	end
-
-	for i=k_maxAdminLevels, 1, -1 do
-		if ( AdminLV[i][guid] ) then
-			return i
-		end
-	end
-
-
---	if ( AdminLV3[guid] ) then
---		return 3
---	elseif ( AdminLV2[guid] ) then
---		return 2
---	elseif ( AdminLV1[guid] ) then
---		return 1
---	end
-	return 0
-end
-
 function getPlayernameToId(name) 
    local i = 0
    local slot = nil
@@ -1219,11 +1212,11 @@ function admins(PlayerID)
 		local sens = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "sensitivity" )
 		local fov = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "cg_fov" )
 		local pmove = et.Info_ValueForKey( et.trap_GetUserinfo( i ), "pmove_fixed" )
-		local level = AdminUserLevel(i)
+		local level = getAdminLevel(i)
 
 		adname = AdminName[GUID]
 
-		if AdminUserLevel(i) == nil or AdminUserLevel(i) == " " or AdminUserLevel(i) < 1 then
+		if getAdminLevel(i) == nil or getAdminLevel(i) == " " or getAdminLevel(i) < 1 then
 		else
 			if et.gentity_get(i,"pers.connected") ~= 2 then
 			else
@@ -1595,7 +1588,7 @@ function comds(client, cvar1, caller)
 
  	if kick then
 		local client2 = clientnum+1
-		if AdminUserLevel(caller) > AdminUserLevel(clientnum) then
+		if getAdminLevel(caller) > getAdminLevel(clientnum) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "pb_sv_kick " .. client2 .. " " .. cvar1 .. "\n" )
 		else
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot kick a higher admin\n" )
@@ -1611,7 +1604,7 @@ function comds(client, cvar1, caller)
 		local name = et.gentity_get(clientnum,"pers.netname")
 		wname = string.lower(et.Q_CleanStr( name ))
 		local cvar1 = tostring( cvar1 )
-		if AdminUserLevel(caller) > AdminUserLevel(clientnum) then
+		if getAdminLevel(caller) > getAdminLevel(clientnum) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref warn \"" .. wname .. "\" \"" .. cvar1 .. "\"\n" )
 		else
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot warn a higher admin\n" )
@@ -1620,7 +1613,7 @@ function comds(client, cvar1, caller)
 		commandSaid = false
  	elseif mute then
 		local name = et.gentity_get(clientnum,"pers.netname")
-		if AdminUserLevel(caller) > AdminUserLevel(clientnum) then
+		if getAdminLevel(caller) > getAdminLevel(clientnum) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientnum .. "\n" )
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute: ^7" ..name.. " ^7has been muted\n" )
 		else
@@ -1630,7 +1623,7 @@ function comds(client, cvar1, caller)
 		commandSaid = false
  	elseif pmute then
 		local name = et.gentity_get(clientnum,"pers.netname")
-		if AdminUserLevel(caller) >= AdminUserLevel(clientnum) then
+		if getAdminLevel(caller) >= getAdminLevel(clientnum) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientnum .. "\n" )
 			local mute = "-1"
 			muted[clientnum] = -1
@@ -2031,7 +2024,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 			local str = string.gsub(str, "<CLIENT_ID>", PlayerID)
 			local str = string.gsub(str, "<GUID>", et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "cl_guid" ))
 			local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(PlayerID,"pers.netname"))
-			local str = string.gsub(str, "<ADMINLEVEL>", AdminUserLevel(PlayerID))
+			local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(PlayerID))
 			local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(PlayerID,"pers.netname")))
 			local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
 			local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
@@ -2057,7 +2050,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 
 
 			if (string.lower(BangCommand) == comm2 ) then
-				if tonumber(level) <= AdminUserLevel(PlayerID) then
+				if tonumber(level) <= getAdminLevel(PlayerID) then
 					et.trap_SendConsoleCommand( et.EXEC_APPEND, "".. str .. "\n" )
 					if strnumber[1] == "forcecvar" then
 						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3etpro svcmd: ^7forcing client cvar ["..strnumber[2].."] to [".. Cvar1 .."]\n" )
@@ -2087,10 +2080,10 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 		end
 	end
 
---et.G_Print("******************************    " .. AdminUserLevel(PlayerID) .. "\n")
+--et.G_Print("******************************    " .. getAdminLevel(PlayerID) .. "\n")
 --et.G_Print("******************************    " .. admin_req .. "\n")
 
-	if AdminUserLevel(PlayerID) >= admin_req then
+	if getAdminLevel(PlayerID) >= admin_req then
 		if (string.lower(BangCommand) == k_commandprefix.."admintest") then
 			adminStatus(PlayerID)
         elseif (string.lower(BangCommand) == k_commandprefix .. "time") then
@@ -2125,42 +2118,42 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --Admin commands
 	--level 3
   if (string.lower(BangCommand) == k_commandprefix.."gib") then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gib:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."slap") then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Slap:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix .. "setlevel") then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Setlevel:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."readconfig" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3ReadConfig:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."spree_restart" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Spree reset:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."ban" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Ban:^7 \[partname/id#\] \[reason\]\n" )
 		else
@@ -2173,7 +2166,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Ban:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."getip" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getip:^7 \[partname/id#\]\n" )
 		else
@@ -2186,7 +2179,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getip:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."getguid" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getguid:^7 \[partname/id#\]\n" )
 		else
@@ -2199,7 +2192,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Getguid:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."makeshoutcaster" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makeshoutcaster:^7 \[partname/id#\]\n" )
 		else
@@ -2212,7 +2205,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makeshoutcaster:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."removeshoutcaster" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removeshoutcaster:^7 \[partname/id#\]\n" )
 		else
@@ -2225,7 +2218,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removeshoutcaster:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."makereferee" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makereferee:^7 \[partname/id#\]\n" )
 		else
@@ -2238,7 +2231,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Makereferee:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."removereferee" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removereferee:^7 \[partname/id#\]\n" )
 		else
@@ -2251,7 +2244,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Removereferee:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."gravity" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 Changes the gravity \[default = 800\]\n" )
 		else
@@ -2267,7 +2260,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Gravity:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."knifeonly" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7 Disable or enable g_knifeonly \[0-1\]\n" )
 		else
@@ -2287,7 +2280,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knifeonly:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."speed" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Changes game speed \[default = 320\]\n" )
 		else
@@ -2303,7 +2296,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."knockback" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Changes knockback \[default = 1000\]\n" )
 		else
@@ -2319,7 +2312,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."cheats" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Disable or enable cheats \[0-1\]\n" )
 		else
@@ -2339,7 +2332,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."laser" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Disable or enable g_debugbullets \[0-1\]\n" )
 		else
@@ -2359,35 +2352,35 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."crazygravity" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Crazygravity:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."panzerwar" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Panzerwar:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."frenzy" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Frenzy:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."grenadewar" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
         execute_command(params)
 --	else
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Grenadewar:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."sniperwar" ) then
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
         dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
         execute_command(params)
 --	else
@@ -2401,7 +2394,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 
 	--level 2
   if (string.lower(BangCommand) == k_commandprefix.."kick" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n" )
 		else
@@ -2414,7 +2407,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."warn" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 \[partname/id#\] \[reason\]\n" )
 		else
@@ -2427,7 +2420,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."mute" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 \[partname/id#\]\n" )
 		else
@@ -2440,7 +2433,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."pmute" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 \[partname/id#\]\n" )
 		else
@@ -2453,7 +2446,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."timelimit" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		local timel = tonumber(Cvar1)
 		if timel then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "timelimit " .. timel .. "\n" )
@@ -2465,7 +2458,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unlock:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."unmute" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 \[partname/id#\]\n" )
 		else
@@ -2478,7 +2471,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 --		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Unmute:^7 command unavailible due to lack of required admin status!\n" )
 --	end
   elseif (string.lower(BangCommand) == k_commandprefix.."finger" ) then
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 		if Cvarct < 3 then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Finger:^7 \[partname/id#\]\n" )
 		else
@@ -2496,7 +2489,7 @@ end
 
 function lstcomds( PlayerID )
 	for i=0, k_maxAdminLevels, 1 do
-		if AdminUserLevel(PlayerID) >= i then
+		if getAdminLevel(PlayerID) >= i then
 			et.trap_SendServerCommand(PlayerID, string.format("print \"Level " .. i .. " Commands\n"))
 			et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
 			for q=1, tonumber(lvlsc[i]), 3 do
@@ -2519,7 +2512,7 @@ function lstcomds( PlayerID )
 	end
 
 
---	if AdminUserLevel(PlayerID) >= 0 then
+--	if getAdminLevel(PlayerID) >= 0 then
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 0 Commands\n"))
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
 --		for q=1, tonumber(lvl0c), 3 do
@@ -2539,7 +2532,7 @@ function lstcomds( PlayerID )
 --		end
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
 --	end
---	if AdminUserLevel(PlayerID) >= 1 then
+--	if getAdminLevel(PlayerID) >= 1 then
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 1 Commands \[PROTECTED USER\]\n"))
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
 --		for w=1, tonumber(lvl1c), 3 do
@@ -2559,7 +2552,7 @@ function lstcomds( PlayerID )
 --		end
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
 --	end
---	if AdminUserLevel(PlayerID) >= 2 then
+--	if getAdminLevel(PlayerID) >= 2 then
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 2 Commands\n"))
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
 --		for r=1, tonumber(lvl2c), 3 do
@@ -2579,7 +2572,7 @@ function lstcomds( PlayerID )
 --		end
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n\n"))
 --	end
---	if AdminUserLevel(PlayerID) == 3 then
+--	if getAdminLevel(PlayerID) == 3 then
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"Level 3 Commands \[SILENT COMMANDS WITH /sc \(command\)\]\n"))
 --		et.trap_SendServerCommand(PlayerID, string.format("print \"^1-------------------------------------------------------------------\n"))
 --		for t=1, tonumber(lvl3c), 3 do
@@ -2664,7 +2657,7 @@ function kills(victim, killer, meansOfDeath, weapon)
 if Gamestate == 0 then
 	if k_teamkillrestriction == 1 then
 		if victimteam == killerteam and killer ~= victim and killer ~= 1022 then
-			if AdminUserLevel(killer) < k_tk_protect then
+			if getAdminLevel(killer) < k_tk_protect then
 
 				local warning = (k_tklimit_low + 1)
 				local pbkiller = killer + 1
@@ -3666,7 +3659,7 @@ function et_RunFrame(levelTime)
 
     if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
         for i = 0, clientsLimit, 1 do
-            if AdminUserLevel(i) >= 1 then
+            if getAdminLevel(i) >= 1 then
                 local team = et.gentity_get(i, "sess.sessionTeam")
 
                 if team >= 3 or team < 1 then
@@ -4257,7 +4250,7 @@ function et_ClientCommand(clientNum, command)
             say_parms = "qsay"
             et_ClientSay( clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
         elseif arg0 == "sc" then
-            if AdminUserLevel(clientNum) == 3 then
+            if getAdminLevel(clientNum) == 3 then
                 local name = et.gentity_get(clientNum, "pers.netname")
 
                 if k_advancedpms == 1 then
@@ -4305,7 +4298,7 @@ function et_ClientCommand(clientNum, command)
             return 1
         end
 
-        if AdminUserLevel(clientNum) >= 2 then
+        if getAdminLevel(clientNum) >= 2 then
             if string.lower(command) == "admins" then
                 admins(clientNum)
                 return 1
@@ -4324,7 +4317,7 @@ function et_ClientCommand(clientNum, command)
     if votedis == 1 then
         local vote = et.trap_Argv(1)
 
-        if AdminUserLevel(clientNum) < 3 then
+        if getAdminLevel(clientNum) < 3 then
             if et.trap_Argv(0) == "callvote" then
                 if vote == "shuffleteamsxp" or vote == "shuffleteamsxp_norestart" or vote == "nextmap" or vote == "swapteams" or vote == "matchreset" or vote == "maprestart" or vote == "map" then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
@@ -4370,7 +4363,7 @@ function et_ClientCommand(clientNum, command)
 
     if string.lower(command) == "ma" or string.lower(command) == "pma" then
         for i = 0, clientsLimit, 1 do
-            if AdminUserLevel(i) >= 2 then
+            if getAdminLevel(i) >= 2 then
                 local name = et.gentity_get(clientNum, "pers.netname") 
                 et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
 
@@ -4380,7 +4373,7 @@ function et_ClientCommand(clientNum, command)
             end
         end
 
-        if AdminUserLevel(clientNum) < 2 then
+        if getAdminLevel(clientNum) < 2 then
             et.trap_SendServerCommand(clientNum, ("b 8 \"^dPm to admins has been sent^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
 
             if k_advancedpms == 1 then
@@ -4520,7 +4513,7 @@ function et_ConsoleCommand()
         return 1
     elseif arg0 == "ma" or arg0 == "pma" then
             for i = 0, clientsLimit, 1 do
-                if AdminUserLevel(i) >= 2 then
+                if getAdminLevel(i) >= 2 then
                     et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from ^1SERVER^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
                     et.G_ClientSound(i, pmsound)
                 end
@@ -4558,7 +4551,7 @@ function et_Print(text)
         local vote = t[4]
         local target = tonumber(t[5])
 
-        if (vote == "kick" or vote == "mute") and AdminUserLevel(caller) < AdminUserLevel(target) then
+        if (vote == "kick" or vote == "mute") and getAdminLevel(caller) < getAdminLevel(target) then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n")
         end
     end
