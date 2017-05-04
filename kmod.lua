@@ -1021,6 +1021,7 @@ end
 
 function setMapSpreeRecord(PlayerID, kills2)
     local mapname = tostring(et.trap_Cvar_Get("mapname"))
+    -- TODO base path of sprees directory
     local fdadm,len = et.trap_FS_FOpenFile("sprees/" .. mapname .. ".record", et.FS_WRITE)
     local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
     local date = os.date("%x %I:%M:%S%p")
@@ -1031,8 +1032,37 @@ function setMapSpreeRecord(PlayerID, kills2)
     et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
     et.trap_FS_FCloseFile(fdadm)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills on " .. mapname .."  ^7" .. tostring(oldmapspree) .. "\n")
-    loadmapspreerecord()
+    loadMapSpreeRecord()
 end
+
+function loadMapSpreeRecord()
+    local mapname = tostring(et.trap_Cvar_Get("mapname"))
+    -- TODO base path of sprees directory
+    local fd,len = et.trap_FS_FOpenFile("sprees/" .. mapname .. ".record", et.FS_READ)
+    local kills = 0
+    local date = ""
+    local name = ""
+
+    if len <= 0 then
+        et.G_Print("WARNING: No spree record found! \n")
+        oldmapspree = "^3[Old: ^7N/A^3]"
+        oldmapspree2 = "^3Map Spree Record: ^7There is no current spree record"
+        mapspreerecordkills = 0
+    else
+        local filestr = et.trap_FS_Read(fd, len)
+
+        s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
+        mapspreerecordkills = tonumber(kills)
+        oldmapspree = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
+        oldmapspree2 = "^3Map Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date .. " on the map of " .. mapname
+        intmMaprecord = "Current Map spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+
+    end
+
+    et.trap_FS_FCloseFile(fd)
+end
+
+--
 
 function ParseString(inputString)
 	local i = 1
@@ -1047,33 +1077,6 @@ end
 function floodprotector()
 	floodprotect = 1
 	fpProt = tonumber(mtime)
-end
-
-function loadmapspreerecord()
-	local mapname = tostring(et.trap_Cvar_Get("mapname"))
-	local fd,len = et.trap_FS_FOpenFile( "sprees/"..mapname..".record", et.FS_READ )
-	local kills = 0
-	local date = ""
-	local name = ""
-
-	if len <= 0 then
-		et.G_Print("WARNING: No spree record found! \n")
-		oldmapspree = "^3[Old: ^7N/A^3]"
-		oldmapspree2 = "^3Map Spree Record: ^7There is no current spree record"
-		mapspreerecordkills = 0
-	else
-		local filestr = et.trap_FS_Read( fd, len )
-
-		s,e,kills,date,name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-		
-		mapspreerecordkills = tonumber(kills)
-		oldmapspree = "^3[Old: ^7" ..name.. "^3 " .. kills .. "^7 @ " ..date.. "^3]"
-		oldmapspree2 = "^3Map Spree Record: ^7" ..name.. "^7 with ^3" .. kills .. "^7 kills at " ..date.. " on the map of " ..mapname
-		intmMaprecord = "Current Map spree record: ^7" ..name.. "^7 with ^3" .. kills .. "^7 kills at " ..date
-
-	end
-
-	et.trap_FS_FCloseFile( fd ) 
 end
 
 function getsetlvlidfname(name) 
@@ -1770,7 +1773,7 @@ function readconfig()
 
 	loadAdmins()
 	loadSpreeRecord()
-	loadmapspreerecord()
+	loadMapSpreeRecord()
 
 	k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
 
@@ -2974,7 +2977,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
     loadAdmins()
     loadSpreeRecord()
-    loadmapspreerecord()
+    loadMapSpreeRecord()
     loadMutes()
 
     local currentver = et.trap_Cvar_Get("mod_version")
