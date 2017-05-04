@@ -1171,6 +1171,61 @@ function readConfig()
     loadCommands()
 end
 
+function client2id(client, cmd, verbose, cmdSaid)
+    local clientNum = tonumber(client)
+
+    if clientNum then
+        if clientNum >= 0 and clientNum < 64 then
+            if et.gentity_get(clientNum, "pers.connected") ~= 2 then
+                if verbose == 'client' then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7There is no client associated with this slot number\n")
+                elseif verbose == 'console' then
+                    et.G_Print("There is no client associated with this slot number\n")
+                end
+
+                return nil
+            end
+        else
+            if verbose == 'client' then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Please enter a slot number between 0 and 63\n")
+            elseif verbose == 'console' then
+                et.G_Print("Please enter a slot number between 0 and 63\n")
+            end
+
+            return nil
+        end
+    else
+        if client then
+            s, e = string.find(client, client)
+
+            if e <= 2 then
+                if verbose == 'client' then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Player name requires more than 2 characters\n")
+                elseif verbose == 'console' then
+                    et.G_Print("Player name requires more than 2 characters\n")
+                end
+
+                return nil
+            else
+                clientNum = getPlayernameToId(client)
+            end
+        end
+
+        if not clientNum then
+            if verbose == 'client' then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7Try name again or use slot number\n")
+            elseif verbose == 'console' then
+                et.G_Print("Try name again or use slot number\n")
+            end
+
+            return nil
+        end
+    end
+
+    return clientNum
+end
+
+
 --
 
 function ParseString(inputString)
@@ -1375,7 +1430,7 @@ function dmg_test( PlayerID )
 end
 
 function comds(client, cvar1, caller)
-	local clientnum = tonumber(client) 
+	local clientNum = tonumber(client) 
 	if clientnum then 
 	local wname = ""
       if (clientnum >= 0) and (clientnum < 64) then 
@@ -1489,14 +1544,6 @@ function comds(client, cvar1, caller)
  	elseif putspec then
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. clientnum .. "\n" )
 		putspec = false
-		commandSaid = false
- 	elseif makeshoutcaster then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref makeshoutcaster " .. clientnum .. "\n" )
-		makeshoutcaster = false
-		commandSaid = false
- 	elseif removeshoutcaster then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref removeshoutcaster " .. clientnum .. "\n" )
-		removeshoutcaster = false
 		commandSaid = false
  	elseif makereferee then
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref referee " .. clientnum .. "\n" )
@@ -1737,23 +1784,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
                 comds(Cvar1, PlayerID)
             end
         elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Makeshoutcaster:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                makeshoutcaster = true
-                fullcom = "Makeshoutcaster"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/makeshoutcaster.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Removeshoutcaster:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                removeshoutcaster = true
-                fullcom = "Removeshoutcaster"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/removeshoutcaster.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "makereferee" then
             if Cvarct < 3 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Makereferee:^7 \[partname/id#\]\n")
