@@ -9,7 +9,7 @@ function execute_command(params)
     local spa = 23
     local adname = ""
 
-    for i = 0, clientLimit, 1 do
+    for i = 0, clientsLimit, 1 do
         guis = et.Info_ValueForKey(et.trap_GetUserinfo(i), "cl_guid")
         GUID = string.upper(guis)
         local teamnumber = tonumber(et.gentity_get(i, "sess.sessionTeam"))

@@ -8,7 +8,7 @@ function execute_command(params)
     local playercount = 0
     local spa = 24
 
-    for i = 0, clientLimit, 1 do
+    for i = 0, clientsLimit, 1 do
         local teamnumber = tonumber(et.gentity_get(i, "sess.sessionTeam"))
         local cname = et.Info_ValueForKey( et.trap_GetUserinfo(i), "name")
         local rate = et.Info_ValueForKey(et.trap_GetUserinfo(i), "rate")

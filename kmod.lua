@@ -988,30 +988,6 @@ function ParseString(inputString)
 	return t
 end
 
-function killingspreereset()
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		local name = et.gentity_get(i,"pers.netname")
-		if killingspree[i] >= 5 then
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." ^7" ..name.. "^1's Killing spree was ended! Sprees Disabled!\n" )
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1Killingspree's disabled.  All sprees reset.\n" )
-		end
-
-		killingspree[i] = 0
-	end
-end
-
-function dspreereset()
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		deathspree[i] = 0
-	end
-end
-
-function flakreset()
-	for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-		flakmonkey[i] = 0
-	end
-end
-
 function floodprotector()
 	floodprotect = 1
 	fpProt = tonumber(mtime)
@@ -2469,6 +2445,30 @@ end
 
 -- et_RunFrame
 
+function killingSpreeReset()
+    for i = 0, clientsLimit, 1 do
+        local name = et.gentity_get(i, "pers.netname")
+
+        if killingspree[i] >= 5 then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1Killingspree's disabled.  All sprees reset.\n")
+        end
+
+        killingspree[i] = 0
+    end
+end
+
+function deathSpreeReset()
+    for i = 0, clientsLimit, 1 do
+        deathspree[i] = 0
+    end
+end
+
+function flakMonkeyReset()
+    for i = 0, clientsLimit, 1 do
+        flakmonkey[i] = 0
+    end
+end
+
 -- Get location of displayed message on client screen.
 -- 1 : chat area
 -- 2 : center screen area
@@ -3447,7 +3447,7 @@ function et_RunFrame(levelTime)
 
     if k_sprees == 0 then
         if antiloop2 == 0 then
-            killingspreereset()
+            killingSpreeReset()
         end
 
         antiloop2 = 1
@@ -3457,7 +3457,7 @@ function et_RunFrame(levelTime)
 
     if k_deathsprees == 0 then
         if antiloop3 == 0 then
-            dspreereset()
+            deathSpreeReset()
         end
 
         antiloop3 = 1
@@ -3467,7 +3467,7 @@ function et_RunFrame(levelTime)
 
     if k_flakmonkey == 0 then
         if antiloop4 == 0 then
-            flakreset()
+            flakMonkeyReset()
         end
 
         antiloop4 = 1
