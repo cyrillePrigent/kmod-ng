@@ -1545,14 +1545,6 @@ function comds(client, cvar1, caller)
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. clientnum .. "\n" )
 		putspec = false
 		commandSaid = false
- 	elseif makereferee then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref referee " .. clientnum .. "\n" )
-		makereferee = false
-		commandSaid = false
- 	elseif removereferee then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref unreferee " .. clientnum .. "\n" )
-		removereferee = false
-		commandSaid = false
  	elseif finger then
 		adminStatus(clientnum)
  	elseif getip then
@@ -1790,23 +1782,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/removeshoutcaster.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "makereferee" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Makereferee:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                makereferee = true
-                fullcom = "Makereferee"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/makereferee.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "removereferee" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Removereferee:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                removereferee = true
-                fullcom = "Removereferee"
-                comds(Cvar1)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/removereferee.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "gravity" then
             if Cvarct < 3 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Changes the gravity \[default = 800\]\n")
