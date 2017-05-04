@@ -976,7 +976,23 @@ function getAdminLevel(PlayerID)
     return 0
 end
 
---
+-- Spree function
+
+function setSpreeRecord(PlayerID, kills2)
+    -- TODO base path of sprees directory
+    local fdadm, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
+    local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo(PlayerID), "name"))
+    local date = os.date("%x %I:%M:%S%p")
+    local kills = tonumber(kills2)
+
+    SPREE = kills .. "@" .. date .. "@" .. Name
+
+    et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
+    et.trap_FS_FCloseFile(fdadm)
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills  ^7" .. tostring(oldspree) .. "\n")
+    loadspreerecord()
+end
+
 
 function ParseString(inputString)
 	local i = 1
@@ -991,20 +1007,6 @@ end
 function floodprotector()
 	floodprotect = 1
 	fpProt = tonumber(mtime)
-end
-
-function spreerecord(PlayerID, kills2)
-	local fdadm,len = et.trap_FS_FOpenFile( "sprees/spree_record.dat", et.FS_WRITE )
-	local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo( PlayerID ), "name" ))
-	local date = os.date("%x %I:%M:%S%p")
-	local kills = tonumber(kills2)
-
-	SPREE = kills .. "@" .. date .. "@" .. Name
-
-	et.trap_FS_Write( SPREE, string.len(SPREE) ,fdadm )
-	et.trap_FS_FCloseFile( fdadm )
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^1New spree record: ^7" ..Name.. " ^7with^3 " ..kills.. "^7 kills  ^7" ..tostring(oldspree).. "\n" )
-	loadspreerecord()
 end
 
 function loadspreerecord()
@@ -2706,7 +2708,7 @@ function kills(victim, killer, meansOfDeath, weapon)
 
         if k_spreerecord == 1 then
             if killr[victim] > spreerecordkills then
-                spreerecord(victim, killr[victim])
+                setSpreeRecord(victim, killr[victim])
             end
 
             if killr[victim] > mapspreerecordkills then
