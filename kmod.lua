@@ -1489,11 +1489,6 @@ function comds(client, cvar1, caller)
 		end
 		kick = false
 		commandSaid = false
- 	elseif ban then
-		local client2 = clientnum+1
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "pb_sv_ban " .. client2 .. " " .. cvar1 .. "\n" )
-		ban = false
-		commandSaid = false
  	elseif warn then
 		local name = et.gentity_get(clientnum,"pers.netname")
 		wname = string.lower(et.Q_CleanStr( name ))
@@ -1741,14 +1736,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "ban" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Ban:^7 \[partname/id#\] \[reason\]\n")
-            else
-                commandSaid = true
-                ban = true
-                fullcom = "Ban"
-                comds(Cvar1, Cvar2)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/ban.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "getip" then
             if Cvarct < 3 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Getip:^7 \[partname/id#\]\n")
