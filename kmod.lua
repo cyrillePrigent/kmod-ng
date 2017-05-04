@@ -126,14 +126,12 @@ EV_GENERAL_SOUND = 49
 team = { "AXIS" , "ALLIES" , "SPECTATOR" }
 class = { [0]="SOLDIER" , "MEDIC" , "ENGINEER" , "FIELD OPS" , "COVERT OPS" }
 
---AdminLV0 = {}
---AdminLV1 = {}
---AdminLV2 = {}
---AdminLV3 = {}
 AdminLV = {}
-for z=0, 9999, 1 do
-	AdminLV[z] = {}
+
+for z = 0, 9999, 1 do
+    AdminLV[z] = {}
 end
+
 chkGUID = {}
 AdminName = {}
 originalclass = {}
@@ -397,43 +395,6 @@ sweapons = {
 	false	--WP_AKIMBO_SILENCEDLUGER,// 48
 }
 
---[[
-lvl0c = 5
-lvl0 = {
-	k_commandprefix.."admintest",
-	k_commandprefix.."time",
-	k_commandprefix.."date",
-	k_commandprefix.."spree_record",
-	k_commandprefix.."tk_index",
-}
-
-lvl1c = 1
-lvl1 = {
-	k_commandprefix.."spec999",
-}
-
-lvl2c = 1
-lvl2 = {
-	k_commandprefix.."finger",
-}
-
-lvl3c = 13
-lvl3 = {
-	k_commandprefix.."ban",
-	k_commandprefix.."readconfig",
-	k_commandprefix.."spree_restart",
-	k_commandprefix.."getip",
-	k_commandprefix.."crazygravity",
-	k_commandprefix.."getguid",
-	k_commandprefix.."setlevel",
-	k_commandprefix.."gib",
-	k_commandprefix.."slap",
-	k_commandprefix.."panzerwar",
-	k_commandprefix.."frenzy",
-	k_commandprefix.."grenadewar",
-	k_commandprefix.."sniperwar",
-}
---]]
 lvls = {}
 lvlsc = {}
 
@@ -1187,6 +1148,29 @@ function loadCommands()
     et.trap_FS_FCloseFile(fd)
 end
 
+function readConfig()
+    loadAdmins()
+    loadSpreeRecord()
+    loadMapSpreeRecord()
+
+    k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
+
+    for i = 0, k_maxAdminLevels, 1 do
+        t = tostring(et.trap_Cvar_Get("k_Admin" .. i))
+        local c = 1
+        lvls[i] = {}
+
+        for w in string.gfind(t, "([^%s]+)%s*") do
+            lvls[i][c] = k_commandprefix .. w
+            c=c + 1
+        end
+
+        lvlsc[i] = c - 1
+    end
+
+    loadCommands()
+end
+
 --
 
 function ParseString(inputString)
@@ -1541,88 +1525,6 @@ function comds(client, cvar1, caller)
 	end
 
 
-end
-
-function readconfig()
-
-	loadAdmins()
-	loadSpreeRecord()
-	loadMapSpreeRecord()
-
-	k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
-
-	for i=0, k_maxAdminLevels, 1 do
-		t = tostring(et.trap_Cvar_Get("k_Admin" .. i))
-		local c = 1
-		lvls[i] = {}
-		for w in string.gfind(t, "([^%s]+)%s*") do
-			lvls[i][c]=k_commandprefix .. w
---			if type(lvls[i][c]) ~= "string" then
---				et.G_Print("i and c = " .. i .. " and " .. c .. " = nil\n")
---			else
---				et.G_Print("i and c = " .. i .. " and " .. c .. " = " .. lvls[i][c] .. "\n")
---			end
-			c=c+1
-		end
-		lvlsc[i] = c-1
---		et.G_Print("lvlsc = " .. lvlsc[i] .. "\n")
-	end
-
---[[	
-	lvl0c = 5
-	lvl0 = {
-		k_commandprefix.."admintest",
-		k_commandprefix.."time",
-		k_commandprefix.."date",
-		k_commandprefix.."spree_record",
-		k_commandprefix.."tk_index",
-	}
-
-	lvl1c = 1
-	lvl1 = {
-		k_commandprefix.."spec999",
-	}
-
-	lvl2c = 7
-	lvl2 = {
-		k_commandprefix.."finger",
-		k_commandprefix.."kick",
-		k_commandprefix.."warn",
-		k_commandprefix.."mute",
-		k_commandprefix.."pmute",
-		k_commandprefix.."unmute",
-		k_commandprefix.."timelimit",
-	}
-
-	lvl3c = 23
-	lvl3 = {
-		k_commandprefix.."ban",
-		k_commandprefix.."readconfig",
-		k_commandprefix.."makeshoutcaster",
-		k_commandprefix.."makereferee",
-		k_commandprefix.."removeshoutcaster",
-		k_commandprefix.."removereferee",
-		k_commandprefix.."gravity",
-		k_commandprefix.."speed",
-		k_commandprefix.."knifeonly",
-		k_commandprefix.."knockback",
-		k_commandprefix.."cheats",
-		k_commandprefix.."laser",
-		k_commandprefix.."spree_restart",
-		k_commandprefix.."getip",
-		k_commandprefix.."crazygravity",
-		k_commandprefix.."getguid",
-		k_commandprefix.."setlevel",
-		k_commandprefix.."gib",
-		k_commandprefix.."slap",
-		k_commandprefix.."panzerwar",
-		k_commandprefix.."frenzy",
-		k_commandprefix.."grenadewar",
-		k_commandprefix.."sniperwar",
-	}
---]]
-
-	loadCommands()
 end
 
 function randomClientFinder()
@@ -2794,7 +2696,7 @@ function et_InitGame(levelTime, randomSeed, restart)
         killr[i] = 0
     end
 
-    readconfig()
+    readConfig()
 
     et.G_Print("KMOD version " .. KMODversion .. " has been initialized...\n")
 end
