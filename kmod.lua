@@ -2412,102 +2412,6 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
 end
 end
 
-function deaths(victim, killer, meansOfDeath, weapon)
-    weapon = getMeansOfDeathName(meansOfDeath)
-
-	local kil = tonumber(killer)
-	local killername = ""
-
-	if killer == 1022 then
-		killername="The World"
-	else
-		killername=et.Info_ValueForKey( et.trap_GetUserinfo( killer ), "name" )
-	end
-	playerwhokilled[victim] = killer
-	killedwithweapv[victim] = tostring(weapon)
-
-	local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam")) 
-	local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
-	local killedname=et.Info_ValueForKey( et.trap_GetUserinfo( victim ), "name" )
-
-		if k_spreerecord == 1 then
-			if killr[victim] > spreerecordkills then
-				spreerecord(victim, killr[victim])
-				--killr[victim] = 0
-			else
-				--killr[victim] = 0
-			end
-			if killr[victim] > mapspreerecordkills then
-				mapspreerecord(victim, killr[victim])
-				killr[victim] = 0
-			else
-				killr[victim] = 0
-			end
-		end
-
-
-
-if k_deathsprees == 1 then
-	deathspree[victim]=deathspree[victim]+1
-end
-		if k_sprees == 1 then
-			if (killingspree[victim]>=5) then
-				local str = string.gsub(k_end_message1, "#victim#", killedname)
-				local str = string.gsub(str, "#kills#", killingspree[victim])
-				local str = string.gsub(str, "#killer#", killername)
-
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ks_location.." "..str.."\n" )
-				killingspree[victim]=0
-			else
-				killingspree[victim]=0
-			end
-		end
-
-	flakmonkey[victim]=0
---	multikill[victim]=0
-
-if k_deathsprees == 1 then
-	if (deathspree[victim]==k_deathspree1_amount) then
-		local str = string.gsub(k_ds_message1, "#victim#", killedname)
-		local str = string.gsub(str, "#deaths#", deathspree[victim])
-
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ds_location.." "..str.."\n" )
-		if k_deathspreesounds == 1 then
-			if k_noisereduction == 1 then
-				et.G_ClientSound(victim, deathspreesound1)
-			else
-				et.G_globalSound(deathspreesound1)
-			end
-		end
-	elseif (deathspree[victim]==k_deathspree2_amount) then
-		local str = string.gsub(k_ds_message2, "#victim#", killedname)
-		local str = string.gsub(str, "#deaths#", deathspree[victim])
-
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ds_location.." "..str.."\n" )
-		if k_deathspreesounds == 1 then
-			if k_noisereduction == 1 then
-				et.G_ClientSound(victim, deathspreesound2)
-			else
-				et.G_globalSound(deathspreesound2)
-			end
-		end
-	elseif (deathspree[victim]==k_deathspree3_amount) then
-		local str = string.gsub(k_ds_message3, "#victim#", killedname)
-		local str = string.gsub(str, "#deaths#", deathspree[victim])
-
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..ds_location.." "..str.."\n" )
-		if k_deathspreesounds == 1 then
-			if k_noisereduction == 1 then
-				et.G_ClientSound(victim, deathspreesound3)
-			else
-				et.G_globalSound(deathspreesound3)
-			end
-		end
-	end
-end
-
-end
-
 function et.G_ClientSound(clientnum, soundfile)
 	local tempentity = et.G_TempEntity(et.gentity_get(clientnum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
 	et.gentity_set(tempentity, "s.teamNum", clientnum)
@@ -2974,6 +2878,82 @@ function kills(victim, killer, meansOfDeath, weapon)
             end
         else
             flakmonkey[killer] = 0
+        end
+    end
+end
+
+function deathSpreeProcess(msg, sound)
+    local str = string.gsub(msg, "#victim#", killedname)
+    local str = string.gsub(str, "#deaths#", deathspree[victim])
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, ds_location .. " " .. str .. "\n" )
+
+    if k_deathspreesounds == 1 then
+        if k_noisereduction == 1 then
+            et.G_ClientSound(victim, sound)
+        else
+            et.G_globalSound(sound)
+        end
+    end
+end
+
+function deaths(victim, killer, meansOfDeath, weapon)
+    weapon = getMeansOfDeathName(meansOfDeath)
+
+    local kil = tonumber(killer)
+    local killername = ""
+
+    if killer == 1022 then
+        killername = "The World"
+    else
+        killername = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+    end
+
+    playerwhokilled[victim] = killer
+    killedwithweapv[victim] = tostring(weapon)
+
+    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
+    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+    local killedname = et.Info_ValueForKey(et.trap_GetUserinfo( victim ), "name")
+
+    if k_spreerecord == 1 then
+        if killr[victim] > spreerecordkills then
+            spreerecord(victim, killr[victim])
+        end
+
+        if killr[victim] > mapspreerecordkills then
+            mapspreerecord(victim, killr[victim])
+            killr[victim] = 0
+        else
+            killr[victim] = 0
+        end
+    end
+
+    if k_deathsprees == 1 then
+        deathspree[victim] = deathspree[victim] + 1
+    end
+
+    if k_sprees == 1 then
+        if killingspree[victim] >= 5 then
+            local str = string.gsub(k_end_message1, "#victim#", killedname)
+            local str = string.gsub(str, "#kills#", killingspree[victim])
+            local str = string.gsub(str, "#killer#", killername)
+
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
+            killingspree[victim] = 0
+        else
+            killingspree[victim] = 0
+        end
+    end
+
+    flakmonkey[victim] = 0
+
+    if k_deathsprees == 1 then
+        if deathspree[victim] == k_deathspree1_amount then
+            deathSpreeProcess(k_ds_message1, deathspreesound1)
+        elseif deathspree[victim] == k_deathspree2_amount then
+            deathSpreeProcess(k_ds_message2, deathspreesound2)
+        elseif deathspree[victim] == k_deathspree3_amount then
+            deathSpreeProcess(k_ds_message3, deathspreesound3)
         end
     end
 end
