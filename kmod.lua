@@ -990,7 +990,33 @@ function setSpreeRecord(PlayerID, kills2)
     et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
     et.trap_FS_FCloseFile(fdadm)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills  ^7" .. tostring(oldspree) .. "\n")
-    loadspreerecord()
+    loadSpreeRecord()
+end
+
+function loadSpreeRecord()
+    -- TODO base path of sprees directory
+    local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_READ)
+    local kills = 0
+    local date = ""
+    local name = ""
+
+    if len <= 0 then
+        et.G_Print("WARNING: No spree record found! \n")
+        oldspree = "^3[Old: ^7N/A^3]"
+        oldspree2 = "^3Spree Record: ^7There is no current spree record"
+        spreerecordkills = 0
+    else
+        local filestr = et.trap_FS_Read(fd, len)
+
+        s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
+        spreerecordkills = tonumber(kills)
+        oldspree = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
+        oldspree2 = "^3Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+        intmrecord = "Current spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+
+    end
+
+    et.trap_FS_FCloseFile(fd)
 end
 
 
@@ -1007,32 +1033,6 @@ end
 function floodprotector()
 	floodprotect = 1
 	fpProt = tonumber(mtime)
-end
-
-function loadspreerecord()
-	local fd,len = et.trap_FS_FOpenFile( "sprees/spree_record.dat", et.FS_READ )
-	local kills = 0
-	local date = ""
-	local name = ""
-
-	if len <= 0 then
-		et.G_Print("WARNING: No spree record found! \n")
-		oldspree = "^3[Old: ^7N/A^3]"
-		oldspree2 = "^3Spree Record: ^7There is no current spree record"
-		spreerecordkills = 0
-	else
-		local filestr = et.trap_FS_Read( fd, len )
-
-		s,e,kills,date,name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-		
-		spreerecordkills = tonumber(kills)
-		oldspree = "^3[Old: ^7" ..name.. "^3 " .. kills .. "^7 @ " ..date.. "^3]"
-		oldspree2 = "^3Spree Record: ^7" ..name.. "^7 with ^3" .. kills .. "^7 kills at " ..date
-		intmrecord = "Current spree record: ^7" ..name.. "^7 with ^3" .. kills .. "^7 kills at " ..date
-
-	end
-
-	et.trap_FS_FCloseFile( fd ) 
 end
 
 function mapspreerecord(PlayerID, kills2)
@@ -1770,7 +1770,7 @@ end
 function readconfig()
 
 	loadAdmins()
-	loadspreerecord()
+	loadSpreeRecord()
 	loadmapspreerecord()
 
 	k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
@@ -2974,7 +2974,7 @@ function et_InitGame(levelTime, randomSeed, restart)
     initTime = levelTime
 
     loadAdmins()
-    loadspreerecord()
+    loadSpreeRecord()
     loadmapspreerecord()
     loadMutes()
 
