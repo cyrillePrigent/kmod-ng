@@ -1429,72 +1429,6 @@ function dmg_test( PlayerID )
 	et.trap_SendServerCommand("print \"damage = " .. damage .. "\nsdmgflags = " .. sdmgflags .. "\nsessdamage_given = " .. sessdamage_given .. "\nsessdamage_received = " .. sessdamage_received .. "\n\"")
 end
 
-function comds(client, cvar1, caller)
-	local clientNum = tonumber(client) 
-	if clientnum then 
-	local wname = ""
-      if (clientnum >= 0) and (clientnum < 64) then 
-      	if et.gentity_get(clientnum,"pers.connected") ~= 2 then 
-			if commandSaid then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ": ^7There is no client associated with this slot number\n" )
-				commandSaid = false
-			else
-            		et.G_Print("There is no client associated with this slot number\n") 
-			end
-      	return 
-         	end 
-
-      else              
-		if commandSaid then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ": ^7Please enter a slot number between 0 and 63\n" )
-			commandSaid = false
-		else 
-         		et.G_Print("Please enter a slot number between 0 and 63\n") 
-		end
-      return 
-      end 
-	else 
-      	if client then 
-			s,e=string.find(client, client)
-				if e <= 2 then
-					if commandSaid then
-						et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ": ^7Player name requires more than 2 characters\n" )
-						commandSaid = false
-					else
-						et.G_Print("Player name requires more than 2 characters\n")
-					end
-	   			return
-				else
-			         	clientnum = getPlayernameToId(client)
-					wname = clientnum
-				end
-      	end 
-         	if not clientnum then 
-			if commandSaid then
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ": ^7Try name again or use slot number\n" )
-				commandSaid = false
-			else
-         			et.G_Print("Try name again or use slot number\n") 
-			end
-         	return 
-         	end 
-   	end 
-
- 	if putaxis then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref putaxis " .. clientnum .. "\n" )
-		putaxis = false
-		commandSaid = false
- 	elseif putallies then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref putallies " .. clientnum .. "\n" )
-		putallies = false
-		commandSaid = false
- 	elseif putspec then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. clientnum .. "\n" )
-		putspec = false
-		commandSaid = false
-	end
-end
-
 function randomClientFinder()
 	randomClient = {}
 	local m = 0
@@ -1812,6 +1746,15 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "pmute" then
             dofile(kmod_ng_path .. '/kmod/command/client/pmute.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putspec" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putspec.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putallies" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putallies.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putaxis" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putaxis.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "timelimit" then
             local timel = tonumber(Cvar1)
