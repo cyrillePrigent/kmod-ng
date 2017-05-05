@@ -1309,15 +1309,6 @@ function part2id(client)
     return clientNum
 end
 
-function dmg_test( PlayerID )
-	local damage = et.gentity_get(PlayerID, "damage")
-	local sdmgFlags = et.gentity_get(PlayerID, "s.dmgFlags")
-	local sessdamage_given = et.gentity_get(PlayerID, "sess.damage_given")
-	local sessdamage_received = et.gentity_get(PlayerID, "sess.damage_received")
-
-	et.trap_SendServerCommand("print \"damage = " .. damage .. "\nsdmgflags = " .. sdmgflags .. "\nsessdamage_given = " .. sessdamage_given .. "\nsessdamage_received = " .. sessdamage_received .. "\n\"")
-end
-
 function randomClientFinder()
 	randomClient = {}
 	local m = 0
@@ -3203,11 +3194,6 @@ function et_ClientCommand(clientNum, command)
                 logChat(clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
             end
         end
-    end
-
-    if arg0 == "dmg_test" then
-        dmg_test(clientNum)
-        return 1
     end
 
     if arg0 == "m" or arg0 == "pm"  then
