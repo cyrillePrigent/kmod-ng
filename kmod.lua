@@ -1633,17 +1633,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/removereferee.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "gravity" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Changes the gravity \[default = 800\]\n")
-            else
-                local grav = tonumber(Cvar1)
-                if grav then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity " .. grav .. "\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Gravity has been changed to " .. grav .. "\n")
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gravity:^7 Please enter in only numbers\n")
-                end
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/gravity.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "knifeonly" then
             if Cvarct < 3 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7 Disable or enable g_knifeonly \[0-1\]\n")
@@ -1663,29 +1654,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
                 end
             end
         elseif lowBangCmd == k_commandprefix .. "speed" then
-                if Cvarct < 3 then
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Changes game speed \[default = 320\]\n" )
-                else
-                    local speed2 = tonumber(Cvar1)
-                    if speed then
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_speed " .. speed2 .. "\n" )
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Game speed has been changed to " .. speed2 .. "\n" )
-                    else
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Speed:^7 Please enter in only numbers\n" )
-                    end
-                end
+            dofile(kmod_ng_path .. '/kmod/command/client/speed.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "knockback" then
-                if Cvarct < 3 then
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Changes knockback \[default = 1000\]\n" )
-                else
-                    local knock = tonumber(Cvar1)
-                    if knock then
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "g_knockback " .. knock .. "\n" )
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Knockback has been changed to " .. knock .. "\n" )
-                    else
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Knockback:^7 Please enter in only numbers\n" )
-                    end
-                end
+            dofile(kmod_ng_path .. '/kmod/command/client/knockback.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "cheats" then
                 if Cvarct < 3 then
                     et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Disable or enable cheats \[0-1\]\n" )
