@@ -1636,23 +1636,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/gravity.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "knifeonly" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7 Disable or enable g_knifeonly \[0-1\]\n")
-            else
-                local knife = tonumber(Cvar1)
-
-                if knife >= 0 and knife <= 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_knifeonly " .. knife .. "\n" )
-
-                    if knife == 1 then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7Knifeonly has been Enabled\n")
-                    else
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7Knifeonly has been Disabled\n")
-                    end
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Knifeonly:^7 Valid values are \[0-1\]\n")
-                end
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/knifeonly.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "speed" then
             dofile(kmod_ng_path .. '/kmod/command/client/speed.lua')
             execute_command(params)
@@ -1660,37 +1645,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/knockback.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "cheats" then
-                if Cvarct < 3 then
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Disable or enable cheats \[0-1\]\n" )
-                else
-                    local cheat = tonumber(Cvar1)
-                    if cheat >= 0 and cheat <= 1 then
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar sv_cheats " .. cheat .. "\n" )
-                        if cheat == 1 then
-                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Enabled\n" )
-                        else
-                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7Cheats have been Disabled\n" )
-                        end
-                    else
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Cheats:^7 Valid values are \[0-1\]\n" )
-                    end
-                end
+            dofile(kmod_ng_path .. '/kmod/command/both/cheats.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "laser" then
-                if Cvarct < 3 then
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Disable or enable g_debugbullets \[0-1\]\n" )
-                else
-                    local laser = tonumber(Cvar1)
-                    if laser >= 0 and laser <= 1 then
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, "forcecvar g_debugbullets " .. laser .. "\n" )
-                        if laser == 1 then
-                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Enabled\n" )
-                        else
-                            et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7Laser has been Disabled\n" )
-                        end
-                    else
-                        et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Laser:^7 Valid values are \[0-1\]\n" )
-                    end
-                end
+            dofile(kmod_ng_path .. '/kmod/command/both/laser.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "crazygravity" then
             dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
             execute_command(params)
