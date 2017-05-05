@@ -1328,12 +1328,6 @@ function randomClientFinder()
 	return dv2
 end
 
-function et.G_ClientSound(clientnum, soundfile)
-	local tempentity = et.G_TempEntity(et.gentity_get(clientnum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
-	et.gentity_set(tempentity, "s.teamNum", clientnum)
-	et.gentity_set(tempentity, "s.eventParm", et.G_SoundIndex(soundfile))
-end
-
 speaker = {}
 --for pse = 0, 63, 1 do
 --	speaker[pse] = et.G_Spawn()
@@ -3644,4 +3638,10 @@ function et_ClientSay(clientNum,mode,text)
 			end
 	end
 	return ClientUserCommand(clientNum, command1, first, second, third, commands)
+end
+
+function et.G_ClientSound(clientNum, soundFile)
+    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
+    et.gentity_set(tmpEntity, "s.teamNum", clientNum)
+    et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
 end
