@@ -1225,18 +1225,19 @@ function client2id(client, cmd, verbose, cmdSaid)
     return clientNum
 end
 
+function splitWord(inputString)
+    local i = 1
+    local t = {}
+
+    for w in string.gfind(inputString, "([^%s]+)%s*") do
+        t[i] = w
+        i = i + 1
+    end
+
+    return t
+end
 
 --
-
-function ParseString(inputString)
-	local i = 1
-	local t = {}
-	for w in string.gfind(inputString, "([^%s]+)%s*") do
-		t[i]=w
-		i=i+1
-	end
-	return t
-end
 
 function getPlayernameToId(name)
     local i = 0
@@ -2032,8 +2033,7 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
         local filestr = et.trap_FS_Read(fd, len)
 
         for level,comm,str in string.gfind(filestr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
-            local strnumber = {}
-            local strnumber = ParseString(str)
+            local strnumber = splitWord(str)
 
             local comm2 = k_commandprefix .. comm
             local t = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
@@ -3484,7 +3484,7 @@ end
 -- This makes it very easy to spoof.
 -- DO NOT TRUST STRINGS OBTAINED IN THIS WAY
 function et_Print(text)
-    local t = ParseString(text)
+    local t = splitWord(text)
 
     if t[1] == "saneClientCommand:" and t[3] == "callvote" then
         local caller = tonumber(t[2])
