@@ -1328,44 +1328,6 @@ function randomClientFinder()
 	return dv2
 end
 
-speaker = {}
---for pse = 0, 63, 1 do
---	speaker[pse] = et.G_Spawn()
---	et.G_AddEvent(pse, EV_GLOBAL_CLIENT_SOUND, 0)
---end
-
---for pse = 0, 63, 1 do
---	speaker[pse] = et.G_TempEntity(et.gentity_get(pse, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
---end
-
-function speaker_test(clientnum, soundfile)
-	local tempentity
-	
-	if speaker[clientnum] == nil then
-		tempentity = et.G_TempEntity(et.gentity_get(clientnum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
-		speaker[clientnum] = tempentity
-	else
-		local origin3 = {}
-		origin3[1] = -65536
-		origin3[2] = -65536
-		origin3[3] = -65536
-
-		et.gentity_set(speaker[clientnum], "r.currentOrigin", origin3)
-
-		tempentity = et.G_TempEntity(et.gentity_get(clientnum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
-		speaker[clientnum] = tempentity
-	end
-
-
-	et.gentity_set(tempentity, "s.teamNum", clientnum)
-	et.gentity_set(tempentity, "s.eventParm", et.G_SoundIndex(soundfile))
-
-	local origin = et.gentity_get(tempentity, "origin")
-	local origin2 = et.gentity_get(clientnum, "r.currentOrigin")
-	et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay " .. soundfile .. " was played at speaker " .. origin[1] .. ", " .. origin[2] .. ", " .. origin[3] .. " and you are at " .. origin2[1] .. ", " .. origin2[2] .. ", " .. origin2[3] .. "\n" )
-end
-
-
 
 
 
@@ -3145,9 +3107,6 @@ function et_ClientCommand(clientNum, command)
 
             say_parms = "qsay"
             et_ClientSay(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
-        elseif arg0 == "st" then
-            speaker_test(clientNum, et.ConcatArgs(1))
-            return 1
         elseif arg0 == "say_buddy" then
             if k_logchat == 1 then
                 logChat(clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
