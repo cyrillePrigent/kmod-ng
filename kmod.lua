@@ -1757,13 +1757,8 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/putaxis.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "timelimit" then
-            local timel = tonumber(Cvar1)
-            if timel then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, "timelimit " .. timel .. "\n" )
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Timelimit has been changed to " .. timel .. "\n" )
-            else
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Timelimit:^7 Please enter in only numbers\n" )
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/timelimit.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "unmute" then
             dofile(kmod_ng_path .. '/kmod/command/client/unmute.lua')
             execute_command(params)
