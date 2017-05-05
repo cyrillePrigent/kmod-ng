@@ -1480,27 +1480,7 @@ function comds(client, cvar1, caller)
          	end 
    	end 
 
- 	if kick then
-		local client2 = clientnum+1
-		if getAdminLevel(caller) > getAdminLevel(clientnum) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "pb_sv_kick " .. client2 .. " " .. cvar1 .. "\n" )
-		else
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot kick a higher admin\n" )
-		end
-		kick = false
-		commandSaid = false
- 	elseif warn then
-		local name = et.gentity_get(clientnum,"pers.netname")
-		wname = string.lower(et.Q_CleanStr( name ))
-		local cvar1 = tostring( cvar1 )
-		if getAdminLevel(caller) > getAdminLevel(clientnum) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref warn \"" .. wname .. "\" \"" .. cvar1 .. "\"\n" )
-		else
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot warn a higher admin\n" )
-		end
-		warn = false
-		commandSaid = false
- 	elseif mute then
+ 	if mute then
 		local name = et.gentity_get(clientnum,"pers.netname")
 		if getAdminLevel(caller) > getAdminLevel(clientnum) then
 			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientnum .. "\n" )
@@ -1844,23 +1824,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
         end
 
         if lowBangCmd == k_commandprefix .. "kick" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n" )
-            else
-                commandSaid = true
-                kick = true
-                fullcom = "Kick"
-                comds(Cvar1, Cvar2, PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/kick.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "warn" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Warn:^7 \[partname/id#\] \[reason\]\n" )
-            else
-                commandSaid = true
-                warn = true
-                fullcom = "Warn"
-                comds(Cvar1, Cvar2, PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/warn.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "mute" then
             if Cvarct < 3 then
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 \[partname/id#\]\n" )
