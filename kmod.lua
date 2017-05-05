@@ -1564,36 +1564,24 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
     end
 
     if getAdminLevel(PlayerID) >= admin_req then
-        if lowBangCmd == k_commandprefix .. "admintest" then
-            adminStatus(PlayerID)
-        elseif lowBangCmd == k_commandprefix .. "time" then
+        if lowBangCmd == k_commandprefix .. "time" then
             dofile(kmod_ng_path .. '/kmod/command/time.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "date" then
             dofile(kmod_ng_path .. '/kmod/command/date.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix.."spree_record" then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " " .. tostring(oldspree2) .. "\n")
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " " .. tostring(oldmapspree2) .. "\n")
+            dofile(kmod_ng_path .. '/kmod/command/client/spree_record.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "spec999" then
             dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "tk_index" then
-            local status = ""
-            local name = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name")
-
-            if teamkillr[PlayerID] < -1 then
-                status = "^1NOT OK"
-            else
-                status = "^2OK"
-            end
-
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Tk_index: ^7" .. name .. "^7 has a tk index of ^3" .. teamkillr[PlayerID] .. "^7 \[" .. status .. "^7\] \n")
+            dofile(kmod_ng_path .. '/kmod/command/client/tk_index.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "listcmds" then
             dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
             execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "durt" then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " k_panzersperteam = " .. k_panzersperteam .. " " .. k_panzersperteam2 .. "\n")
         end
 
         if lowBangCmd == k_commandprefix .. "gib" then
