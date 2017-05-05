@@ -1308,118 +1308,6 @@ function part2id(client)
     return clientNum
 end
 
-function curse_filter( PlayerID )
---	local k_cursemode = 1
-	local k_cursemode = tonumber(et.trap_Cvar_Get("k_cursemode"))
-	local name = et.gentity_get(PlayerID,"pers.netname")
-	local ref = tonumber(et.gentity_get(PlayerID,"sess.referee"))
-
-	if (k_cursemode - 32) >= 0 then
-		-- Override kill and slap
-		if (k_cursemode - 32) > 7 then
-			k_cursemode = 7
-		else
-			k_cursemode = k_cursemode - 32
-		end
-        if et.gentity_get(PlayerID,"pers.connected") == 2 then
-            local team = et.gentity_get(clientNum, "sess.sessionTeam")
-
-            if team > 0 or team < 4 then
-                params.client = PlayerID
-                params.commandSaid = commandSaid
-                params.say = say_parms
-                dofile(kmod_ng_path .. '/kmod/command/gib.lua')
-                execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
-            end
-        end
-	end
-	if (k_cursemode - 16) >= 0 then
-		-- Override slap
-		if (k_cursemode - 16) > 7 then
-			k_cursemode = 7
-		else
-			k_cursemode = k_cursemode - 16
-		end
-		if et.gentity_get(PlayerID,"pers.connected") == 2 then
-			if et.gentity_get(PlayerID,"sess.sessionTeam") >= 3 or et.gentity_get(PlayerID,"sess.sessionTeam") < 1 then
-			else
-				et.gentity_get(PlayerID,"health",-1)
-				et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto killed for language!\n" )
-			end
-		end
-	end
-    if (k_cursemode - 8) >= 0 then
-        k_cursemode = k_cursemode - 16
-        if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            local team = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
-
-            if sessionTeam > 0 or sessionTeam < 4 then
-                params.client = et.PlayerID
-                params.commandSaid = commandSaid
-                params.say = say_parms
-                dofile(kmod_ng_path .. '/kmod/command/burn.lua')
-                execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
-            end
-        end
-    end
-	if (k_cursemode - 4) >= 0 then
-		-- Override kill and slap
-		if (k_cursemode - 4) > 0 then
-			k_cursemode = 0
-		end
-		if ref == 0 then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-			local mute = "-1"
-			muted[PlayerID] = -1
-			setMute(PlayerID, mute)
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been permanently muted for language!\n" )
-		end
-	end
-	if (k_cursemode - 2) >= 0 then
-		-- Override kill and slap
-		if (k_cursemode - 2) > 0 then
-			k_cursemode = 0
-		end
-		--Mute time starts at one then doubles each time thereafter
-		if ref == 0 then
-			if nummutes[PlayerID] == 0 then
-				nummutes[PlayerID] = 1
-				muted[PlayerID] = mtime + (1*60*1000)
-			else
-				nummutes[PlayerID] = nummutes[PlayerID] + nummutes[PlayerID]
-				muted[PlayerID] = mtime + (nummutes[PlayerID]*60*1000)
-			end
-			--muted[PlayerID] = mtime + 300000         --5 minutes in milliseconds
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute "..PlayerID.."\n" )
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto muted for ^1".. nummutes[PlayerID] .."^7 minute(s)!\n" )
-		end
-	end
-	if k_cursemode == 1 then
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-		et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto muted!\n" )
-	end
-
-
-
---	if k_cursemode == 1 then
---		--Mute time starts at one then doubles each time thereafter
---		if ref > 0 then
---			if nummutes[PlayerID] == 0 then
---				nummutes[PlayerID] = 1
---				muted[PlayerID] = mtime + (1*60*1000)
---			else
---				nummutes[PlayerID] = nummutes[PlayerID] + nummutes[PlayerID]
---				muted[PlayerID] = mtime + (nummutes[PlayerID]*60*1000)
---			end
---			--muted[PlayerID] = mtime + 300000         --5 minutes in milliseconds
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute "..PlayerID.."\n" )
---			et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7"..name.." ^7has been auto muted for ^1".. nummutes[PlayerID] .."^7 minute(s)!\n" )
---		end
---	end
-end
-
 function dmg_test( PlayerID )
 	local damage = et.gentity_get(PlayerID, "damage")
 	local sdmgFlags = et.gentity_get(PlayerID, "s.dmgFlags")
@@ -1446,247 +1334,6 @@ function randomClientFinder()
 	local dv2 = randomClient[dv]
 
 	return dv2
-end
-
-function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
-    params = {}
-    params.command   = 'client'
-    params.nbArg     = Cvarct
-    params.clientNum = PlayerID
-    params["arg1"]   = Cvar1
-    params["arg2"]   = Cvar2
-
-    params.commandSaid = true
-    params.say = say_parms
-
-    local admin_req = k_maxAdminLevels + 1
-    local fd,len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
-    local lowBangCmd = string.lower(BangCommand)
-
-    if len > 0 then
-        local filestr = et.trap_FS_Read(fd, len)
-
-        for level,comm,str in string.gfind(filestr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
-            local strnumber = {}
-            local strnumber = ParseString(str)
-
-            local comm2 = k_commandprefix .. comm
-            local t = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
-            local c = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
-            local player_last_victim_name = ""
-            local player_last_killer_name = ""
-            local player_last_victim_cname = ""
-            local player_last_killer_cname = ""
-
-            if playerlastkilled[PlayerID] == 1022 then
-                player_last_victim_name = "NO ONE"
-                player_last_victim_cname = "NO ONE"
-            else
-                player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerlastkilled[PlayerID], "pers.netname"))
-                player_last_victim_cname = et.gentity_get(playerlastkilled[PlayerID], "pers.netname")
-            end
-
-            if playerwhokilled[PlayerID] == 1022 then
-                player_last_killer_name = "NO ONE"
-                player_last_killer_cname = "NO ONE"
-            else
-                player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerwhokilled[PlayerID], "pers.netname"))
-                player_last_killer_cname = et.gentity_get(playerwhokilled[PlayerID], "pers.netname")
-            end
-
-            local pnameID = part2id(Cvar1)
-
-            if not pnameID then
-                pnameID = 1021
-            end
-
-            local PBpnameID = pnameID + 1
-            local PBID = PlayerID + 1
-
-            local randomC = randomClientFinder()
-            local randomTeam = team[tonumber(et.gentity_get(randomC, "sess.sessionTeam"))]
-            local randomCName = et.gentity_get(randomC, "pers.netname")
-            local randomName = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
-            local randomClass = class[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
-
-            local str = string.gsub(str, "<CLIENT_ID>", PlayerID)
-            local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
-            local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(PlayerID, "pers.netname"))
-            local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(PlayerID))
-            local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname")))
-            local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
-            local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
-            local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[PlayerID])
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedwithweapv[PlayerID])
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerlastkilled[PlayerID])
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedwithweapk[PlayerID])
-            local str = string.gsub(str, "<PNAME2ID>", pnameID)
-            local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
-            local str = string.gsub(str, "<PB_ID>", PBID)
-            local str = string.gsub(str, "<RANDOM_ID>", randomC)
-            local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
-            local str = string.gsub(str, "<RANDOM_NAME>", randomName)
-            local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
-            local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
-            local teamnumber = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
-            local classnumber = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
-
-
-            if lowBangCmd == comm2 then
-                if tonumber(level) <= getAdminLevel(PlayerID) then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, str .. "\n")
-
-                    if strnumber[1] == "forcecvar" then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3etpro svcmd: ^7forcing client cvar [" .. strnumber[2] .. "] to [" .. Cvar1 .. "]\n")
-                    end
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^7Insufficient Admin status\n")
-                end
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-
-
-    for i = 0, k_maxAdminLevels, 1 do
-        for q = 1, lvlsc[i], 1 do
-            if lvls[i][q] == BangCommand then
-                admin_req = i
-                break
-            end
-        end
-    end
-
-    if getAdminLevel(PlayerID) >= admin_req then
-        if lowBangCmd == k_commandprefix .. "time" then
-            dofile(kmod_ng_path .. '/kmod/command/time.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "date" then
-            dofile(kmod_ng_path .. '/kmod/command/date.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix.."spree_record" then
-            dofile(kmod_ng_path .. '/kmod/command/client/spree_record.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "spec999" then
-            dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "tk_index" then
-            dofile(kmod_ng_path .. '/kmod/command/client/tk_index.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "listcmds" then
-            dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
-            execute_command(params)
-        end
-
-        if lowBangCmd == k_commandprefix .. "gib" then
-            dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "slap" then
-            dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "setlevel" then
-            dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "readconfig" then
-            dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "spree_restart" then
-            dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "ban" then
-            dofile(kmod_ng_path .. '/kmod/command/client/ban.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "getip" then
-            dofile(kmod_ng_path .. '/kmod/command/client/getip.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "getguid" then
-            dofile(kmod_ng_path .. '/kmod/command/client/getguid.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
-            dofile(kmod_ng_path .. '/kmod/command/client/makeshoutcaster.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
-            dofile(kmod_ng_path .. '/kmod/command/client/removeshoutcaster.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "makereferee" then
-            dofile(kmod_ng_path .. '/kmod/command/client/makereferee.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "removereferee" then
-            dofile(kmod_ng_path .. '/kmod/command/client/removereferee.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "gravity" then
-            dofile(kmod_ng_path .. '/kmod/command/client/gravity.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "knifeonly" then
-            dofile(kmod_ng_path .. '/kmod/command/client/knifeonly.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "speed" then
-            dofile(kmod_ng_path .. '/kmod/command/client/speed.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "knockback" then
-            dofile(kmod_ng_path .. '/kmod/command/client/knockback.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "cheats" then
-            dofile(kmod_ng_path .. '/kmod/command/both/cheats.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "laser" then
-            dofile(kmod_ng_path .. '/kmod/command/both/laser.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "crazygravity" then
-            dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "panzerwar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "frenzy" then
-            dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "grenadewar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "sniperwar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
-            execute_command(params)
-        end
-
-        if lowBangCmd == k_commandprefix .. "kick" then
-            dofile(kmod_ng_path .. '/kmod/command/client/kick.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "warn" then
-            dofile(kmod_ng_path .. '/kmod/command/client/warn.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "mute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/mute.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "pmute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/pmute.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putspec" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putspec.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putallies" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putallies.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putaxis" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putaxis.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "timelimit" then
-            dofile(kmod_ng_path .. '/kmod/command/client/timelimit.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "unmute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/unmute.lua')
-            execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "finger" then
-            dofile(kmod_ng_path .. '/kmod/command/client/finger.lua')
-            execute_command(params)
-        end
-    end
 end
 
 function et.G_ClientSound(clientnum, soundfile)
@@ -2256,6 +1903,353 @@ function deaths(victim, killer, meansOfDeath, weapon)
             deathSpreeProcess(k_ds_message2, deathspreesound2)
         elseif deathspree[victim] == k_deathspree3_amount then
             deathSpreeProcess(k_ds_message3, deathspreesound3)
+        end
+    end
+end
+
+-- et_ClientSay
+
+function curseFilter(PlayerID)
+    local k_cursemode = tonumber(et.trap_Cvar_Get("k_cursemode"))
+    local name = et.gentity_get(PlayerID, "pers.netname")
+    local ref = tonumber(et.gentity_get(PlayerID, "sess.referee"))
+
+    if (k_cursemode - 32) >= 0 then
+        -- Override kill and slap
+        if (k_cursemode - 32) > 7 then
+            k_cursemode = 7
+        else
+            k_cursemode = k_cursemode - 32
+        end
+
+        if et.gentity_get(PlayerID, "pers.connected") == 2 then
+            local team = et.gentity_get(clientNum, "sess.sessionTeam")
+
+            if team > 0 or team < 4 then
+                params.client = PlayerID
+                params.commandSaid = commandSaid
+                params.say = say_parms
+                dofile(kmod_ng_path .. '/kmod/command/gib.lua')
+                execute_command(params)
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
+            end
+        end
+    end
+
+    if (k_cursemode - 16) >= 0 then
+        -- Override slap
+        if (k_cursemode - 16) > 7 then
+            k_cursemode = 7
+        else
+            k_cursemode = k_cursemode - 16
+        end
+
+        if et.gentity_get(PlayerID, "pers.connected") == 2 then
+            local team = et.gentity_get(clientNum, "sess.sessionTeam")
+
+            if team > 0 or team < 4 then
+                et.gentity_get(PlayerID, "health", -1)
+                et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto killed for language!\n" )
+            end
+        end
+    end
+
+    if (k_cursemode - 8) >= 0 then
+        k_cursemode = k_cursemode - 16
+
+        if et.gentity_get(PlayerID, "pers.connected") == 2 then
+            local team = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+
+            if sessionTeam > 0 or sessionTeam < 4 then
+                params.client = et.PlayerID
+                params.commandSaid = commandSaid
+                params.say = say_parms
+                dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+                execute_command(params)
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
+            end
+        end
+    end
+
+    if (k_cursemode - 4) >= 0 then
+        -- Override kill and slap
+        if (k_cursemode - 4) > 0 then
+            k_cursemode = 0
+        end
+
+        if ref == 0 then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n")
+            local mute = "-1"
+            muted[PlayerID] = -1
+            setMute(PlayerID, mute)
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been permanently muted for language!\n")
+        end
+    end
+
+    if (k_cursemode - 2) >= 0 then
+        -- Override kill and slap
+        if (k_cursemode - 2) > 0 then
+            k_cursemode = 0
+        end
+
+        --Mute time starts at one then doubles each time thereafter
+        if ref == 0 then
+            if nummutes[PlayerID] == 0 then
+                nummutes[PlayerID] = 1
+                muted[PlayerID] = mtime + (1 * 60 * 1000)
+            else
+                nummutes[PlayerID] = nummutes[PlayerID] + nummutes[PlayerID]
+                muted[PlayerID] = mtime + (nummutes[PlayerID] * 60 * 1000)
+            end
+
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted for ^1" .. nummutes[PlayerID] .. "^7 minute(s)!\n")
+        end
+    end
+
+    if k_cursemode == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted!\n")
+    end
+end
+
+function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
+    params = {}
+    params.command   = 'client'
+    params.nbArg     = Cvarct
+    params.clientNum = PlayerID
+    params["arg1"]   = Cvar1
+    params["arg2"]   = Cvar2
+
+    params.commandSaid = true
+    params.say = say_parms
+
+    local admin_req = k_maxAdminLevels + 1
+    local fd,len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
+    local lowBangCmd = string.lower(BangCommand)
+
+    if len > 0 then
+        local filestr = et.trap_FS_Read(fd, len)
+
+        for level,comm,str in string.gfind(filestr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
+            local strnumber = {}
+            local strnumber = ParseString(str)
+
+            local comm2 = k_commandprefix .. comm
+            local t = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+            local c = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
+            local player_last_victim_name = ""
+            local player_last_killer_name = ""
+            local player_last_victim_cname = ""
+            local player_last_killer_cname = ""
+
+            if playerlastkilled[PlayerID] == 1022 then
+                player_last_victim_name = "NO ONE"
+                player_last_victim_cname = "NO ONE"
+            else
+                player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerlastkilled[PlayerID], "pers.netname"))
+                player_last_victim_cname = et.gentity_get(playerlastkilled[PlayerID], "pers.netname")
+            end
+
+            if playerwhokilled[PlayerID] == 1022 then
+                player_last_killer_name = "NO ONE"
+                player_last_killer_cname = "NO ONE"
+            else
+                player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerwhokilled[PlayerID], "pers.netname"))
+                player_last_killer_cname = et.gentity_get(playerwhokilled[PlayerID], "pers.netname")
+            end
+
+            local pnameID = part2id(Cvar1)
+
+            if not pnameID then
+                pnameID = 1021
+            end
+
+            local PBpnameID = pnameID + 1
+            local PBID = PlayerID + 1
+
+            local randomC = randomClientFinder()
+            local randomTeam = team[tonumber(et.gentity_get(randomC, "sess.sessionTeam"))]
+            local randomCName = et.gentity_get(randomC, "pers.netname")
+            local randomName = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
+            local randomClass = class[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
+
+            local str = string.gsub(str, "<CLIENT_ID>", PlayerID)
+            local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+            local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(PlayerID, "pers.netname"))
+            local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(PlayerID))
+            local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname")))
+            local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
+            local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
+            local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedwithweapv[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerlastkilled[PlayerID])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedwithweapk[PlayerID])
+            local str = string.gsub(str, "<PNAME2ID>", pnameID)
+            local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
+            local str = string.gsub(str, "<PB_ID>", PBID)
+            local str = string.gsub(str, "<RANDOM_ID>", randomC)
+            local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
+            local str = string.gsub(str, "<RANDOM_NAME>", randomName)
+            local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
+            local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
+            local teamnumber = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
+            local classnumber = tonumber(et.gentity_get(PlayerID, "sess.latchPlayerType"))
+
+
+            if lowBangCmd == comm2 then
+                if tonumber(level) <= getAdminLevel(PlayerID) then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, str .. "\n")
+
+                    if strnumber[1] == "forcecvar" then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3etpro svcmd: ^7forcing client cvar [" .. strnumber[2] .. "] to [" .. Cvar1 .. "]\n")
+                    end
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^7Insufficient Admin status\n")
+                end
+            end
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
+
+
+    for i = 0, k_maxAdminLevels, 1 do
+        for q = 1, lvlsc[i], 1 do
+            if lvls[i][q] == BangCommand then
+                admin_req = i
+                break
+            end
+        end
+    end
+
+    if getAdminLevel(PlayerID) >= admin_req then
+        if lowBangCmd == k_commandprefix .. "time" then
+            dofile(kmod_ng_path .. '/kmod/command/time.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "date" then
+            dofile(kmod_ng_path .. '/kmod/command/date.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix.."spree_record" then
+            dofile(kmod_ng_path .. '/kmod/command/client/spree_record.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "spec999" then
+            dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "tk_index" then
+            dofile(kmod_ng_path .. '/kmod/command/client/tk_index.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "listcmds" then
+            dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
+            execute_command(params)
+        end
+
+        if lowBangCmd == k_commandprefix .. "gib" then
+            dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "slap" then
+            dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "setlevel" then
+            dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "readconfig" then
+            dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "spree_restart" then
+            dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "ban" then
+            dofile(kmod_ng_path .. '/kmod/command/client/ban.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "getip" then
+            dofile(kmod_ng_path .. '/kmod/command/client/getip.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "getguid" then
+            dofile(kmod_ng_path .. '/kmod/command/client/getguid.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
+            dofile(kmod_ng_path .. '/kmod/command/client/makeshoutcaster.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
+            dofile(kmod_ng_path .. '/kmod/command/client/removeshoutcaster.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "makereferee" then
+            dofile(kmod_ng_path .. '/kmod/command/client/makereferee.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "removereferee" then
+            dofile(kmod_ng_path .. '/kmod/command/client/removereferee.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "gravity" then
+            dofile(kmod_ng_path .. '/kmod/command/client/gravity.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "knifeonly" then
+            dofile(kmod_ng_path .. '/kmod/command/client/knifeonly.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "speed" then
+            dofile(kmod_ng_path .. '/kmod/command/client/speed.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "knockback" then
+            dofile(kmod_ng_path .. '/kmod/command/client/knockback.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "cheats" then
+            dofile(kmod_ng_path .. '/kmod/command/both/cheats.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "laser" then
+            dofile(kmod_ng_path .. '/kmod/command/both/laser.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "crazygravity" then
+            dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "panzerwar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "frenzy" then
+            dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "grenadewar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "sniperwar" then
+            dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
+            execute_command(params)
+        end
+
+        if lowBangCmd == k_commandprefix .. "kick" then
+            dofile(kmod_ng_path .. '/kmod/command/client/kick.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "warn" then
+            dofile(kmod_ng_path .. '/kmod/command/client/warn.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "mute" then
+            dofile(kmod_ng_path .. '/kmod/command/client/mute.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "pmute" then
+            dofile(kmod_ng_path .. '/kmod/command/client/pmute.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putspec" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putspec.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putallies" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putallies.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "putaxis" then
+            dofile(kmod_ng_path .. '/kmod/command/client/putaxis.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "timelimit" then
+            dofile(kmod_ng_path .. '/kmod/command/client/timelimit.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "unmute" then
+            dofile(kmod_ng_path .. '/kmod/command/client/unmute.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "finger" then
+            dofile(kmod_ng_path .. '/kmod/command/client/finger.lua')
+            execute_command(params)
         end
     end
 end
@@ -3630,7 +3624,7 @@ function et_ClientSay(clientNum,mode,text)
 --						if f ~= 0 then
 						if word == Bword then
 --							et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay moo\n" )
-							curse_filter( clientNum )
+							curseFilter( clientNum )
 							break
 						end
 --					end
