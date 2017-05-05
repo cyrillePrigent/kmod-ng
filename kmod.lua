@@ -1534,23 +1534,7 @@ function comds(client, cvar1, caller)
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref remove " .. clientnum .. "\n" )
 		putspec = false
 		commandSaid = false
- 	elseif getip then
-		local IP   = et.Info_ValueForKey( et.trap_GetUserinfo( clientnum ), "ip" )
-		local cvar1 = tonumber(cvar1)
-		local name = et.gentity_get(clientnum,"pers.netname")
-		et.trap_SendServerCommand(cvar1, string.format("b 8 \"^3Getip: " .. name .. "^7's IP is " .. IP .. ""))
-		getip = false
-		commandSaid = false
- 	elseif getguid then
-		local GUID   = et.Info_ValueForKey( et.trap_GetUserinfo( clientnum ), "cl_guid" )
-		local cvar1 = tonumber(cvar1)
-		local name = et.gentity_get(clientnum,"pers.netname")
-		et.trap_SendServerCommand(cvar1, string.format("b 8 \"^3Getguid: " .. name .. "^7's GUID is " .. GUID .. ""))
-		getguid = false
-		commandSaid = false
 	end
-
-
 end
 
 function randomClientFinder()
@@ -1739,23 +1723,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/ban.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "getip" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Getip:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                getip = true
-                fullcom = "Getip"
-                comds(Cvar1, PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/getip.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "getguid" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Getguid:^7 \[partname/id#\]\n")
-            else
-                commandSaid = true
-                getguid = true
-                fullcom = "Getguid"
-                comds(Cvar1, PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/getguid.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
             dofile(kmod_ng_path .. '/kmod/command/client/makeshoutcaster.lua')
             execute_command(params)
