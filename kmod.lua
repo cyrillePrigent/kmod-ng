@@ -1480,29 +1480,7 @@ function comds(client, cvar1, caller)
          	end 
    	end 
 
- 	if mute then
-		local name = et.gentity_get(clientnum,"pers.netname")
-		if getAdminLevel(caller) > getAdminLevel(clientnum) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientnum .. "\n" )
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute: ^7" ..name.. " ^7has been muted\n" )
-		else
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot mute a higher admin\n" )
-		end
-		mute = false
-		commandSaid = false
- 	elseif pmute then
-		local name = et.gentity_get(clientnum,"pers.netname")
-		if getAdminLevel(caller) >= getAdminLevel(clientnum) then
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientnum .. "\n" )
-			local mute = "-1"
-			muted[clientnum] = -1
-			setMute(clientnum, mute)
-		else
-			et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3" .. fullcom .. ":^7 Cannot mute a higher admin\n" )
-		end
-		pmute = false
-		commandSaid = false
- 	elseif putaxis then
+ 	if putaxis then
 		et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref putaxis " .. clientnum .. "\n" )
 		putaxis = false
 		commandSaid = false
@@ -1830,23 +1808,11 @@ function ClientUserCommand(PlayerID, Command, BangCommand, Cvar1, Cvar2, Cvarct)
             dofile(kmod_ng_path .. '/kmod/command/client/warn.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "mute" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Mute:^7 \[partname/id#\]\n" )
-            else
-                commandSaid = true
-                mute = true
-                fullcom = "Mute"
-                comds(Cvar1, "dv", PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/mute.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "pmute" then
-            if Cvarct < 3 then
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, ""..say_parms.." ^3Pmute:^7 \[partname/id#\]\n" )
-            else
-                commandSaid = true
-                pmute = true
-                fullcom = "Pmute"
-                comds(Cvar1, "dv", PlayerID)
-            end
+            dofile(kmod_ng_path .. '/kmod/command/client/pmute.lua')
+            execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "timelimit" then
             local timel = tonumber(Cvar1)
             if timel then
