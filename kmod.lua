@@ -1,5 +1,4 @@
-kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. '/etpro'
-
+kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. '/' .. et.trap_Cvar_Get("gamename") .. '/kmod/'
 KMODversion = "Beta 1.5"
 KMODversion2 = "1.5"
 k_commandprefix = "!" -- change this to your desired prefix
@@ -118,12 +117,13 @@ teamkillr = {}
 khp = {}
 PlayerName = {}
 Bname = {}
+team = {}
 
 EV_GLOBAL_CLIENT_SOUND = 54
 et.CS_PLAYERS = 689
 EV_GENERAL_SOUND = 49
 
-team = { "AXIS" , "ALLIES" , "SPECTATOR" }
+teamList = { "AXIS" , "ALLIES" , "SPECTATOR" }
 class = { [0]="SOLDIER" , "MEDIC" , "ENGINEER" , "FIELD OPS" , "COVERT OPS" }
 
 AdminLV = {}
@@ -432,20 +432,8 @@ bluelimbo = ""
 
 floodprotect = 0
 commandSaid = false
-kick = false
-fullcom = ""
+
 finger = false
-removereferee = false
-makereferee = false
-removeshoutcaster = false
-makeshoutcaster = false
-putspec = false
-putallies = false
-putaxis = false
-unmute = false
-mute = false
-warn = false
-ban = false
 crazygravity = false
 crazytime = 0
 
@@ -544,11 +532,10 @@ for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
 	adrnum2[i] = 0
 	adrtime[i] = 0
 	adrtime2[i] = 0
+    team[i] = 0
 end
 
 k_Admin = {}
-
-qwerty = 0
 
 -- Mute function
 
@@ -558,7 +545,7 @@ function loadMutes()
     local dv = 1
     local dv2 = 1
     chkIP = {}
-    local fd,len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+    local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
 
     for i = 0, clientsLimit, 1 do
         chkIP[i] = 0
@@ -585,7 +572,7 @@ end
 
 function setMute(PlayerID, muteTime)
     local time = math.ceil(muteTime)
-    local fdadm,len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
+    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
     local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
     local IP = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
     s, e, IP = string.find(IP, "(%d+%.%d+%.%d+%.%d+)")
@@ -595,7 +582,7 @@ function setMute(PlayerID, muteTime)
         confirm2 = 1
         et.trap_FS_FCloseFile(fdadm)
     else
-        local fdread, length = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+        local fdread, length = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
         local n = 0
 
         if length ~= 0 then
@@ -631,7 +618,7 @@ function setMute(PlayerID, muteTime)
     end
 
     if confirm2 == 1 then
-        fdadm, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
+        fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
 
         if muted[PlayerID] ~= 0 then
             ADMIN = time .. " - " .. IP .. " - " .. Name .. "\n"
@@ -647,8 +634,8 @@ function setMute(PlayerID, muteTime)
 end
 
 function removeMute(PlayerID)
-    local fdin, lenin = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
-    local fdout, lenout = et.trap_FS_FOpenFile("mutestmp.cfg", et.FS_WRITE)
+    local fdin, lenin = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
+    local fdout, lenout = et.trap_FS_FOpenFile(kmod_ng_path .. "mutestmp.cfg", et.FS_WRITE)
     local IP2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
     s, e, IP2 = string.find(IP2, "(%d+%.%d+%.%d+%.%d+)")
     local i = 0
@@ -660,7 +647,7 @@ function removeMute(PlayerID)
 
         for time, ip, name in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
             if ip ~= IP2 then
-                mute = time .. " - " .. ip .. " - " .. name .. "\n"
+                local mute = time .. " - " .. ip .. " - " .. name .. "\n"
                 et.trap_FS_Write(mute, string.len(mute), fdout)
             end
 
@@ -688,7 +675,7 @@ function checkMute(PlayerID)
         ip = -1
     end
 
-    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
 
     if len > 0 then
         local filestr = et.trap_FS_Read(fd, len)
@@ -721,7 +708,7 @@ function loadAdmins()
     local i2 = 0
     local dv = 1
     local dv2 = 1
-    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
 
     if len <= 0 then
         et.G_Print("WARNING: No Admins's Defined! \n")
@@ -754,7 +741,7 @@ end
 
 function setAdmin(PlayerID, levelv)
     -- gets file length
-    local fdadm,len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
+    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
     et.trap_FS_FCloseFile(fdadm)
     local level = tonumber(levelv)
     local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
@@ -786,7 +773,7 @@ function setAdmin(PlayerID, levelv)
         end
     end
 
-    local fdadm, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
 
     if confirm == 1 then
         for i = 0, k_maxAdminLevels, 1 do
@@ -848,8 +835,8 @@ function addAdmin(GUID)
 end
 
 function removeAdmin(PlayerID)
-    local fdin, lenin = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
-    local fdout, lenout = et.trap_FS_FOpenFile("shrubbottmp.cfg", et.FS_WRITE)
+    local fdin, lenin = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
+    local fdout, lenout = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbottmp.cfg", et.FS_WRITE)
     local GUID2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
     local i = 0
     local IPRemove = ""
@@ -941,7 +928,7 @@ end
 
 function setSpreeRecord(PlayerID, kills2)
     -- TODO base path of sprees directory
-    local fdadm, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_WRITE)
     local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo(PlayerID), "name"))
     local date = os.date("%x %I:%M:%S%p")
     local kills = tonumber(kills2)
@@ -956,7 +943,7 @@ end
 
 function loadSpreeRecord()
     -- TODO base path of sprees directory
-    local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_READ)
     local kills = 0
     local date = ""
     local name = ""
@@ -983,7 +970,7 @@ end
 function setMapSpreeRecord(PlayerID, kills2)
     local mapname = tostring(et.trap_Cvar_Get("mapname"))
     -- TODO base path of sprees directory
-    local fdadm,len = et.trap_FS_FOpenFile("sprees/" .. mapname .. ".record", et.FS_WRITE)
+    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_WRITE)
     local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
     local date = os.date("%x %I:%M:%S%p")
     local kills = tonumber(kills2)
@@ -999,7 +986,7 @@ end
 function loadMapSpreeRecord()
     local mapname = tostring(et.trap_Cvar_Get("mapname"))
     -- TODO base path of sprees directory
-    local fd,len = et.trap_FS_FOpenFile("sprees/" .. mapname .. ".record", et.FS_READ)
+    local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_READ)
     local kills = 0
     local date = ""
     local name = ""
@@ -1041,7 +1028,7 @@ end
 
 function logChat(PlayerID, mode, text, PMID)
     local text = et.Q_CleanStr(text)
-    local fdadm, len = et.trap_FS_FOpenFile("chat_log.log", et.FS_APPEND)
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "chat_log.log", et.FS_APPEND)
     local time = os.date("%x %I:%M:%S%p")
     local ip
     local guid
@@ -1121,7 +1108,7 @@ function printModInfo(clientNum)
 end
 
 function loadCommands()
-    local fd, len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
 
     if len > 0 then
         local filestr = et.trap_FS_Read(fd, len)
@@ -1237,8 +1224,6 @@ function splitWord(inputString)
     return t
 end
 
---
-
 function getPlayernameToId(name)
     local i = 0
     local slot = nil
@@ -1308,11 +1293,6 @@ function part2id(client)
 
     return clientNum
 end
-
-
-
-
-
 
 function printCmdMsg(cmdType, msg)
     if cmdType == 'client' then
@@ -1560,8 +1540,8 @@ function kills(victim, killer, meansOfDeath, weapon)
     victimname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
     playerlastkilled[killer] = victim
     killedwithweapk[killer] = tostring(weapon)
-    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
-    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+    local victimteam = team[victim]
+    local killerteam = team[killer]
 
     if killer == 1022 then
         killername = "The World"
@@ -1791,8 +1771,8 @@ function deaths(victim, killer, meansOfDeath, weapon)
     playerwhokilled[victim] = killer
     killedwithweapv[victim] = tostring(weapon)
 
-    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
-    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+    local victimteam = team[victim]
+    local killerteam = team[killer]
     local killedname = et.Info_ValueForKey(et.trap_GetUserinfo( victim ), "name")
 
     if k_spreerecord == 1 then
@@ -1854,9 +1834,7 @@ function curseFilter(PlayerID)
         end
 
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            local team = et.gentity_get(clientNum, "sess.sessionTeam")
-
-            if team > 0 or team < 4 then
+            if team[clientNum] > 0 or team[clientNum] < 4 then
                 params.client = PlayerID
                 params.commandSaid = commandSaid
                 params.say = say_parms
@@ -1876,9 +1854,7 @@ function curseFilter(PlayerID)
         end
 
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            local team = et.gentity_get(clientNum, "sess.sessionTeam")
-
-            if team > 0 or team < 4 then
+            if team[clientNum] > 0 or team[clientNum] < 4 then
                 et.gentity_get(PlayerID, "health", -1)
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto killed for language!\n" )
             end
@@ -1889,9 +1865,7 @@ function curseFilter(PlayerID)
         k_cursemode = k_cursemode - 16
 
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            local team = tonumber(et.gentity_get(PlayerID, "sess.sessionTeam"))
-
-            if sessionTeam > 0 or sessionTeam < 4 then
+            if team[PlayerID] > 0 or team[PlayerID] < 4 then
                 params.client = et.PlayerID
                 params.commandSaid = commandSaid
                 params.say = say_parms
@@ -1970,6 +1944,7 @@ end
 function et_InitGame(levelTime, randomSeed, restart)
     k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
     initTime = levelTime
+    clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
 
     loadAdmins()
     loadSpreeRecord()
@@ -1982,7 +1957,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
     k_panzersperteam = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 
-    for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+    for i = 0, clientsLimit, 1 do
         killingspree[i] = 0
         flakmonkey[i] = 0
         deathspree[i] = 0
@@ -2037,10 +2012,8 @@ function et_ShutdownGame(restart)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
 
     if panzdv == 1 then
-        for p = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
-            local team = et.gentity_get(p, "sess.sessionTeam")
-
-            if team == 1 or team == 2 then
+        for p = 0, clientLimit, 1 do
+            if team[p] == 1 or team[p] == 2 then
                 et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
                 et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
             end
@@ -2051,7 +2024,7 @@ function et_ShutdownGame(restart)
         logChat("DV", "START", "DV")
     end
 
-    for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+    for i = 0, clientLimit, 1 do
         if et.gentity_get(i, "pers.connected") == 2 then
             if muted[i] > 0 then
                 local muteDur = (muted[i] - mtime) / 1000
@@ -2073,8 +2046,6 @@ end
 --  levelTime is the current level time in milliseconds.
 function et_RunFrame(levelTime)
     mtime = tonumber(levelTime) -- still cannot remember why i made this but its used in alot of stuff so i'll leave it
-
-    local clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
 
     if run_once == 0 then
         k_panzersperteam2 = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
@@ -2292,9 +2263,8 @@ function et_RunFrame(levelTime)
     if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
         for i = 0, clientsLimit, 1 do
             if getAdminLevel(i) >= 1 then
-                local team = et.gentity_get(i, "sess.sessionTeam")
-
-                if team >= 3 or team < 1 then
+                --if team[i] >= 3 or team[i] < 1 then
+                if team[i] == 3 then
                     et.gentity_set(i, "client.inactivityTime", mtime)
                     et.gentity_set(i, "client.inactivityWarning", 1)
                 end
@@ -2332,11 +2302,9 @@ function et_RunFrame(levelTime)
 
                 if latchPlayerWeapon ~= 32 or latchPlayerWeapon ~= 25 or latchPlayerWeapon ~= 42 or latchPlayerWeapon ~= 43 then
                     if latchPlayerWeapon ~= 33 then
-                        local team = tonumber(et.gentity_get(r, "sess.sessionTeam"))
-
-                        if team == 1 then
+                        if team[r] == 1 then
                             et.gentity_set(r, "sess.latchPlayerWeapon", 32)
-                        elseif team == 2 then
+                        elseif team[r] == 2 then
                             et.gentity_set(r, "sess.latchPlayerWeapon", 25)
                         end
                     end
@@ -2428,9 +2396,7 @@ function et_RunFrame(levelTime)
 
         if (panzdv == 1 or snipdv == 1) and antilooppw == 0 then
             for p = 0, clientsLimit, 1 do
-                local team = et.gentity_get(p, "sess.sessionTeam")
-
-                if team == 1 or team == 2 then
+                if team[p] == 1 or team[p] == 2 then
                     et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
                     et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
                 end
@@ -2639,15 +2605,13 @@ function et_RunFrame(levelTime)
 
     for i = 0, clientsLimit, 1 do
         if et.gentity_get(i, "pers.connected") == 2 then
-            local team = et.gentity_get(i, "sess.sessionTeam")
-
-            if team == 1 then
+            if team[i] == 1 then
                 numAxisPlayers = numAxisPlayers + 1
-            elseif team == 2 then
+            elseif team[i] == 2 then
                 numAlliedPlayers = numAlliedPlayers + 1
             end
 
-            if team == 1 or team == 2 then
+            if team[i] == 1 or team[i] == 2 then
                 active_players = active_players + 1
             end
 
@@ -2777,6 +2741,8 @@ function et_ClientDisconnect(clientNum)
 
     PlayerName[clientNum] = ""
 
+    team[clientNum] = 0
+
     if k_logchat == 1 then
         logChat(clientNum, "DISCONNECT", "DV2")
     end
@@ -2817,19 +2783,15 @@ end
 --  clientNum is the client slot id.
 --  revived is 1 if the client was spawned by being revived.
 function et_ClientSpawn(clientNum, revived)
-    if panzdv == 1 then
-        local doublehealth = tonumber(et.gentity_get(clientNum, "health")) * 2
-        local team = et.gentity_get(clientNum, "sess.sessionTeam")
+    team[clientNum] = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
-        if team >= 1 and team < 3 then
+    if team[clientNum] == 1 or team[clientNum] == 2 then
+        if panzdv == 1 then
+            local doublehealth = tonumber(et.gentity_get(clientNum, "health")) * 2
             et.gentity_set(clientNum, "health", doublehealth)
         end
-    end
 
-    if revived == 0 then
-        local team = et.gentity_get(clientNum, "sess.sessionTeam")
-
-        if team >= 1 and team < 3 then
+        if revived == 0 then
             clientrespawn[clientNum] = 1
         end
     end
@@ -2857,7 +2819,7 @@ function et_ClientCommand(clientNum, command)
             end
 
             say_parms = "qsay"
-            et_ClientSay( clientNum, et.SAY_ALL, et.ConcatArgs(1))
+            et_ClientSay(clientNum, et.SAY_ALL, et.ConcatArgs(1))
         elseif arg0 == "say_team" then
             if k_logchat == 1 then
                 logChat(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
@@ -2878,7 +2840,7 @@ function et_ClientCommand(clientNum, command)
             end
 
             say_parms = "qsay"
-            et_ClientSay( clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
+            et_ClientSay(clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
         elseif arg0 == "sc" then
             if getAdminLevel(clientNum) == 3 then
                 local name = et.gentity_get(clientNum, "pers.netname")
@@ -2937,7 +2899,7 @@ function et_ClientCommand(clientNum, command)
 
     local ref = tonumber(et.gentity_get(clientNum, "sess.referee"))
 
-    if tonumber(et.gentity_get(clientNum, "sess.sessionTeam")) == 3 then
+    if team[clientNum] == 3 then
         if et.trap_Argv(0) == "team" and et.trap_Argv(1) then
             switchteam[clientNum] = 1
         end
@@ -3020,10 +2982,9 @@ function et_ClientCommand(clientNum, command)
 
     if k_slashkilllimit == 1 then
         local name = et.gentity_get(clientNum, "pers.netname")
-        local teamnumber = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
         if cmd == "kill" then
-            if teamnumber ~= 3 then
+            if team[clientNum] ~= 3 then
                 if et.gentity_get(clientNum, "health") > 0 then
                     if selfkills[clientNum] < k_slashkills then
                         selfkills[clientNum] = selfkills[clientNum] + 1
@@ -3207,8 +3168,8 @@ end
 function et_Obituary( victim, killer, meansOfDeath )
     local killername= ""
     local killedname=et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
-    local victimteam = tonumber(et.gentity_get(victim, "sess.sessionTeam"))
-    local killerteam = tonumber(et.gentity_get(killer, "sess.sessionTeam"))
+    local victimteam = team[victim]
+    local killerteam = team[killer]
     weapon = ""
 
     if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
@@ -3305,7 +3266,7 @@ function et_ClientSay(clientNum, mode, text)
     local returnVal = 0
     s, e, BangCommand, Cvar1, Cvar2 = string.find(text, "%s*([%p]?[.%S]*)%s+([.%S]*)%s+(.*)")
 
-    local fd, len = et.trap_FS_FOpenFile("badwords.list", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "badwords.list", et.FS_READ)
 
     if len > 0 then
         local filestr = et.trap_FS_Read(fd, len)
@@ -3359,7 +3320,7 @@ function et_ClientSay(clientNum, mode, text)
     params.say = say_parms
 
     local admin_req = k_maxAdminLevels + 1
-    local fd,len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
+    local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
     local lowBangCmd = string.lower(BangCommand)
 
     if len > 0 then
@@ -3369,7 +3330,6 @@ function et_ClientSay(clientNum, mode, text)
             local strnumber = splitWord(str)
 
             local comm2 = k_commandprefix .. comm
-            local t = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
             local c = tonumber(et.gentity_get(clientNum, "sess.latchPlayerType"))
             local player_last_victim_name = ""
             local player_last_killer_name = ""
@@ -3402,7 +3362,7 @@ function et_ClientSay(clientNum, mode, text)
             local PBID = clientNum + 1
 
             local randomC = randomClientFinder()
-            local randomTeam = team[tonumber(et.gentity_get(randomC, "sess.sessionTeam"))]
+            local randomTeam = teamList[team[randomC]]
             local randomCName = et.gentity_get(randomC, "pers.netname")
             local randomName = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
             local randomClass = class[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
@@ -3413,7 +3373,7 @@ function et_ClientSay(clientNum, mode, text)
             local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(clientNum))
             local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname")))
             local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
-            local str = string.gsub(str, "<PLAYER_TEAM>", team[t])
+            local str = string.gsub(str, "<PLAYER_TEAM>", teamList[clientNum])
             local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
             local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[clientNum])
             local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
@@ -3431,7 +3391,6 @@ function et_ClientSay(clientNum, mode, text)
             local str = string.gsub(str, "<RANDOM_NAME>", randomName)
             local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
             local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
-            local teamnumber = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
             local classnumber = tonumber(et.gentity_get(clientNum, "sess.latchPlayerType"))
 
 

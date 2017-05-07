@@ -2,7 +2,7 @@
 -- TODO base path of shrubbot.cfg file
 
 function execute_command(params)
-    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
 
     if len <= 0 then
         et.G_Print("WARNING: No Admins's Defined! \n")

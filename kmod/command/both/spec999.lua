@@ -3,11 +3,10 @@
 function execute_command(params)
     local matches = 0
 
-    for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-        local team = tonumber(et.gentity_get(i, "sess.sessionTeam"))
+    for i = 0, clientLimit, 1 do
         local ping = tonumber(et.gentity_get(i, "ps.ping"))
 
-        if team ~= 3 and team ~= 0 and ping >= 999 then
+        if (team[i] == 1 or team[i] == 2) and ping >= 999 then
             matches = matches + 1
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
         end

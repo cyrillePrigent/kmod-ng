@@ -12,7 +12,6 @@ function execute_command(params)
     for i = 0, clientsLimit, 1 do
         guis = et.Info_ValueForKey(et.trap_GetUserinfo(i), "cl_guid")
         GUID = string.upper(guis)
-        local teamnumber = tonumber(et.gentity_get(i, "sess.sessionTeam"))
         local cname = et.Info_ValueForKey(et.trap_GetUserinfo(i), "name")
         local nudge = et.Info_ValueForKey(et.trap_GetUserinfo(i), "cl_timenudge")
         local pitch = et.Info_ValueForKey(et.trap_GetUserinfo(i), "m_pitch")
@@ -30,7 +29,7 @@ function execute_command(params)
 
         if getAdminLevel(i) >= 1 then
             if et.gentity_get(i, "pers.connected") == 2 then
-                et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[teamnumber], i, name, space, level, adname))
+                et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[team[i]], i, name, space, level, adname))
                 playercount = playercount + 1
             end
 

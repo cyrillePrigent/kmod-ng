@@ -1,7 +1,7 @@
 
 
 function execute_command(params)
-    local fdadm, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_WRITE)
 
     SPREE = ''
 

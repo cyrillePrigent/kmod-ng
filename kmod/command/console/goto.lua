@@ -14,9 +14,7 @@ function execute_command(params)
     target = part2id(params["arg2"])
 
     if target ~= nil then
-        local team = et.gentity_get(params["arg1"], "sess.sessionTeam")
-
-        if et.gentity_get(params["arg1"], "pers.connected") == 2 and (team > 0 or team < 4) then
+        if et.gentity_get(params["arg1"], "pers.connected") == 2 and (team[params["arg1"]] > 0 or team[params["arg1"]] < 4) then
             local targetOrigin = et.gentity_get(target, "origin")
             targetOrigin[2] = targetOrigin[2] + 40
             et.gentity_set(params["arg1"], "origin", targetOrigin)

@@ -9,7 +9,6 @@ function execute_command(params)
     local spa = 24
 
     for i = 0, clientsLimit, 1 do
-        local teamnumber = tonumber(et.gentity_get(i, "sess.sessionTeam"))
         local cname = et.Info_ValueForKey( et.trap_GetUserinfo(i), "name")
         local rate = et.Info_ValueForKey(et.trap_GetUserinfo(i), "rate")
         local snaps = et.Info_ValueForKey(et.trap_GetUserinfo(i), "snaps")
@@ -26,7 +25,7 @@ function execute_command(params)
         end
 
         if et.gentity_get(i,"pers.connected") == 2 then
-            et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[teamnumber], i, name, space, rate, snaps, ref))
+            et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[team[i]], i, name, space, rate, snaps, ref))
             playercount = playercount + 1
         end
     end

@@ -48,9 +48,7 @@ function execute_command(params)
         end
     end
 
-    local team = et.gentity_get(clientNum, "sess.sessionTeam")
-
-    if team >= 3 or team < 1 then
+    if team[clientNum] >= 3 or team[clientNum] < 1 then
         if params.commandSaid then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Slap: ^7Client is not actively playing\n")
         else

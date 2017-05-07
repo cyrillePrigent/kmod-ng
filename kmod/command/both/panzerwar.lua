@@ -22,9 +22,7 @@ function execute_command(params)
                         panzdv = 1
 
                         for p = 0, clientsLimit, 1 do
-                            local team = et.gentity_get(p, "sess.sessionTeam")
-
-                            if team >= 1 and team < 3 then
+                            if team[p] == 1 or team[p] == 2 then
                                 originalclass[p] = tonumber(et.gentity_get(p, "sess.latchPlayerType"))
                                 originalweap[p] = tonumber(et.gentity_get(p, "sess.latchPlayerWeapon"))
 
@@ -49,9 +47,7 @@ function execute_command(params)
                     panzdv = 0
 
                     for p = 0, clientsLimit, 1 do
-                        local team = et.gentity_get(p, "sess.sessionTeam")
-
-                        if team == 1 or team == 2 then
+                        if team[p] == 1 or team[p] == 2 then
                             if et.gentity_get(p, "health") >= 0 then
                                 et.G_Damage(p, p, 1022, 400, 24, 0)
                                 -- in case they recently spawned and are protected by spawn shield

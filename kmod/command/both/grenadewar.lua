@@ -21,9 +21,7 @@ function execute_command(params)
                         grendv = 1
 
                         for p = 0, clientsLimit, 1 do
-                            local team = et.gentity_get(p, "sess.sessionTeam")
-
-                            if team >= 1 and team < 3 then
+                            if team[p] == 1 or team[p] == 2 then
                                 if et.gentity_get(p, "health") > 0 then
                                     et.G_Damage(p, p, 1022, 400, 24, 0)
                                     -- in case they recently spawned and are protected by spawn shield
@@ -42,9 +40,7 @@ function execute_command(params)
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
 
                     for p = 0, clientsLimit, 1 do
-                        local team = et.gentity_get(p, "sess.sessionTeam")
-
-                        if team >= 1 and team < 3 then
+                        if team[p] == 1 or team[p] == 2 then
                             if et.gentity_get(p, "health") > 0 then
                                 et.G_Damage(p, p, 1022, 400, 24, 0)
                                 -- in case they recently spawned and are protected by spawn shield
