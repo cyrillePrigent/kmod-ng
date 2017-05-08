@@ -1,5 +1,6 @@
 
 
+-- TODO : Add mute duration
 function execute_command(params)
     if params.nbArg < 3 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Mute:^7 \[partname/id#\]\n")

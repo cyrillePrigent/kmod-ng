@@ -74,18 +74,76 @@ SOURCES:
 	The rest of the code is mine :D
 --]]
 
+-- Global vars
+
+--[[
+   Mute table :
+     duration :
+       key   => ip adress
+       value => duration in seconds, -1 for permanent mute
+     end :
+       key   => client ID
+       value => mute end (in miliseconds)
+     multipliers :
+       key   => client ID
+       value => mute duration multipliers
+     ip :
+       key   => numeric (start to 0)
+       value => ip adress to check to mute
+--]]
+mute = {
+    ['duration'] = {},
+    ['end'] = {},
+    ['multipliers'] = {},
+    ['ip'] = {}
+}
+
+selfkills = {}
+
+-- Obituary
+
 killingspree = {}
 flakmonkey = {}
 deathspree = {}
 multikill = {}
-playerwhokilled = {}
-killedwithweapk = {}
-killedwithweapv = {}
-playerlastkilled = {}
-muted = {}
-muteDuration = {}
-nummutes = {}
-chkIP = {}
+playerWhoKilled = {}
+killedWithWeapon = {
+    ['killer'] = {},
+    ['hp'] = {}
+}
+playerLastKilled = {}
+kill = {
+    [1] = {},
+    [2] = {},
+    [3] = {},
+    [4] = {},
+    [5] = {},
+    [6] = {},
+    [7] = {},
+    [8] = {}
+}
+-- NOTE killingspree equivalent
+nbKill = {}
+tkIndex = {}
+killerHp = {}
+firstBlood = 0
+lastBlood = ""
+spreeRecordKills = 0
+oldSpree = {
+    ['short'] = {},
+    ['long'] = {}
+}
+currentSpreeRecord = ""
+mapSpreeRecordKills = 0
+oldMapSpree = {
+    ['short'] = {},
+    ['long'] = {}
+}
+currentMapSpreeRecord = ""
+
+
+
+
 antiloopadr1 = {}
 antiloopadr2 = {}
 adrenaline = {}
@@ -102,19 +160,6 @@ gibbed = {}
 randomClient = {}
 
 timecounter = 1
-
-kill1 = {}
-kill2 = {}
-kill3 = {}
-kill4 = {}
-kill5 = {}
-kill6 = {}
-kill7 = {}
-kill8 = {}
-killr = {}
-selfkills = {}
-teamkillr = {}
-khp = {}
 PlayerName = {}
 Bname = {}
 team = {}
@@ -403,15 +448,6 @@ numAlliedPlayers = 0
 active_players = 0
 total_players = 0
 
-firstblood = 0
-lastblood = ""
-oldspree = ""
-oldspree2 = ""
-intmrecord = ""
-oldmapspree = ""
-oldmapspree2 = ""
-intmMaprecord = ""
-
 panzer_antiloop = 0
 panzer_antiloop1 = 0
 panzer_antiloop2 = 0
@@ -504,8 +540,6 @@ antiloop4 = 0
 antiloopes = 0
 antilooppw = 0
 confirm = 0
-spreerecordkills = 0
-mapspreerecordkills = 0
 crazydv = 1
 CGactive = 0
 panzdv = 0
@@ -541,104 +575,97 @@ k_Admin = {}
 
 function loadMutes()
     local i = 0
-    local i2 = 0
-    local dv = 1
-    local dv2 = 1
-    chkIP = {}
-    local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
+    mute['ip'] = {}
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
 
     for i = 0, clientsLimit, 1 do
-        chkIP[i] = 0
+        mute['ip'][i] = 0
     end
 
     if len <= 0 then
-        et.G_Print("WARNING: No Mutes Defined! \n")
+        et.G_Print("WARNING: No Mutes Defined!\n")
     else
         local filestr = et.trap_FS_Read(fd, len)
         local i = 0
 
         for time, ip in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-            muteDuration[ip] = time
-            chkIP[i] = ip
-
-            if dv == 1 then
-                i = i + 1
-            end
+            mute['duration'][ip] = time
+            mute['ip'][i] = ip
+            i = i + 1
         end
     end
 
     et.trap_FS_FCloseFile(fd)
 end
 
-function setMute(PlayerID, muteTime)
-    local time = math.ceil(muteTime)
-    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
-    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
-    local IP = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
-    s, e, IP = string.find(IP, "(%d+%.%d+%.%d+%.%d+)")
-    local dv = 0
+function getNbMuted()
+    local fdread, length = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
+    local n = 0
+
+    if length ~= 0 then
+        local fileStr = et.trap_FS_Read(fdread, length)
+
+        for ip in string.gfind(fileStr, "%-*%d+%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
+            n = n + 1
+        end
+    end
+
+    et.trap_FS_FCloseFile(fdread)
+    return n
+end
+
+function writeMute(playerId, muteTime)
+    fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
+
+    if mute['end'][playerId] ~= 0 then
+        local time = math.ceil(muteTime)
+        local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
+        local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
+        et.trap_FS_Write(muteLine, string.len(muteLine), fdadm)
+    end
+
+    et.trap_FS_FCloseFile(fdadm)
+end
+
+function setMute(playerId, muteTime)
+    local edit = false
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
+    local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip"))
+    s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+
+    et.trap_FS_FCloseFile(fdadm)
 
     if len == -1 then
-        confirm2 = 1
-        et.trap_FS_FCloseFile(fdadm)
+        edit = true
     else
-        local fdread, length = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-        local n = 0
-
-        if length ~= 0 then
-            local filestr = et.trap_FS_Read(fdread, length)
-
-            for ip in string.gfind(filestr, "%-*%d+%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-                n = n + 1
-            end
-        end
-
-        et.trap_FS_FCloseFile(fdread)
-        -- Close the mutes file so that removeMute() can open the mutes.cfg
-        et.trap_FS_FCloseFile(fdadm)
+        local n = getNbMuted()
 
         for i = 0, n, 1 do
-            if chkIP[i] == IP then
-                dv = 1
-
-                if dv == 1 then
-                    removeMute(PlayerID)
-                end
-
+            if mute['ip'][i] == ip then
+                removeMute(playerId)
+                edit = true
                 break
             end
         end
 
-
-        if muted[PlayerID] > 0 or muted[PlayerID] == -1 then
-            confirm2 = 1
+        if mute['end'][playerId] > 0 or mute['end'][playerId] == -1 then
+            edit = true
         else
-            confirm2 = 0
+            edit = false
         end
     end
 
-    if confirm2 == 1 then
-        fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
-
-        if muted[PlayerID] ~= 0 then
-            ADMIN = time .. " - " .. IP .. " - " .. Name .. "\n"
-            confirm2 = 0
-            et.trap_FS_Write(ADMIN, string.len(ADMIN) ,fdadm)
-        else
-            loadMutes()
-        end
-
-        et.trap_FS_FCloseFile(fdadm)
+    if edit then
+        writeMute(playerId, muteTime)
         loadMutes()
     end
 end
 
-function removeMute(PlayerID)
+function removeMute(playerId)
     local fdin, lenin = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
     local fdout, lenout = et.trap_FS_FOpenFile(kmod_ng_path .. "mutestmp.cfg", et.FS_WRITE)
-    local IP2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip"))
-    s, e, IP2 = string.find(IP2, "(%d+%.%d+%.%d+%.%d+)")
-    local i = 0
+    local ip2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip"))
+    s, e, ip2 = string.find(ip2, "(%d+%.%d+%.%d+%.%d+)")
 
     if lenin <= 0 then
         et.G_Print("There is no Mutes to remove \n")
@@ -646,30 +673,70 @@ function removeMute(PlayerID)
         local filestr = et.trap_FS_Read(fdin, lenin)
 
         for time, ip, name in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
-            if ip ~= IP2 then
-                local mute = time .. " - " .. ip .. " - " .. name .. "\n"
-                et.trap_FS_Write(mute, string.len(mute), fdout)
+            if ip ~= ip2 then
+                local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
+                et.trap_FS_Write(muteLine, string.len(muteLine), fdout)
             end
-
-            i = i + 1
-
         end
     end
 
-    confirm2 = 1
     et.trap_FS_FCloseFile(fdin)
     et.trap_FS_FCloseFile(fdout)
     et.trap_FS_Rename("mutestmp.cfg", "mutes.cfg")
     loadMutes()
 end
 
-function checkMute(PlayerID)
-    local ip = ""
-    local name = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name")
-    local ref = tonumber(et.gentity_get(PlayerID, "sess.referee"))
+function checkMuteShutdownGame()
+    for i = 0, clientLimit, 1 do
+        if et.gentity_get(i, "pers.connected") == 2 then
+            if mute['end'][i] > 0 then
+                setMute(i, (mute['end'][i] - mtime) / 1000)
+            elseif mute['end'][i] == 0 then
+                local ip = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
+                s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
 
-    if PlayerID ~= -1 then
-        ip = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
+                if mute['duration'][ip] ~= 0 then
+                    setMute(i, 0)
+                end
+            end
+        end
+    end
+end
+
+function checkMuteRunFrame()
+    for i = 0, clientsLimit, 1 do
+        local mute = et.gentity_get(i, "sess.muted")
+
+        if mute['end'][i] > 0 then
+            if mtime > mute['end'][i] then
+                if mute == 1 then
+                    local name = et.gentity_get(i, "pers.netname")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .." ^7has been auto unmuted.  Please watch your language!\n")
+                end
+
+                mute['end'][i] = 0
+            elseif mtime < mute['end'][i] then
+                if mute == 0 then
+                    mute['end'][i] = 0
+                    setMute(i, 0)
+                end
+            elseif mute == 0 then
+                mute['end'][i] = 0
+            end
+        elseif mute['end'][i] == -1 then
+            if mute == 0 then
+                mute['end'][i] = 0
+            end
+        end
+    end
+end
+
+function checkMuteClentBegin(playerId)
+    local ip = ""
+
+    if playerId ~= -1 then
+        ip = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip")
         s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
     else
         ip = -1
@@ -678,19 +745,23 @@ function checkMute(PlayerID)
     local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
 
     if len > 0 then
-        local filestr = et.trap_FS_Read(fd, len)
+        local name = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name")
+        local ref = tonumber(et.gentity_get(playerId, "sess.referee"))
+        local fileStr = et.trap_FS_Read(fd, len)
         local i = 0
 
-        for time in string.gfind(filestr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
-            if chkIP[i] == ip and ref == 0 then
-                if tonumber(muteDuration[ip]) > 0 then
-                    muted[PlayerID] = mtime + tonumber((muteDuration[ip]) * 1000)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has not yet finished his mute sentance.  (^1" .. muteDuration[ip] .. "^7) seconds.\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-                elseif tonumber(muteDuration[ip]) == -1 then
-                    muted[PlayerID] = -1
+        for time in string.gfind(fileStr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
+            if mute['ip'][i] == ip and ref == 0 then
+                local muteDuration = tonumber(mute['duration'][ip])
+
+                if muteDuration > 0 then
+                    mute['end'][playerId] = mtime + (muteDuration * 1000)
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has not yet finished his mute sentance.  (^1" .. muteDuration .. "^7) seconds.\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. playerId .. "\n" )
+                elseif muteDuration == -1 then
+                    mute['end'][playerId] = -1
                     et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has been permanently muted\n")
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n")
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. playerId .. "\n")
                 end
             end
 
@@ -701,13 +772,61 @@ function checkMute(PlayerID)
     et.trap_FS_FCloseFile(fd)
 end
 
+function checkMuteClientDisconnect(playerId)
+    if mute['end'][playerId] > 0 then
+        setMute(playerId, (mute['end'][playerId] - mtime) / 1000)
+        mute['end'][playerId] = 0
+    elseif mute['end'][playerId] == 0 then
+        setMute(playerId, 0)
+        mute['end'][playerId] = 0
+    end
+end
+
+-- Selfkills function
+
+function checkSelfkills(playerId)
+    local name = et.gentity_get(playerId, "pers.netname")
+
+    if team[playerId] ~= 3 and et.gentity_get(playerId, "health") > 0 then
+        if selfkills[playerId] < k_slashkills then
+            selfkills[playerId] = selfkills[playerId] + 1
+
+            if selfkills[playerId] == k_slashkills then
+                if k_advancedpms == 1 then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
+                    et.G_ClientSound(playerId, pmsound)
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
+                end
+            elseif selfkills[playerId] == (k_slashkills - 1) then
+                if k_advancedpms == 1 then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You have ^11^7 /kill left for this map.\n")
+                    et.G_ClientSound(playerId, pmsound)
+                else
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n")
+                end
+            end
+        else
+            if k_advancedpms == 1 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You may no longer /kill for the rest of this map!\n")
+                et.G_ClientSound(playerId, pmsound)
+            else
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n")
+            end
+
+            return 1
+        end
+    end
+
+    return 0
+end
+
 -- Admin function
 
 function loadAdmins()
     local i = 0
     local i2 = 0
     local dv = 1
-    local dv2 = 1
     local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
 
     if len <= 0 then
@@ -937,7 +1056,7 @@ function setSpreeRecord(PlayerID, kills2)
 
     et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
     et.trap_FS_FCloseFile(fdadm)
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills  ^7" .. tostring(oldspree) .. "\n")
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills  ^7" .. oldSpree['short'] .. "\n")
     loadSpreeRecord()
 end
 
@@ -950,17 +1069,17 @@ function loadSpreeRecord()
 
     if len <= 0 then
         et.G_Print("WARNING: No spree record found! \n")
-        oldspree = "^3[Old: ^7N/A^3]"
-        oldspree2 = "^3Spree Record: ^7There is no current spree record"
-        spreerecordkills = 0
+        oldSpree['short'] = "^3[Old: ^7N/A^3]"
+        oldSpree['long'] = "^3Spree Record: ^7There is no current spree record"
+        spreeRecordKills = 0
     else
         local filestr = et.trap_FS_Read(fd, len)
 
         s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-        spreerecordkills = tonumber(kills)
-        oldspree = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
-        oldspree2 = "^3Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
-        intmrecord = "Current spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+        spreeRecordKills = tonumber(kills)
+        oldSpree['short'] = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
+        oldSpree['long'] = "^3Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+        currentSpreeRecord = "Current spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
 
     end
 
@@ -979,7 +1098,7 @@ function setMapSpreeRecord(PlayerID, kills2)
 
     et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
     et.trap_FS_FCloseFile(fdadm)
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills on " .. mapname .."  ^7" .. tostring(oldmapspree) .. "\n")
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills on " .. mapname .."  ^7" .. oldMapSpree['short'] .. "\n")
     loadMapSpreeRecord()
 end
 
@@ -993,17 +1112,17 @@ function loadMapSpreeRecord()
 
     if len <= 0 then
         et.G_Print("WARNING: No spree record found! \n")
-        oldmapspree = "^3[Old: ^7N/A^3]"
-        oldmapspree2 = "^3Map Spree Record: ^7There is no current spree record"
-        mapspreerecordkills = 0
+        oldMapSpree['short'] = "^3[Old: ^7N/A^3]"
+        oldMapSpree['long'] = "^3Map Spree Record: ^7There is no current spree record"
+        mapSpreeRecordKills = 0
     else
         local filestr = et.trap_FS_Read(fd, len)
 
         s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-        mapspreerecordkills = tonumber(kills)
-        oldmapspree = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
-        oldmapspree2 = "^3Map Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date .. " on the map of " .. mapname
-        intmMaprecord = "Current Map spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
+        mapSpreeRecordKills = tonumber(kills)
+        oldMapSpree['short'] = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
+        oldMapSpree['long'] = "^3Map Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date .. " on the map of " .. mapname
+        currentMapSpreeRecord = "Current Map spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
 
     end
 
@@ -1538,8 +1657,8 @@ function kills(victim, killer, meansOfDeath, weapon)
     local killername = ""
 
     victimname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
-    playerlastkilled[killer] = victim
-    killedwithweapk[killer] = tostring(weapon)
+    playerLastKilled[killer] = victim
+    killedWithWeapon['killer'][killer] = tostring(weapon)
     local victimteam = team[victim]
     local killerteam = team[killer]
 
@@ -1564,21 +1683,21 @@ function kills(victim, killer, meansOfDeath, weapon)
         end
 
         if k_spreerecord == 1 then
-            if killr[victim] > spreerecordkills then
-                setSpreeRecord(victim, killr[victim])
+            if nbKill[victim] > spreeRecordKills then
+                setSpreeRecord(victim, nbKill[victim])
             end
 
-            if killr[victim] > mapspreerecordkills then
-                setMapSpreeRecord(victim, killr[victim])
-                killr[victim] = 0
+            if nbKill[victim] > mapSpreeRecordKills then
+                setMapSpreeRecord(victim, nbKill[victim])
+                nbKill[victim] = 0
             else
-                killr[victim] = 0
+                nbKill[victim] = 0
             end
         end
 
         flakmonkey[victim]=0
     else
-        killername=et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+        killername = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
     end
 
     if killer ~= victim and k_sprees == 1 then
@@ -1593,33 +1712,33 @@ function kills(victim, killer, meansOfDeath, weapon)
                     local pbkiller = killer + 1
 
                     if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 or meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 57 or meansOfDeath == 30  or meansOfDeath == 27 or meansOfDeath == 49 or meansOfDeath == 3 then
-                        teamkillr[killer] = teamkillr[killer] - 0.75
+                        tkIndex[killer] = tkIndex[killer] - 0.75
                     elseif meansOfDeath == 30  or meansOfDeath == 27 then
-                        teamkillr[killer] = teamkillr[killer] - 0.65
+                        tkIndex[killer] = tkIndex[killer] - 0.65
                     elseif meansOfDeath == 45 then
                         -- Mines do nothing!
                     else
-                        teamkillr[killer] = teamkillr[killer] - 1
+                        tkIndex[killer] = tkIndex[killer] - 1
                     end
 
-                    if warning > teamkillr[killer] and k_tklimit_low < teamkillr[killer] then
+                    if warning > tkIndex[killer] and k_tklimit_low < tkIndex[killer] then
                         if k_advancedpms == 1 then
                             et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
                             et.G_ClientSound(killer, pmsound)
                         else
                             et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
                         end
-                    elseif teamkillr[killer] <= k_tklimit_low then
+                    elseif tkIndex[killer] <= k_tklimit_low then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n")
                     end
                 end
             else
                 if killer ~= victim then
                     if killer ~= 1022 then
-                        teamkillr[killer] = teamkillr[killer] + 1
+                        tkIndex[killer] = tkIndex[killer] + 1
 
-                        if teamkillr[killer] > k_tklimit_high then
-                            teamkillr[killer] = k_tklimit_high
+                        if tkIndex[killer] > k_tklimit_high then
+                            tkIndex[killer] = k_tklimit_high
                         end
                     end
                 end
@@ -1634,21 +1753,21 @@ function kills(victim, killer, meansOfDeath, weapon)
             multikill[killer] = multikill[killer] + 1
 
             if multikill[killer] == 1 then
-                kill1[killer] = mtime
+                kill[1][killer] = mtime
             elseif multikill[killer] == 2 then
-                kill2, kill1 = multikillProcess(dvtime, kill2, kill1, k_mk_message1, doublekillsound)
+                kill[2], kill[1] = multikillProcess(dvtime, kill[2], kill[1], k_mk_message1, doublekillsound)
             elseif multikill[killer] == 3 then
-                kill3, kill2 = multikillProcess(dvtime, kill3, kill2, k_mk_message2, multikillsound)
+                kill[3], kill[2] = multikillProcess(dvtime, kill[3], kill[2], k_mk_message2, multikillsound)
             elseif multikill[killer] == 4 then
-                kill4, kill3 = multikillProcess(dvtime, kill4, kill3, k_mk_message3, megakillsound)
+                kill[4], kill[3] = multikillProcess(dvtime, kill[4], kill[3], k_mk_message3, megakillsound)
             elseif multikill[killer] == 5 then
-                kill5, kill4 = multikillProcess(dvtime, kill5, kill4, k_mk_message4, ultrakillsound)
+                kill[5], kill[4] = multikillProcess(dvtime, kill[5], kill[4], k_mk_message4, ultrakillsound)
             elseif multikill[killer] == 6 then
-                kill6, kill5 = multikillProcess(dvtime, kill6, kill5, k_mk_message5, monsterkillsound)
+                kill[6], kill[5] = multikillProcess(dvtime, kill[6], kill[5], k_mk_message5, monsterkillsound)
             elseif multikill[killer] == 7 then
-                kill7, kill6 = multikillProcess(dvtime, kill7, kill6, k_mk_message6, ludicrouskillsound)
+                kill[7], kill[6] = multikillProcess(dvtime, kill[7], kill[6], k_mk_message6, ludicrouskillsound)
             elseif multikill[killer] == 8 then
-                kill8, kill7 = multikillProcess(dvtime, kill8, kill7, k_mk_message7, holyshitsound, true)
+                kill[8], kill[7] = multikillProcess(dvtime, kill[8], kill[7], k_mk_message7, holyshitsound, true)
             end
         else
             multikill[killer] = 0
@@ -1658,7 +1777,7 @@ function kills(victim, killer, meansOfDeath, weapon)
     if killer ~= 1022 then
         if killer ~= victim and victimteam ~= killerteam then
             if k_spreerecord == 1 then
-                killr[killer] = killr[killer] + 1
+                nbKill[killer] = nbKill[killer] + 1
             end
 
             if k_sprees == 1 then
@@ -1699,15 +1818,15 @@ function kills(victim, killer, meansOfDeath, weapon)
             end
 
             if k_spreerecord == 1 then
-                if killr[victim] > spreerecordkills then
-                    setSpreeRecord(victim, killr[victim])
+                if nbKill[victim] > spreeRecordKills then
+                    setSpreeRecord(victim, nbKill[victim])
                 end
 
-                if killr[victim] > mapspreerecordkills then
-                    setMapSpreeRecord(victim, killr[victim])
-                    killr[victim] = 0
+                if nbKill[victim] > mapSpreeRecordKills then
+                    setMapSpreeRecord(victim, nbKill[victim])
+                    nbKill[victim] = 0
                 else
-                    killr[victim] = 0
+                    nbKill[victim] = 0
                 end
             end
         end
@@ -1768,23 +1887,23 @@ function deaths(victim, killer, meansOfDeath, weapon)
         killername = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
     end
 
-    playerwhokilled[victim] = killer
-    killedwithweapv[victim] = tostring(weapon)
+    playerWhoKilled[victim] = killer
+    killedWithWeapon['victim'][victim] = tostring(weapon)
 
     local victimteam = team[victim]
     local killerteam = team[killer]
     local killedname = et.Info_ValueForKey(et.trap_GetUserinfo( victim ), "name")
 
     if k_spreerecord == 1 then
-        if killr[victim] > spreerecordkills then
-            setSpreeRecord(victim, killr[victim])
+        if nbKill[victim] > spreeRecordKills then
+            setSpreeRecord(victim, nbKill[victim])
         end
 
-        if killr[victim] > mapspreerecordkills then
-            setMapSpreeRecord(victim, killr[victim])
-            killr[victim] = 0
+        if nbKill[victim] > mapSpreeRecordKills then
+            setMapSpreeRecord(victim, nbKill[victim])
+            nbKill[victim] = 0
         else
-            killr[victim] = 0
+            nbKill[victim] = 0
         end
     end
 
@@ -1884,9 +2003,8 @@ function curseFilter(PlayerID)
 
         if ref == 0 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n")
-            local mute = "-1"
-            muted[PlayerID] = -1
-            setMute(PlayerID, mute)
+            mute['end'][PlayerID] = -1
+            setMute(PlayerID, -1)
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been permanently muted for language!\n")
         end
     end
@@ -1899,16 +2017,16 @@ function curseFilter(PlayerID)
 
         --Mute time starts at one then doubles each time thereafter
         if ref == 0 then
-            if nummutes[PlayerID] == 0 then
-                nummutes[PlayerID] = 1
-                muted[PlayerID] = mtime + (1 * 60 * 1000)
+            if mute['multipliers'][PlayerID] == 0 then
+                mute['multipliers'][PlayerID] = 1
+                mute['end'][PlayerID] = mtime + (1 * 60 * 1000)
             else
-                nummutes[PlayerID] = nummutes[PlayerID] + nummutes[PlayerID]
-                muted[PlayerID] = mtime + (nummutes[PlayerID] * 60 * 1000)
+                mute['multipliers'][PlayerID] = mute['multipliers'][PlayerID] + mute['multipliers'][PlayerID]
+                mute['end'][PlayerID] = mtime + (mute['multipliers'][PlayerID] * 60 * 1000)
             end
 
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted for ^1" .. nummutes[PlayerID] .. "^7 minute(s)!\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted for ^1" .. mute['multipliers'][PlayerID] .. "^7 minute(s)!\n")
         end
     end
 
@@ -1958,12 +2076,21 @@ function et_InitGame(levelTime, randomSeed, restart)
     k_panzersperteam = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 
     for i = 0, clientsLimit, 1 do
+        mute['end'][i] = 0
+        mute['multipliers'][i] = 0
+        selfkills[i] = 0
         killingspree[i] = 0
         flakmonkey[i] = 0
         deathspree[i] = 0
         multikill[i] = 0
-        muted[i] = 0
-        nummutes[i] = 0
+        playerWhoKilled[i] = 1022
+        killedWithWeapon['killer'][i] = ""
+        killedWithWeapon['victim'][i] = ""
+        playerLastKilled[i] = 1022
+        nbKill[i] = 0
+        tkIndex[i] = 0
+        killerHp[i] = 0
+
         antiloopadr1[i] = 0
         antiloopadr2[i] = 0
         adrenaline[i] = 0
@@ -1977,18 +2104,10 @@ function et_InitGame(levelTime, randomSeed, restart)
         switchteam[i] = 0
         gibbed[i] = 0
 
-        playerwhokilled[i] = 1022
-        killedwithweapk[i] = ""
-        killedwithweapv[i] = ""
-        playerlastkilled[i] = 1022
-        selfkills[i] = 0
-        teamkillr[i] = 0
-        khp[i] = 0
         AdminName[i] = ""
         originalclass[i] = ""
         originalweap[i] = ""
 
-        killr[i] = 0
     end
 
     readConfig()
@@ -2024,22 +2143,7 @@ function et_ShutdownGame(restart)
         logChat("DV", "START", "DV")
     end
 
-    for i = 0, clientLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            if muted[i] > 0 then
-                local muteDur = (muted[i] - mtime) / 1000
-                setMute(i, muteDur)
-            elseif muted[i] == 0 then
-                IP = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
-                s, e, IP = string.find(IP, "(%d+%.%d+%.%d+%.%d+)")
-
-                if muteDuration[IP] ~= 0 then
-                    local muteDur = 0
-                    setMute(i, muteDur)
-                end
-            end
-        end
-    end
+    checkMuteShutdownGame()
 end
 
 -- Called when qagame runs a server frame.
@@ -2365,8 +2469,8 @@ function et_RunFrame(levelTime)
 
     if Gamestate == 3 then
         if k_lastblood == 1 and antiloop == 0 then
-            if lastblood then
-                local str = string.gsub(k_lb_message, "#killer#", lastblood)
+            if lastBlood then
+                local str = string.gsub(k_lb_message, "#killer#", lastBlood)
 
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, lb_location .. " " .. str .. "\n")
             end
@@ -2382,8 +2486,8 @@ function et_RunFrame(levelTime)
             end
 
             if k_spreerecord == 1 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. tostring(intmrecord) .. "\n")
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. tostring(intmMaprecord) .. "\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. currentSpreeRecord .. "\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. currentMapSpreeRecord .. "\n")
             end
 
             antiloop = 1
@@ -2524,32 +2628,7 @@ function et_RunFrame(levelTime)
     end
 
 
-    for i = 0, clientsLimit, 1 do
-        local mute = et.gentity_get(i, "sess.muted")
-
-        if muted[i] > 0 then
-            if mtime > muted[i] then
-                if mute == 1 then
-                    local name = et.gentity_get(i, "pers.netname")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .." ^7has been auto unmuted.  Please watch your language!\n")
-                end
-
-                muted[i] = 0
-            elseif mtime < muted[i] then
-                if mute == 0 then
-                    muted[i] = 0
-                    setMute(i, 0)
-                end
-            elseif mute == 0 then
-                muted[i] = 0
-            end
-        elseif muted[i] == -1 then
-            if mute == 0 then
-                muted[i] = 0
-            end
-        end
-    end
+    checkMuteRunFrame()
 
     if k_disablevotes == 1 then
         local timelimit = tonumber(et.trap_Cvar_Get("timelimit"))
@@ -2701,11 +2780,28 @@ end
 -- Called when a client disconnects.
 --  clientNum is the client slot id.
 function et_ClientDisconnect(clientNum)
+    mute['multipliers'][clientNum] = 0
+    selfkills[clientNum] = 0
     killingspree[clientNum] = 0
     flakmonkey[clientNum] = 0
     deathspree[clientNum] = 0
     multikill[clientNum] = 0
-    nummutes[clientNum] = 0
+    playerWhoKilled[clientNum] = 1022
+    killedWithWeapon['killer'][clientNum] = ""
+    killedWithWeapon['victim'][clientNum] = ""
+    playerLastKilled[clientNum] = 1022
+    kill[1][clientNum] = ""
+    kill[2][clientNum] = ""
+    kill[3][clientNum] = ""
+    kill[4][clientNum] = ""
+    kill[5][clientNum] = ""
+    kill[6][clientNum] = ""
+    kill[7][clientNum] = ""
+    kill[8][clientNum] = ""
+    nbKill[clientNum] = 0
+    tkIndex[clientNum] = 0
+    killerHp[clientNum] = 0
+
     antiloopadr1[clientNum] = 0
     antiloopadr2[clientNum] = 0
     adrenaline[clientNum] = 0
@@ -2719,25 +2815,9 @@ function et_ClientDisconnect(clientNum)
     switchteam[clientNum] = 0
     gibbed[clientNum] = 0
 
-    playerwhokilled[clientNum] = 1022
-    killedwithweapk[clientNum] = ""
-    killedwithweapv[clientNum] = ""
-    playerlastkilled[clientNum] = 1022
-    selfkills[clientNum] = 0
-    teamkillr[clientNum] = 0
-    khp[clientNum] = 0
     AdminName[clientNum] = ""
     originalclass[clientNum] = ""
     originalweap[clientNum] = ""
-
-    killr[clientNum] = 0
-
-    kill1[clientNum] = ""
-    kill2[clientNum] = ""
-    kill3[clientNum] = ""
-    kill4[clientNum] = ""
-    kill5[clientNum] = ""
-    kill6[clientNum] = ""
 
     PlayerName[clientNum] = ""
 
@@ -2747,15 +2827,7 @@ function et_ClientDisconnect(clientNum)
         logChat(clientNum, "DISCONNECT", "DV2")
     end
 
-    if muted[clientNum] > 0 then
-        local muteDur = (muted[clientNum] - mtime) / 1000
-        setMute(clientNum, muteDur)
-        muted[clientNum] = 0
-    elseif muted[clientNum] == 0 then
-        local muteDur = 0
-        setMute(clientNum, muteDur)
-        muted[clientNum] = 0
-    end
+    checkMuteClientDisconnect(clientNum)
 end
 
 -- Called when a client begins (becomes active, and enters the gameworld).
@@ -2766,11 +2838,12 @@ function et_ClientBegin(clientNum)
     printModInfo(clientNum)
     loadAdmins()
 
-    teamkillr[clientNum] = 0
+    mute['end'][clientNum] = 0
     selfkills[clientNum] = 0
-    muted[clientNum] = 0
+    tkIndex[clientNum] = 0
+
     loadMutes()
-    checkMute(clientNum)
+    checkMuteClentBegin(clientNum)
 
     Bname[clientNum] = name
 
@@ -2980,43 +3053,8 @@ function et_ClientCommand(clientNum, command)
         return 1
     end
 
-    if k_slashkilllimit == 1 then
-        local name = et.gentity_get(clientNum, "pers.netname")
-
-        if cmd == "kill" then
-            if team[clientNum] ~= 3 then
-                if et.gentity_get(clientNum, "health") > 0 then
-                    if selfkills[clientNum] < k_slashkills then
-                        selfkills[clientNum] = selfkills[clientNum] + 1
-
-                        if selfkills[clientNum] == k_slashkills then
-                            if k_advancedpms == 1 then
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
-                                et.G_ClientSound(clientNum, pmsound)
-                            else
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
-                            end
-                        elseif selfkills[clientNum] == (k_slashkills - 1) then
-                            if k_advancedpms == 1 then
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You have ^11^7 /kill left for this map.\n")
-                                et.G_ClientSound(clientNum, pmsound)
-                            else
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n")
-                            end
-                        end
-                    else
-                        if k_advancedpms == 1 then
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. clientNum .. " ^7You may no longer /kill for the rest of this map!\n")
-                            et.G_ClientSound(clientNum, pmsound)
-                        else
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n")
-                        end
-
-                        return 1
-                    end
-                end
-            end
-        end
+    if cmd == "kill" and k_slashkilllimit == 1 then
+        return checkSelfkills(playerId)
     end
 
     return 0
@@ -3156,36 +3194,36 @@ function et_Print(text)
 
     if t[1] == "Medic_Revive:" then
         local reviver = tonumber(t[2])
-        teamkillr[reviver] = teamkillr[reviver] + 1
+        tkIndex[reviver] = tkIndex[reviver] + 1
 
-        if teamkillr[reviver] > k_tklimit_high then
-            teamkillr[reviver] = k_tklimit_high
+        if tkIndex[reviver] > k_tklimit_high then
+            tkIndex[reviver] = k_tklimit_high
         end
     end
 end
 
 -- Called whenever a player is killed.
-function et_Obituary( victim, killer, meansOfDeath )
-    local killername= ""
-    local killedname=et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
+function et_Obituary(victim, killer, meansOfDeath)
+    local killername = ""
+    local killedname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
     local victimteam = team[victim]
     local killerteam = team[killer]
     weapon = ""
 
     if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
         killername  = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
-        lastblood   = killername
-        khp[killer] = (mtime + 5000)
+        lastBlood   = killername
+        killerHp[killer] = (mtime + 5000)
 
-        if khp[victim] == nil then
-            khp[victim] = 0
+        if killerHp[victim] == nil then
+            killerHp[victim] = 0
         end
     end
 
     if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
         if killer ~= victim then
-            if firstblood == 0 then
-                firstblood = 1
+            if firstBlood == 0 then
+                firstBlood = 1
 
                 if k_firstblood == 1 then
                     local str = string.gsub(k_fb_message, "#killer#", killername)
@@ -3205,7 +3243,7 @@ function et_Obituary( victim, killer, meansOfDeath )
         local killerhp = et.gentity_get(killer, "health")
 
         if k_killerhpdisplay == 1 then
-            if khp[victim] < mtime then
+            if killerHp[victim] < mtime then
                 if killerhp >= 75 then
                     et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
 
@@ -3336,20 +3374,20 @@ function et_ClientSay(clientNum, mode, text)
             local player_last_victim_cname = ""
             local player_last_killer_cname = ""
 
-            if playerlastkilled[clientNum] == 1022 then
+            if playerLastKilled[clientNum] == 1022 then
                 player_last_victim_name = "NO ONE"
                 player_last_victim_cname = "NO ONE"
             else
-                player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerlastkilled[clientNum], "pers.netname"))
-                player_last_victim_cname = et.gentity_get(playerlastkilled[clientNum], "pers.netname")
+                player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerLastKilled[clientNum], "pers.netname"))
+                player_last_victim_cname = et.gentity_get(playerLastKilled[clientNum], "pers.netname")
             end
 
-            if playerwhokilled[clientNum] == 1022 then
+            if playerWhoKilled[clientNum] == 1022 then
                 player_last_killer_name = "NO ONE"
                 player_last_killer_cname = "NO ONE"
             else
-                player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerwhokilled[clientNum], "pers.netname"))
-                player_last_killer_cname = et.gentity_get(playerwhokilled[clientNum], "pers.netname")
+                player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerWhoKilled[clientNum], "pers.netname"))
+                player_last_killer_cname = et.gentity_get(playerWhoKilled[clientNum], "pers.netname")
             end
 
             local pnameID = part2id(Cvar1)
@@ -3375,14 +3413,14 @@ function et_ClientSay(clientNum, mode, text)
             local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
             local str = string.gsub(str, "<PLAYER_TEAM>", teamList[clientNum])
             local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerwhokilled[clientNum])
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerWhoKilled[clientNum])
             local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
             local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
-            local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedwithweapv[clientNum])
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerlastkilled[clientNum])
+            local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedWithWeapon['victim'][clientNum])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerLastKilled[clientNum])
             local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
             local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
-            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedwithweapk[clientNum])
+            local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedWithWeapon['killer'][clientNum])
             local str = string.gsub(str, "<PNAME2ID>", pnameID)
             local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
             local str = string.gsub(str, "<PB_ID>", PBID)
