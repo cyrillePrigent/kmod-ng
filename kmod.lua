@@ -141,8 +141,11 @@ oldMapSpree = {
 }
 currentMapSpreeRecord = ""
 
-
-
+-- Advanced respawn
+clientRespawn = {}
+switchTeam = {}
+invincibleDummy = {}
+invincibleStart = {}
 
 antiloopadr1 = {}
 antiloopadr2 = {}
@@ -152,10 +155,7 @@ adrnum2 = {}
 adrtime = {}
 adrtime2 = {}
 adrendummy = {}
-clientrespawn = {}
-invincStart = {}
-invincDummy = {}
-switchteam = {}
+
 gibbed = {}
 randomClient = {}
 
@@ -819,6 +819,39 @@ function checkSelfkills(playerId)
     end
 
     return 0
+end
+
+-- Advanced spawn function
+
+function checkAdvancedSpawn()
+    for i = 0, clientsLimit, 1 do
+        if switchTeam[i] == 1 then
+            et.gentity_set(i, "ps.powerups", 1, 0)
+        end
+
+        switchTeam[i] = 0
+    end
+
+    for i = 0, clientsLimit, 1 do
+        if clientRespawn[i] == 1 then
+            if (switchTeam[i] == 0 and et.gentity_get(i, "ps.powerups", 1) > 0) then
+                if invincibleDummy[i] == 0 then
+                    invincibleStart[i] = tonumber(et.gentity_get(i, "client.inactivityTime"))
+                    invincibleDummy[i] = 1
+                end
+
+                if tonumber(et.gentity_get(i, "client.inactivityTime")) == invincibleStart[i] then
+                    et.gentity_set(i, "ps.powerups", 1, mtime + 3000)
+                else
+                    clientRespawn[i] = 0
+                    invincibleDummy[i] = 0
+                end
+            else
+                clientRespawn[i] = 0
+                invincibleDummy[i] = 0
+            end
+        end
+    end
 end
 
 -- Admin function
@@ -2090,6 +2123,10 @@ function et_InitGame(levelTime, randomSeed, restart)
         nbKill[i] = 0
         tkIndex[i] = 0
         killerHp[i] = 0
+        clientRespawn[i] = 0
+        switchTeam[i] = 0
+        invincibleDummy[i] = 0
+        --invincibleStart[i] = 0
 
         antiloopadr1[i] = 0
         antiloopadr2[i] = 0
@@ -2099,9 +2136,6 @@ function et_InitGame(levelTime, randomSeed, restart)
         adrtime[i] = 0
         adrtime2[i] = 0
         adrendummy[i] = 0
-        clientrespawn[i] = 0
-        invincDummy[i] = 0
-        switchteam[i] = 0
         gibbed[i] = 0
 
         AdminName[i] = ""
@@ -2314,37 +2348,7 @@ function et_RunFrame(levelTime)
 
     -- g_inactivity is required or this will not work
     if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then
-        for i = 0, clientsLimit, 1 do
-            if switchteam[i] == 1 then
-                et.gentity_set(i, "ps.powerups", 1, 0)
-            end
-
-            switchteam[i] = 0
-        end
-
-        for i = 0, clientsLimit, 1 do
-            if clientrespawn[i] == 1 then
-                if (switchteam[i] == 0 and et.gentity_get(i, "ps.powerups", 1) > 0) then
-                    if invincDummy[i] == 0 then
-                        invincStart[i] = tonumber(et.gentity_get(i, "client.inactivityTime"))
-                        invincDummy[i] = 1
-                    end
-
-                    local inactivity = tonumber(et.gentity_get(i, "client.inactivityTime"))
-
-                    if inactivity == invincStart[i] then
-                        local timer = mtime + 3000
-                        et.gentity_set(i, "ps.powerups", 1, timer)
-                    else
-                        clientrespawn[i] = 0
-                        invincDummy[i] = 0
-                    end
-                else
-                    clientrespawn[i] = 0
-                    invincDummy[i] = 0
-                end
-            end
-        end
+        checkAdvancedSpawn()
     end
 
     if panzdv == 1 or frenzdv == 1 or grendv == 1 or snipdv == 1 then
@@ -2801,7 +2805,11 @@ function et_ClientDisconnect(clientNum)
     nbKill[clientNum] = 0
     tkIndex[clientNum] = 0
     killerHp[clientNum] = 0
-
+    clientRespawn[clientNum] = 0
+    switchTeam[clientNum] = 0
+    invincibleDummy[clientNum] = 0
+    --invincibleStart[clientNum] = 0
+    
     antiloopadr1[clientNum] = 0
     antiloopadr2[clientNum] = 0
     adrenaline[clientNum] = 0
@@ -2810,9 +2818,6 @@ function et_ClientDisconnect(clientNum)
     adrtime[clientNum] = 0
     adrtime2[clientNum] = 0
     adrendummy[clientNum] = 0
-    clientrespawn[clientNum] = 0
-    invincDummy[clientNum] = 0
-    switchteam[clientNum] = 0
     gibbed[clientNum] = 0
 
     AdminName[clientNum] = ""
@@ -2865,7 +2870,7 @@ function et_ClientSpawn(clientNum, revived)
         end
 
         if revived == 0 then
-            clientrespawn[clientNum] = 1
+            clientRespawn[clientNum] = 1
         end
     end
 end
@@ -2974,7 +2979,7 @@ function et_ClientCommand(clientNum, command)
 
     if team[clientNum] == 3 then
         if et.trap_Argv(0) == "team" and et.trap_Argv(1) then
-            switchteam[clientNum] = 1
+            switchTeam[clientNum] = 1
         end
     end
 
@@ -3283,9 +3288,9 @@ function et_Obituary(victim, killer, meansOfDeath)
     deaths(victim, killer, meansOfDeath, weapon)
 
     if meansOfDeath == 64 or meansOfDeath == 63 then
-        switchteam[victim] = 1
+        switchTeam[victim] = 1
     else
-        switchteam[victim] = 0
+        switchTeam[victim] = 0
     end
 
     --Weapons used!
