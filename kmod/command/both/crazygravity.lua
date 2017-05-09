@@ -6,24 +6,22 @@ function execute_command(params)
     else
         local crazy = tonumber(params["arg1"])
 
-        if crazy >= 0 and crazy <= 1 then
-            if crazy == 1 then
-                if CGactive == 0 then
-                    printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Enabled\n")
-                    crazygravity = true
-                    crazydv = 1
-                else
-                    printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity is already active\n")
-                end
+        if crazy == 1 then
+            if crazyGravity['active'] == false then
+                printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Enabled\n")
+                crazyGravity['active'] = true
+                crazyGravity['change'] = true
             else
-                if CGactive == 1 then
-                    printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
-                    crazygravity = false
-                    crazydv = 0
-                else
-                    printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has already been disabled\n")
-                end
+                printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity is already active\n")
+            end
+        elseif crazy == 0 then
+            if crazyGravity['active'] == true then
+                printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
+                crazyGravity['active'] = false
+                crazyGravity['change'] = false
+            else
+                printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has already been disabled\n")
             end
         else
             printCmdMsg(params.command, "^3Crazygravity:^7 Valid values are \[0-1\]\n")
