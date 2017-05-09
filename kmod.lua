@@ -413,6 +413,8 @@ players = {
     ['total'] = 0
 }
 
+-- Disable vote
+
 -- Auto panzer disable
 autoPanzerDisable = {
     ['disabledMsg'] = false,
@@ -422,6 +424,7 @@ autoPanzerDisable = {
 }
 
 
+voteDisabled = false
 
 
 randomClient = {}
@@ -461,7 +464,7 @@ lvlsc = {}
 
 
 
-floodprotect = 0
+--floodprotect = 0
 commandSaid = false
 
 finger = false
@@ -934,6 +937,18 @@ function gameModeShutdownGame()
     end
 end
 
+function setWeaponAmmo(weaponList, clientId)
+    for i = 1, (et.MAX_WEAPONS - 1), 1 do
+        if not weaponList[i] then
+            et.gentity_set(clientId, "ps.ammoclip", i, 0)
+            et.gentity_set(clientId, "ps.ammo", i, 0)
+        else
+            et.gentity_set(clientId, "ps.ammoclip", i, 999)
+            et.gentity_set(clientId, "ps.ammo", i, 999)
+        end
+    end
+end
+
 function gameModeRunFrame()
     if gameMode ~= false then
         if timedelay_antiloop == 0 then
@@ -1042,6 +1057,57 @@ function crazyGravityRunFrame()
         crazyGravity['change'] = true
     elseif remainingTime / 1000 == 5 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity will be changed in ^15^7 seconds!\n")
+    end
+end
+
+-- Disable vote function
+-- TODO Clean timecounter var
+function disableVoteRunFrame()
+    local timeLimit = tonumber(et.trap_Cvar_Get("timelimit"))
+
+    if k_dvmode == 1 then
+        local cancelTime = (timeLimit - k_dvtime)
+
+        if timecounter >= (cancelTime * 60) then
+            if voteDisabled == false then
+                voteDisabled = true
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
+            end
+        else
+            if voteDisabled then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
+            end
+
+            voteDisabled = false
+        end
+    elseif k_dvmode == 3 then
+        if timecounter >= (k_dvtime * 60) then
+            if voteDisabled == false then
+                voteDisabled = true
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
+            end
+        else
+            if voteDisabled then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
+            end
+
+            voteDisabled = false
+        end
+    else
+        local cancelPercent = (timeLimit * (k_dvtime / 100))
+
+        if timecounter >= (cancelPercent * 60) then
+            if voteDisabled == false then
+                voteDisabled = true
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
+            end
+        else
+            if voteDisabled then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
+            end
+
+            voteDisabled = false
+        end
     end
 end
 
@@ -1853,18 +1919,6 @@ function getMessageLocation(location)
     end
 end
 
-function setWeaponAmmo(weaponList, clientId)
-    for i = 1, (et.MAX_WEAPONS - 1), 1 do
-        if not weaponList[i] then
-            et.gentity_set(clientId, "ps.ammoclip", i, 0)
-            et.gentity_set(clientId, "ps.ammo", i, 0)
-        else
-            et.gentity_set(clientId, "ps.ammoclip", i, 999)
-            et.gentity_set(clientId, "ps.ammo", i, 999)
-        end
-    end
-end
-
 -- et_Obituary
 
 function getMeansOfDeathName(meansOfDeath)
@@ -2536,7 +2590,6 @@ function et_RunFrame(levelTime)
         timedvs = 1
     end
 
-    timelimit = tonumber(et.trap_Cvar_Get("timelimit"))
     Gamestate = tonumber(et.trap_Cvar_Get("gamestate"))
 
     if GAMEPAUSED == 1 then
@@ -2728,13 +2781,13 @@ function et_RunFrame(levelTime)
         antiloop4 = 0
     end
 
-    if floodprotect == 1 then
-        fpPtime = (mtime - fpProt) / 1000
-
-        if fpPtime >= 2 then
-            floodprotect = 0
-        end
-    end
+--     if floodprotect == 1 then
+--         fpPtime = (mtime - fpProt) / 1000
+-- 
+--         if fpPtime >= 2 then
+--             floodprotect = 0
+--         end
+--     end
 
     if k_advancedadrenaline == 1 then
         checkAdvancedAdrenalineFrame()
@@ -2743,50 +2796,7 @@ function et_RunFrame(levelTime)
     checkMuteRunFrame()
 
     if k_disablevotes == 1 then
-        local timelimit = tonumber(et.trap_Cvar_Get("timelimit"))
-
-        if k_dvmode == 1 then
-            local cancel_time = (timelimit - k_dvtime)
-            if timecounter >= (cancel_time * 60) then
-                if votedis == 0 then
-                    votedis = 1
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-                end
-            else
-                if votedis == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-                end
-
-                votedis = 0
-            end
-        elseif k_dvmode == 3 then
-            if timecounter >= (k_dvtime * 60) then
-                if votedis == 0 then
-                    votedis = 1
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-                end
-            else
-                if votedis == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-                end
-
-                votedis = 0
-            end
-        else
-            local cancel_percent = (timelimit * (k_dvtime / 100))
-            if timecounter >= (cancel_percent * 60) then
-                if votedis == 0 then
-                    votedis = 1
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-                end
-            else
-                if votedis == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-                end
-
-                votedis = 0
-            end
-        end
+        disableVoteRunFrame()
     end
 
     if k_autopanzerdisable == 1 then
@@ -2995,7 +3005,7 @@ function et_ClientCommand(clientNum, command)
         end
     end
 
-    if votedis == 1 then
+    if voteDisabled then
         local vote = et.trap_Argv(1)
 
         if getAdminLevel(clientNum) < 3 then
