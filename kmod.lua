@@ -101,7 +101,6 @@ mute = {
 selfkills = {}
 
 -- Obituary
-
 killingspree = {}
 flakmonkey = {}
 deathspree = {}
@@ -147,22 +146,263 @@ switchTeam = {}
 invincibleDummy = {}
 invincibleStart = {}
 
-antiloopadr1 = {}
-antiloopadr2 = {}
+-- What ?
+gibbed = {}
+
+-- Advanced adrenaline
+
+-- key   => player ID
+-- value => 0 or 1 if adrenaline is active
 adrenaline = {}
+-- key   => player ID
+-- value => 0 or 1 when adrenaline is used
+antiloopadr1 = {}
+-- key   => player ID
+-- value => 0 or 1 when adrenaline is used
+antiloopadr2 = {}
+-- key   => player ID
+-- value => et.gentity_get(i, "ps.powerups", 12)
 adrnum = {}
 adrnum2 = {}
 adrtime = {}
 adrtime2 = {}
 adrendummy = {}
 
-gibbed = {}
-randomClient = {}
+-- Global player info storage
 
-timecounter = 1
-PlayerName = {}
-Bname = {}
+-- Team player table
 team = {}
+-- Current name table
+PlayerName = {}
+-- Last name table
+Bname = {}
+
+-- Game mode (frenzy, grenadewar, panzerwar & sniperwar)
+gameMode = false
+applyGameModeSettings = false
+originalClass = {}
+originalWeapon = {}
+weapon = {
+    ['panzerwar'] = {
+        nil,	--// 1
+        false,	--WP_LUGER,				// 2
+        false,	--WP_MP40,				// 3
+        false,	--WP_GRENADE_LAUNCHER,	// 4
+        true,	--WP_PANZERFAUST,		// 5
+        false,	--WP_FLAMETHROWER,		// 6
+        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
+        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
+        false,	--WP_GRENADE_PINEAPPLE,	// 9
+        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
+        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
+        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
+        false,	--WP_ARTY,				// 13
+        false,	--WP_SILENCER,			// 14	// used to be sp5
+        false,	--WP_DYNAMITE,			// 15
+        nil,	--// 16
+        nil,	--// 17
+        nil,		--// 18
+        false,	--WP_MEDKIT,			// 19
+        false,	--WP_BINOCULARS,		// 20
+        nil,	--// 21
+        nil,	--// 22
+        false,	--WP_KAR98,				// 23	// WolfXP weapons
+        false,	--WP_CARBINE,			// 24
+        false,	--WP_GARAND,			// 25
+        false,	--WP_LANDMINE,			// 26
+        false,	--WP_SATCHEL,			// 27
+        false,	--WP_SATCHEL_DET,		// 28
+        nil,	--// 29
+        false,	--WP_SMOKE_BOMB,		// 30
+        false,	--WP_MOBILE_MG42,		// 31
+        false,	--WP_K43,				// 32
+        false,	--WP_FG42,				// 33
+        nil,	--// 34
+        false,	--WP_MORTAR,			// 35
+        nil,	--// 36
+        false,	--WP_AKIMBO_COLT,		// 37
+        false,	--WP_AKIMBO_LUGER,		// 38
+        nil,	--// 39
+        nil,	--// 40
+        false,	--WP_SILENCED_COLT,		// 41
+        false,	--WP_GARAND_SCOPE,		// 42
+        false,	--WP_K43_SCOPE,			// 43
+        false,	--WP_FG42SCOPE,			// 44
+        false,	--WP_MORTAR_SET,		// 45
+        false,	--WP_MEDIC_ADRENALINE,	// 46
+        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
+        false	--WP_AKIMBO_SILENCEDLUGER,// 48
+    },
+    ['frenzy'] = {
+        nil,	--// 1
+        true,	--WP_LUGER,				// 2
+        true,	--WP_MP40,				// 3
+        true,	--WP_GRENADE_LAUNCHER,	// 4
+        true,	--WP_PANZERFAUST,		// 5
+        true,	--WP_FLAMETHROWER,		// 6
+        true,	--WP_COLT,				// 7	// equivalent american weapon to german luger
+        true,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
+        true,	--WP_GRENADE_PINEAPPLE,	// 9
+        true,	--WP_STEN,				// 10	// silenced sten sub-machinegun
+        true,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
+        true,	--WP_AMMO,				// 12	// JPW NERVE likewise
+        true,	--WP_ARTY,				// 13
+        true,	--WP_SILENCER,			// 14	// used to be sp5
+        true,	--WP_DYNAMITE,			// 15
+        nil,	--// 16
+        nil,	--// 17
+        nil,		--// 18
+        true,	--WP_MEDKIT,			// 19
+        true,	--WP_BINOCULARS,		// 20
+        nil,	--// 21
+        nil,	--// 22
+        true,	--WP_KAR98,				// 23	// WolfXP weapons
+        true,	--WP_CARBINE,			// 24
+        true,	--WP_GARAND,			// 25
+        true,	--WP_LANDMINE,			// 26
+        true,	--WP_SATCHEL,			// 27
+        true,	--WP_SATCHEL_DET,		// 28
+        nil,	--// 29
+        true,	--WP_SMOKE_BOMB,		// 30
+        true,	--WP_MOBILE_MG42,		// 31
+        true,	--WP_K43,				// 32
+        true,	--WP_FG42,				// 33
+        nil,	--// 34
+        true,	--WP_MORTAR,			// 35
+        nil,	--// 36
+        true,	--WP_AKIMBO_COLT,		// 37
+        true,	--WP_AKIMBO_LUGER,		// 38
+        nil,	--// 39
+        nil,	--// 40
+        true,	--WP_SILENCED_COLT,		// 41
+        true,	--WP_GARAND_SCOPE,		// 42
+        true,	--WP_K43_SCOPE,			// 43
+        true,	--WP_FG42SCOPE,			// 44
+        true,	--WP_MORTAR_SET,		// 45
+        false,	--WP_MEDIC_ADRENALINE,	// 46
+        true,	--WP_AKIMBO_SILENCEDCOLT,// 47
+        true	--WP_AKIMBO_SILENCEDLUGER,// 48
+    },
+    ['grenadewar'] = {
+        nil,	--// 1
+        false,	--WP_LUGER,				// 2
+        false,	--WP_MP40,				// 3
+        true,	--WP_GRENADE_LAUNCHER,	// 4
+        false,	--WP_PANZERFAUST,		// 5
+        false,	--WP_FLAMETHROWER,		// 6
+        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
+        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
+        true,	--WP_GRENADE_PINEAPPLE,	// 9
+        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
+        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
+        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
+        false,	--WP_ARTY,				// 13
+        false,	--WP_SILENCER,			// 14	// used to be sp5
+        false,	--WP_DYNAMITE,			// 15
+        nil,	--// 16
+        nil,	--// 17
+        nil,		--// 18
+        false,	--WP_MEDKIT,			// 19
+        false,	--WP_BINOCULARS,		// 20
+        nil,	--// 21
+        nil,	--// 22
+        false,	--WP_KAR98,				// 23	// WolfXP weapons
+        false,	--WP_CARBINE,			// 24
+        false,	--WP_GARAND,			// 25
+        false,	--WP_LANDMINE,			// 26
+        false,	--WP_SATCHEL,			// 27
+        false,	--WP_SATCHEL_DET,		// 28
+        nil,	--// 29
+        false,	--WP_SMOKE_BOMB,		// 30
+        false,	--WP_MOBILE_MG42,		// 31
+        false,	--WP_K43,				// 32
+        false,	--WP_FG42,				// 33
+        nil,	--// 34
+        false,	--WP_MORTAR,			// 35
+        nil,	--// 36
+        false,	--WP_AKIMBO_COLT,		// 37
+        false,	--WP_AKIMBO_LUGER,		// 38
+        nil,	--// 39
+        nil,	--// 40
+        false,	--WP_SILENCED_COLT,		// 41
+        false,	--WP_GARAND_SCOPE,		// 42
+        false,	--WP_K43_SCOPE,			// 43
+        false,	--WP_FG42SCOPE,			// 44
+        false,	--WP_MORTAR_SET,		// 45
+        false,	--WP_MEDIC_ADRENALINE,	// 46
+        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
+        false	--WP_AKIMBO_SILENCEDLUGER,// 48
+    },
+    ['sniperwar'] = {
+        nil,	--// 1
+        false,	--WP_LUGER,				// 2
+        false,	--WP_MP40,				// 3
+        false,	--WP_GRENADE_LAUNCHER,	// 4
+        false,	--WP_PANZERFAUST,		// 5
+        false,	--WP_FLAMETHROWER,		// 6
+        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
+        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
+        false,	--WP_GRENADE_PINEAPPLE,	// 9
+        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
+        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
+        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
+        false,	--WP_ARTY,				// 13
+        false,	--WP_SILENCER,			// 14	// used to be sp5
+        false,	--WP_DYNAMITE,			// 15
+        nil,	--// 16
+        nil,	--// 17
+        nil,		--// 18
+        false,	--WP_MEDKIT,			// 19
+        false,	--WP_BINOCULARS,		// 20
+        nil,	--// 21
+        nil,	--// 22
+        false,	--WP_KAR98,				// 23	// WolfXP weapons
+        false,	--WP_CARBINE,			// 24
+        true,	--WP_GARAND,			// 25
+        false,	--WP_LANDMINE,			// 26
+        false,	--WP_SATCHEL,			// 27
+        nil,	--WP_SATCHEL_DET,		// 28
+        nil,	--// 29
+        false,	--WP_SMOKE_BOMB,		// 30
+        false,	--WP_MOBILE_MG42,		// 31
+        true,	--WP_K43,				// 32
+        true,	--WP_FG42,				// 33
+        nil,	--// 34
+        false,	--WP_MORTAR,			// 35
+        nil,	--// 36
+        false,	--WP_AKIMBO_COLT,		// 37
+        false,	--WP_AKIMBO_LUGER,		// 38
+        nil,	--// 39
+        nil,	--// 40
+        false,	--WP_SILENCED_COLT,		// 41
+        true,	--WP_GARAND_SCOPE,		// 42
+        true,	--WP_K43_SCOPE,			// 43
+        true,	--WP_FG42SCOPE,			// 44
+        false,	--WP_MORTAR_SET,		// 45
+        false,	--WP_MEDIC_ADRENALINE,	// 46
+        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
+        false	--WP_AKIMBO_SILENCEDLUGER,// 48
+    }
+}
+originalSettings = {
+    ['team_maxmortars'] = '',
+    ['team_maxpanzers'] = '',
+    ['team_maxflamers'] = '',
+    ['team_maxmg42s'] = '',
+    ['team_maxmedics'] = '',
+    ['team_maxengineers'] = '',
+    ['team_maxfieldops'] = '',
+    ['team_maxcovertops'] = '',
+    ['g_soldierchargetime'] = '',
+    ['g_speed'] = ''
+}
+
+
+
+
+randomClient = {}
+timecounter = 1
+
 
 EV_GLOBAL_CLIENT_SOUND = 54
 et.CS_PLAYERS = 689
@@ -179,269 +419,16 @@ end
 
 chkGUID = {}
 AdminName = {}
-originalclass = {}
-originalweap = {}
 
 et.MAX_WEAPONS = 50
 GAMEPAUSED = 0
 
-pweapons = {
-	nil,	--// 1
-	false,	--WP_LUGER,				// 2
-	false,	--WP_MP40,				// 3
-	false,	--WP_GRENADE_LAUNCHER,	// 4
-	true,	--WP_PANZERFAUST,		// 5
-	false,	--WP_FLAMETHROWER,		// 6
-	false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-	false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-	false,	--WP_GRENADE_PINEAPPLE,	// 9
-	false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-	false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-	false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-	false,	--WP_ARTY,				// 13
-	false,	--WP_SILENCER,			// 14	// used to be sp5
-	false,	--WP_DYNAMITE,			// 15
-	nil,	--// 16
-	nil,	--// 17
-	nil,		--// 18
-	false,	--WP_MEDKIT,			// 19
-	false,	--WP_BINOCULARS,		// 20
-	nil,	--// 21
-	nil,	--// 22
-	false,	--WP_KAR98,				// 23	// WolfXP weapons
-	false,	--WP_CARBINE,			// 24
-	false,	--WP_GARAND,			// 25
-	false,	--WP_LANDMINE,			// 26
-	false,	--WP_SATCHEL,			// 27
-	false,	--WP_SATCHEL_DET,		// 28
-	nil,	--// 29
-	false,	--WP_SMOKE_BOMB,		// 30
-	false,	--WP_MOBILE_MG42,		// 31
-	false,	--WP_K43,				// 32
-	false,	--WP_FG42,				// 33
-	nil,	--// 34
-	false,	--WP_MORTAR,			// 35
-	nil,	--// 36
-	false,	--WP_AKIMBO_COLT,		// 37
-	false,	--WP_AKIMBO_LUGER,		// 38
-	nil,	--// 39
-	nil,	--// 40
-	false,	--WP_SILENCED_COLT,		// 41
-	false,	--WP_GARAND_SCOPE,		// 42
-	false,	--WP_K43_SCOPE,			// 43
-	false,	--WP_FG42SCOPE,			// 44
-	false,	--WP_MORTAR_SET,		// 45
-	false,	--WP_MEDIC_ADRENALINE,	// 46
-	false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-	false	--WP_AKIMBO_SILENCEDLUGER,// 48
-}
 
-fweapons = {
-	nil,	--// 1
-	true,	--WP_LUGER,				// 2
-	true,	--WP_MP40,				// 3
-	true,	--WP_GRENADE_LAUNCHER,	// 4
-	true,	--WP_PANZERFAUST,		// 5
-	true,	--WP_FLAMETHROWER,		// 6
-	true,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-	true,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-	true,	--WP_GRENADE_PINEAPPLE,	// 9
-	true,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-	true,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-	true,	--WP_AMMO,				// 12	// JPW NERVE likewise
-	true,	--WP_ARTY,				// 13
-	true,	--WP_SILENCER,			// 14	// used to be sp5
-	true,	--WP_DYNAMITE,			// 15
-	nil,	--// 16
-	nil,	--// 17
-	nil,		--// 18
-	true,	--WP_MEDKIT,			// 19
-	true,	--WP_BINOCULARS,		// 20
-	nil,	--// 21
-	nil,	--// 22
-	true,	--WP_KAR98,				// 23	// WolfXP weapons
-	true,	--WP_CARBINE,			// 24
-	true,	--WP_GARAND,			// 25
-	true,	--WP_LANDMINE,			// 26
-	true,	--WP_SATCHEL,			// 27
-	true,	--WP_SATCHEL_DET,		// 28
-	nil,	--// 29
-	true,	--WP_SMOKE_BOMB,		// 30
-	true,	--WP_MOBILE_MG42,		// 31
-	true,	--WP_K43,				// 32
-	true,	--WP_FG42,				// 33
-	nil,	--// 34
-	true,	--WP_MORTAR,			// 35
-	nil,	--// 36
-	true,	--WP_AKIMBO_COLT,		// 37
-	true,	--WP_AKIMBO_LUGER,		// 38
-	nil,	--// 39
-	nil,	--// 40
-	true,	--WP_SILENCED_COLT,		// 41
-	true,	--WP_GARAND_SCOPE,		// 42
-	true,	--WP_K43_SCOPE,			// 43
-	true,	--WP_FG42SCOPE,			// 44
-	true,	--WP_MORTAR_SET,		// 45
-	false,	--WP_MEDIC_ADRENALINE,	// 46
-	true,	--WP_AKIMBO_SILENCEDCOLT,// 47
-	true	--WP_AKIMBO_SILENCEDLUGER,// 48
-}
-
-aweapons = {
-	nil,	--// 1
-	true,	--WP_LUGER,				// 2
-	true,	--WP_MP40,				// 3
-	true,	--WP_GRENADE_LAUNCHER,	// 4
-	true,	--WP_PANZERFAUST,		// 5
-	true,	--WP_FLAMETHROWER,		// 6
-	true,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-	true,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-	true,	--WP_GRENADE_PINEAPPLE,	// 9
-	true,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-	true,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-	true,	--WP_AMMO,				// 12	// JPW NERVE likewise
-	true,	--WP_ARTY,				// 13
-	true,	--WP_SILENCER,			// 14	// used to be sp5
-	true,	--WP_DYNAMITE,			// 15
-	nil,	--// 16
-	nil,	--// 17
-	nil,		--// 18
-	true,	--WP_MEDKIT,			// 19
-	true,	--WP_BINOCULARS,		// 20
-	nil,	--// 21
-	nil,	--// 22
-	true,	--WP_KAR98,				// 23	// WolfXP weapons
-	true,	--WP_CARBINE,			// 24
-	true,	--WP_GARAND,			// 25
-	true,	--WP_LANDMINE,			// 26
-	true,	--WP_SATCHEL,			// 27
-	true,	--WP_SATCHEL_DET,		// 28
-	nil,	--// 29
-	true,	--WP_SMOKE_BOMB,		// 30
-	true,	--WP_MOBILE_MG42,		// 31
-	true,	--WP_K43,				// 32
-	true,	--WP_FG42,				// 33
-	nil,	--// 34
-	true,	--WP_MORTAR,			// 35
-	nil,	--// 36
-	true,	--WP_AKIMBO_COLT,		// 37
-	true,	--WP_AKIMBO_LUGER,		// 38
-	nil,	--// 39
-	nil,	--// 40
-	true,	--WP_SILENCED_COLT,		// 41
-	true,	--WP_GARAND_SCOPE,		// 42
-	true,	--WP_K43_SCOPE,			// 43
-	true,	--WP_FG42SCOPE,			// 44
-	true,	--WP_MORTAR_SET,		// 45
-	false,	--WP_MEDIC_ADRENALINE,	// 46
-	true,	--WP_AKIMBO_SILENCEDCOLT,// 47
-	true	--WP_AKIMBO_SILENCEDLUGER,// 48
-}
-
-gweapons = {
-	nil,	--// 1
-	false,	--WP_LUGER,				// 2
-	false,	--WP_MP40,				// 3
-	true,	--WP_GRENADE_LAUNCHER,	// 4
-	false,	--WP_PANZERFAUST,		// 5
-	false,	--WP_FLAMETHROWER,		// 6
-	false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-	false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-	true,	--WP_GRENADE_PINEAPPLE,	// 9
-	false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-	false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-	false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-	false,	--WP_ARTY,				// 13
-	false,	--WP_SILENCER,			// 14	// used to be sp5
-	false,	--WP_DYNAMITE,			// 15
-	nil,	--// 16
-	nil,	--// 17
-	nil,		--// 18
-	false,	--WP_MEDKIT,			// 19
-	false,	--WP_BINOCULARS,		// 20
-	nil,	--// 21
-	nil,	--// 22
-	false,	--WP_KAR98,				// 23	// WolfXP weapons
-	false,	--WP_CARBINE,			// 24
-	false,	--WP_GARAND,			// 25
-	false,	--WP_LANDMINE,			// 26
-	false,	--WP_SATCHEL,			// 27
-	false,	--WP_SATCHEL_DET,		// 28
-	nil,	--// 29
-	false,	--WP_SMOKE_BOMB,		// 30
-	false,	--WP_MOBILE_MG42,		// 31
-	false,	--WP_K43,				// 32
-	false,	--WP_FG42,				// 33
-	nil,	--// 34
-	false,	--WP_MORTAR,			// 35
-	nil,	--// 36
-	false,	--WP_AKIMBO_COLT,		// 37
-	false,	--WP_AKIMBO_LUGER,		// 38
-	nil,	--// 39
-	nil,	--// 40
-	false,	--WP_SILENCED_COLT,		// 41
-	false,	--WP_GARAND_SCOPE,		// 42
-	false,	--WP_K43_SCOPE,			// 43
-	false,	--WP_FG42SCOPE,			// 44
-	false,	--WP_MORTAR_SET,		// 45
-	false,	--WP_MEDIC_ADRENALINE,	// 46
-	false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-	false	--WP_AKIMBO_SILENCEDLUGER,// 48
-}
-
-sweapons = {
-	nil,	--// 1
-	false,	--WP_LUGER,				// 2
-	false,	--WP_MP40,				// 3
-	false,	--WP_GRENADE_LAUNCHER,	// 4
-	false,	--WP_PANZERFAUST,		// 5
-	false,	--WP_FLAMETHROWER,		// 6
-	false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-	false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-	false,	--WP_GRENADE_PINEAPPLE,	// 9
-	false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-	false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-	false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-	false,	--WP_ARTY,				// 13
-	false,	--WP_SILENCER,			// 14	// used to be sp5
-	false,	--WP_DYNAMITE,			// 15
-	nil,	--// 16
-	nil,	--// 17
-	nil,		--// 18
-	false,	--WP_MEDKIT,			// 19
-	false,	--WP_BINOCULARS,		// 20
-	nil,	--// 21
-	nil,	--// 22
-	false,	--WP_KAR98,				// 23	// WolfXP weapons
-	false,	--WP_CARBINE,			// 24
-	true,	--WP_GARAND,			// 25
-	false,	--WP_LANDMINE,			// 26
-	false,	--WP_SATCHEL,			// 27
-	nil,	--WP_SATCHEL_DET,		// 28
-	nil,	--// 29
-	false,	--WP_SMOKE_BOMB,		// 30
-	false,	--WP_MOBILE_MG42,		// 31
-	true,	--WP_K43,				// 32
-	true,	--WP_FG42,				// 33
-	nil,	--// 34
-	false,	--WP_MORTAR,			// 35
-	nil,	--// 36
-	false,	--WP_AKIMBO_COLT,		// 37
-	false,	--WP_AKIMBO_LUGER,		// 38
-	nil,	--// 39
-	nil,	--// 40
-	false,	--WP_SILENCED_COLT,		// 41
-	true,	--WP_GARAND_SCOPE,		// 42
-	true,	--WP_K43_SCOPE,			// 43
-	true,	--WP_FG42SCOPE,			// 44
-	false,	--WP_MORTAR_SET,		// 45
-	false,	--WP_MEDIC_ADRENALINE,	// 46
-	false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-	false	--WP_AKIMBO_SILENCEDLUGER,// 48
-}
-
+-- Client command authorized by level
 lvls = {}
+-- Client command counter authorized by level
 lvlsc = {}
+
 
 numAxisPlayers = 0
 numAlliedPlayers = 0
@@ -453,18 +440,8 @@ panzer_antiloop1 = 0
 panzer_antiloop2 = 0
 panzers_enabled = 0
 
-panzers = ""
-medics = ""
-cvops = ""
-fops = ""
-engie = ""
-flamers = ""
-mortars = ""
-mg42s = ""
-soldcharge = ""
-speed = ""
-redlimbo = ""
-bluelimbo = ""
+
+
 
 floodprotect = 0
 commandSaid = false
@@ -542,11 +519,7 @@ antilooppw = 0
 confirm = 0
 crazydv = 1
 CGactive = 0
-panzdv = 0
 sldv = 0
-frenzdv = 0
-grendv = 0
-snipdv = 0
 antiloopm = 0
 pausedv = 0
 pausedv2 = 0
@@ -555,7 +528,6 @@ timedv = 0
 timedvs = 0
 refreshrate = 0
 timedelay_antiloop = 0
-egamemodes = 0
 run_once = 0
 
 for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
@@ -851,6 +823,189 @@ function checkAdvancedSpawn()
                 invincibleDummy[i] = 0
             end
         end
+    end
+end
+
+-- Advanced adrenaline function
+
+function checkAdvancedAdrenalineFrame()
+    for i = 0, clientsLimit, 1 do
+        local adrentlimit = 10
+        local adrensound = "sound/misc/regen.wav"
+
+        if pausedv == 1 then
+            adrendummy[i] = 1
+        end
+
+        if adrendummy[i] == 1 and tonumber(et.gentity_get(i, "ps.powerups", 12)) == 0 then
+            adrendummy[i] = 0
+        end
+
+        if adrendummy[i] == 0 then
+            if tonumber(et.gentity_get(i, "ps.powerups", 12)) > 0 then
+                adrnum[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
+                local soundIndex = et.G_SoundIndex(adrensound)
+                local name = et.gentity_get(i, "pers.netname")
+
+                if antiloopadr1[i] == 0 then
+                    adrtime[i] = mtime
+
+                    if k_adrensound == 1 then
+                        et.G_Sound(i, soundIndex)
+                    end
+
+                    antiloopadr1[i] = 1
+                end
+
+                if antiloopadr2[i] == 0 then
+                    adrtime2[i] = mtime
+                    adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
+                    antiloopadr2[i] = 1
+                end
+
+                adrenaline[i] = 1
+                local tottime = math.floor((((mtime - adrtime[i]) / 1000) + 0.05))
+                local tottime2 = math.floor((((mtime - adrtime2[i]) / 1000) + 0.05))
+
+                if tottime >= 1 then
+                    antiloopadr1[i] = 0
+                end
+
+                if adrnum[i] ~= adrnum2[i] then
+                    adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
+
+                    if k_adrensound == 1 then
+                        et.G_Sound(i, soundIndex)
+                    end
+
+                    adrtime[i] = mtime
+                    adrtime2[i] = mtime
+                end
+
+                local atime = (adrentlimit - tottime2)
+                et.trap_SendServerCommand(i, string.format("cp \"^3Adrenaline ^1" .. atime .. "\n\""))
+            else
+                adrenaline[i] = 0
+                antiloopadr1[i] = 0
+                antiloopadr2[i] = 0
+                adrnum[i] = 0
+                adrnum2[i] = 0
+            end
+        end
+    end
+end
+
+-- Game mode function
+
+function gameModeShutdownGame()
+    if gameMode ~= false then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
+
+        if gameMode == 'panzerwar' then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_speed " .. originalSettings['g_speed'] .. "\n")
+        end
+    end
+
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
+
+    if gameMode == 'panzerwar' then
+        for p = 0, clientLimit, 1 do
+            if team[p] == 1 or team[p] == 2 then
+                et.gentity_set(p, "sess.latchPlayerType", originalClass[p])
+                et.gentity_set(p, "sess.latchPlayerWeapon", originalWeapon[p])
+            end
+        end
+    end
+end
+
+function gameModeRunFrame()
+    if gameMode ~= false then
+        if timedelay_antiloop == 0 then
+            refreshrate = mtime
+            timedelay_antiloop = 1
+        end
+
+        -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
+        if ((mtime-refreshrate) / 1000) >= 0.25 then
+            applyGameModeSettings = true
+            timedelay_antiloop = 0
+        else
+            applyGameModeSettings = false
+        end
+    else
+        applyGameModeSettings = false
+    end
+
+    if gameMode == 'panzerwar' then
+        if applyGameModeSettings then
+            for q = 0, clientsLimit, 1 do
+                et.gentity_set(q, "sess.latchPlayerWeapon", 5)
+                setWeaponAmmo(weapons['panzerwar'], q)
+            end
+        end
+    elseif gameMode == 'frenzy' then
+        if applyGameModeSettings then
+            for w = 0, clientsLimit, 1 do
+                setWeaponAmmo(weapons['frenzy'], w)
+            end
+        end
+    elseif gameMode == 'grenadewar' then
+        if applyGameModeSettings then
+            for e = 0, clientsLimit, 1 do
+                setWeaponAmmo(weapons['grenadewar'], e)
+            end
+        end
+    elseif gameMode == 'sniperwar' then
+        if applyGameModeSettings then
+            for r = 0, clientsLimit, 1 do
+                if tonumber(et.gentity_get(r, "sess.latchPlayerType")) ~= 4 then
+                    et.gentity_set(r, "sess.latchPlayerType", 4)
+                end
+
+                local latchPlayerWeapon = tonumber(et.gentity_get(r, "sess.latchPlayerWeapon"))
+
+                if latchPlayerWeapon ~= 33 and (latchPlayerWeapon ~= 32 or latchPlayerWeapon ~= 25 or latchPlayerWeapon ~= 42 or latchPlayerWeapon ~= 43) then
+                    if team[r] == 1 then
+                        et.gentity_set(r, "sess.latchPlayerWeapon", 32)
+                    elseif team[r] == 2 then
+                        et.gentity_set(r, "sess.latchPlayerWeapon", 25)
+                    end
+                end
+
+                setWeaponAmmo(weapons['sniperwar'], r)
+            end
+        end
+    else
+        originalSettings['team_maxmortars'] = tonumber(et.trap_Cvar_Get("team_maxmortars"))
+        originalSettings['team_maxpanzers'] = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
+        originalSettings['team_maxflamers'] = tonumber(et.trap_Cvar_Get("team_maxflamers"))
+        originalSettings['team_maxmg42s'] = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
+        originalSettings['team_maxmedics'] = tonumber(et.trap_Cvar_Get("team_maxmedics"))
+        originalSettings['team_maxengineers'] = tonumber(et.trap_Cvar_Get("team_maxengineers"))
+        originalSettings['team_maxfieldops'] = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
+        originalSettings['team_maxcovertops'] = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
+        originalSettings['g_soldierchargetime'] = tonumber(et.trap_Cvar_Get("g_soldierchargetime"))
+        originalSettings['g_speed'] = tonumber(et.trap_Cvar_Get("g_speed"))
+    end
+
+    if Gamestate == 3 then
+        if (gameMode == 'panzerwar' or gameMode == 'sniperwar') and antilooppw == 0 then
+            for p = 0, clientsLimit, 1 do
+                if team[p] == 1 or team[p] == 2 then
+                    et.gentity_set(p, "sess.latchPlayerType", originalClass[p])
+                    et.gentity_set(p, "sess.latchPlayerWeapon", originalWeapon[p])
+                end
+            end
+
+            antilooppw = 1
+        end
+    end
+end
+
+function gameModeClientSpawn(clientNum)
+    if gameMode == 'panzerwar' then
+        local doubleHealth = tonumber(et.gentity_get(clientNum, "health")) * 2
+        et.gentity_set(clientNum, "health", doubleHealth)
     end
 end
 
@@ -2127,21 +2282,21 @@ function et_InitGame(levelTime, randomSeed, restart)
         switchTeam[i] = 0
         invincibleDummy[i] = 0
         --invincibleStart[i] = 0
+        gibbed[i] = 0
+        adrenaline[i] = 0
 
         antiloopadr1[i] = 0
         antiloopadr2[i] = 0
-        adrenaline[i] = 0
         adrnum[i] = 0
         adrnum2[i] = 0
         adrtime[i] = 0
         adrtime2[i] = 0
         adrendummy[i] = 0
-        gibbed[i] = 0
 
+        originalClass[i] = ""
+        originalWeapon[i] = ""
+        
         AdminName[i] = ""
-        originalclass[i] = ""
-        originalweap[i] = ""
-
     end
 
     readConfig()
@@ -2152,26 +2307,7 @@ end
 -- Called when qagame shuts down.
 --  restart indicates if the shutdown is being called due to a map_restart (1) or not (0).
 function et_ShutdownGame(restart)
-    if panzdv == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
-    elseif frenzdv == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
-    elseif grendv == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
-    elseif snipdv == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. medics .. " ; team_maxcovertops " .. cvops .. " ; team_maxfieldops " .. fops .. " ; team_maxengineers " .. engie .. " ; team_maxflamers " .. flamers .. " ; team_maxmortars " .. mortars .. " ; team_maxmg42s " .. mg42s .. " ; team_maxpanzers " .. panzers .. " ; forcecvar g_soldierchargetime " .. soldcharge .. "\n")
-    end
-
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
-
-    if panzdv == 1 then
-        for p = 0, clientLimit, 1 do
-            if team[p] == 1 or team[p] == 2 then
-                et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
-                et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
-            end
-        end
-    end
+    gameModeShutdownGame()
 
     if k_logchat == 1 then
         logChat("DV", "START", "DV")
@@ -2351,23 +2487,6 @@ function et_RunFrame(levelTime)
         checkAdvancedSpawn()
     end
 
-    if panzdv == 1 or frenzdv == 1 or grendv == 1 or snipdv == 1 then
-        if timedelay_antiloop == 0 then
-            refreshrate = mtime
-            timedelay_antiloop = 1
-        end
-
-        -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
-        if ((mtime-refreshrate) / 1000) >= 0.25 then
-            egamemodes = 1
-            timedelay_antiloop = 0
-        else
-            egamemodes = 0
-        end
-    else
-        egamemodes = 0
-    end
-
     if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
         for i = 0, clientsLimit, 1 do
             if getAdminLevel(i) >= 1 then
@@ -2380,59 +2499,7 @@ function et_RunFrame(levelTime)
         end
     end
 
-    if panzdv == 1 then
-        if egamemodes == 1 then
-            for q = 0, clientsLimit, 1 do
-                et.gentity_set(q, "sess.latchPlayerWeapon", 5)
-                setWeaponAmmo(pweapons, q)
-            end
-        end
-    elseif frenzdv == 1 then
-        if egamemodes == 1 then
-            for w = 0, clientsLimit, 1 do
-                setWeaponAmmo(fweapons, w)
-            end
-        end
-    elseif grendv == 1 then
-        if egamemodes == 1 then
-            for e = 0, clientsLimit, 1 do
-                setWeaponAmmo(gweapons, e)
-            end
-        end
-    elseif snipdv == 1 then
-        if egamemodes == 1 then
-            for r = 0, clientsLimit, 1 do
-                if tonumber(et.gentity_get(r, "sess.latchPlayerType")) ~= 4 then
-                    et.gentity_set(r, "sess.latchPlayerType", 4)
-                end
-
-                local latchPlayerWeapon = tonumber(et.gentity_get(r, "sess.latchPlayerWeapon"))
-
-                if latchPlayerWeapon ~= 32 or latchPlayerWeapon ~= 25 or latchPlayerWeapon ~= 42 or latchPlayerWeapon ~= 43 then
-                    if latchPlayerWeapon ~= 33 then
-                        if team[r] == 1 then
-                            et.gentity_set(r, "sess.latchPlayerWeapon", 32)
-                        elseif team[r] == 2 then
-                            et.gentity_set(r, "sess.latchPlayerWeapon", 25)
-                        end
-                    end
-                end
-
-                setWeaponAmmo(sweapons, r)
-            end
-        end
-    else
-        panzers = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-        medics = tonumber(et.trap_Cvar_Get("team_maxmedics"))
-        cvops = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
-        fops = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
-        engie = tonumber(et.trap_Cvar_Get("team_maxengineers"))
-        flamers = tonumber(et.trap_Cvar_Get("team_maxflamers"))
-        mortars = tonumber(et.trap_Cvar_Get("team_maxmortars"))
-        mg42s = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
-        soldcharge = tonumber(et.trap_Cvar_Get("g_soldierchargetime"))
-        speed = tonumber(et.trap_Cvar_Get("g_speed"))
-    end
+    gameModeRunFrame()
 
     if crazygravity then
         CGactive = 1
@@ -2501,16 +2568,6 @@ function et_RunFrame(levelTime)
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref shuffleteamsxp_norestart\n")
             antiloopes = 1
         end
-
-        if (panzdv == 1 or snipdv == 1) and antilooppw == 0 then
-            for p = 0, clientsLimit, 1 do
-                if team[p] == 1 or team[p] == 2 then
-                    et.gentity_set(p, "sess.latchPlayerType", originalclass[p])
-                    et.gentity_set(p, "sess.latchPlayerWeapon", originalweap[p])
-                end
-            end
-            antilooppw = 1
-        end
     end
 
     if k_advancedpms == 1 then
@@ -2565,72 +2622,8 @@ function et_RunFrame(levelTime)
     end
 
     if k_advancedadrenaline == 1 then
-        for i = 0, clientsLimit, 1 do
-            local adrentlimit = 10
-            local adrensound = "sound/misc/regen.wav"
-
-            if pausedv == 1 then
-                adrendummy[i] = 1
-            end
-
-            if adrendummy[i] == 1 and tonumber(et.gentity_get(i, "ps.powerups", 12)) == 0 then
-                adrendummy[i] = 0
-            end
-
-            if adrendummy[i] == 0 then
-                if tonumber(et.gentity_get(i, "ps.powerups", 12)) > 0 then
-                    adrnum[i]  = tonumber(et.gentity_get(i, "ps.powerups", 12))
-                    soundindex = et.G_SoundIndex(adrensound)
-                    local name = et.gentity_get(i, "pers.netname")
-
-                    if antiloopadr1[i] == 0 then
-                        adrtime[i] = mtime
-
-                        if k_adrensound == 1 then
-                            et.G_Sound( i,  soundindex)
-                        end
-
-                        antiloopadr1[i] = 1
-                    end
-
-                    if antiloopadr2[i] == 0 then
-                        adrtime2[i] = mtime
-                        adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
-                        antiloopadr2[i] = 1
-                    end
-
-                    adrenaline[i] = 1
-                    local tottime = math.floor((((mtime - adrtime[i]) / 1000) + 0.05))
-                    local tottime2 = math.floor((((mtime - adrtime2[i]) / 1000) + 0.05))
-
-                    if tottime >= 1 then
-                        antiloopadr1[i] = 0
-                    end
-
-                    if adrnum[i] ~= adrnum2[i] then
-                        adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
-
-                        if k_adrensound == 1 then
-                            et.G_Sound(i, soundindex)
-                        end
-
-                        adrtime[i] = mtime
-                        adrtime2[i] = mtime
-                    end
-
-                    local atime = (adrentlimit - tottime2)
-                    et.trap_SendServerCommand(i, string.format("cp \"^3Adrenaline ^1" .. atime .. "\n\""))
-                else
-                    adrenaline[i] = 0
-                    antiloopadr1[i] = 0
-                    antiloopadr2[i] = 0
-                    adrnum[i] = 0
-                    adrnum2[i] = 0
-                end
-            end
-        end
+        checkAdvancedAdrenalineFrame()
     end
-
 
     checkMuteRunFrame()
 
@@ -2708,7 +2701,7 @@ function et_RunFrame(levelTime)
     local active_panzers = 0
 
     if k_autopanzerdisable == 1 then
-        if panzdv == 0 and frenzdv == 0 and grendv == 0 and snipdv == 0 then
+        if gameMode == false then
             if active_players < k_panzerplayerlimit then
                     for i = 0, clientsLimit, 1 do
                         if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
@@ -2809,22 +2802,22 @@ function et_ClientDisconnect(clientNum)
     switchTeam[clientNum] = 0
     invincibleDummy[clientNum] = 0
     --invincibleStart[clientNum] = 0
+    gibbed[clientNum] = 0
+    adrenaline[clientNum] = 0
     
     antiloopadr1[clientNum] = 0
     antiloopadr2[clientNum] = 0
-    adrenaline[clientNum] = 0
     adrnum[clientNum] = 0
     adrnum2[clientNum] = 0
     adrtime[clientNum] = 0
     adrtime2[clientNum] = 0
     adrendummy[clientNum] = 0
-    gibbed[clientNum] = 0
 
-    AdminName[clientNum] = ""
-    originalclass[clientNum] = ""
-    originalweap[clientNum] = ""
+    originalClass[clientNum] = ""
+    originalWeapon[clientNum] = ""
 
     PlayerName[clientNum] = ""
+    AdminName[clientNum] = ""
 
     team[clientNum] = 0
 
@@ -2864,10 +2857,7 @@ function et_ClientSpawn(clientNum, revived)
     team[clientNum] = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
     if team[clientNum] == 1 or team[clientNum] == 2 then
-        if panzdv == 1 then
-            local doublehealth = tonumber(et.gentity_get(clientNum, "health")) * 2
-            et.gentity_set(clientNum, "health", doublehealth)
-        end
+        gameModeClientSpawn(clientNum)
 
         if revived == 0 then
             clientRespawn[clientNum] = 1
