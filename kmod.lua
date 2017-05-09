@@ -401,11 +401,25 @@ originalSettings = {
 crazyGravity = {
     ['active'] = false,
     ['gravity'] = 800,
-    ['change'] = false
+    ['change'] = false,
     ['time'] = 0
 }
 
+-- Players stats
+players = {
+    ['allies'] = 0,
+    ['axis'] = 0,
+    ['active'] = 0,
+    ['total'] = 0
+}
 
+-- Auto panzer disable
+autoPanzerDisable = {
+    ['disabledMsg'] = false,
+    ['enabledMsg'] = false,
+    ['warning'] = 0,
+    ['time'] = 0
+}
 
 
 
@@ -440,15 +454,9 @@ lvls = {}
 lvlsc = {}
 
 
-numAxisPlayers = 0
-numAlliedPlayers = 0
-active_players = 0
-total_players = 0
 
-panzer_antiloop = 0
-panzer_antiloop1 = 0
-panzer_antiloop2 = 0
-panzers_enabled = 0
+
+
 
 
 
@@ -1034,6 +1042,77 @@ function crazyGravityRunFrame()
         crazyGravity['change'] = true
     elseif remainingTime / 1000 == 5 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity will be changed in ^15^7 seconds!\n")
+    end
+end
+
+-- Auto panzer disable function
+
+function autoPanzerDisableRunFrame()
+    if gameMode == false then
+        local activePanzers = false
+
+        if players['active'] < k_panzerplayerlimit then
+            for i = 0, clientsLimit, 1 do
+                if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
+                    activePanzers = true
+                    break
+                end
+            end
+
+            if autoPanzerDisable['disabledMsg'] == false then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:  ^7Panzers have been disabled.\n")
+                autoPanzerDisable['disabledMsg'] = true
+                autoPanzerDisable['enabledMsg'] = false
+            end
+
+            if activePanzers then
+                if autoPanzerDisable['warning'] == 0 then
+                    autoPanzerDisable['time'] = mtime
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers 0\n")
+                    autoPanzerDisable['warning'] = 1
+                end
+
+                local remainingTime = ((mtime - autoPanzerDisable['time']) / 1000)
+
+                if remainingTime > 30 then
+                    if autoPanzerDisable['warning'] == 1 then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!\n")
+                        autoPanzerDisable['warning'] = 2
+                    end
+                end
+
+                if remainingTime > 60 then
+                    for i = 0, clientsLimit, 1 do
+                        if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
+                            et.gentity_set(i, "sess.latchPlayerWeapon", 3)
+
+                            if k_advancedpms == 1 then
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. i .. " ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
+                            else
+                                local name = et.gentity_get(PlayerID,"pers.netname")
+                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m \"" .. name .. "\" ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
+                            end
+                        end
+                    end
+
+                    autoPanzerDisable['disabledMsg'] = false
+                    autoPanzerDisable['warning'] = 0
+                end
+            else
+                autoPanzerDisable['warning'] = 0
+            end
+        else
+            autoPanzerDisable['disabledMsg'] = false
+            autoPanzerDisable['warning'] = 0
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
+
+            if autoPanzerDisable['enabledMsg'] == false then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled.  Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
+                autoPanzerDisable['enabledMsg'] = true
+            end
+        end
     end
 end
 
@@ -2515,6 +2594,47 @@ function et_RunFrame(levelTime)
     fb_location = getMessageLocation(k_fb_location)
     lb_location = getMessageLocation(k_lb_location)
 
+    --players['axis'] = 0
+    --players['allies'] = 0
+    players['active'] = 0
+    --players['total'] = 0
+
+    for i = 0, clientsLimit, 1 do
+        PlayerName[i] = et.gentity_get(i, "pers.netname")
+
+        if not PlayerName[i] then
+            PlayerName[i] = ""
+        end
+
+        if not Bname[i] then
+            Bname[i] = ""
+        end
+
+        if et.gentity_get(i, "pers.connected") == 2 then
+            if PlayerName[i] ~= Bname[i] then
+                logChat(Bname[i], "NAME_CHANGE", PlayerName[i])
+                Bname[i] = PlayerName[i]
+            end
+
+            --[[
+            if team[i] == 1 then
+                players['axis'] = players['axis'] + 1
+            elseif team[i] == 2 then
+                players['allies'] = players['allies'] + 1
+            end
+            ]]--
+
+            if team[i] == 1 or team[i] == 2 then
+                players['active'] = players['active'] + 1
+            end
+
+            --players['total'] = players['total'] + 1
+        else
+            PlayerName[i] = ""
+            Bname[i] = ""
+        end
+    end
+
     -- g_inactivity is required or this will not work
     if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then
         checkAdvancedSpawn()
@@ -2539,23 +2659,6 @@ function et_RunFrame(levelTime)
     end
 
     local ftime = ((mtime - initTime) / 1000)
-
-    for i = 0, clientsLimit, 1 do
-        PlayerName[i] = et.gentity_get(i, "pers.netname")
-
-        if not PlayerName[i] then
-            PlayerName[i] = ""
-        end
-
-        if not Bname[i] then
-            Bname[i] = ""
-        end
-
-        if et.gentity_get(i, "pers.connected") ~= 2 then
-            PlayerName[i] = ""
-            Bname[i] = ""
-        end
-    end
 
     if Gamestate == 3 then
         if k_lastblood == 1 and antiloop == 0 then
@@ -2633,13 +2736,6 @@ function et_RunFrame(levelTime)
         end
     end
 
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 and PlayerName[i] ~= Bname[i] then
-            logChat(Bname[i], "NAME_CHANGE", PlayerName[i])
-            Bname[i] = PlayerName[i]
-        end
-    end
-
     if k_advancedadrenaline == 1 then
         checkAdvancedAdrenalineFrame()
     end
@@ -2693,101 +2789,8 @@ function et_RunFrame(levelTime)
         end
     end
 
-    numAxisPlayers = 0
-    numAlliedPlayers = 0
-    active_players = 0
-    total_players = 0
-
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            if team[i] == 1 then
-                numAxisPlayers = numAxisPlayers + 1
-            elseif team[i] == 2 then
-                numAlliedPlayers = numAlliedPlayers + 1
-            end
-
-            if team[i] == 1 or team[i] == 2 then
-                active_players = active_players + 1
-            end
-
-            total_players = total_players + 1
-        end
-    end
-
-    local k_panzerwarning1 = "^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!"
-    local k_panzerwarning2 = "^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!"
-    local k_panzermoved = "^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!"
-    local active_panzers = 0
-
     if k_autopanzerdisable == 1 then
-        if gameMode == false then
-            if active_players < k_panzerplayerlimit then
-                    for i = 0, clientsLimit, 1 do
-                        if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
-                            active_panzers = 1
-                            break
-                        end
-                    end
-
-                    if panzer_antiloop == 0 then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:  ^7Panzers have been disabled.\n")
-                        panzer_antiloop = 1
-                        panzers_enabled = 0
-                    end
-
-                    if active_panzers == 1 then
-                        if panzer_antiloop1 == 0 then
-                            panzertime = mtime
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay " .. k_panzerwarning1 .. "\n")
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers 0\n")
-                            panzer_antiloop1 = 1
-                        end
-
-                        if ((mtime - panzertime) / 1000) > 30 then
-                            if panzer_antiloop2 == 0 then
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay " .. k_panzerwarning2 .. "\n")
-                                panzer_antiloop2 = 1
-                            end
-                        end
-
-                        if ((mtime - panzertime) / 1000) > 60 then
-                            for i = 0, clientsLimit, 1 do
-                                if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
-                                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
-                                    et.gentity_set(i, "sess.latchPlayerWeapon", 3)
-
-                                    if k_advancedpms == 1 then
-                                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. i .. " " .. k_panzermoved .. "\n")
-                                    else
-                                        local name = et.gentity_get(PlayerID,"pers.netname")
-                                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m \"" .. name .. "\" " .. k_panzermoved .. "\n")
-                                    end
-                                end
-                            end
-
-                            active_panzers = 0
-                            panzer_antiloop = 0
-                            panzer_antiloop1 = 0
-                            panzer_antiloop2 = 0
-                        end
-                    else
-                        active_panzers = 0
-                        panzer_antiloop1 = 0
-                        panzer_antiloop2 = 0
-                    end
-            else
-                active_panzers = 0
-                panzer_antiloop = 0
-                panzer_antiloop1 = 0
-                panzer_antiloop2 = 0
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
-
-                if panzers_enabled == 0 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled.  Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
-                    panzers_enabled = 1
-                end
-            end
-        end
+        autoPanzerDisableRunFrame()
     end
 end
 
