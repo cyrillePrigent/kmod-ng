@@ -108,6 +108,7 @@ multikill = {}
 playerWhoKilled = {}
 killedWithWeapon = {
     ['killer'] = {},
+    ['victim'] = {},
     ['hp'] = {}
 }
 playerLastKilled = {}
@@ -127,6 +128,7 @@ tkIndex = {}
 killerHp = {}
 firstBlood = 0
 lastBlood = ""
+lastBloodTrigger = 0
 spreeRecordKills = 0
 oldSpree = {
     ['short'] = {},
@@ -139,6 +141,9 @@ oldMapSpree = {
     ['long'] = {}
 }
 currentMapSpreeRecord = ""
+killingSpreeResetTrigger = 0
+deathSpreeResetTrigger = 0
+flakMonkeyResetTrigger = 0
 
 -- Advanced respawn
 clientRespawn = {}
@@ -396,6 +401,9 @@ originalSettings = {
     ['g_soldierchargetime'] = '',
     ['g_speed'] = ''
 }
+refreshRate = 0
+refreshRateTrigger = 0
+restorePlayersSettingsTrigger = 0
 
 -- Crazy gravity
 crazyGravity = {
@@ -425,19 +433,17 @@ autoPanzerDisable = {
 
 
 voteDisabled = false
-
-
 randomClient = {}
-timecounter = 1
+endRoundShuffleTrigger = 0
 
+timeCounter = 0
+GAMEPAUSED = 0
+pausedv = 0
+pausedv2 = 0
+pausetime = 0
+timedv = 0
 
-EV_GLOBAL_CLIENT_SOUND = 54
-et.CS_PLAYERS = 689
-EV_GENERAL_SOUND = 49
-
-teamList = { "AXIS" , "ALLIES" , "SPECTATOR" }
-class = { [0]="SOLDIER" , "MEDIC" , "ENGINEER" , "FIELD OPS" , "COVERT OPS" }
-
+-- Admin
 AdminLV = {}
 
 for z = 0, 9999, 1 do
@@ -446,28 +452,24 @@ end
 
 chkGUID = {}
 AdminName = {}
-
-et.MAX_WEAPONS = 50
-GAMEPAUSED = 0
-
-
 -- Client command authorized by level
 lvls = {}
 -- Client command counter authorized by level
 lvlsc = {}
+confirm = 0
+sldv = 0
 
+-- et constant
+--EV_GENERAL_SOUND = 49
+et.MAX_WEAPONS = 50
+EV_GLOBAL_CLIENT_SOUND = 54
+--et.CS_PLAYERS = 689
 
-
-
-
-
-
+teamList = { "AXIS" , "ALLIES" , "SPECTATOR" }
+class = { [0]="SOLDIER" , "MEDIC" , "ENGINEER" , "FIELD OPS" , "COVERT OPS" }
 
 
 --floodprotect = 0
-commandSaid = false
-
-finger = false
 
 
 --[[
@@ -529,38 +531,20 @@ k_advancedspawn = 0
 --]]
 
 pmsound = "sound/misc/NewBeep.wav"
+adrensound = "sound/misc/regen.wav"
 
-antiloop = 0
-antiloop2 = 0
-antiloop3 = 0
-antiloop4 = 0
-antiloopes = 0
-antilooppw = 0
-confirm = 0
-
-sldv = 0
-antiloopm = 0
-pausedv = 0
-pausedv2 = 0
-pausetime = 0
-timedv = 0
-timedvs = 0
-refreshrate = 0
-timedelay_antiloop = 0
-run_once = 0
-
-for i=0, tonumber(et.trap_Cvar_Get("sv_maxclients"))-1, 1 do
-	antiloopadr1[i] = 0
-	antiloopadr2[i] = 0
-	adrenaline[i] = 0
-	adrnum[i] = 0
-	adrnum2[i] = 0
-	adrtime[i] = 0
-	adrtime2[i] = 0
+--[[
+for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
+    antiloopadr1[i] = 0
+    antiloopadr2[i] = 0
+    adrenaline[i] = 0
+    adrnum[i] = 0
+    adrnum2[i] = 0
+    adrtime[i] = 0
+    adrtime2[i] = 0
     team[i] = 0
 end
-
-k_Admin = {}
+]]--
 
 -- Mute function
 
@@ -678,11 +662,13 @@ function removeMute(playerId)
 end
 
 function checkMuteShutdownGame()
-    for i = 0, clientLimit, 1 do
+    for i = 0, clientsLimit, 1 do
         if et.gentity_get(i, "pers.connected") == 2 then
-            if mute['end'][i] > 0 then
-                setMute(i, (mute['end'][i] - mtime) / 1000)
-            elseif mute['end'][i] == 0 then
+            local muteEnd = tonumber(mute['end'][i])
+
+            if muteEnd > 0 then
+                setMute(i, (muteEnd - mtime) / 1000)
+            elseif muteEnd == 0 then
                 local ip = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
                 s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
 
@@ -696,28 +682,30 @@ end
 
 function checkMuteRunFrame()
     for i = 0, clientsLimit, 1 do
-        local mute = et.gentity_get(i, "sess.muted")
+        local muted = et.gentity_get(i, "sess.muted")
 
-        if mute['end'][i] > 0 then
-            if mtime > mute['end'][i] then
-                if mute == 1 then
-                    local name = et.gentity_get(i, "pers.netname")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .." ^7has been auto unmuted.  Please watch your language!\n")
-                end
+        if mute['end'][i] ~= nil then
+            if mute['end'][i] > 0 then
+                if mtime > mute['end'][i] then
+                    if muted == 1 then
+                        local name = et.gentity_get(i, "pers.netname")
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .." ^7has been auto unmuted.  Please watch your language!\n")
+                    end
 
-                mute['end'][i] = 0
-            elseif mtime < mute['end'][i] then
-                if mute == 0 then
                     mute['end'][i] = 0
-                    setMute(i, 0)
+                elseif mtime < mute['end'][i] then
+                    if muted == 0 then
+                        mute['end'][i] = 0
+                        setMute(i, 0)
+                    end
+                elseif muted == 0 then
+                    mute['end'][i] = 0
                 end
-            elseif mute == 0 then
-                mute['end'][i] = 0
-            end
-        elseif mute['end'][i] == -1 then
-            if mute == 0 then
-                mute['end'][i] = 0
+            elseif mute['end'][i] == -1 then
+                if muted == 0 then
+                    mute['end'][i] = 0
+                end
             end
         end
     end
@@ -850,7 +838,6 @@ end
 function checkAdvancedAdrenalineFrame()
     for i = 0, clientsLimit, 1 do
         local adrentlimit = 10
-        local adrensound = "sound/misc/regen.wav"
 
         if pausedv == 1 then
             adrendummy[i] = 1
@@ -951,15 +938,15 @@ end
 
 function gameModeRunFrame()
     if gameMode ~= false then
-        if timedelay_antiloop == 0 then
-            refreshrate = mtime
-            timedelay_antiloop = 1
+        if refreshRateTrigger == 0 then
+            refreshRate = mtime
+            refreshRateTrigger = 1
         end
 
         -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
-        if ((mtime-refreshrate) / 1000) >= 0.25 then
+        if ((mtime - refreshRate) / 1000) >= 0.25 then
             applyGameModeSettings = true
-            timedelay_antiloop = 0
+            refreshRateTrigger = 0
         else
             applyGameModeSettings = false
         end
@@ -1019,8 +1006,8 @@ function gameModeRunFrame()
         originalSettings['g_speed'] = tonumber(et.trap_Cvar_Get("g_speed"))
     end
 
-    if Gamestate == 3 then
-        if (gameMode == 'panzerwar' or gameMode == 'sniperwar') and antilooppw == 0 then
+    if gameState == 3 then
+        if (gameMode == 'panzerwar' or gameMode == 'sniperwar') and restorePlayersSettingsTrigger == 0 then
             for p = 0, clientsLimit, 1 do
                 if team[p] == 1 or team[p] == 2 then
                     et.gentity_set(p, "sess.latchPlayerType", originalClass[p])
@@ -1028,7 +1015,7 @@ function gameModeRunFrame()
                 end
             end
 
-            antilooppw = 1
+            restorePlayersSettingsTrigger = 1
         end
     end
 end
@@ -1061,14 +1048,13 @@ function crazyGravityRunFrame()
 end
 
 -- Disable vote function
--- TODO Clean timecounter var
 function disableVoteRunFrame()
     local timeLimit = tonumber(et.trap_Cvar_Get("timelimit"))
 
     if k_dvmode == 1 then
         local cancelTime = (timeLimit - k_dvtime)
 
-        if timecounter >= (cancelTime * 60) then
+        if timeCounter >= (cancelTime * 60) then
             if voteDisabled == false then
                 voteDisabled = true
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
@@ -1081,7 +1067,7 @@ function disableVoteRunFrame()
             voteDisabled = false
         end
     elseif k_dvmode == 3 then
-        if timecounter >= (k_dvtime * 60) then
+        if timeCounter >= (k_dvtime * 60) then
             if voteDisabled == false then
                 voteDisabled = true
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
@@ -1096,7 +1082,7 @@ function disableVoteRunFrame()
     else
         local cancelPercent = (timeLimit * (k_dvtime / 100))
 
-        if timecounter >= (cancelPercent * 60) then
+        if timeCounter >= (cancelPercent * 60) then
             if voteDisabled == false then
                 voteDisabled = true
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
@@ -1260,9 +1246,8 @@ function setAdmin(PlayerID, levelv)
         for i = 0, k_maxAdminLevels, 1 do
             if level == 0 then
                 if sldv == 0 then
-                    if commandSaid then
+                    if params.commandSaid then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a regular ^7user!\n")
-                        commandSaid = false
                     else
                         et.G_Print(Name .. "^7 is now a regular ^7user!\n")
                         confirm = 0
@@ -1285,9 +1270,8 @@ function setAdmin(PlayerID, levelv)
         et.trap_FS_Write(ADMIN, string.len(ADMIN), fdadm)
         et.trap_FS_FCloseFile(fdadm)
 
-        if commandSaid then
+        if params.commandSaid then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-            commandSaid = false
         else
             et.G_Print(Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
         end
@@ -1356,26 +1340,22 @@ function removeAdmin(PlayerID)
     end
 end
 
-function adminStatus(PlayerID)
+function adminStatus(PlayerID, caller)
     local IP   = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
     local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
 
     for i = k_maxAdminLevels, 0, -1 do
-        if finger then
+        if caller == 'finger' then
             local name = et.gentity_get(PlayerID, "pers.netname")
 
             if AdminLV[i][GUID] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
-                finger = false
-                commandSaid = false
                 break
             elseif i == 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
-                finger = false
-                commandSaid = false
                 break
             end
-        else
+        elseif caller == 'admintest' then
             if AdminLV[i][GUID] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
                 break
@@ -1408,7 +1388,6 @@ end
 -- Spree function
 
 function setSpreeRecord(PlayerID, kills2)
-    -- TODO base path of sprees directory
     local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_WRITE)
     local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo(PlayerID), "name"))
     local date = os.date("%x %I:%M:%S%p")
@@ -1423,7 +1402,6 @@ function setSpreeRecord(PlayerID, kills2)
 end
 
 function loadSpreeRecord()
-    -- TODO base path of sprees directory
     local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_READ)
     local kills = 0
     local date = ""
@@ -1450,8 +1428,7 @@ end
 
 function setMapSpreeRecord(PlayerID, kills2)
     local mapname = tostring(et.trap_Cvar_Get("mapname"))
-    -- TODO base path of sprees directory
-    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_WRITE)
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_WRITE)
     local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
     local date = os.date("%x %I:%M:%S%p")
     local kills = tonumber(kills2)
@@ -1466,14 +1443,13 @@ end
 
 function loadMapSpreeRecord()
     local mapname = tostring(et.trap_Cvar_Get("mapname"))
-    -- TODO base path of sprees directory
-    local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_READ)
     local kills = 0
     local date = ""
     local name = ""
 
     if len <= 0 then
-        et.G_Print("WARNING: No spree record found! \n")
+        et.G_Print("WARNING: No map spree record found! \n")
         oldMapSpree['short'] = "^3[Old: ^7N/A^3]"
         oldMapSpree['long'] = "^3Map Spree Record: ^7There is no current spree record"
         mapSpreeRecordKills = 0
@@ -2150,7 +2126,7 @@ function kills(victim, killer, meansOfDeath, weapon)
         deathspree[killer]=0
     end
 
-    if Gamestate == 0 then
+    if gameState == 0 then
         if k_teamkillrestriction == 1 then
             if victimteam == killerteam and killer ~= victim and killer ~= 1022 then
                 if getAdminLevel(killer) < k_tk_protect then
@@ -2401,7 +2377,7 @@ function curseFilter(PlayerID)
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
             if team[clientNum] > 0 or team[clientNum] < 4 then
                 params.client = PlayerID
-                params.commandSaid = commandSaid
+                params.commandSaid = true
                 params.say = say_parms
                 dofile(kmod_ng_path .. '/kmod/command/gib.lua')
                 execute_command(params)
@@ -2432,7 +2408,7 @@ function curseFilter(PlayerID)
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
             if team[PlayerID] > 0 or team[PlayerID] < 4 then
                 params.client = et.PlayerID
-                params.commandSaid = commandSaid
+                params.commandSaid = true
                 params.say = say_parms
                 dofile(kmod_ng_path .. '/kmod/command/burn.lua')
                 execute_command(params)
@@ -2510,9 +2486,9 @@ function et_InitGame(levelTime, randomSeed, restart)
     initTime = levelTime
     clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
 
-    loadAdmins()
-    loadSpreeRecord()
-    loadMapSpreeRecord()
+    --loadAdmins()
+    --loadSpreeRecord()
+    --loadMapSpreeRecord()
     loadMutes()
 
     local currentver = et.trap_Cvar_Get("mod_version")
@@ -2555,6 +2531,8 @@ function et_InitGame(levelTime, randomSeed, restart)
         originalWeapon[i] = ""
         
         AdminName[i] = ""
+        
+        team[i] = 0
     end
 
     readConfig()
@@ -2579,18 +2557,10 @@ end
 function et_RunFrame(levelTime)
     mtime = tonumber(levelTime) -- still cannot remember why i made this but its used in alot of stuff so i'll leave it
 
-    if run_once == 0 then
+    if timeCounter == 0 then
+        timeCounter = (mtime - initTime) / 1000
         k_panzersperteam2 = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-        run_once = 1
     end
-
-    if timedvs == 0 then
-        local ktime = (((mtime - initTime) / 1000))
-        timecounter = ktime
-        timedvs = 1
-    end
-
-    Gamestate = tonumber(et.trap_Cvar_Get("gamestate"))
 
     if GAMEPAUSED == 1 then
         if pausedv == 0 then
@@ -2613,30 +2583,32 @@ function et_RunFrame(levelTime)
             pausedv = 0
             pausedv2 = 0
             timedv1 = nil
-            timed=v2 = nil
+            timedv2 = nil
         end
     else
         if timedv == 0 then
             timedv1 = mtime
             timedv = 1
             if type(timedv2) ~= "nil" then
-                timecounter = timecounter + ((timedv1 - timedv2) / 1000)
-                s, e, thous = string.find(timecounter, "%d*%.%d%d(%d*)")
+                timeCounter = timeCounter + ((timedv1 - timedv2) / 1000)
+                s, e, thous = string.find(timeCounter, "%d*%.%d%d(%d*)")
                 if thous == 9999999 then
-                    timecounter = timecounter + 0.000000001
+                    timeCounter = timeCounter + 0.000000001
                 end
             end
         else
             timedv2 = mtime
             timedv = 0
-            timecounter = timecounter + ((timedv2 - timedv1) / 1000)
-            s, e, thous = string.find(timecounter, "%d*%.%d%d(%d*)")
+            timeCounter = timeCounter + ((timedv2 - timedv1) / 1000)
+            s, e, thous = string.find(timeCounter, "%d*%.%d%d(%d*)")
 
             if thous == 9999999 then
-                timecounter=timecounter + 0.000000001
+                timeCounter=timeCounter + 0.000000001
             end
         end
     end
+
+    gameState = tonumber(et.trap_Cvar_Get("gamestate"))
 
     readKmodNgCvar()
 
@@ -2713,8 +2685,8 @@ function et_RunFrame(levelTime)
 
     local ftime = ((mtime - initTime) / 1000)
 
-    if Gamestate == 3 then
-        if k_lastblood == 1 and antiloop == 0 then
+    if gameState == 3 then
+        if k_lastblood == 1 and lastBloodTrigger == 0 then
             if lastBlood then
                 local str = string.gsub(k_lb_message, "#killer#", lastBlood)
 
@@ -2736,12 +2708,12 @@ function et_RunFrame(levelTime)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. currentMapSpreeRecord .. "\n")
             end
 
-            antiloop = 1
+            lastBloodTrigger = 1
         end
 
-        if k_endroundshuffle == 1 and antiloopes == 0 then
+        if k_endroundshuffle == 1 and endRoundShuffleTrigger == 0 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref shuffleteamsxp_norestart\n")
-            antiloopes = 1
+            endRoundShuffleTrigger = 1
         end
     end
 
@@ -2752,33 +2724,33 @@ function et_RunFrame(levelTime)
     end
 
     if k_sprees == 0 then
-        if antiloop2 == 0 then
+        if killingSpreeResetTrigger == 0 then
             killingSpreeReset()
         end
 
-        antiloop2 = 1
+        killingSpreeResetTrigger = 1
     elseif k_sprees == 1 then
-        antiloop2 = 0
+        killingSpreeResetTrigger = 0
     end
 
     if k_deathsprees == 0 then
-        if antiloop3 == 0 then
+        if deathSpreeResetTrigger == 0 then
             deathSpreeReset()
         end
 
-        antiloop3 = 1
+        deathSpreeResetTrigger = 1
     elseif k_deathsprees == 1 then
-        antiloop3 = 0
+        deathSpreeResetTrigger = 0
     end
 
     if k_flakmonkey == 0 then
-        if antiloop4 == 0 then
+        if flakMonkeyResetTrigger == 0 then
             flakMonkeyReset()
         end
 
-        antiloop4 = 1
+        flakMonkeyResetTrigger = 1
     elseif k_flakmonkey == 1 then
-        antiloop4 = 0
+        flakMonkeyResetTrigger = 0
     end
 
 --     if floodprotect == 1 then
@@ -3486,7 +3458,10 @@ function et_ClientSay(clientNum, mode, text)
     end
 
     if getAdminLevel(clientNum) >= admin_req then
-        if lowBangCmd == k_commandprefix .. "time" then
+        if lowBangCmd == k_commandprefix .. "admintest" then
+            dofile(kmod_ng_path .. '/kmod/command/client/admintest.lua')
+            execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "time" then
             dofile(kmod_ng_path .. '/kmod/command/time.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "date" then

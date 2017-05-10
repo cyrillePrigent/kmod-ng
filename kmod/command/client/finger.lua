@@ -7,7 +7,7 @@ function execute_command(params)
         clientNum = client2id(params["arg1"], 'Finger', 'client', params.say)
 
         if clientNum ~= nil
-            adminStatus(clientNum)
+            adminStatus(clientNum, 'finger')
         end
     end
 
