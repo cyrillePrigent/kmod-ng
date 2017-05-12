@@ -1254,9 +1254,9 @@ function setRegularUser(playerId)
     if confirm then
         local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
 
-        if params.commandSaid then
+        if params.command == 'client' then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
-        else
+        elseif params.command == 'console' then
             et.G_Print(name .. "^7 is now a regular ^7user!\n")
         end
 
@@ -1292,9 +1292,9 @@ function setAdmin(playerId, level)
             end
         end
 
-        if params.commandSaid then
+        if params.command == 'client' then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        else
+        elseif params.command == 'console' then
             et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
         end
 
@@ -1345,9 +1345,9 @@ function setAdmin2(playerId, level, sldv)
         for i = 0, k_maxAdminLevels, 1 do
             if level == 0 then
                 if sldv == 0 then
-                    if params.commandSaid then
+                    if params.command == 'client' then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
-                    else
+                    elseif params.command == 'console' then
                         et.G_Print(name .. "^7 is now a regular ^7user!\n")
                     end
                 end
@@ -1367,9 +1367,9 @@ function setAdmin2(playerId, level, sldv)
             end
         end
 
-        if params.commandSaid then
+        if params.command == 'client' then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        else
+        elseif params.command == 'console' then
             et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
         end
 
@@ -1590,7 +1590,7 @@ function logChat(PlayerID, mode, text, PMID)
             from = et.gentity_get(PlayerID, "pers.netname")
         end
 
-        local rec1 = part2id(PMID)
+        local rec1 = client2id(PMID)
 
         if rec1 then
             local recipiant = et.gentity_get(rec1,"pers.netname")
@@ -1710,6 +1710,8 @@ function client2id(client, cmd, verbose, cmdSaid)
             return nil
         end
     else
+        local client = string.lower(et.Q_CleanStr(client))
+
         if client then
             s, e = string.find(client, client)
 
@@ -1773,10 +1775,9 @@ function getPlayernameToId(name)
 
     if matchcount >= 2 then
 -- set level
---         if commandSaid then
+--         if params.command == 'client' then
 --             et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---             commandSaid = false
---         else
+--         elseif params.command == 'console' then
 --             et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
 --         end
 
@@ -1784,42 +1785,6 @@ function getPlayernameToId(name)
     else
         return slot
     end
-end
-
--- goto.lua
--- iwant.lua
--- logChat
--- ClientUserCommand
--- et_ClientCommand
-function part2id(client)
-    local clientNum = tonumber(client)
-
-    if clientNum then
-        if clientNum >= 0 and clientNum < 64 then
-            if et.gentity_get(clientNum, "pers.connected") ~= 2 then
-                return nil
-            end
-
-            return clientNum
-        end
-    else
-        local client = string.lower(et.Q_CleanStr(client))
-
-        if client then
-            s, e = string.find(client, client)
-                if e <= 2 then
-                    return nil
-                else
-                    clientNum = getPlayernameToId(client)
-                end
-        end
-
-        if not clientNum then
-            return nil
-        end
-    end
-
-    return clientNum
 end
 
 function printCmdMsg(cmdType, msg)
@@ -2448,7 +2413,6 @@ function curseFilter(PlayerID)
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
             if team[clientNum] > 0 or team[clientNum] < 4 then
                 params.client = PlayerID
-                params.commandSaid = true
                 params.say = say_parms
                 dofile(kmod_ng_path .. '/command/gib.lua')
                 execute_command(params)
@@ -2478,8 +2442,7 @@ function curseFilter(PlayerID)
 
         if et.gentity_get(PlayerID, "pers.connected") == 2 then
             if team[PlayerID] > 0 or team[PlayerID] < 4 then
-                params.client = et.PlayerID
-                params.commandSaid = true
+                params["arg1"] = et.PlayerID
                 params.say = say_parms
                 dofile(kmod_ng_path .. '/command/burn.lua')
                 execute_command(params)
@@ -3062,7 +3025,7 @@ function et_ClientCommand(clientNum, command)
     if k_antiunmute == 1 then
         if vote == "unmute" then
             local client = et.trap_Argv(2)
-            local clientnumber = part2id(client)
+            local clientnumber = client2id(client)
             local targetmuted = et.gentity_get(clientnumber, "sess.muted")
 
             if targetmuted == 1 then
@@ -3087,7 +3050,6 @@ function et_ClientCommand(clientNum, command)
             else
                 params         = {}
                 params.command = 'client'
-                params.commandSaid = true
                 params["arg1"] = et.trap_Argv(1)
                 params["arg2"] = clientNum
                 params["arg3"] = et.ConcatArgs(2)
@@ -3133,16 +3095,14 @@ end
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
     arg0 = string.lower(et.trap_Argv(0))
-	say_parms = "qsay"
+say_parms = "qsay"
 
     params         = {}
     params.command = 'console'
     params.nbArg   = et.trap_Argc()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
-
-    params.commandSaid = false
-    params.say = say_parms
+    params.say     = say_parms
 
     if arg0 == k_commandprefix .. "setlevel" then
         dofile(kmod_ng_path .. '/command/both/setlevel.lua')
@@ -3185,6 +3145,9 @@ function et_ConsoleCommand()
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "slap" then
         dofile(kmod_ng_path .. '/command/both/slap.lua')
+        return execute_command(params)
+    elseif arg0 == k_commandprefix .. "burn" then
+        dofile(kmod_ng_path .. '/command/both/burn.lua')
         return execute_command(params)
     elseif arg0 == "k_commandprefix" then
         et.G_Print("Unknown command in line k_commandprefix\n")
@@ -3421,9 +3384,7 @@ function et_ClientSay(clientNum, mode, text)
     params.clientNum = clientNum
     params["arg1"]   = Cvar1
     params["arg2"]   = Cvar2
-
-    params.commandSaid = true
-    params.say = say_parms
+    params.say       = say_parms
 
     local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
     local lowBangCmd = string.lower(BangCommand)
@@ -3457,7 +3418,7 @@ function et_ClientSay(clientNum, mode, text)
                 player_last_killer_cname = et.gentity_get(playerWhoKilled[clientNum], "pers.netname")
             end
 
-            local pnameID = part2id(Cvar1)
+            local pnameID = client2id(Cvar1)
 
             if not pnameID then
                 pnameID = 1021
@@ -3520,10 +3481,10 @@ function et_ClientSay(clientNum, mode, text)
             dofile(kmod_ng_path .. '/command/client/admintest.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "time" then
-            dofile(kmod_ng_path .. '/command/time.lua')
+            dofile(kmod_ng_path .. '/command/client/time.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "date" then
-            dofile(kmod_ng_path .. '/command/date.lua')
+            dofile(kmod_ng_path .. '/command/client/date.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix.."spree_record" then
             dofile(kmod_ng_path .. '/command/client/spree_record.lua')
@@ -3543,6 +3504,9 @@ function et_ClientSay(clientNum, mode, text)
         elseif lowBangCmd == k_commandprefix .. "slap" then
             dofile(kmod_ng_path .. '/command/both/slap.lua')
             execute_command(params)
+        elseif lowBangCmd == k_commandprefix .. "burn" then
+            dofile(kmod_ng_path .. '/command/both/burn.lua')
+            return execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "setlevel" then
             dofile(kmod_ng_path .. '/command/both/setlevel.lua')
             execute_command(params)

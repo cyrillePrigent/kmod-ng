@@ -4,7 +4,7 @@ function execute_command(params)
     if params.nbArg < 3 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Kick', 'client', params.say)
+        clientNum = client2id(params["arg1"], 'Kick', params.command, params.say)
 
         if clientNum ~= nil
             local client = clientNum + 1

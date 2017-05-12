@@ -4,7 +4,7 @@ function execute_command(params)
     if params.nbArg < 3 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Warn:^7 \[partname/id#\] \[reason\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Warn', 'client', params.say)
+        clientNum = client2id(params["arg1"], 'Warn', params.command, params.say)
 
         if clientNum ~= nil
             local name = et.gentity_get(clientNum, "pers.netname")
