@@ -24,8 +24,7 @@ function execute_command(params)
         local fov = et.Info_ValueForKey(et.trap_GetUserinfo(i), "cg_fov")
         local pmove = et.Info_ValueForKey(et.trap_GetUserinfo(i), "pmove_fixed")
         local level = getAdminLevel(i)
-
-        adname = AdminName[GUID]
+        local adname = admin['name'][GUID]
 
         if getAdminLevel(i) >= 1 then
             if et.gentity_get(i, "pers.connected") == 2 then

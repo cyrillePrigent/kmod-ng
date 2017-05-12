@@ -443,21 +443,34 @@ pausedv2 = 0
 pausetime = 0
 timedv = 0
 
--- Admin
-AdminLV = {}
+--[[
+   Admin table :
+     name :
+       key   => admin guid
+       value => admin name
+     level :
+       key   => admin level (0 to k_maxAdminLevels cvar value)
+       value => table with : key = guid and value = true
+--]]
+admin = {
+    ['name'] = {},
+    ['level'] = {}
+}
 
-for z = 0, 9999, 1 do
-    AdminLV[z] = {}
-end
+--[[
+   Commands table :
+     list :
+       key   => admin level (0 to k_maxAdminLevels cvar value)
+       value => table with numeric index and value = command
+     listCount :
+       key   => admin level (0 to k_maxAdminLevels cvar value)
+       value => value count of commands['list'] admin level
+--]]
+commands = {
+    ['list'] = {},
+    ['listCount'] = {}
+}
 
-chkGUID = {}
-AdminName = {}
--- Client command authorized by level
-lvls = {}
--- Client command counter authorized by level
-lvlsc = {}
-confirm = 0
-sldv = 0
 
 -- et constant
 --EV_GENERAL_SOUND = 49
@@ -1171,127 +1184,11 @@ end
 
 -- Admin function
 
-function loadAdmins()
-    local i = 0
-    local i2 = 0
-    local dv = 1
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-
-    if len <= 0 then
-        et.G_Print("WARNING: No Admins's Defined! \n")
-    else
-        local filestr = et.trap_FS_Read(fd, len)
-        local i = 0
-
-        for guid in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*") do
-            -- upcase for exact matches
-            chkGUID[i] = string.upper(guid)
-
-            if dv == 1 then
-                i = i + 1
-            end
-        end
-
-        for guid2 in string.gfind(filestr, "(%d%s%-%s%x+)%s%-%s*") do
-            -- upcase for exact matches
-            guid2 = string.upper(guid2)
-            addAdmin(guid2)
-        end
-
-        for guid3, Name in string.gfind(filestr, "%d%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-            AdminName[guid3] = Name
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function setAdmin(PlayerID, levelv)
-    -- gets file length
-    local fdadm,len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
-    et.trap_FS_FCloseFile(fdadm)
-    local level = tonumber(levelv)
-    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
-    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
-    local dv = 0
-    local dvi = 0
-
-    if len == -1 then
-        confirm = 1
-    else
-        for i = 0, tonumber(table.getn(chkGUID)), 1 do
-            if chkGUID[i] == GUID then
-                dv = 1
-
-                if dv == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
-                    removeAdmin(PlayerID)
-                end
-
-                break
-            end
-
-            dvi = i
-        end
-
-        if dvi == tonumber(table.getn(chkGUID)) then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
-            confirm = 1
-        end
-    end
-
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
-
-    if confirm == 1 then
-        for i = 0, k_maxAdminLevels, 1 do
-            if level == 0 then
-                if sldv == 0 then
-                    if params.commandSaid then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a regular ^7user!\n")
-                    else
-                        et.G_Print(Name .. "^7 is now a regular ^7user!\n")
-                        confirm = 0
-                    end
-                end
-
-                loadAdmins()
-                return
-            elseif level == i and level > 0 then
-                for q = 0, i, 1 do
-                    AdminLV[q][GUID] = true
-                    ADMIN = level .. " - " .. GUID .. " - " .. Name .. "\n"
-                    confirm = 0
-                end
-
-                break
-            end
-        end
-
-        et.trap_FS_Write(ADMIN, string.len(ADMIN), fdadm)
-        et.trap_FS_FCloseFile(fdadm)
-
-        if params.commandSaid then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Setlevel: ^7" .. Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        else
-            et.G_Print(Name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        end
-
-        loadAdmins()
-        return 1
-    else
-        et.trap_FS_FCloseFile(fdadm)
-        return 1
-    end
-end
-
-function addAdmin(GUID)
-    s, e, level,GUID = string.find(GUID, "(%d)%s%-%s(%x+)")
-    level = tonumber(level)
-
+function addAdmin(level, guid)
     for i = 0, k_maxAdminLevels, 1 do
         if level == i then
             for q = 1, i, 1 do
-                AdminLV[q][GUID] = true
+                admin['level'][q][guid] = true
             end
 
             break
@@ -1299,90 +1196,268 @@ function addAdmin(GUID)
     end
 end
 
-function removeAdmin(PlayerID)
-    local fdin, lenin = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-    local fdout, lenout = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbottmp.cfg", et.FS_WRITE)
-    local GUID2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
-    local i = 0
-    local IPRemove = ""
-    local fname = ""
-    local dv = 1
+function loadAdmins()
+    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
 
-    if lenin == -1 then
-        et.G_Print("There is no Power User IP to remove \n")
+    if len <= 0 then
+        et.G_Print("WARNING: No Admins's Defined! \n")
     else
-        local filestr = et.trap_FS_Read(fdin, lenin)
+        local fileStr = et.trap_FS_Read(fd, len)
+        local i = 0
 
-        for lvl, guid, name in string.gfind(filestr, "(%d)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-            if guid == GUID2 then
-                guid = string.upper(guid)
-                fname = name
-
-                for q = 0, k_maxAdminLevels, 1 do
-                    AdminLV[q][GUID2] = false
-                end
-            else
-                guid = lvl .. " - " .. guid .. " - " .. name .. "\n"
-                et.trap_FS_Write(guid, string.len(guid), fdout)
-            end
-
+        for level, guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
+            -- upcase for exact matches
+            local _guid = string.upper(guid)
+            local _level = tonumber(level)
+            addAdmin(_level, _guid)
+            admin['name'][guid] = name
             i = i + 1
         end
     end
 
-    confirm = 1
-    et.trap_FS_FCloseFile(fdin)
-    et.trap_FS_FCloseFile(fdout)
-    et.trap_FS_Rename("shrubbottmp.cfg", "shrubbot.cfg")
+    et.trap_FS_FCloseFile(fd)
+end
 
-    if dv == 1 then
+function confirmSetAdmin(playerId, guid)
+    -- gets file length
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
+    et.trap_FS_FCloseFile(fdadm)
+
+    if len == -1 then
+        return true, false
+    else
+        local i = 0
+
+        for _guid, _name in pairs(admin['name']) do
+            if _guid == guid then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
+                removeAdmin(playerId)
+                return true, true
+            end
+
+            i = i + 1
+        end
+
+        if i == tonumber(table.getn(admin['name'])) then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
+            return true, false
+        end
+    end
+
+    return false, false
+end
+
+function setRegularUser(playerId)
+    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
+    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
+
+    if confirm then
+        local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
+
+        if params.commandSaid then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
+        else
+            et.G_Print(name .. "^7 is now a regular ^7user!\n")
+        end
+
+        -- adminReloaded
         loadAdmins()
     end
 end
 
-function adminStatus(PlayerID, caller)
-    local IP   = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "ip")
-    local GUID = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid"))
+function setAdmin(playerId, level)
+    local level = tonumber(level)
+    local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
+    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
+    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
+
+    if confirm and not adminReloaded then
+        loadAdmins()
+    end
+
+    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
+
+    if confirm then
+        for i = 0, k_maxAdminLevels, 1 do
+            if level == i then
+                for q = 0, i, 1 do
+                    admin['level'][q][guid] = true
+                end
+
+                local shrubbotLine = level .. " - " .. guid .. " - " .. name .. "\n"
+                local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
+                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdadm)
+                et.trap_FS_FCloseFile(fdadm)
+                break
+            end
+        end
+
+        if params.commandSaid then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+        else
+            et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+        end
+
+        -- adminReloaded
+        loadAdmins()
+    end
+end
+
+--[[
+function _setAdmin(playerId, level)
+    setAdmin2(playerId, 0, 1)
+    setAdmin2(playerId, level, 0)
+end
+
+function setAdmin2(playerId, level, sldv)
+    -- gets file length
+    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
+    et.trap_FS_FCloseFile(fdadm)
+
+    local level = tonumber(level)
+    local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
+    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
+    local confirm = 0
+
+    if len == -1 then
+        confirm = 1
+    else
+        local i = 0
+
+        for _guid, _name in pairs(admin['name']) do
+            if _guid == guid then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
+                removeAdmin(playerId)
+                confirm = 1
+                break
+            end
+
+            i = i + 1
+        end
+
+        if i == tonumber(table.getn(admin['name'])) then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
+            confirm = 1
+        end
+    end
+
+    if confirm == 1 then
+        for i = 0, k_maxAdminLevels, 1 do
+            if level == 0 then
+                if sldv == 0 then
+                    if params.commandSaid then
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
+                    else
+                        et.G_Print(name .. "^7 is now a regular ^7user!\n")
+                    end
+                end
+
+                loadAdmins()
+                return
+            elseif level == i and level > 0 then
+                for q = 0, i, 1 do
+                    admin['level'][q][guid] = true
+                end
+
+                local shrubbotLine = level .. " - " .. guid .. " - " .. name .. "\n"
+                local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
+                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdadm)
+                et.trap_FS_FCloseFile(fdadm)
+                break
+            end
+        end
+
+        if params.commandSaid then
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+        else
+            et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
+        end
+
+        loadAdmins()
+    end
+end
+
+function removeAdmin(playerId)
+    local fdIn, lenIn = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
+    local fdOut, lenOut = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbottmp.cfg", et.FS_WRITE)
+    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
+
+    if lenIn == -1 then
+        et.G_Print("There is no Power User IP to remove \n")
+    else
+        local fileStr = et.trap_FS_Read(fdIn, lenIn)
+
+        for lvl, _guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
+            if _guid == guid then
+                _guid = string.upper(_guid)
+                --fname = name
+
+                for q = 0, k_maxAdminLevels, 1 do
+                    admin['level'][q][guid] = false
+                end
+            else
+                local shrubbotLine = lvl .. " - " .. _guid .. " - " .. name .. "\n"
+                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdOut)
+            end
+        end
+    end
+
+    et.trap_FS_FCloseFile(fdIn)
+    et.trap_FS_FCloseFile(fdOut)
+    et.trap_FS_Rename("shrubbottmp.cfg", "shrubbot.cfg")
+    loadAdmins()
+end
+--]]
+
+function adminStatus(playerId, caller)
+    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
+    local name = et.gentity_get(playerId, "pers.netname")
 
     for i = k_maxAdminLevels, 0, -1 do
         if caller == 'finger' then
-            local name = et.gentity_get(PlayerID, "pers.netname")
-
-            if AdminLV[i][GUID] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
+            if admin['level'][i][guid] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
                 break
             elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
                 break
             end
         elseif caller == 'admintest' then
-            if AdminLV[i][GUID] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
+            if admin['level'][i][guid] and i ~= 0 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
                 break
             elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
                 break
             end
         end
     end
 end
 
-function getAdminLevel(PlayerID)
-    local guid = ""
+function getAdminLevel(playerId)
+    if playerId ~= -1 then
+        local guid = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid")
 
-    if PlayerID ~= -1 then
-        guid = et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "cl_guid")
-    else
-        guid = -1
-    end
-
-    for i = k_maxAdminLevels, 1, -1 do
-        if AdminLV[i][guid] then
-            return i
+        for i = k_maxAdminLevels, 1, -1 do
+            if admin['level'][i][guid] then
+                return i
+            end
         end
     end
 
     return 0
+end
+
+function getCommandLevel(cmd)
+    for i = 0, k_maxAdminLevels, 1 do
+        for q = 1, commands['listCount'][i], 1 do
+            if commands['list'][i][q] == cmd then
+                return i
+            end
+        end
+    end
+
+    return k_maxAdminLevels + 1
 end
 
 -- Spree function
@@ -1469,7 +1544,7 @@ end
 
 -- Log function
 
-function logMessage(clientNum, msg, msgType)
+function logMessage(time, clientNum, msg, msgType)
     local clientInfo = et.trap_GetUserinfo(clientNum)
     local ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
     local guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
@@ -1492,19 +1567,19 @@ function logChat(PlayerID, mode, text, PMID)
     local LOG
 
     if mode == et.SAY_ALL then
-        LOG = logMessage(PlayerID, text)
+        LOG = logMessage(time, PlayerID, text)
     elseif mode == et.SAY_TEAM then
-        LOG = logMessage(PlayerID, text, 'TEAM')
+        LOG = logMessage(time, PlayerID, text, 'TEAM')
     elseif mode == et.SAY_BUDDY then
-        LOG = logMessage(PlayerID, text, 'BUDDY')
+        LOG = logMessage(time, PlayerID, text, 'BUDDY')
     elseif mode == et.SAY_TEAMNL then
-        LOG = logMessage(PlayerID, text, 'TEAM')
+        LOG = logMessage(time, PlayerID, text, 'TEAM')
     elseif mode == "VSAY_TEAM" then
-        LOG = logMessage(PlayerID, text, 'VSAY_TEAM')
+        LOG = logMessage(time, PlayerID, text, 'VSAY_TEAM')
     elseif mode == "VSAY_BUDDY" then
-        LOG = logMessage(PlayerID, text, 'VSAY_BUDDY')
+        LOG = logMessage(time, PlayerID, text, 'VSAY_BUDDY')
     elseif mode == "VSAY_ALL" then
-        LOG = logMessage(PlayerID, text, 'VSAY')
+        LOG = logMessage(time, PlayerID, text, 'VSAY')
     elseif mode == "PMESSAGE" then
         local clientInfo = et.trap_GetUserinfo(PlayerID)
         ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
@@ -1568,22 +1643,13 @@ function loadCommands()
     local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
 
     if len > 0 then
-        local filestr = et.trap_FS_Read(fd, len)
-        local counter = {}
-        local d = {}
+        local fileStr = et.trap_FS_Read(fd, len)
 
-        for i = 0, k_maxAdminLevels, 1 do
-            counter[i] = 0
-            d[i] = lvlsc[i]
-        end
-
-        for level, comm in string.gfind(filestr, "[^%#](%d)%s*%-%s*(%w+)%s*%=%s*[^%\n]*") do
-            local comm2 = k_commandprefix .. comm
-
+        for lvl, cmd in string.gfind(fileStr, "[^%#](%d)%s*%-%s*(%w+)%s*%=%s*[^%\n]*") do
             for i = 0, k_maxAdminLevels, 1 do
-                if tonumber(level) == i then
-                    lvlsc[i] = lvlsc[i] + 1
-                    lvls[i][lvlsc[i]] = comm2
+                if tonumber(lvl) == i then
+                    commands['listCount'][i] = commands['listCount'][i] + 1
+                    commands['list'][i][commands['listCount'][i]] = k_commandprefix .. cmd
                 end
             end
         end
@@ -1593,23 +1659,28 @@ function loadCommands()
 end
 
 function readConfig()
-    loadAdmins()
     loadSpreeRecord()
     loadMapSpreeRecord()
 
     k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
 
     for i = 0, k_maxAdminLevels, 1 do
-        t = tostring(et.trap_Cvar_Get("k_Admin" .. i))
-        local c = 1
-        lvls[i] = {}
+        admin['level'][i] = {}
+    end
+
+    loadAdmins()
+
+    for i = 0, k_maxAdminLevels, 1 do
+        local t = tostring(et.trap_Cvar_Get("k_Admin" .. i))
+        local c = 0
+        commands['list'][i] = {}
 
         for w in string.gfind(t, "([^%s]+)%s*") do
-            lvls[i][c] = k_commandprefix .. w
-            c=c + 1
+            commands['list'][i][c] = k_commandprefix .. w
+            c = c + 1
         end
 
-        lvlsc[i] = c - 1
+        commands['listCount'][i] = c
     end
 
     loadCommands()
@@ -1755,7 +1826,7 @@ function printCmdMsg(cmdType, msg)
     if cmdType == 'client' then
         et.G_Print(msg)
     elseif cmdType == 'console' then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " " .. msg)
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " " .. msg)
     end
 end
 
@@ -2379,7 +2450,7 @@ function curseFilter(PlayerID)
                 params.client = PlayerID
                 params.commandSaid = true
                 params.say = say_parms
-                dofile(kmod_ng_path .. '/kmod/command/gib.lua')
+                dofile(kmod_ng_path .. '/command/gib.lua')
                 execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
             end
@@ -2410,7 +2481,7 @@ function curseFilter(PlayerID)
                 params.client = et.PlayerID
                 params.commandSaid = true
                 params.say = say_parms
-                dofile(kmod_ng_path .. '/kmod/command/burn.lua')
+                dofile(kmod_ng_path .. '/command/burn.lua')
                 execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
             end
@@ -2529,9 +2600,7 @@ function et_InitGame(levelTime, randomSeed, restart)
 
         originalClass[i] = ""
         originalWeapon[i] = ""
-        
-        AdminName[i] = ""
-        
+
         team[i] = 0
     end
 
@@ -2821,7 +2890,6 @@ function et_ClientDisconnect(clientNum)
     originalWeapon[clientNum] = ""
 
     PlayerName[clientNum] = ""
-    AdminName[clientNum] = ""
 
     team[clientNum] = 0
 
@@ -2956,7 +3024,7 @@ function et_ClientCommand(clientNum, command)
             params         = {}
             params.command = 'client'
             params["arg1"] = clientNum
-            dofile(kmod_ng_path .. '/kmod/command/client/players.lua')
+            dofile(kmod_ng_path .. '/command/client/players.lua')
             return execute_command(params)
         end
 
@@ -2964,7 +3032,7 @@ function et_ClientCommand(clientNum, command)
             params         = {}
             params.command = 'client'
             params["arg1"] = clientNum
-            dofile(kmod_ng_path .. '/kmod/command/client/admins.lua')
+            dofile(kmod_ng_path .. '/command/client/admins.lua')
             return execute_command(params)
         end
     end
@@ -3023,7 +3091,7 @@ function et_ClientCommand(clientNum, command)
                 params["arg1"] = et.trap_Argv(1)
                 params["arg2"] = clientNum
                 params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. '/kmod/command/both/private_message.lua')
+                dofile(kmod_ng_path .. '/command/both/private_message.lua')
                 return execute_command(params)
             end
         end
@@ -3065,6 +3133,7 @@ end
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
     arg0 = string.lower(et.trap_Argv(0))
+	say_parms = "qsay"
 
     params         = {}
     params.command = 'console'
@@ -3076,46 +3145,46 @@ function et_ConsoleCommand()
     params.say = say_parms
 
     if arg0 == k_commandprefix .. "setlevel" then
-        dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+        dofile(kmod_ng_path .. '/command/both/setlevel.lua')
         return execute_command(params)
     elseif arg0 == "goto" then
-        dofile(kmod_ng_path .. '/kmod/command/console/goto.lua')
+        dofile(kmod_ng_path .. '/command/console/goto.lua')
         return execute_command(params)
     elseif arg0 == "iwant" then
-        dofile(kmod_ng_path .. '/kmod/command/console/iwant.lua')
+        dofile(kmod_ng_path .. '/command/console/iwant.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "showadmins" then
-        dofile(kmod_ng_path .. '/kmod/command/console/showadmins.lua')
+        dofile(kmod_ng_path .. '/command/console/showadmins.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "readconfig" then
-        dofile(kmod_ng_path .. '/kmod/command/console/readconfig.lua')
+        dofile(kmod_ng_path .. '/command/console/readconfig.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "spree_restart" then
-        dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+        dofile(kmod_ng_path .. '/command/both/spree_restart.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "panzerwar" then
-        dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
+        dofile(kmod_ng_path .. '/command/both/panzerwar.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "frenzy" then
-        dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+        dofile(kmod_ng_path .. '/command/both/frenzy.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "grenadewar" then
-        dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
+        dofile(kmod_ng_path .. '/command/both/grenadewar.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "sniperwar" then
-        dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
+        dofile(kmod_ng_path .. '/command/both/sniperwar.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "crazygravity" then
-        dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+        dofile(kmod_ng_path .. '/command/both/crazygravity.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "spec999" then
-        dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
+        dofile(kmod_ng_path .. '/command/both/spec999.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "gib" then
-        dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
+        dofile(kmod_ng_path .. '/command/both/gib.lua')
         return execute_command(params)
     elseif arg0 == k_commandprefix .. "slap" then
-        dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
+        dofile(kmod_ng_path .. '/command/both/slap.lua')
         return execute_command(params)
     elseif arg0 == "k_commandprefix" then
         et.G_Print("Unknown command in line k_commandprefix\n")
@@ -3128,7 +3197,7 @@ function et_ConsoleCommand()
             else
                 params["arg2"] = 1022
                 params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. '/kmod/command/both/private_message.lua')
+                dofile(kmod_ng_path .. '/command/both/private_message.lua')
                 return execute_command(params)
             end
 
@@ -3356,7 +3425,6 @@ function et_ClientSay(clientNum, mode, text)
     params.commandSaid = true
     params.say = say_parms
 
-    local admin_req = k_maxAdminLevels + 1
     local fd,len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
     local lowBangCmd = string.lower(BangCommand)
 
@@ -3447,140 +3515,126 @@ function et_ClientSay(clientNum, mode, text)
 
     et.trap_FS_FCloseFile(fd)
 
-
-    for i = 0, k_maxAdminLevels, 1 do
-        for q = 1, lvlsc[i], 1 do
-            if lvls[i][q] == BangCommand then
-                admin_req = i
-                break
-            end
-        end
-    end
-
-    if getAdminLevel(clientNum) >= admin_req then
+    if getAdminLevel(clientNum) >= getCommandLevel(BangCommand) then
         if lowBangCmd == k_commandprefix .. "admintest" then
-            dofile(kmod_ng_path .. '/kmod/command/client/admintest.lua')
+            dofile(kmod_ng_path .. '/command/client/admintest.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "time" then
-            dofile(kmod_ng_path .. '/kmod/command/time.lua')
+            dofile(kmod_ng_path .. '/command/time.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "date" then
-            dofile(kmod_ng_path .. '/kmod/command/date.lua')
+            dofile(kmod_ng_path .. '/command/date.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix.."spree_record" then
-            dofile(kmod_ng_path .. '/kmod/command/client/spree_record.lua')
+            dofile(kmod_ng_path .. '/command/client/spree_record.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "spec999" then
-            dofile(kmod_ng_path .. '/kmod/command/both/spec999.lua')
+            dofile(kmod_ng_path .. '/command/both/spec999.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "tk_index" then
-            dofile(kmod_ng_path .. '/kmod/command/client/tk_index.lua')
+            dofile(kmod_ng_path .. '/command/client/tk_index.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "listcmds" then
-            dofile(kmod_ng_path .. '/kmod/command/client/listcmds.lua')
+            dofile(kmod_ng_path .. '/command/client/listcmds.lua')
             execute_command(params)
-        end
-
-        if lowBangCmd == k_commandprefix .. "gib" then
-            dofile(kmod_ng_path .. '/kmod/command/both/gib.lua')
+        elseif lowBangCmd == k_commandprefix .. "gib" then
+            dofile(kmod_ng_path .. '/command/both/gib.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "slap" then
-            dofile(kmod_ng_path .. '/kmod/command/both/slap.lua')
+            dofile(kmod_ng_path .. '/command/both/slap.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "setlevel" then
-            dofile(kmod_ng_path .. '/kmod/command/both/setlevel.lua')
+            dofile(kmod_ng_path .. '/command/both/setlevel.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "readconfig" then
-            dofile(kmod_ng_path .. '/kmod/command/both/readconfig.lua')
+            dofile(kmod_ng_path .. '/command/both/readconfig.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "spree_restart" then
-            dofile(kmod_ng_path .. '/kmod/command/both/spree_restart.lua')
+            dofile(kmod_ng_path .. '/command/both/spree_restart.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "ban" then
-            dofile(kmod_ng_path .. '/kmod/command/client/ban.lua')
+            dofile(kmod_ng_path .. '/command/client/ban.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "getip" then
-            dofile(kmod_ng_path .. '/kmod/command/client/getip.lua')
+            dofile(kmod_ng_path .. '/command/client/getip.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "getguid" then
-            dofile(kmod_ng_path .. '/kmod/command/client/getguid.lua')
+            dofile(kmod_ng_path .. '/command/client/getguid.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
-            dofile(kmod_ng_path .. '/kmod/command/client/makeshoutcaster.lua')
+            dofile(kmod_ng_path .. '/command/client/makeshoutcaster.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
-            dofile(kmod_ng_path .. '/kmod/command/client/removeshoutcaster.lua')
+            dofile(kmod_ng_path .. '/command/client/removeshoutcaster.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "makereferee" then
-            dofile(kmod_ng_path .. '/kmod/command/client/makereferee.lua')
+            dofile(kmod_ng_path .. '/command/client/makereferee.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "removereferee" then
-            dofile(kmod_ng_path .. '/kmod/command/client/removereferee.lua')
+            dofile(kmod_ng_path .. '/command/client/removereferee.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "gravity" then
-            dofile(kmod_ng_path .. '/kmod/command/client/gravity.lua')
+            dofile(kmod_ng_path .. '/command/client/gravity.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "knifeonly" then
-            dofile(kmod_ng_path .. '/kmod/command/client/knifeonly.lua')
+            dofile(kmod_ng_path .. '/command/client/knifeonly.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "speed" then
-            dofile(kmod_ng_path .. '/kmod/command/client/speed.lua')
+            dofile(kmod_ng_path .. '/command/client/speed.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "knockback" then
-            dofile(kmod_ng_path .. '/kmod/command/client/knockback.lua')
+            dofile(kmod_ng_path .. '/command/client/knockback.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "cheats" then
-            dofile(kmod_ng_path .. '/kmod/command/both/cheats.lua')
+            dofile(kmod_ng_path .. '/command/both/cheats.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "laser" then
-            dofile(kmod_ng_path .. '/kmod/command/both/laser.lua')
+            dofile(kmod_ng_path .. '/command/both/laser.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "crazygravity" then
-            dofile(kmod_ng_path .. '/kmod/command/both/crazygravity.lua')
+            dofile(kmod_ng_path .. '/command/both/crazygravity.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "panzerwar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/panzerwar.lua')
+            dofile(kmod_ng_path .. '/command/both/panzerwar.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "frenzy" then
-            dofile(kmod_ng_path .. '/kmod/command/both/frenzy.lua')
+            dofile(kmod_ng_path .. '/command/both/frenzy.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "grenadewar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/grenadewar.lua')
+            dofile(kmod_ng_path .. '/command/both/grenadewar.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "sniperwar" then
-            dofile(kmod_ng_path .. '/kmod/command/both/sniperwar.lua')
+            dofile(kmod_ng_path .. '/command/both/sniperwar.lua')
             execute_command(params)
-        end
-
-        if lowBangCmd == k_commandprefix .. "kick" then
-            dofile(kmod_ng_path .. '/kmod/command/client/kick.lua')
+        elseif lowBangCmd == k_commandprefix .. "kick" then
+            dofile(kmod_ng_path .. '/command/client/kick.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "warn" then
-            dofile(kmod_ng_path .. '/kmod/command/client/warn.lua')
+            dofile(kmod_ng_path .. '/command/client/warn.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "mute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/mute.lua')
+            dofile(kmod_ng_path .. '/command/client/mute.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "pmute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/pmute.lua')
+            dofile(kmod_ng_path .. '/command/client/pmute.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "putspec" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putspec.lua')
+            dofile(kmod_ng_path .. '/command/client/putspec.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "putallies" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putallies.lua')
+            dofile(kmod_ng_path .. '/command/client/putallies.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "putaxis" then
-            dofile(kmod_ng_path .. '/kmod/command/client/putaxis.lua')
+            dofile(kmod_ng_path .. '/command/client/putaxis.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "timelimit" then
-            dofile(kmod_ng_path .. '/kmod/command/client/timelimit.lua')
+            dofile(kmod_ng_path .. '/command/client/timelimit.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "unmute" then
-            dofile(kmod_ng_path .. '/kmod/command/client/unmute.lua')
+            dofile(kmod_ng_path .. '/command/client/unmute.lua')
             execute_command(params)
         elseif lowBangCmd == k_commandprefix .. "finger" then
-            dofile(kmod_ng_path .. '/kmod/command/client/finger.lua')
+            dofile(kmod_ng_path .. '/command/client/finger.lua')
             execute_command(params)
         end
     end

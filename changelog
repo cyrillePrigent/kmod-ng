@@ -1,0 +1,5 @@
+
+
+version 0.1
+
+- When command is setted twice in k_Admin cvar, et_ClientSay uses the highest level of both (fixed)
