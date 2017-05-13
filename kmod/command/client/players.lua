@@ -1,9 +1,8 @@
 
 
--- params["arg1"] => player ID
 function execute_command(params)
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"^3 ID ^1: ^3Player                     Rate  Snaps\n"))
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"^1--------------------------------------------\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"^3 ID ^1: ^3Player                     Rate  Snaps\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"^1--------------------------------------------\n"))
     local pteam = { "^1X" , "^4L" , " " }
     local playercount = 0
     local spa = 24
@@ -16,7 +15,7 @@ function execute_command(params)
         local namel = tonumber(string.len(name)) - 1
         local namespa = spa - namel
         local space = string.rep(" ", namespa)
-        local ref = tonumber(et.gentity_get(params["arg1"], "sess.referee"))
+        local ref = tonumber(et.gentity_get(params.clientNum, "sess.referee"))
 
         if ref == 0 then
             ref = ""
@@ -25,11 +24,11 @@ function execute_command(params)
         end
 
         if et.gentity_get(i,"pers.connected") == 2 then
-            et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[team[i]], i, name, space, rate, snaps, ref))
+            et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[team[i]], i, name, space, rate, snaps, ref))
             playercount = playercount + 1
         end
     end
 
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"\n^3 " .. playercount .. " ^7total players\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"\n^3 " .. playercount .. " ^7total players\n"))
     return 1
 end

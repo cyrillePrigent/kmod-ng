@@ -2,8 +2,8 @@
 
 -- params["arg1"] => player ID
 function execute_command(params)
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"^3 ID ^1:^3 Player                   ^1: ^3 Level ^1 : ^3 AdminName\n"))
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"^1----------------------------------------------------------------\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"^3 ID ^1:^3 Player                   ^1: ^3 Level ^1 : ^3 AdminName\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"^1----------------------------------------------------------------\n"))
     local pteam = { "^1X" , "^4L" , " " }
     local playercount = 0
     local spa = 23
@@ -28,13 +28,13 @@ function execute_command(params)
 
         if getAdminLevel(i) >= 1 then
             if et.gentity_get(i, "pers.connected") == 2 then
-                et.trap_SendServerCommand(params["arg1"], string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[team[i]], i, name, space, level, adname))
+                et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[team[i]], i, name, space, level, adname))
                 playercount = playercount + 1
             end
 
         end
     end
 
-    et.trap_SendServerCommand(params["arg1"], string.format("print \"\n^3 " .. playercount .. " ^7total admins\n"))
+    et.trap_SendServerCommand(params.clientNum, string.format("print \"\n^3 " .. playercount .. " ^7total admins\n"))
     return 1
 end
