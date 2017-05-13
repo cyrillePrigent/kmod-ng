@@ -1,6 +1,7 @@
 kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. '/' .. et.trap_Cvar_Get("gamename") .. '/kmod/'
 KMODversion = "Beta 1.5"
 KMODversion2 = "1.5"
+
 k_commandprefix = "!" -- change this to your desired prefix
 
 --[[
@@ -187,7 +188,7 @@ gameMode = false
 applyGameModeSettings = false
 originalClass = {}
 originalWeapon = {}
-weapon = {
+weapons = {
     ['panzerwar'] = {
         nil,	--// 1
         false,	--WP_LUGER,				// 2
@@ -558,6 +559,9 @@ for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
     team[i] = 0
 end
 ]]--
+
+-- Load command configuration
+dofile(kmod_ng_path .. '/command/config.lua')
 
 -- Mute function
 
@@ -1934,136 +1938,136 @@ end
 -- et_Obituary
 
 function getMeansOfDeathName(meansOfDeath)
-    if (meansOfDeath==0) then
-        weapon="UNKNOWN"
-    elseif (meansOfDeath==1) then
-        weapon="MACHINEGUN"
-    elseif (meansOfDeath==2) then
-        weapon="BROWNING"
-    elseif (meansOfDeath==3) then
-        weapon="MG42"
-    elseif (meansOfDeath==4) then
-        weapon="GRENADE"
-    elseif (meansOfDeath==5) then
-        weapon="ROCKET"
-    elseif (meansOfDeath==6) then
-        weapon="KNIFE"
-    elseif (meansOfDeath==7) then
-        weapon="LUGER"
-    elseif (meansOfDeath==8) then
-        weapon="COLT"
-    elseif (meansOfDeath==9) then
-        weapon="MP40"
-    elseif (meansOfDeath==10) then
-        weapon="THOMPSON"
-    elseif (meansOfDeath==11) then
-        weapon="STEN"
-    elseif (meansOfDeath==12) then
-        weapon="GARAND"
-    elseif (meansOfDeath==13) then
-        weapon="SNOOPERSCOPE"
-    elseif (meansOfDeath==14) then
-        weapon="SILENCER"
-    elseif (meansOfDeath==15) then
-        weapon="FG42"
-    elseif (meansOfDeath==16) then
-        weapon="FG42SCOPE"
-    elseif (meansOfDeath==17) then
-        weapon="PANZERFAUST"
-    elseif (meansOfDeath==18) then
-        weapon="GRENADE_LAUNCHER"
-    elseif (meansOfDeath==19) then
-        weapon="FLAMETHROWER"
-    elseif (meansOfDeath==20) then
-        weapon="GRENADE_PINEAPPLE"
-    elseif (meansOfDeath==21) then
-        weapon="CROSS"
-    elseif (meansOfDeath==22) then
-        weapon="MAPMORTAR"
-    elseif (meansOfDeath==23) then
-        weapon="MAPMORTAR_SPLASH"
-    elseif (meansOfDeath==24) then
-        weapon="KICKED"
-    elseif (meansOfDeath==25) then
-        weapon="GRABBER"
-    elseif (meansOfDeath==26) then
-        weapon="DYNAMITE"
-    elseif (meansOfDeath==27) then
-        weapon="AIRSTRIKE"
-    elseif (meansOfDeath==28) then
-        weapon="SYRINGE"
-    elseif (meansOfDeath==29) then
-        weapon="AMMO"
-    elseif (meansOfDeath==30) then
-        weapon="ARTY"
-    elseif (meansOfDeath==31) then
-        weapon="WATER"
-    elseif (meansOfDeath==32) then
-        weapon="SLIME"
-    elseif (meansOfDeath==33) then
-        weapon="LAVA"
-    elseif (meansOfDeath==34) then
-        weapon="CRUSH"
-    elseif (meansOfDeath==35) then
-        weapon="TELEFRAG"
-    elseif (meansOfDeath==36) then
-        weapon="FALLING"
-    elseif (meansOfDeath==37) then
-        weapon = "SUICIDE"
-    elseif (meansOfDeath==38) then
-        weapon="TARGET_LASER"
-    elseif (meansOfDeath==39) then
-        weapon="TRIGGER_HURT"
-    elseif (meansOfDeath==40) then
-        weapon="EXPLOSIVE"
-    elseif (meansOfDeath==41) then
-        weapon="CARBINE"
-    elseif (meansOfDeath==42) then
-        weapon="KAR98"
-    elseif (meansOfDeath==43) then
-        weapon="GPG40"
-    elseif (meansOfDeath==44) then
-        weapon="M7"
-    elseif (meansOfDeath==45) then
-        weapon="LANDMINE"
-    elseif (meansOfDeath==46) then
-        weapon="SATCHEL"
-    elseif (meansOfDeath==47) then
-        weapon="TRIPMINE"
-    elseif (meansOfDeath==48) then
-        weapon="SMOKEBOMB"
-    elseif (meansOfDeath==49) then
-        weapon="MOBILE_MG42"
-    elseif (meansOfDeath==50) then
-        weapon="SILENCED_COLT"
-    elseif (meansOfDeath==51) then
-        weapon="GARAND_SCOPE"
-    elseif (meansOfDeath==52) then
-        weapon="CRUSH_CONSTRUCTION"
-    elseif (meansOfDeath==53) then
-        weapon="CRUSH_CONSTRUCTIONDEATH"
-    elseif (meansOfDeath==54) then
-        weapon="CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
-    elseif (meansOfDeath==55) then
-        weapon="K43"
-    elseif (meansOfDeath==56) then
-        weapon="K43_SCOPE"
-    elseif (meansOfDeath==57) then
-        weapon="MORTAR"
-    elseif (meansOfDeath==58) then
-        weapon="AKIMBO_COLT"
-    elseif (meansOfDeath==59) then
-        weapon="AKIMBO_LUGER"
-    elseif (meansOfDeath==60) then
-        weapon="AKIMBO_SILENCEDCOLT"
-    elseif (meansOfDeath==61) then
-        weapon="AKIMBO_SILENCEDLUGER"
-    elseif (meansOfDeath==62) then
-        weapon="SMOKEGRENADE"
-    elseif (meansOfDeath==63) then
-        weapon="SWAP_SPACES"
-    elseif (meansOfDeath==64) then
-        weapon="SWITCH_TEAM"
+    if meansOfDeath == 0 then
+        return "UNKNOWN"
+    elseif meansOfDeath == 1 then
+        return "MACHINEGUN"
+    elseif meansOfDeath == 2 then
+        return "BROWNING"
+    elseif meansOfDeath == 3 then
+        return "MG42"
+    elseif meansOfDeath == 4 then
+        return "GRENADE"
+    elseif meansOfDeath == 5 then
+        return "ROCKET"
+    elseif meansOfDeath == 6 then
+        return "KNIFE"
+    elseif meansOfDeath == 7 then
+        return "LUGER"
+    elseif meansOfDeath == 8 then
+        return "COLT"
+    elseif meansOfDeath == 9 then
+        return "MP40"
+    elseif meansOfDeath == 10 then
+        return "THOMPSON"
+    elseif meansOfDeath == 11 then
+        return "STEN"
+    elseif meansOfDeath == 12 then
+        return "GARAND"
+    elseif meansOfDeath == 13 then
+        return "SNOOPERSCOPE"
+    elseif meansOfDeath == 14 then
+        return "SILENCER"
+    elseif meansOfDeath == 15 then
+        return "FG42"
+    elseif meansOfDeath == 16 then
+        return "FG42SCOPE"
+    elseif meansOfDeath == 17 then
+        return "PANZERFAUST"
+    elseif meansOfDeath == 18 then
+        return "GRENADE_LAUNCHER"
+    elseif meansOfDeath == 19 then
+        return "FLAMETHROWER"
+    elseif meansOfDeath == 20 then
+        return "GRENADE_PINEAPPLE"
+    elseif meansOfDeath == 21 then
+        return "CROSS"
+    elseif meansOfDeath == 22 then
+        return "MAPMORTAR"
+    elseif meansOfDeath == 23 then
+        return "MAPMORTAR_SPLASH"
+    elseif meansOfDeath == 24 then
+        return "KICKED"
+    elseif meansOfDeath == 25 then
+        return "GRABBER"
+    elseif meansOfDeath == 26 then
+        return "DYNAMITE"
+    elseif meansOfDeath == 27 then
+        return "AIRSTRIKE"
+    elseif meansOfDeath == 28 then
+        return "SYRINGE"
+    elseif meansOfDeath == 29 then
+        return "AMMO"
+    elseif meansOfDeath == 30 then
+        return "ARTY"
+    elseif meansOfDeath == 31 then
+        return "WATER"
+    elseif meansOfDeath == 32 then
+        return "SLIME"
+    elseif meansOfDeath == 33 then
+        return "LAVA"
+    elseif meansOfDeath == 34 then
+        return "CRUSH"
+    elseif meansOfDeath == 35 then
+        return "TELEFRAG"
+    elseif meansOfDeath == 36 then
+        return "FALLING"
+    elseif meansOfDeath == 37 then
+        return "SUICIDE"
+    elseif meansOfDeath == 38 then
+        return "TARGET_LASER"
+    elseif meansOfDeath == 39 then
+        return "TRIGGER_HURT"
+    elseif meansOfDeath == 40 then
+        return "EXPLOSIVE"
+    elseif meansOfDeath == 41 then
+        return "CARBINE"
+    elseif meansOfDeath == 42 then
+        return "KAR98"
+    elseif meansOfDeath == 43 then
+        return "GPG40"
+    elseif meansOfDeath == 44 then
+        return "M7"
+    elseif meansOfDeath == 45 then
+        return "LANDMINE"
+    elseif meansOfDeath == 46 then
+        return "SATCHEL"
+    elseif meansOfDeath == 47 then
+        return "TRIPMINE"
+    elseif meansOfDeath == 48 then
+        return "SMOKEBOMB"
+    elseif meansOfDeath == 49 then
+        return "MOBILE_MG42"
+    elseif meansOfDeath == 50 then
+        return "SILENCED_COLT"
+    elseif meansOfDeath == 51 then
+        return "GARAND_SCOPE"
+    elseif meansOfDeath == 52 then
+        return "CRUSH_CONSTRUCTION"
+    elseif meansOfDeath == 53 then
+        return "CRUSH_CONSTRUCTIONDEATH"
+    elseif meansOfDeath == 54 then
+        return "CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
+    elseif meansOfDeath == 55 then
+        return "K43"
+    elseif meansOfDeath == 56 then
+        return "K43_SCOPE"
+    elseif meansOfDeath == 57 then
+        return "MORTAR"
+    elseif meansOfDeath == 58 then
+        return "AKIMBO_COLT"
+    elseif meansOfDeath == 59 then
+        return "AKIMBO_LUGER"
+    elseif meansOfDeath == 60 then
+        return "AKIMBO_SILENCEDCOLT"
+    elseif meansOfDeath == 61 then
+        return "AKIMBO_SILENCEDLUGER"
+    elseif meansOfDeath == 62 then
+        return "SMOKEGRENADE"
+    elseif meansOfDeath == 63 then
+        return "SWAP_SPACES"
+    elseif meansOfDeath == 64 then
+        return "SWITCH_TEAM"
     end
 end
 
@@ -2621,6 +2625,26 @@ function checkClientCommand(clientNum, lowBangCmd, say_parms)
     return false
 end
 
+function runCommandFile(command, params)
+    local result = 0
+    execute_command = nil
+
+    if cmdList[params.command] ~= nil and cmdList[params.command][command] ~= nil then
+        dofile(kmod_ng_path .. cmdList[params.command][command])
+
+        if (type(execute_command) == 'function') then
+            result = execute_command(params)
+            execute_command = nil
+        else
+            et.G_LogPrint('None `execute_command` function defined in command file')
+        end
+    else
+        et.G_LogPrint('Unknow command : ' .. command)
+    end
+
+    return result
+end
+
 -- NOTE :
 -- Note of ReyalP (http://wolfwiki.anime.net/index.php/Talk:Lua_Mod_API#et_ClientSay_.3F)
 -- et_ClientSay is a function you would define yourself to filter or do something with chats.
@@ -2641,131 +2665,12 @@ function checkClientSay(params, text)
     end
 
     if getAdminLevel(params.clientNum) >= getCommandLevel(params.bangCmd) then
-        if lowBangCmd == k_commandprefix .. "admintest" then
-            dofile(kmod_ng_path .. '/command/client/admintest.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "time" then
-            dofile(kmod_ng_path .. '/command/client/time.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "date" then
-            dofile(kmod_ng_path .. '/command/client/date.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix.."spree_record" then
-            dofile(kmod_ng_path .. '/command/client/spree_record.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "spec999" then
-            dofile(kmod_ng_path .. '/command/both/spec999.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "tk_index" then
-            dofile(kmod_ng_path .. '/command/client/tk_index.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "listcmds" then
-            dofile(kmod_ng_path .. '/command/client/listcmds.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "gib" then
-            dofile(kmod_ng_path .. '/command/both/gib.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "slap" then
-            dofile(kmod_ng_path .. '/command/both/slap.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "burn" then
-            dofile(kmod_ng_path .. '/command/both/burn.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "setlevel" then
-            dofile(kmod_ng_path .. '/command/both/setlevel.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "readconfig" then
-            dofile(kmod_ng_path .. '/command/both/readconfig.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "spree_restart" then
-            dofile(kmod_ng_path .. '/command/both/spree_restart.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "ban" then
-            dofile(kmod_ng_path .. '/command/client/ban.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "getip" then
-            dofile(kmod_ng_path .. '/command/client/getip.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "getguid" then
-            dofile(kmod_ng_path .. '/command/client/getguid.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "makeshoutcaster" then
-            dofile(kmod_ng_path .. '/command/client/makeshoutcaster.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "removeshoutcaster" then
-            dofile(kmod_ng_path .. '/command/client/removeshoutcaster.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "makereferee" then
-            dofile(kmod_ng_path .. '/command/client/makereferee.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "removereferee" then
-            dofile(kmod_ng_path .. '/command/client/removereferee.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "gravity" then
-            dofile(kmod_ng_path .. '/command/client/gravity.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "knifeonly" then
-            dofile(kmod_ng_path .. '/command/client/knifeonly.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "speed" then
-            dofile(kmod_ng_path .. '/command/client/speed.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "knockback" then
-            dofile(kmod_ng_path .. '/command/client/knockback.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "cheats" then
-            dofile(kmod_ng_path .. '/command/both/cheats.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "laser" then
-            dofile(kmod_ng_path .. '/command/both/laser.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "crazygravity" then
-            dofile(kmod_ng_path .. '/command/both/crazygravity.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "panzerwar" then
-            dofile(kmod_ng_path .. '/command/both/panzerwar.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "frenzy" then
-            dofile(kmod_ng_path .. '/command/both/frenzy.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "grenadewar" then
-            dofile(kmod_ng_path .. '/command/both/grenadewar.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "sniperwar" then
-            dofile(kmod_ng_path .. '/command/both/sniperwar.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "kick" then
-            dofile(kmod_ng_path .. '/command/client/kick.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "warn" then
-            dofile(kmod_ng_path .. '/command/client/warn.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "mute" then
-            dofile(kmod_ng_path .. '/command/client/mute.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "pmute" then
-            dofile(kmod_ng_path .. '/command/client/pmute.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putspec" then
-            dofile(kmod_ng_path .. '/command/client/putspec.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putallies" then
-            dofile(kmod_ng_path .. '/command/client/putallies.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "putaxis" then
-            dofile(kmod_ng_path .. '/command/client/putaxis.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "timelimit" then
-            dofile(kmod_ng_path .. '/command/client/timelimit.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "unmute" then
-            dofile(kmod_ng_path .. '/command/client/unmute.lua')
-            return execute_command(params)
-        elseif lowBangCmd == k_commandprefix .. "finger" then
-            dofile(kmod_ng_path .. '/command/client/finger.lua')
-            return execute_command(params)
+        if runCommandFile(lowBangCmd, params) == 1 then
+            return 1
         end
     end
+
+    return 0
 end
 
 -- Enemy Territory callbacks
@@ -3406,55 +3311,17 @@ function et_ConsoleCommand()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
 
-    if arg0 == k_commandprefix .. "setlevel" then
-        dofile(kmod_ng_path .. '/command/both/setlevel.lua')
-        return execute_command(params)
-    elseif arg0 == "goto" then
-        dofile(kmod_ng_path .. '/command/console/goto.lua')
-        return execute_command(params)
-    elseif arg0 == "iwant" then
-        dofile(kmod_ng_path .. '/command/console/iwant.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "showadmins" then
-        dofile(kmod_ng_path .. '/command/console/showadmins.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "readconfig" then
-        dofile(kmod_ng_path .. '/command/console/readconfig.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "spree_restart" then
-        dofile(kmod_ng_path .. '/command/both/spree_restart.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "panzerwar" then
-        dofile(kmod_ng_path .. '/command/both/panzerwar.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "frenzy" then
-        dofile(kmod_ng_path .. '/command/both/frenzy.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "grenadewar" then
-        dofile(kmod_ng_path .. '/command/both/grenadewar.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "sniperwar" then
-        dofile(kmod_ng_path .. '/command/both/sniperwar.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "crazygravity" then
-        dofile(kmod_ng_path .. '/command/both/crazygravity.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "spec999" then
-        dofile(kmod_ng_path .. '/command/both/spec999.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "gib" then
-        dofile(kmod_ng_path .. '/command/both/gib.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "slap" then
-        dofile(kmod_ng_path .. '/command/both/slap.lua')
-        return execute_command(params)
-    elseif arg0 == k_commandprefix .. "burn" then
-        dofile(kmod_ng_path .. '/command/both/burn.lua')
-        return execute_command(params)
-    elseif arg0 == "k_commandprefix" then
-        et.G_Print("Unknown command in line k_commandprefix\n")
+    if runCommandFile(arg0, params) == 1 then
         return 1
-    elseif arg0 == "m2" then  -- used when advancedpms is enabled
+    end
+
+
+    --if arg0 == "k_commandprefix" then
+    --    et.G_Print("Unknown command in line k_commandprefix\n")
+    --    return 1
+    --else
+
+    if arg0 == "m2" then  -- used when advancedpms is enabled
         if k_advancedpms == 1 then
             if (et.trap_Argc() < 2) then 
                 et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")

@@ -1,5 +1,4 @@
 
--- TODO base path of shrubbot.cfg file
 
 function execute_command(params)
     local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
@@ -18,4 +17,6 @@ function execute_command(params)
     end
 
     et.trap_FS_FCloseFile(fd)
+
+    return 1
 end
