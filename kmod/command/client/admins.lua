@@ -28,7 +28,7 @@ function execute_command(params)
 
         if getAdminLevel(i) >= 1 then
             if et.gentity_get(i, "pers.connected") == 2 then
-                et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[team[i]], i, name, space, level, adname))
+                et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[client[i]['team']], i, name, space, level, adname))
                 playercount = playercount + 1
             end
 

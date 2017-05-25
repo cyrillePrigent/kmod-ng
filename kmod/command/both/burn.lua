@@ -15,7 +15,7 @@ function execute_command(params)
     local clientNum = client2id(tonumber(params["arg1"]), 'Burn', params.command, params.say)
 
     if clientNum ~= nil
-        if team[clientNum] >= 3 or team[clientNum] < 1 then
+        if client[clientNum]['team'] >= 3 or client[clientNum]['team'] < 1 then
             if params.command == 'client' then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Burn: ^7Client is not actively playing\n")
             elseif params.command == 'console' then

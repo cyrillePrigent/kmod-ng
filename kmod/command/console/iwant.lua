@@ -7,12 +7,12 @@ function execute_command(params)
         et.G_Print("Iwant is used to teleport one player to another player\n")
         et.G_Print("useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
     else
-        playerId = client2id(params["arg1"], 'Iwant', params.command, params.say)
+        targetNum = client2id(params["arg1"], 'Iwant', params.command, params.say)
 
-        if playerId ~= nil and et.gentity_get(params["arg1"], "pers.connected") == 2 and (team[params["arg1"]] > 0 or team[params["arg1"]] < 4) then
-            local playerIdOrigin = et.gentity_get(playerId, "origin")
-            playerIdOrigin[2] = playerIdOrigin[2] + 40
-            et.gentity_set(params["arg2"], "origin", playerIdOrigin)
+        if targetNum ~= nil and et.gentity_get(params["arg1"], "pers.connected") == 2 and (client[params["arg1"]]['team'] > 0 or client[params["arg1"]]['team'] < 4) then
+            local targetOrigin = et.gentity_get(targetNum, "origin")
+            targetOrigin[2] = targetOrigin[2] + 40
+            et.gentity_set(params["arg2"], "origin", targetOrigin)
         end
     end
 

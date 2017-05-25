@@ -10,7 +10,7 @@ function execute_command(params)
             local name = et.gentity_get(clientNum, "pers.netname")
 
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                if team[clientNum] ~= 2 then
+                if client[clientNum]['team'] ~= 2 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putallies " .. clientNum .. "\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putallies: ^7" .. name .. " ^7has been putted allies\n")
                 else

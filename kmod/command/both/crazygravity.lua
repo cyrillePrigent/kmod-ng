@@ -4,9 +4,13 @@ function execute_command(params)
     if params.nbArg < 3 then
         printCmdMsg(params.command, "^3Crazygravity:^7 Disable or enable crazygravity \[0-1\]\n")
     else
-        local crazy = tonumber(params["arg1"])
+        local cgValue = tonumber(params["arg1"])
 
-        if crazy == 1 then
+        if crazyGravity == nil then
+            dofile(kmod_ng_path .. '/modules/crazygravity.lua')
+        end
+
+        if cgValue == 1 then
             if crazyGravity['active'] == false then
                 printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Enabled\n")
                 crazyGravity['active'] = true
@@ -14,7 +18,7 @@ function execute_command(params)
             else
                 printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity is already active\n")
             end
-        elseif crazy == 0 then
+        elseif cgValue == 0 then
             if crazyGravity['active'] == true then
                 printCmdMsg(params.command, "^3Crazygravity:^7 Crazygravity has been Disabled.  Resetting gravity\n")
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")

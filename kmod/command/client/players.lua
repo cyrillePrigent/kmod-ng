@@ -24,7 +24,7 @@ function execute_command(params)
         end
 
         if et.gentity_get(i,"pers.connected") == 2 then
-            et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[team[i]], i, name, space, rate, snaps, ref))
+            et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[client[i]['team']], i, name, space, rate, snaps, ref))
             playercount = playercount + 1
         end
     end

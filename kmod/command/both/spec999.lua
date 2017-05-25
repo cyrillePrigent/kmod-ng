@@ -6,7 +6,7 @@ function execute_command(params)
     for i = 0, clientsLimit, 1 do
         local ping = tonumber(et.gentity_get(i, "ps.ping"))
 
-        if (team[i] == 1 or team[i] == 2) and ping >= 999 then
+        if (client[i]['team'] == 1 or client[i]['team'] == 2) and ping >= 999 then
             matches = matches + 1
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
         end

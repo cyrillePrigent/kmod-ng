@@ -1,7 +1,7 @@
 
 
 function execute_command(params)
-    for i = 0, k_maxAdminLevels, 1 do
+    for i = 0, maxAdminLevel, 1 do
         if getAdminLevel(params.clientNum) >= i then
             et.trap_SendServerCommand(params.clientNum, string.format("print \"Level " .. i .. " Commands\n"))
             et.trap_SendServerCommand(params.clientNum, string.format("print \"^1-------------------------------------------------------------------\n"))

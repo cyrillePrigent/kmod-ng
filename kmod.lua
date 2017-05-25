@@ -1,8 +1,6 @@
-kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. '/' .. et.trap_Cvar_Get("gamename") .. '/kmod/'
-KMODversion = "Beta 1.5"
-KMODversion2 = "1.5"
 
-k_commandprefix = "!" -- change this to your desired prefix
+-- Change this to your desired prefix
+k_commandprefix = "!"
 
 --[[
 This lua was created to replace most features of etadmin mod
@@ -10,2668 +8,72 @@ and is much faster in response time and includes some features
 that etadmin mod does not have and vice versa.
 
 FEATURES:
-	*** Killingsprees plus all the other killingspree type stuff (Sounds Included)
-	*** Doublekills, Multikills, Ultrakills, Monsterkills, and Ludicrouskills (Sounds Included)
-	*** Flakmonkey's - When you get 3 kills with either panzer or a riflenade.
-		Flakmonkey is reset if you get any other type of kill/teamkill/or if you die (Sound included)
-	*** Firstblood (Sound Included)
-	*** Lastblood
-	*** Spreerecord (not including records for individual maps)
-	*** Enhanced Private Messaging - The sender can use partial name of recipiant
-		or can now use the recipiants slot number.  When using ETPro 3.2.6 or higher,
-		a new sound will be played letting you know that you have a private message.
-		Players can now private message all 2+ level admins currently on the server using
-		/ma or /pma then your message.
-	*** Vote disable was taken directly from ETAdmin mod and is slightly enhanced such that
-		it will detect changes to the timelimit.  (see config for details)
-	*** Antiunmute - When a player is muted he may not be unmuted via vote
-	*** Advanced Adrenaline - Players using adrenaline now have a timer in their cp area
-		displaying the amount of adrenaline time they have left.
-		A sound will also be played in their general location letting everyone else
-		know that they are using adrenaline (disableable) (sound included)
-	*** Killer's HP - Killer's HP is displayed to their victims.  When you kill somone
-		and are killed in return within a certain amount of time no message will be displayed.
-		When a killer is using adrenaline the victim will see a message displaying so.
-	*** Advanced players - Time nudge and max packets are removed from players list
-		and admins may see which admins (level 2+) are on the server using /admins
-	*** Chat log - All chats are logged along with player renames/connects/disconnects/and map restarts
-	*** Crazygravity - The exact same crazy gravity you've come to know and love
-	*** Team kill restriction - Taken from Etadmin mod and uses punkbuster to kick (see config)
-	*** /kill limit - After the max amount of slash kills is reached they are no longer
-		able to /kill.
-	*** Endround shuffle - At the end of each round teams are shuffled automatically
-		I recomend using this on servers with alot of people.
-	*** Noise reduction - ETPRO 3.2.6 OR HIGHER IS REQUIRED!!!  Plays all killingsprees
-		multikills/deathsprees/and firstblood to the killer or victim depending on which one
-	*** Color codes can be changed for lastblood and killer HP display in config
-	*** Spawn kill protection - A newly spawned player will keep his spawn shield
-		Until he either moves or fires his weapon.  (see config)
-	*** Paths to sounds can be changed to fit server admins needs.
+    *** Killingsprees plus all the other killingspree type stuff (Sounds Included)
+    *** Doublekills, Multikills, Ultrakills, Monsterkills, and Ludicrouskills (Sounds Included)
+    *** Flakmonkey's - When you get 3 kills with either panzer or a riflenade.
+        Flakmonkey is reset if you get any other type of kill/teamkill/or if you die (Sound included)
+    *** Firstblood (Sound Included)
+    *** Lastblood
+    *** Spreerecord (not including records for individual maps)
+    *** Enhanced Private Messaging - The sender can use partial name of recipiant
+        or can now use the recipiants slot number.  When using ETPro 3.2.6 or higher,
+        a new sound will be played letting you know that you have a private message.
+        Players can now private message all 2+ level admins currently on the server using
+        /ma or /pma then your message.
+    *** Vote disable was taken directly from ETAdmin mod and is slightly enhanced such that
+        it will detect changes to the timelimit.  (see config for details)
+    *** Antiunmute - When a player is muted he may not be unmuted via vote
+    *** Advanced Adrenaline - Players using adrenaline now have a timer in their cp area
+        displaying the amount of adrenaline time they have left.
+        A sound will also be played in their general location letting everyone else
+        know that they are using adrenaline (disableable) (sound included)
+    *** Killer's HP - Killer's HP is displayed to their victims.  When you kill somone
+        and are killed in return within a certain amount of time no message will be displayed.
+        When a killer is using adrenaline the victim will see a message displaying so.
+    *** Advanced players - Time nudge and max packets are removed from players list
+        and admins may see which admins (level 2+) are on the server using /admins
+    *** Chat log - All chats are logged along with player renames/connects/disconnects/and map restarts
+    *** Crazygravity - The exact same crazy gravity you've come to know and love
+    *** Team kill restriction - Taken from Etadmin mod and uses punkbuster to kick (see config)
+    *** /kill limit - After the max amount of slash kills is reached they are no longer
+        able to /kill.
+    *** Endround shuffle - At the end of each round teams are shuffled automatically
+        I recomend using this on servers with alot of people.
+    *** Noise reduction - ETPRO 3.2.6 OR HIGHER IS REQUIRED!!!  Plays all killingsprees
+        multikills/deathsprees/and firstblood to the killer or victim depending on which one
+    *** Color codes can be changed for lastblood and killer HP display in config
+    *** Spawn kill protection - A newly spawned player will keep his spawn shield
+        Until he either moves or fires his weapon.  (see config)
+    *** Paths to sounds can be changed to fit server admins needs.
 
 CREDITS:
-	Special to
-		Noobology
-		Armymen
-		Rikku
-		Monkey Spawn
-		Brunout
-		Dominator
-		James
-		Pantsless Victims
-	For helping with testing
+    Special to
+        Noobology
+        Armymen
+        Rikku
+        Monkey Spawn
+        Brunout
+        Dominator
+        James
+        Pantsless Victims
+    For helping with testing
 
 SOURCES:
-	Some code and ideas dirived from G073nks which can be found here
-		http://wolfwiki.anime.net/index.php/User:Gotenks
-	Code to get slot number from name was from the slap command I found on the ETPro forum here 
-		http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap
-	Infty's NoKill lua code was used and edited for the slashkill limit which can be found here
-		http://wolfwiki.anime.net/index.php/User:Infty
-	Ideas dirived from ETAdmin_mod found here
-		http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page
+    Some code and ideas dirived from G073nks which can be found here
+        http://wolfwiki.anime.net/index.php/User:Gotenks
+    Code to get slot number from name was from the slap command I found on the ETPro forum here 
+        http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap
+    Infty's NoKill lua code was used and edited for the slashkill limit which can be found here
+        http://wolfwiki.anime.net/index.php/User:Infty
+    Ideas dirived from ETAdmin_mod found here
+        http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page
 
-	If you see your code in here let me know and I'll add you to the credits for future releases
+    If you see your code in here let me know and I'll add you to the credits for future releases
 
-	The rest of the code is mine :D
+    The rest of the code is mine :D
 --]]
 
--- Global vars
-
---[[
-   Mute table :
-     duration :
-       key   => ip adress
-       value => duration in seconds, -1 for permanent mute
-     end :
-       key   => client ID
-       value => mute end (in miliseconds)
-     multipliers :
-       key   => client ID
-       value => mute duration multipliers
-     ip :
-       key   => numeric (start to 0)
-       value => ip adress to check to mute
---]]
-mute = {
-    ['duration'] = {},
-    ['end'] = {},
-    ['multipliers'] = {},
-    ['ip'] = {}
-}
-
-selfkills = {}
-
--- Obituary
-killingspree = {}
-flakmonkey = {}
-deathspree = {}
-multikill = {}
-playerWhoKilled = {}
-killedWithWeapon = {
-    ['killer'] = {},
-    ['victim'] = {},
-    ['hp'] = {}
-}
-playerLastKilled = {}
-kill = {
-    [1] = {},
-    [2] = {},
-    [3] = {},
-    [4] = {},
-    [5] = {},
-    [6] = {},
-    [7] = {},
-    [8] = {}
-}
--- NOTE killingspree equivalent
-nbKill = {}
-tkIndex = {}
-killerHp = {}
-firstBlood = 0
-lastBlood = ""
-lastBloodTrigger = 0
-spreeRecordKills = 0
-oldSpree = {
-    ['short'] = {},
-    ['long'] = {}
-}
-currentSpreeRecord = ""
-mapSpreeRecordKills = 0
-oldMapSpree = {
-    ['short'] = {},
-    ['long'] = {}
-}
-currentMapSpreeRecord = ""
-killingSpreeResetTrigger = 0
-deathSpreeResetTrigger = 0
-flakMonkeyResetTrigger = 0
-
--- Advanced respawn
-clientRespawn = {}
-switchTeam = {}
-invincibleDummy = {}
-invincibleStart = {}
-
--- What ?
-gibbed = {}
-
--- Advanced adrenaline
-
--- key   => player ID
--- value => 0 or 1 if adrenaline is active
-adrenaline = {}
--- key   => player ID
--- value => 0 or 1 when adrenaline is used
-antiloopadr1 = {}
--- key   => player ID
--- value => 0 or 1 when adrenaline is used
-antiloopadr2 = {}
--- key   => player ID
--- value => et.gentity_get(i, "ps.powerups", 12)
-adrnum = {}
-adrnum2 = {}
-adrtime = {}
-adrtime2 = {}
-adrendummy = {}
-
--- Global player info storage
-
--- Team player table
-team = {}
--- Current name table
-PlayerName = {}
--- Last name table
-Bname = {}
-
--- Game mode (frenzy, grenadewar, panzerwar & sniperwar)
-gameMode = false
-applyGameModeSettings = false
-originalClass = {}
-originalWeapon = {}
-weapons = {
-    ['panzerwar'] = {
-        nil,	--// 1
-        false,	--WP_LUGER,				// 2
-        false,	--WP_MP40,				// 3
-        false,	--WP_GRENADE_LAUNCHER,	// 4
-        true,	--WP_PANZERFAUST,		// 5
-        false,	--WP_FLAMETHROWER,		// 6
-        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-        false,	--WP_GRENADE_PINEAPPLE,	// 9
-        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-        false,	--WP_ARTY,				// 13
-        false,	--WP_SILENCER,			// 14	// used to be sp5
-        false,	--WP_DYNAMITE,			// 15
-        nil,	--// 16
-        nil,	--// 17
-        nil,		--// 18
-        false,	--WP_MEDKIT,			// 19
-        false,	--WP_BINOCULARS,		// 20
-        nil,	--// 21
-        nil,	--// 22
-        false,	--WP_KAR98,				// 23	// WolfXP weapons
-        false,	--WP_CARBINE,			// 24
-        false,	--WP_GARAND,			// 25
-        false,	--WP_LANDMINE,			// 26
-        false,	--WP_SATCHEL,			// 27
-        false,	--WP_SATCHEL_DET,		// 28
-        nil,	--// 29
-        false,	--WP_SMOKE_BOMB,		// 30
-        false,	--WP_MOBILE_MG42,		// 31
-        false,	--WP_K43,				// 32
-        false,	--WP_FG42,				// 33
-        nil,	--// 34
-        false,	--WP_MORTAR,			// 35
-        nil,	--// 36
-        false,	--WP_AKIMBO_COLT,		// 37
-        false,	--WP_AKIMBO_LUGER,		// 38
-        nil,	--// 39
-        nil,	--// 40
-        false,	--WP_SILENCED_COLT,		// 41
-        false,	--WP_GARAND_SCOPE,		// 42
-        false,	--WP_K43_SCOPE,			// 43
-        false,	--WP_FG42SCOPE,			// 44
-        false,	--WP_MORTAR_SET,		// 45
-        false,	--WP_MEDIC_ADRENALINE,	// 46
-        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-        false	--WP_AKIMBO_SILENCEDLUGER,// 48
-    },
-    ['frenzy'] = {
-        nil,	--// 1
-        true,	--WP_LUGER,				// 2
-        true,	--WP_MP40,				// 3
-        true,	--WP_GRENADE_LAUNCHER,	// 4
-        true,	--WP_PANZERFAUST,		// 5
-        true,	--WP_FLAMETHROWER,		// 6
-        true,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-        true,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-        true,	--WP_GRENADE_PINEAPPLE,	// 9
-        true,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-        true,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-        true,	--WP_AMMO,				// 12	// JPW NERVE likewise
-        true,	--WP_ARTY,				// 13
-        true,	--WP_SILENCER,			// 14	// used to be sp5
-        true,	--WP_DYNAMITE,			// 15
-        nil,	--// 16
-        nil,	--// 17
-        nil,		--// 18
-        true,	--WP_MEDKIT,			// 19
-        true,	--WP_BINOCULARS,		// 20
-        nil,	--// 21
-        nil,	--// 22
-        true,	--WP_KAR98,				// 23	// WolfXP weapons
-        true,	--WP_CARBINE,			// 24
-        true,	--WP_GARAND,			// 25
-        true,	--WP_LANDMINE,			// 26
-        true,	--WP_SATCHEL,			// 27
-        true,	--WP_SATCHEL_DET,		// 28
-        nil,	--// 29
-        true,	--WP_SMOKE_BOMB,		// 30
-        true,	--WP_MOBILE_MG42,		// 31
-        true,	--WP_K43,				// 32
-        true,	--WP_FG42,				// 33
-        nil,	--// 34
-        true,	--WP_MORTAR,			// 35
-        nil,	--// 36
-        true,	--WP_AKIMBO_COLT,		// 37
-        true,	--WP_AKIMBO_LUGER,		// 38
-        nil,	--// 39
-        nil,	--// 40
-        true,	--WP_SILENCED_COLT,		// 41
-        true,	--WP_GARAND_SCOPE,		// 42
-        true,	--WP_K43_SCOPE,			// 43
-        true,	--WP_FG42SCOPE,			// 44
-        true,	--WP_MORTAR_SET,		// 45
-        false,	--WP_MEDIC_ADRENALINE,	// 46
-        true,	--WP_AKIMBO_SILENCEDCOLT,// 47
-        true	--WP_AKIMBO_SILENCEDLUGER,// 48
-    },
-    ['grenadewar'] = {
-        nil,	--// 1
-        false,	--WP_LUGER,				// 2
-        false,	--WP_MP40,				// 3
-        true,	--WP_GRENADE_LAUNCHER,	// 4
-        false,	--WP_PANZERFAUST,		// 5
-        false,	--WP_FLAMETHROWER,		// 6
-        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-        true,	--WP_GRENADE_PINEAPPLE,	// 9
-        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-        false,	--WP_ARTY,				// 13
-        false,	--WP_SILENCER,			// 14	// used to be sp5
-        false,	--WP_DYNAMITE,			// 15
-        nil,	--// 16
-        nil,	--// 17
-        nil,		--// 18
-        false,	--WP_MEDKIT,			// 19
-        false,	--WP_BINOCULARS,		// 20
-        nil,	--// 21
-        nil,	--// 22
-        false,	--WP_KAR98,				// 23	// WolfXP weapons
-        false,	--WP_CARBINE,			// 24
-        false,	--WP_GARAND,			// 25
-        false,	--WP_LANDMINE,			// 26
-        false,	--WP_SATCHEL,			// 27
-        false,	--WP_SATCHEL_DET,		// 28
-        nil,	--// 29
-        false,	--WP_SMOKE_BOMB,		// 30
-        false,	--WP_MOBILE_MG42,		// 31
-        false,	--WP_K43,				// 32
-        false,	--WP_FG42,				// 33
-        nil,	--// 34
-        false,	--WP_MORTAR,			// 35
-        nil,	--// 36
-        false,	--WP_AKIMBO_COLT,		// 37
-        false,	--WP_AKIMBO_LUGER,		// 38
-        nil,	--// 39
-        nil,	--// 40
-        false,	--WP_SILENCED_COLT,		// 41
-        false,	--WP_GARAND_SCOPE,		// 42
-        false,	--WP_K43_SCOPE,			// 43
-        false,	--WP_FG42SCOPE,			// 44
-        false,	--WP_MORTAR_SET,		// 45
-        false,	--WP_MEDIC_ADRENALINE,	// 46
-        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-        false	--WP_AKIMBO_SILENCEDLUGER,// 48
-    },
-    ['sniperwar'] = {
-        nil,	--// 1
-        false,	--WP_LUGER,				// 2
-        false,	--WP_MP40,				// 3
-        false,	--WP_GRENADE_LAUNCHER,	// 4
-        false,	--WP_PANZERFAUST,		// 5
-        false,	--WP_FLAMETHROWER,		// 6
-        false,	--WP_COLT,				// 7	// equivalent american weapon to german luger
-        false,	--WP_THOMPSON,			// 8	// equivalent american weapon to german mp40
-        false,	--WP_GRENADE_PINEAPPLE,	// 9
-        false,	--WP_STEN,				// 10	// silenced sten sub-machinegun
-        false,	--WP_MEDIC_SYRINGE,		// 11	// JPW NERVE -- broken out from CLASS_SPECIAL per Id request
-        false,	--WP_AMMO,				// 12	// JPW NERVE likewise
-        false,	--WP_ARTY,				// 13
-        false,	--WP_SILENCER,			// 14	// used to be sp5
-        false,	--WP_DYNAMITE,			// 15
-        nil,	--// 16
-        nil,	--// 17
-        nil,		--// 18
-        false,	--WP_MEDKIT,			// 19
-        false,	--WP_BINOCULARS,		// 20
-        nil,	--// 21
-        nil,	--// 22
-        false,	--WP_KAR98,				// 23	// WolfXP weapons
-        false,	--WP_CARBINE,			// 24
-        true,	--WP_GARAND,			// 25
-        false,	--WP_LANDMINE,			// 26
-        false,	--WP_SATCHEL,			// 27
-        nil,	--WP_SATCHEL_DET,		// 28
-        nil,	--// 29
-        false,	--WP_SMOKE_BOMB,		// 30
-        false,	--WP_MOBILE_MG42,		// 31
-        true,	--WP_K43,				// 32
-        true,	--WP_FG42,				// 33
-        nil,	--// 34
-        false,	--WP_MORTAR,			// 35
-        nil,	--// 36
-        false,	--WP_AKIMBO_COLT,		// 37
-        false,	--WP_AKIMBO_LUGER,		// 38
-        nil,	--// 39
-        nil,	--// 40
-        false,	--WP_SILENCED_COLT,		// 41
-        true,	--WP_GARAND_SCOPE,		// 42
-        true,	--WP_K43_SCOPE,			// 43
-        true,	--WP_FG42SCOPE,			// 44
-        false,	--WP_MORTAR_SET,		// 45
-        false,	--WP_MEDIC_ADRENALINE,	// 46
-        false,	--WP_AKIMBO_SILENCEDCOLT,// 47
-        false	--WP_AKIMBO_SILENCEDLUGER,// 48
-    }
-}
-originalSettings = {
-    ['team_maxmortars'] = '',
-    ['team_maxpanzers'] = '',
-    ['team_maxflamers'] = '',
-    ['team_maxmg42s'] = '',
-    ['team_maxmedics'] = '',
-    ['team_maxengineers'] = '',
-    ['team_maxfieldops'] = '',
-    ['team_maxcovertops'] = '',
-    ['g_soldierchargetime'] = '',
-    ['g_speed'] = ''
-}
-refreshRate = 0
-refreshRateTrigger = 0
-restorePlayersSettingsTrigger = 0
-
--- Crazy gravity
-crazyGravity = {
-    ['active'] = false,
-    ['gravity'] = 800,
-    ['change'] = false,
-    ['time'] = 0
-}
-
--- Players stats
-players = {
-    ['allies'] = 0,
-    ['axis'] = 0,
-    ['active'] = 0,
-    ['total'] = 0
-}
-
--- Disable vote
-
--- Auto panzer disable
-autoPanzerDisable = {
-    ['disabledMsg'] = false,
-    ['enabledMsg'] = false,
-    ['warning'] = 0,
-    ['time'] = 0
-}
-
-
-voteDisabled = false
-randomClient = {}
-endRoundShuffleTrigger = 0
-
-timeCounter = 0
-GAMEPAUSED = 0
-pausedv = 0
-pausedv2 = 0
-pausetime = 0
-timedv = 0
-
---[[
-   Admin table :
-     name :
-       key   => admin guid
-       value => admin name
-     level :
-       key   => admin level (0 to k_maxAdminLevels cvar value)
-       value => table with : key = guid and value = true
---]]
-admin = {
-    ['name'] = {},
-    ['level'] = {}
-}
-
---[[
-   Commands table :
-     list :
-       key   => admin level (0 to k_maxAdminLevels cvar value)
-       value => table with numeric index and value = command
-     listCount :
-       key   => admin level (0 to k_maxAdminLevels cvar value)
-       value => value count of commands['list'] admin level
---]]
-commands = {
-    ['list'] = {},
-    ['listCount'] = {}
-}
-
-
--- et constant
---EV_GENERAL_SOUND = 49
-et.MAX_WEAPONS = 50
-EV_GLOBAL_CLIENT_SOUND = 54
---et.CS_PLAYERS = 689
-
-teamList = { "AXIS" , "ALLIES" , "SPECTATOR" }
-class = { [0]="SOLDIER" , "MEDIC" , "ENGINEER" , "FIELD OPS" , "COVERT OPS" }
-
-
---floodprotect = 0
-
-
---[[
---Defaults
-
-killingspreesound="sound/misc/killingspree.wav"
-rampagesound="sound/misc/rampage.wav"
-dominatingsound="sound/misc/dominating.wav"
-unstopablesound="sound/misc/unstoppable.wav"
-godlikesound="sound/misc/godlike.wav"
-wickedsicksound="sound/misc/wickedsick.wav"
-flakmonkeysound="sound/misc/flakmonkey.wav"
-firstbloodsound="sound/misc/firstblood.wav"
-
-deathspreesound1="sound/misc/humiliation.wav"
-deathspreesound2="sound/misc/you_suck.wav"
-deathspreesound3="sound/misc/ae821.wav"
-
-doublekillsound="sound/misc/doublekill.wav"
-multikillsound="sound/misc/multikill.wav"
-ultrakillsound="sound/misc/ultrakill.wav"
-monsterkillsound="sound/misc/monsterkill.wav"
-ludicrouskillsound="sound/misc/ludicrouskill.wav"
-
-k_spreesounds = 1
-k_sprees = 1 -- includes sounds
-k_multikillsounds = 1
-k_multikills = 1 --includes sounds
-k_flakmonkeysound = 1
-k_flakmonkey = 1 --includes sounds
-k_firstbloodsound = 1
-k_firstblood = 1 --includes sound
-k_lastblood = 1
-k_killerhpdisplay = 1
-
-k_spreerecord = 1
-k_advplayers = 1
-k_crazygravityinterval = 30
-k_slashkilllimit = 1
-k_slashkills = 3
-k_teamkillrestriction = 1
-k_tklimit_high = 3
-k_tklimit_low = -3
-k_color = "^2"
-k_advancedpms = 1
-k_playdead = 0
-k_logchat = 1
-k_disablevotes = 1
-k_dvmode = 2
-k_dvpercent = 90
-k_adrensound = 1
-k_advancedadrenaline = 1
-k_noisereduction = 0
-k_endroundshuffle = 0
-k_deathsprees = 1
-k_deathspreesounds = 1
-k_antiunmute = 1
-k_advancedspawn = 0
---]]
-
-pmsound = "sound/misc/NewBeep.wav"
-adrensound = "sound/misc/regen.wav"
-
---[[
-for i = 0, tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1, 1 do
-    antiloopadr1[i] = 0
-    antiloopadr2[i] = 0
-    adrenaline[i] = 0
-    adrnum[i] = 0
-    adrnum2[i] = 0
-    adrtime[i] = 0
-    adrtime2[i] = 0
-    team[i] = 0
-end
-]]--
-
--- Load command configuration
-dofile(kmod_ng_path .. '/command/config.lua')
-
--- Mute function
-
-function loadMutes()
-    local i = 0
-    mute['ip'] = {}
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-
-    for i = 0, clientsLimit, 1 do
-        mute['ip'][i] = 0
-    end
-
-    if len <= 0 then
-        et.G_Print("WARNING: No Mutes Defined!\n")
-    else
-        local filestr = et.trap_FS_Read(fd, len)
-        local i = 0
-
-        for time, ip in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-            mute['duration'][ip] = time
-            mute['ip'][i] = ip
-            i = i + 1
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function getNbMuted()
-    local fdread, length = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-    local n = 0
-
-    if length ~= 0 then
-        local fileStr = et.trap_FS_Read(fdread, length)
-
-        for ip in string.gfind(fileStr, "%-*%d+%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*") do
-            n = n + 1
-        end
-    end
-
-    et.trap_FS_FCloseFile(fdread)
-    return n
-end
-
-function writeMute(playerId, muteTime)
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
-
-    if mute['end'][playerId] ~= 0 then
-        local time = math.ceil(muteTime)
-        local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
-        local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
-        et.trap_FS_Write(muteLine, string.len(muteLine), fdadm)
-    end
-
-    et.trap_FS_FCloseFile(fdadm)
-end
-
-function setMute(playerId, muteTime)
-    local edit = false
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
-    local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip"))
-    s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
-
-    et.trap_FS_FCloseFile(fdadm)
-
-    if len == -1 then
-        edit = true
-    else
-        local n = getNbMuted()
-
-        for i = 0, n, 1 do
-            if mute['ip'][i] == ip then
-                removeMute(playerId)
-                edit = true
-                break
-            end
-        end
-
-        if mute['end'][playerId] > 0 or mute['end'][playerId] == -1 then
-            edit = true
-        else
-            edit = false
-        end
-    end
-
-    if edit then
-        writeMute(playerId, muteTime)
-        loadMutes()
-    end
-end
-
-function removeMute(playerId)
-    local fdin, lenin = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-    local fdout, lenout = et.trap_FS_FOpenFile(kmod_ng_path .. "mutestmp.cfg", et.FS_WRITE)
-    local ip2 = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip"))
-    s, e, ip2 = string.find(ip2, "(%d+%.%d+%.%d+%.%d+)")
-
-    if lenin <= 0 then
-        et.G_Print("There is no Mutes to remove \n")
-    else
-        local filestr = et.trap_FS_Read(fdin, lenin)
-
-        for time, ip, name in string.gfind(filestr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
-            if ip ~= ip2 then
-                local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
-                et.trap_FS_Write(muteLine, string.len(muteLine), fdout)
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fdin)
-    et.trap_FS_FCloseFile(fdout)
-    et.trap_FS_Rename("mutestmp.cfg", "mutes.cfg")
-    loadMutes()
-end
-
-function checkMuteShutdownGame()
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            local muteEnd = tonumber(mute['end'][i])
-
-            if muteEnd > 0 then
-                setMute(i, (muteEnd - mtime) / 1000)
-            elseif muteEnd == 0 then
-                local ip = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
-                s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
-
-                if mute['duration'][ip] ~= 0 then
-                    setMute(i, 0)
-                end
-            end
-        end
-    end
-end
-
-function checkMuteRunFrame()
-    for i = 0, clientsLimit, 1 do
-        local muted = et.gentity_get(i, "sess.muted")
-
-        if mute['end'][i] ~= nil then
-            if mute['end'][i] > 0 then
-                if mtime > mute['end'][i] then
-                    if muted == 1 then
-                        local name = et.gentity_get(i, "pers.netname")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .." ^7has been auto unmuted.  Please watch your language!\n")
-                    end
-
-                    mute['end'][i] = 0
-                elseif mtime < mute['end'][i] then
-                    if muted == 0 then
-                        mute['end'][i] = 0
-                        setMute(i, 0)
-                    end
-                elseif muted == 0 then
-                    mute['end'][i] = 0
-                end
-            elseif mute['end'][i] == -1 then
-                if muted == 0 then
-                    mute['end'][i] = 0
-                end
-            end
-        end
-    end
-end
-
-function checkMuteClentBegin(playerId)
-    local ip = ""
-
-    if playerId ~= -1 then
-        ip = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "ip")
-        s, e, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
-    else
-        ip = -1
-    end
-
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-
-    if len > 0 then
-        local name = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name")
-        local ref = tonumber(et.gentity_get(playerId, "sess.referee"))
-        local fileStr = et.trap_FS_Read(fd, len)
-        local i = 0
-
-        for time in string.gfind(fileStr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
-            if mute['ip'][i] == ip and ref == 0 then
-                local muteDuration = tonumber(mute['duration'][ip])
-
-                if muteDuration > 0 then
-                    mute['end'][playerId] = mtime + (muteDuration * 1000)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has not yet finished his mute sentance.  (^1" .. muteDuration .. "^7) seconds.\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. playerId .. "\n" )
-                elseif muteDuration == -1 then
-                    mute['end'][playerId] = -1
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. name .. "^7 has been permanently muted\n")
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. playerId .. "\n")
-                end
-            end
-
-            i = i + 1
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function checkMuteClientDisconnect(playerId)
-    if mute['end'][playerId] > 0 then
-        setMute(playerId, (mute['end'][playerId] - mtime) / 1000)
-        mute['end'][playerId] = 0
-    elseif mute['end'][playerId] == 0 then
-        setMute(playerId, 0)
-        mute['end'][playerId] = 0
-    end
-end
-
--- Selfkills function
-
-function checkSelfkills(playerId)
-    local name = et.gentity_get(playerId, "pers.netname")
-
-    if team[playerId] ~= 3 and et.gentity_get(playerId, "health") > 0 then
-        if selfkills[playerId] < k_slashkills then
-            selfkills[playerId] = selfkills[playerId] + 1
-
-            if selfkills[playerId] == k_slashkills then
-                if k_advancedpms == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
-                    et.G_ClientSound(playerId, pmsound)
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
-                end
-            elseif selfkills[playerId] == (k_slashkills - 1) then
-                if k_advancedpms == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You have ^11^7 /kill left for this map.\n")
-                    et.G_ClientSound(playerId, pmsound)
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n")
-                end
-            end
-        else
-            if k_advancedpms == 1 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. playerId .. " ^7You may no longer /kill for the rest of this map!\n")
-                et.G_ClientSound(playerId, pmsound)
-            else
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n")
-            end
-
-            return 1
-        end
-    end
-
-    return 0
-end
-
--- Advanced spawn function
-
-function checkAdvancedSpawn()
-    for i = 0, clientsLimit, 1 do
-        if switchTeam[i] == 1 then
-            et.gentity_set(i, "ps.powerups", 1, 0)
-        end
-
-        switchTeam[i] = 0
-    end
-
-    for i = 0, clientsLimit, 1 do
-        if clientRespawn[i] == 1 then
-            if (switchTeam[i] == 0 and et.gentity_get(i, "ps.powerups", 1) > 0) then
-                if invincibleDummy[i] == 0 then
-                    invincibleStart[i] = tonumber(et.gentity_get(i, "client.inactivityTime"))
-                    invincibleDummy[i] = 1
-                end
-
-                if tonumber(et.gentity_get(i, "client.inactivityTime")) == invincibleStart[i] then
-                    et.gentity_set(i, "ps.powerups", 1, mtime + 3000)
-                else
-                    clientRespawn[i] = 0
-                    invincibleDummy[i] = 0
-                end
-            else
-                clientRespawn[i] = 0
-                invincibleDummy[i] = 0
-            end
-        end
-    end
-end
-
--- Advanced adrenaline function
-
-function checkAdvancedAdrenalineFrame()
-    for i = 0, clientsLimit, 1 do
-        local adrentlimit = 10
-
-        if pausedv == 1 then
-            adrendummy[i] = 1
-        end
-
-        if adrendummy[i] == 1 and tonumber(et.gentity_get(i, "ps.powerups", 12)) == 0 then
-            adrendummy[i] = 0
-        end
-
-        if adrendummy[i] == 0 then
-            if tonumber(et.gentity_get(i, "ps.powerups", 12)) > 0 then
-                adrnum[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
-                local soundIndex = et.G_SoundIndex(adrensound)
-                local name = et.gentity_get(i, "pers.netname")
-
-                if antiloopadr1[i] == 0 then
-                    adrtime[i] = mtime
-
-                    if k_adrensound == 1 then
-                        et.G_Sound(i, soundIndex)
-                    end
-
-                    antiloopadr1[i] = 1
-                end
-
-                if antiloopadr2[i] == 0 then
-                    adrtime2[i] = mtime
-                    adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
-                    antiloopadr2[i] = 1
-                end
-
-                adrenaline[i] = 1
-                local tottime = math.floor((((mtime - adrtime[i]) / 1000) + 0.05))
-                local tottime2 = math.floor((((mtime - adrtime2[i]) / 1000) + 0.05))
-
-                if tottime >= 1 then
-                    antiloopadr1[i] = 0
-                end
-
-                if adrnum[i] ~= adrnum2[i] then
-                    adrnum2[i] = tonumber(et.gentity_get(i, "ps.powerups", 12))
-
-                    if k_adrensound == 1 then
-                        et.G_Sound(i, soundIndex)
-                    end
-
-                    adrtime[i] = mtime
-                    adrtime2[i] = mtime
-                end
-
-                local atime = (adrentlimit - tottime2)
-                et.trap_SendServerCommand(i, string.format("cp \"^3Adrenaline ^1" .. atime .. "\n\""))
-            else
-                adrenaline[i] = 0
-                antiloopadr1[i] = 0
-                antiloopadr2[i] = 0
-                adrnum[i] = 0
-                adrnum2[i] = 0
-            end
-        end
-    end
-end
-
--- Game mode function
-
-function gameModeShutdownGame()
-    if gameMode ~= false then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
-
-        if gameMode == 'panzerwar' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_speed " .. originalSettings['g_speed'] .. "\n")
-        end
-    end
-
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
-
-    if gameMode == 'panzerwar' then
-        for p = 0, clientLimit, 1 do
-            if team[p] == 1 or team[p] == 2 then
-                et.gentity_set(p, "sess.latchPlayerType", originalClass[p])
-                et.gentity_set(p, "sess.latchPlayerWeapon", originalWeapon[p])
-            end
-        end
-    end
-end
-
-function setWeaponAmmo(weaponList, clientId)
-    for i = 1, (et.MAX_WEAPONS - 1), 1 do
-        if not weaponList[i] then
-            et.gentity_set(clientId, "ps.ammoclip", i, 0)
-            et.gentity_set(clientId, "ps.ammo", i, 0)
-        else
-            et.gentity_set(clientId, "ps.ammoclip", i, 999)
-            et.gentity_set(clientId, "ps.ammo", i, 999)
-        end
-    end
-end
-
-function gameModeRunFrame()
-    if gameMode ~= false then
-        if refreshRateTrigger == 0 then
-            refreshRate = mtime
-            refreshRateTrigger = 1
-        end
-
-        -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
-        if ((mtime - refreshRate) / 1000) >= 0.25 then
-            applyGameModeSettings = true
-            refreshRateTrigger = 0
-        else
-            applyGameModeSettings = false
-        end
-    else
-        applyGameModeSettings = false
-    end
-
-    if gameMode == 'panzerwar' then
-        if applyGameModeSettings then
-            for q = 0, clientsLimit, 1 do
-                et.gentity_set(q, "sess.latchPlayerWeapon", 5)
-                setWeaponAmmo(weapons['panzerwar'], q)
-            end
-        end
-    elseif gameMode == 'frenzy' then
-        if applyGameModeSettings then
-            for w = 0, clientsLimit, 1 do
-                setWeaponAmmo(weapons['frenzy'], w)
-            end
-        end
-    elseif gameMode == 'grenadewar' then
-        if applyGameModeSettings then
-            for e = 0, clientsLimit, 1 do
-                setWeaponAmmo(weapons['grenadewar'], e)
-            end
-        end
-    elseif gameMode == 'sniperwar' then
-        if applyGameModeSettings then
-            for r = 0, clientsLimit, 1 do
-                if tonumber(et.gentity_get(r, "sess.latchPlayerType")) ~= 4 then
-                    et.gentity_set(r, "sess.latchPlayerType", 4)
-                end
-
-                local latchPlayerWeapon = tonumber(et.gentity_get(r, "sess.latchPlayerWeapon"))
-
-                if latchPlayerWeapon ~= 33 and (latchPlayerWeapon ~= 32 or latchPlayerWeapon ~= 25 or latchPlayerWeapon ~= 42 or latchPlayerWeapon ~= 43) then
-                    if team[r] == 1 then
-                        et.gentity_set(r, "sess.latchPlayerWeapon", 32)
-                    elseif team[r] == 2 then
-                        et.gentity_set(r, "sess.latchPlayerWeapon", 25)
-                    end
-                end
-
-                setWeaponAmmo(weapons['sniperwar'], r)
-            end
-        end
-    else
-        originalSettings['team_maxmortars'] = tonumber(et.trap_Cvar_Get("team_maxmortars"))
-        originalSettings['team_maxpanzers'] = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-        originalSettings['team_maxflamers'] = tonumber(et.trap_Cvar_Get("team_maxflamers"))
-        originalSettings['team_maxmg42s'] = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
-        originalSettings['team_maxmedics'] = tonumber(et.trap_Cvar_Get("team_maxmedics"))
-        originalSettings['team_maxengineers'] = tonumber(et.trap_Cvar_Get("team_maxengineers"))
-        originalSettings['team_maxfieldops'] = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
-        originalSettings['team_maxcovertops'] = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
-        originalSettings['g_soldierchargetime'] = tonumber(et.trap_Cvar_Get("g_soldierchargetime"))
-        originalSettings['g_speed'] = tonumber(et.trap_Cvar_Get("g_speed"))
-    end
-
-    if gameState == 3 then
-        if (gameMode == 'panzerwar' or gameMode == 'sniperwar') and restorePlayersSettingsTrigger == 0 then
-            for p = 0, clientsLimit, 1 do
-                if team[p] == 1 or team[p] == 2 then
-                    et.gentity_set(p, "sess.latchPlayerType", originalClass[p])
-                    et.gentity_set(p, "sess.latchPlayerWeapon", originalWeapon[p])
-                end
-            end
-
-            restorePlayersSettingsTrigger = 1
-        end
-    end
-end
-
-function gameModeClientSpawn(clientNum)
-    if gameMode == 'panzerwar' then
-        local doubleHealth = tonumber(et.gentity_get(clientNum, "health")) * 2
-        et.gentity_set(clientNum, "health", doubleHealth)
-    end
-end
-
--- Crazygravity function
-
-function crazyGravityRunFrame()
-    if crazyGravity['change'] then
-        crazyGravity['time'] = mtime + (k_crazygravityinterval * 1000)
-        crazyGravity['change'] = false
-    end
-
-    local remainingTime = (crazyGravity['time'] - mtime) / 1000
-
-    if remainingTime == 0 then
-        crazyGravity['gravity'] = math.random(10, 1200)
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity has been changed to ^1" .. crazygravity_gravity .. "^7!\n")
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity " .. crazyGravity['gravity'] .. "\n")
-        crazyGravity['change'] = true
-    elseif remainingTime / 1000 == 5 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity will be changed in ^15^7 seconds!\n")
-    end
-end
-
--- Disable vote function
-function disableVoteRunFrame()
-    local timeLimit = tonumber(et.trap_Cvar_Get("timelimit"))
-
-    if k_dvmode == 1 then
-        local cancelTime = (timeLimit - k_dvtime)
-
-        if timeCounter >= (cancelTime * 60) then
-            if voteDisabled == false then
-                voteDisabled = true
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-            end
-        else
-            if voteDisabled then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-            end
-
-            voteDisabled = false
-        end
-    elseif k_dvmode == 3 then
-        if timeCounter >= (k_dvtime * 60) then
-            if voteDisabled == false then
-                voteDisabled = true
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-            end
-        else
-            if voteDisabled then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-            end
-
-            voteDisabled = false
-        end
-    else
-        local cancelPercent = (timeLimit * (k_dvtime / 100))
-
-        if timeCounter >= (cancelPercent * 60) then
-            if voteDisabled == false then
-                voteDisabled = true
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-            end
-        else
-            if voteDisabled then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
-            end
-
-            voteDisabled = false
-        end
-    end
-end
-
--- Auto panzer disable function
-
-function autoPanzerDisableRunFrame()
-    if gameMode == false then
-        local activePanzers = false
-
-        if players['active'] < k_panzerplayerlimit then
-            for i = 0, clientsLimit, 1 do
-                if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
-                    activePanzers = true
-                    break
-                end
-            end
-
-            if autoPanzerDisable['disabledMsg'] == false then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:  ^7Panzers have been disabled.\n")
-                autoPanzerDisable['disabledMsg'] = true
-                autoPanzerDisable['enabledMsg'] = false
-            end
-
-            if activePanzers then
-                if autoPanzerDisable['warning'] == 0 then
-                    autoPanzerDisable['time'] = mtime
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers 0\n")
-                    autoPanzerDisable['warning'] = 1
-                end
-
-                local remainingTime = ((mtime - autoPanzerDisable['time']) / 1000)
-
-                if remainingTime > 30 then
-                    if autoPanzerDisable['warning'] == 1 then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!\n")
-                        autoPanzerDisable['warning'] = 2
-                    end
-                end
-
-                if remainingTime > 60 then
-                    for i = 0, clientsLimit, 1 do
-                        if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
-                            et.gentity_set(i, "sess.latchPlayerWeapon", 3)
-
-                            if k_advancedpms == 1 then
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. i .. " ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
-                            else
-                                local name = et.gentity_get(PlayerID,"pers.netname")
-                                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m \"" .. name .. "\" ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
-                            end
-                        end
-                    end
-
-                    autoPanzerDisable['disabledMsg'] = false
-                    autoPanzerDisable['warning'] = 0
-                end
-            else
-                autoPanzerDisable['warning'] = 0
-            end
-        else
-            autoPanzerDisable['disabledMsg'] = false
-            autoPanzerDisable['warning'] = 0
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
-
-            if autoPanzerDisable['enabledMsg'] == false then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled.  Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
-                autoPanzerDisable['enabledMsg'] = true
-            end
-        end
-    end
-end
-
-
--- Admin function
-
-function addAdmin(level, guid)
-    for i = 0, k_maxAdminLevels, 1 do
-        if level == i then
-            for q = 1, i, 1 do
-                admin['level'][q][guid] = true
-            end
-
-            break
-        end
-    end
-end
-
-function loadAdmins()
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-
-    if len <= 0 then
-        et.G_Print("WARNING: No Admins's Defined! \n")
-    else
-        local fileStr = et.trap_FS_Read(fd, len)
-        local i = 0
-
-        for level, guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-            -- upcase for exact matches
-            local _guid = string.upper(guid)
-            local _level = tonumber(level)
-            addAdmin(_level, _guid)
-            admin['name'][guid] = name
-            i = i + 1
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function confirmSetAdmin(playerId, guid)
-    -- gets file length
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-    et.trap_FS_FCloseFile(fdadm)
-
-    if len == -1 then
-        return true, false
-    else
-        local i = 0
-
-        for _guid, _name in pairs(admin['name']) do
-            if _guid == guid then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
-                removeAdmin(playerId)
-                return true, true
-            end
-
-            i = i + 1
-        end
-
-        if i == tonumber(table.getn(admin['name'])) then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
-            return true, false
-        end
-    end
-
-    return false, false
-end
-
-function setRegularUser(playerId)
-    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
-    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
-
-    if confirm then
-        local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
-
-        if params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
-        elseif params.command == 'console' then
-            et.G_Print(name .. "^7 is now a regular ^7user!\n")
-        end
-
-        -- adminReloaded
-        loadAdmins()
-    end
-end
-
-function setAdmin(playerId, level)
-    local level = tonumber(level)
-    local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
-    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
-    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
-
-    if confirm and not adminReloaded then
-        loadAdmins()
-    end
-
-    local confirm, adminReloaded = confirmSetAdmin(playerId, guid)
-
-    if confirm then
-        for i = 0, k_maxAdminLevels, 1 do
-            if level == i then
-                for q = 0, i, 1 do
-                    admin['level'][q][guid] = true
-                end
-
-                local shrubbotLine = level .. " - " .. guid .. " - " .. name .. "\n"
-                local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
-                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdadm)
-                et.trap_FS_FCloseFile(fdadm)
-                break
-            end
-        end
-
-        if params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        elseif params.command == 'console' then
-            et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        end
-
-        -- adminReloaded
-        loadAdmins()
-    end
-end
-
---[[
-function _setAdmin(playerId, level)
-    setAdmin2(playerId, 0, 1)
-    setAdmin2(playerId, level, 0)
-end
-
-function setAdmin2(playerId, level, sldv)
-    -- gets file length
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-    et.trap_FS_FCloseFile(fdadm)
-
-    local level = tonumber(level)
-    local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "name"))
-    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
-    local confirm = 0
-
-    if len == -1 then
-        confirm = 1
-    else
-        local i = 0
-
-        for _guid, _name in pairs(admin['name']) do
-            if _guid == guid then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay changing admin!\n")
-                removeAdmin(playerId)
-                confirm = 1
-                break
-            end
-
-            i = i + 1
-        end
-
-        if i == tonumber(table.getn(admin['name'])) then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay setting admin!\n")
-            confirm = 1
-        end
-    end
-
-    if confirm == 1 then
-        for i = 0, k_maxAdminLevels, 1 do
-            if level == 0 then
-                if sldv == 0 then
-                    if params.command == 'client' then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
-                    elseif params.command == 'console' then
-                        et.G_Print(name .. "^7 is now a regular ^7user!\n")
-                    end
-                end
-
-                loadAdmins()
-                return
-            elseif level == i and level > 0 then
-                for q = 0, i, 1 do
-                    admin['level'][q][guid] = true
-                end
-
-                local shrubbotLine = level .. " - " .. guid .. " - " .. name .. "\n"
-                local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_APPEND)
-                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdadm)
-                et.trap_FS_FCloseFile(fdadm)
-                break
-            end
-        end
-
-        if params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        elseif params.command == 'console' then
-            et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        end
-
-        loadAdmins()
-    end
-end
-
-function removeAdmin(playerId)
-    local fdIn, lenIn = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbot.cfg", et.FS_READ)
-    local fdOut, lenOut = et.trap_FS_FOpenFile(kmod_ng_path .. "shrubbottmp.cfg", et.FS_WRITE)
-    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
-
-    if lenIn == -1 then
-        et.G_Print("There is no Power User IP to remove \n")
-    else
-        local fileStr = et.trap_FS_Read(fdIn, lenIn)
-
-        for lvl, _guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
-            if _guid == guid then
-                _guid = string.upper(_guid)
-                --fname = name
-
-                for q = 0, k_maxAdminLevels, 1 do
-                    admin['level'][q][guid] = false
-                end
-            else
-                local shrubbotLine = lvl .. " - " .. _guid .. " - " .. name .. "\n"
-                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdOut)
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fdIn)
-    et.trap_FS_FCloseFile(fdOut)
-    et.trap_FS_Rename("shrubbottmp.cfg", "shrubbot.cfg")
-    loadAdmins()
-end
---]]
-
-function adminStatus(playerId, caller)
-    local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid"))
-    local name = et.gentity_get(playerId, "pers.netname")
-
-    for i = k_maxAdminLevels, 0, -1 do
-        if caller == 'finger' then
-            if admin['level'][i][guid] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
-                break
-            end
-        elseif caller == 'admintest' then
-            if admin['level'][i][guid] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
-                break
-            end
-        end
-    end
-end
-
-function getAdminLevel(playerId)
-    if playerId ~= -1 then
-        local guid = et.Info_ValueForKey(et.trap_GetUserinfo(playerId), "cl_guid")
-
-        for i = k_maxAdminLevels, 1, -1 do
-            if admin['level'][i][guid] then
-                return i
-            end
-        end
-    end
-
-    return 0
-end
-
-function getCommandLevel(cmd)
-    for i = 0, k_maxAdminLevels, 1 do
-        for q = 1, commands['listCount'][i], 1 do
-            if commands['list'][i][q] == cmd then
-                return i
-            end
-        end
-    end
-
-    return k_maxAdminLevels + 1
-end
-
--- Spree function
-
-function setSpreeRecord(PlayerID, kills2)
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_WRITE)
-    local Name = et.Q_CleanStr(et.Info_ValueForKey( et.trap_GetUserinfo(PlayerID), "name"))
-    local date = os.date("%x %I:%M:%S%p")
-    local kills = tonumber(kills2)
-
-    SPREE = kills .. "@" .. date .. "@" .. Name
-
-    et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
-    et.trap_FS_FCloseFile(fdadm)
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills  ^7" .. oldSpree['short'] .. "\n")
-    loadSpreeRecord()
-end
-
-function loadSpreeRecord()
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_READ)
-    local kills = 0
-    local date = ""
-    local name = ""
-
-    if len <= 0 then
-        et.G_Print("WARNING: No spree record found! \n")
-        oldSpree['short'] = "^3[Old: ^7N/A^3]"
-        oldSpree['long'] = "^3Spree Record: ^7There is no current spree record"
-        spreeRecordKills = 0
-    else
-        local filestr = et.trap_FS_Read(fd, len)
-
-        s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-        spreeRecordKills = tonumber(kills)
-        oldSpree['short'] = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
-        oldSpree['long'] = "^3Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
-        currentSpreeRecord = "Current spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
-
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function setMapSpreeRecord(PlayerID, kills2)
-    local mapname = tostring(et.trap_Cvar_Get("mapname"))
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_WRITE)
-    local Name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(PlayerID), "name"))
-    local date = os.date("%x %I:%M:%S%p")
-    local kills = tonumber(kills2)
-
-    SPREE = kills .. "@" .. date .. "@" .. Name
-
-    et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
-    et.trap_FS_FCloseFile(fdadm)
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1New Map spree record: ^7" .. Name .. " ^7with^3 " .. kills .. "^7 kills on " .. mapname .."  ^7" .. oldMapSpree['short'] .. "\n")
-    loadMapSpreeRecord()
-end
-
-function loadMapSpreeRecord()
-    local mapname = tostring(et.trap_Cvar_Get("mapname"))
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/" .. mapname .. ".record", et.FS_READ)
-    local kills = 0
-    local date = ""
-    local name = ""
-
-    if len <= 0 then
-        et.G_Print("WARNING: No map spree record found! \n")
-        oldMapSpree['short'] = "^3[Old: ^7N/A^3]"
-        oldMapSpree['long'] = "^3Map Spree Record: ^7There is no current spree record"
-        mapSpreeRecordKills = 0
-    else
-        local filestr = et.trap_FS_Read(fd, len)
-
-        s, e, kills, date, name = string.find(filestr, "(%d+)%@(%d+%/%d+%/%d+%s%d+%:%d+%:%d+%a+)%@([^%\n]*)")
-        mapSpreeRecordKills = tonumber(kills)
-        oldMapSpree['short'] = "^3[Old: ^7" .. name .. "^3 " .. kills .. "^7 @ " .. date .. "^3]"
-        oldMapSpree['long'] = "^3Map Spree Record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date .. " on the map of " .. mapname
-        currentMapSpreeRecord = "Current Map spree record: ^7" .. name .. "^7 with ^3" .. kills .. "^7 kills at " .. date
-
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
--- Log function
-
-function logMessage(time, clientNum, msg, msgType)
-    local clientInfo = et.trap_GetUserinfo(clientNum)
-    local ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-    local name = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
-    local LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
-
-    if msgType then
-        return LOG .. " (" .. msgType .. "): " .. msg .. "\n"
-    else
-        return LOG .. ": " .. msg .. "\n"
-    end
-end
-
-function logChat(PlayerID, mode, text, PMID)
-    local text = et.Q_CleanStr(text)
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "chat_log.log", et.FS_APPEND)
-    local time = os.date("%x %I:%M:%S%p")
-    local ip
-    local guid
-    local LOG
-
-    if mode == et.SAY_ALL then
-        LOG = logMessage(time, PlayerID, text)
-    elseif mode == et.SAY_TEAM then
-        LOG = logMessage(time, PlayerID, text, 'TEAM')
-    elseif mode == et.SAY_BUDDY then
-        LOG = logMessage(time, PlayerID, text, 'BUDDY')
-    elseif mode == et.SAY_TEAMNL then
-        LOG = logMessage(time, PlayerID, text, 'TEAM')
-    elseif mode == "VSAY_TEAM" then
-        LOG = logMessage(time, PlayerID, text, 'VSAY_TEAM')
-    elseif mode == "VSAY_BUDDY" then
-        LOG = logMessage(time, PlayerID, text, 'VSAY_BUDDY')
-    elseif mode == "VSAY_ALL" then
-        LOG = logMessage(time, PlayerID, text, 'VSAY')
-    elseif mode == "PMESSAGE" then
-        local clientInfo = et.trap_GetUserinfo(PlayerID)
-        ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-        local from = "SERVER"
-
-        if PlayerID ~= 1022 then
-            from = et.gentity_get(PlayerID, "pers.netname")
-        end
-
-        local rec1 = client2id(PMID)
-
-        if rec1 then
-            local recipiant = et.gentity_get(rec1,"pers.netname")
-            LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. text .. "\n"
-        end
-    elseif mode == "PMADMINS" then
-        local from = "SERVER"
-
-        if PlayerID ~= 1022 then
-            local clientInfo = et.trap_GetUserinfo(PlayerID)
-            ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-            guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-            from = et.gentity_get(PlayerID, "pers.netname")
-        else
-            ip = "127.0.0.1"
-            guid = "NONE!"
-        end
-
-        local recipiant = "ADMINS"
-        LOG = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. text .. "\n"
-    elseif mode == "CONN" then
-        local clientInfo = et.trap_GetUserinfo(PlayerID)
-        ip = string.upper(et.Info_ValueForKey(clientInfo, "ip" ))
-        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid" ))
-        local name = et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname"))
-
-        LOG = "*** " .. name .. " HAS ENTERED THE GAME  (IP: " .. ip .. " GUID: " .. guid .. ") ***\n"
-    elseif mode == "NAME_CHANGE" then
-        LOG = "*** " .. PlayerID .. " HAS RENAMED TO " .. text .. " ***\n"
-    elseif mode == "DISCONNECT" then
-        local name = et.Q_CleanStr(et.gentity_get(PlayerID, "pers.netname"))
-
-        LOG = "*** " .. name .. " HAS DISCONNECTED ***\n"
-    elseif mode == "START" then
-        LOG = "\n	***SERVER RESTART OR MAP CHANGE***\n\n"
-    end
-
-    et.trap_FS_Write(LOG, string.len(LOG) ,fdadm)
-    et.trap_FS_FCloseFile(fdadm)
-end
-
--- Miscellaneous
-
-function printModInfo(clientNum)
-    et.trap_SendServerCommand(clientNum, "cpm \"This server is running the new KMOD version " .. KMODversion .. "\n\"")
-    et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
-end
-
-function loadCommands()
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
-
-    if len > 0 then
-        local fileStr = et.trap_FS_Read(fd, len)
-
-        for lvl, cmd in string.gfind(fileStr, "[^%#](%d)%s*%-%s*(%w+)%s*%=%s*[^%\n]*") do
-            for i = 0, k_maxAdminLevels, 1 do
-                if tonumber(lvl) == i then
-                    commands['listCount'][i] = commands['listCount'][i] + 1
-                    commands['list'][i][commands['listCount'][i]] = k_commandprefix .. cmd
-                end
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function readConfig()
-    loadSpreeRecord()
-    loadMapSpreeRecord()
-
-    k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
-
-    for i = 0, k_maxAdminLevels, 1 do
-        admin['level'][i] = {}
-    end
-
-    loadAdmins()
-
-    for i = 0, k_maxAdminLevels, 1 do
-        local t = tostring(et.trap_Cvar_Get("k_Admin" .. i))
-        local c = 0
-        commands['list'][i] = {}
-
-        for w in string.gfind(t, "([^%s]+)%s*") do
-            commands['list'][i][c] = k_commandprefix .. w
-            c = c + 1
-        end
-
-        commands['listCount'][i] = c
-    end
-
-    loadCommands()
-end
-
-function client2id(client, cmd, verbose, cmdSaid)
-    local clientNum = tonumber(client)
-
-    if clientNum then
-        if clientNum >= 0 and clientNum < 64 then
-            if et.gentity_get(clientNum, "pers.connected") ~= 2 then
-                if verbose == 'client' then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7There is no client associated with this slot number\n")
-                elseif verbose == 'console' then
-                    et.G_Print("There is no client associated with this slot number\n")
-                end
-
-                return nil
-            end
-        else
-            if verbose == 'client' then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Please enter a slot number between 0 and 63\n")
-            elseif verbose == 'console' then
-                et.G_Print("Please enter a slot number between 0 and 63\n")
-            end
-
-            return nil
-        end
-    else
-        local client = string.lower(et.Q_CleanStr(client))
-
-        if client then
-            s, e = string.find(client, client)
-
-            if e <= 2 then
-                if verbose == 'client' then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Player name requires more than 2 characters\n")
-                elseif verbose == 'console' then
-                    et.G_Print("Player name requires more than 2 characters\n")
-                end
-
-                return nil
-            else
-                clientNum = getPlayernameToId(client)
-            end
-        end
-
-        if not clientNum then
-            if verbose == 'client' then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7Try name again or use slot number\n")
-            elseif verbose == 'console' then
-                et.G_Print("Try name again or use slot number\n")
-            end
-
-            return nil
-        end
-    end
-
-    return clientNum
-end
-
-function splitWord(inputString)
-    local i = 1
-    local t = {}
-
-    for w in string.gfind(inputString, "([^%s]+)%s*") do
-        t[i] = w
-        i = i + 1
-    end
-
-    return t
-end
-
-function getPlayernameToId(name)
-    local i = 0
-    local slot = nil
-    local matchcount = 0
-    local cleanname = string.lower(et.Q_CleanStr(name))
-    local playerp = ""
-
-    for i = 0, clientsLimit, 1 do
-        if PlayerName[i] then
-            playerp = string.lower(et.Q_CleanStr(PlayerName[i]))
-            s, e = string.find(playerp, cleanname)
-
-            if s and e then
-                matchcount = matchcount + 1
-                slot = i
-            end
-        end
-    end
-
-    if matchcount >= 2 then
--- set level
---         if params.command == 'client' then
---             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---         elseif params.command == 'console' then
---             et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---         end
-
-        return nil
-    else
-        return slot
-    end
-end
-
-function printCmdMsg(cmdType, msg)
-    if cmdType == 'client' then
-        et.G_Print(msg)
-    elseif cmdType == 'console' then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " " .. msg)
-    end
-end
-
--- et_RunFrame
-
-function readKmodNgCvar()
-    killingspreesound = tostring(et.trap_Cvar_Get("killingspreesound"))
-    k_color = tostring(et.trap_Cvar_Get("k_color"))
-    rampagesound = tostring(et.trap_Cvar_Get("rampagesound"))
-    dominatingsound = tostring(et.trap_Cvar_Get("dominatingsound"))
-    unstopablesound = tostring(et.trap_Cvar_Get("unstopablesound"))
-    godlikesound = tostring(et.trap_Cvar_Get("godlikesound"))
-    wickedsicksound = tostring(et.trap_Cvar_Get("wickedsicksound"))
-    flakmonkeysound = tostring(et.trap_Cvar_Get("flakmonkeysound"))
-    firstbloodsound = tostring(et.trap_Cvar_Get("firstbloodsound"))
-    deathspreesound1 = tostring(et.trap_Cvar_Get("deathspreesound1"))
-    deathspreesound2 = tostring(et.trap_Cvar_Get("deathspreesound2"))
-    deathspreesound3 = tostring(et.trap_Cvar_Get("deathspreesound3"))
-    doublekillsound = tostring(et.trap_Cvar_Get("doublekillsound"))
-    multikillsound = tostring(et.trap_Cvar_Get("multikillsound"))
-    megakillsound = tostring(et.trap_Cvar_Get("megakillsound"))
-    ultrakillsound = tostring(et.trap_Cvar_Get("ultrakillsound"))
-    monsterkillsound = tostring(et.trap_Cvar_Get("monsterkillsound"))
-    ludicrouskillsound = tostring(et.trap_Cvar_Get("ludicrouskillsound"))
-    holyshitsound = tostring(et.trap_Cvar_Get("holyshitsound"))
-    k_ds_message1 = tostring(et.trap_Cvar_Get("k_ds_message1"))
-    k_ds_message2 = tostring(et.trap_Cvar_Get("k_ds_message2"))
-    k_ds_message3 = tostring(et.trap_Cvar_Get("k_ds_message3"))
-    k_ks_message1 = tostring(et.trap_Cvar_Get("k_ks_message1"))
-    k_ks_message2 = tostring(et.trap_Cvar_Get("k_ks_message2"))
-    k_ks_message3 = tostring(et.trap_Cvar_Get("k_ks_message3"))
-    k_ks_message4 = tostring(et.trap_Cvar_Get("k_ks_message4"))
-    k_ks_message5 = tostring(et.trap_Cvar_Get("k_ks_message5"))
-    k_ks_message6 = tostring(et.trap_Cvar_Get("k_ks_message6"))
-    k_mk_message1 = tostring(et.trap_Cvar_Get("k_mk_message1"))
-    k_mk_message2 = tostring(et.trap_Cvar_Get("k_mk_message2"))
-    k_mk_message3 = tostring(et.trap_Cvar_Get("k_mk_message3"))
-    k_mk_message4 = tostring(et.trap_Cvar_Get("k_mk_message4"))
-    k_mk_message5 = tostring(et.trap_Cvar_Get("k_mk_message5"))
-    k_mk_message6 = tostring(et.trap_Cvar_Get("k_mk_message6"))
-    k_mk_message7 = tostring(et.trap_Cvar_Get("k_mk_message7"))
-    k_fm_message = tostring(et.trap_Cvar_Get("k_fm_message"))
-    k_end_message1 = tostring(et.trap_Cvar_Get("k_end_message1"))
-    k_end_message2 = tostring(et.trap_Cvar_Get("k_end_message2"))
-    k_end_message3 = tostring(et.trap_Cvar_Get("k_end_message3"))
-    k_end_message4 = tostring(et.trap_Cvar_Get("k_end_message4"))
-    k_fb_message = tostring(et.trap_Cvar_Get("k_fb_message"))
-    k_lb_message = tostring(et.trap_Cvar_Get("k_lb_message"))
-    k_autopanzerdisable = tonumber(et.trap_Cvar_Get("k_autopanzerdisable"))
-    k_panzerplayerlimit = tonumber(et.trap_Cvar_Get("k_panzerplayerlimit"))
-    k_panzersperteam = tonumber(et.trap_Cvar_Get("k_panzersperteam"))
-    k_spreesounds = tonumber(et.trap_Cvar_Get("k_spreesounds"))
-    k_sprees = tonumber(et.trap_Cvar_Get("k_sprees"))
-    k_multikillsounds = tonumber(et.trap_Cvar_Get("k_multikillsounds"))
-    k_multikills = tonumber(et.trap_Cvar_Get("k_multikills"))
-    k_flakmonkeysound = tonumber(et.trap_Cvar_Get("k_flakmonkeysound"))
-    k_flakmonkey = tonumber(et.trap_Cvar_Get("k_flakmonkey"))
-    k_firstbloodsound = tonumber(et.trap_Cvar_Get("k_firstbloodsound"))
-    k_firstblood = tonumber(et.trap_Cvar_Get("k_firstblood"))
-    k_lastblood = tonumber(et.trap_Cvar_Get("k_lastblood"))
-    k_killerhpdisplay = tonumber(et.trap_Cvar_Get("k_killerhpdisplay"))
-    k_deathsprees = tonumber(et.trap_Cvar_Get("k_deathsprees"))
-    k_deathspreesounds = tonumber(et.trap_Cvar_Get("k_deathspreesounds"))
-    k_spreerecord = tonumber(et.trap_Cvar_Get("k_spreerecord"))
-    k_advplayers = tonumber(et.trap_Cvar_Get("k_advplayers"))
-    k_crazygravityinterval = tonumber(et.trap_Cvar_Get("k_crazygravityinterval"))
-    k_teamkillrestriction = tonumber(et.trap_Cvar_Get("k_teamkillrestriction"))
-    k_tklimit_high = tonumber(et.trap_Cvar_Get("k_tklimit_high"))
-    k_tklimit_low = tonumber(et.trap_Cvar_Get("k_tklimit_low"))
-    k_tk_protect = tonumber(et.trap_Cvar_Get("k_tk_protect"))
-    k_slashkilllimit = tonumber(et.trap_Cvar_Get("k_slashkilllimit"))
-    k_slashkills = tonumber(et.trap_Cvar_Get("k_slashkills"))
-    k_endroundshuffle = tonumber(et.trap_Cvar_Get("k_endroundshuffle"))
-    k_noisereduction = tonumber(et.trap_Cvar_Get("k_noisereduction"))
-    k_advancedpms = tonumber(et.trap_Cvar_Get("k_advancedpms"))
-    k_logchat = tonumber(et.trap_Cvar_Get("k_logchat"))
-    k_disablevotes = tonumber(et.trap_Cvar_Get("k_disablevotes"))
-    k_dvmode = tonumber(et.trap_Cvar_Get("k_dvmode"))
-    k_dvtime = tonumber(et.trap_Cvar_Get("k_dvtime"))
-    k_adrensound = tonumber(et.trap_Cvar_Get("k_adrensound"))
-    k_advancedadrenaline = tonumber(et.trap_Cvar_Get("k_advancedadrenaline"))
-    k_antiunmute = tonumber(et.trap_Cvar_Get("k_antiunmute"))
-    k_advancedspawn = tonumber(et.trap_Cvar_Get("k_advancedspawn"))
-    k_deathspree1_amount = tonumber(et.trap_Cvar_Get("k_deathspree1_amount"))
-    k_deathspree2_amount = tonumber(et.trap_Cvar_Get("k_deathspree2_amount"))
-    k_deathspree3_amount = tonumber(et.trap_Cvar_Get("k_deathspree3_amount"))
-    k_spree1_amount = tonumber(et.trap_Cvar_Get("k_spree1_amount"))
-    k_spree2_amount = tonumber(et.trap_Cvar_Get("k_spree2_amount"))
-    k_spree3_amount = tonumber(et.trap_Cvar_Get("k_spree3_amount"))
-    k_spree4_amount = tonumber(et.trap_Cvar_Get("k_spree4_amount"))
-    k_spree5_amount = tonumber(et.trap_Cvar_Get("k_spree5_amount"))
-    k_spree6_amount = tonumber(et.trap_Cvar_Get("k_spree6_amount"))
-    k_multikill_time = tonumber(et.trap_Cvar_Get("k_multikill_time"))
-    k_ds_location = tonumber(et.trap_Cvar_Get("k_ds_location"))
-    k_ks_location = tonumber(et.trap_Cvar_Get("k_ks_location"))
-    k_mk_location = tonumber(et.trap_Cvar_Get("k_mk_location"))
-    k_fm_location = tonumber(et.trap_Cvar_Get("k_fm_location"))
-    k_fb_location = tonumber(et.trap_Cvar_Get("k_fb_location"))
-    k_lb_location = tonumber(et.trap_Cvar_Get("k_lb_location"))
-end
-
-function killingSpreeReset()
-    for i = 0, clientsLimit, 1 do
-        local name = et.gentity_get(i, "pers.netname")
-
-        if killingspree[i] >= 5 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^1Killingspree's disabled.  All sprees reset.\n")
-        end
-
-        killingspree[i] = 0
-    end
-end
-
-function deathSpreeReset()
-    for i = 0, clientsLimit, 1 do
-        deathspree[i] = 0
-    end
-end
-
-function flakMonkeyReset()
-    for i = 0, clientsLimit, 1 do
-        flakmonkey[i] = 0
-    end
-end
-
--- Get location of displayed message on client screen.
--- 1 : chat area
--- 2 : center screen area
--- 3 : top of screen
-function getMessageLocation(location)
-    if location == 2 then
-        return "cp"
-    elseif location == 3 then
-        return "bp"
-    else
-        return "qsay"
-    end
-end
-
--- et_Obituary
-
-function getMeansOfDeathName(meansOfDeath)
-    if meansOfDeath == 0 then
-        return "UNKNOWN"
-    elseif meansOfDeath == 1 then
-        return "MACHINEGUN"
-    elseif meansOfDeath == 2 then
-        return "BROWNING"
-    elseif meansOfDeath == 3 then
-        return "MG42"
-    elseif meansOfDeath == 4 then
-        return "GRENADE"
-    elseif meansOfDeath == 5 then
-        return "ROCKET"
-    elseif meansOfDeath == 6 then
-        return "KNIFE"
-    elseif meansOfDeath == 7 then
-        return "LUGER"
-    elseif meansOfDeath == 8 then
-        return "COLT"
-    elseif meansOfDeath == 9 then
-        return "MP40"
-    elseif meansOfDeath == 10 then
-        return "THOMPSON"
-    elseif meansOfDeath == 11 then
-        return "STEN"
-    elseif meansOfDeath == 12 then
-        return "GARAND"
-    elseif meansOfDeath == 13 then
-        return "SNOOPERSCOPE"
-    elseif meansOfDeath == 14 then
-        return "SILENCER"
-    elseif meansOfDeath == 15 then
-        return "FG42"
-    elseif meansOfDeath == 16 then
-        return "FG42SCOPE"
-    elseif meansOfDeath == 17 then
-        return "PANZERFAUST"
-    elseif meansOfDeath == 18 then
-        return "GRENADE_LAUNCHER"
-    elseif meansOfDeath == 19 then
-        return "FLAMETHROWER"
-    elseif meansOfDeath == 20 then
-        return "GRENADE_PINEAPPLE"
-    elseif meansOfDeath == 21 then
-        return "CROSS"
-    elseif meansOfDeath == 22 then
-        return "MAPMORTAR"
-    elseif meansOfDeath == 23 then
-        return "MAPMORTAR_SPLASH"
-    elseif meansOfDeath == 24 then
-        return "KICKED"
-    elseif meansOfDeath == 25 then
-        return "GRABBER"
-    elseif meansOfDeath == 26 then
-        return "DYNAMITE"
-    elseif meansOfDeath == 27 then
-        return "AIRSTRIKE"
-    elseif meansOfDeath == 28 then
-        return "SYRINGE"
-    elseif meansOfDeath == 29 then
-        return "AMMO"
-    elseif meansOfDeath == 30 then
-        return "ARTY"
-    elseif meansOfDeath == 31 then
-        return "WATER"
-    elseif meansOfDeath == 32 then
-        return "SLIME"
-    elseif meansOfDeath == 33 then
-        return "LAVA"
-    elseif meansOfDeath == 34 then
-        return "CRUSH"
-    elseif meansOfDeath == 35 then
-        return "TELEFRAG"
-    elseif meansOfDeath == 36 then
-        return "FALLING"
-    elseif meansOfDeath == 37 then
-        return "SUICIDE"
-    elseif meansOfDeath == 38 then
-        return "TARGET_LASER"
-    elseif meansOfDeath == 39 then
-        return "TRIGGER_HURT"
-    elseif meansOfDeath == 40 then
-        return "EXPLOSIVE"
-    elseif meansOfDeath == 41 then
-        return "CARBINE"
-    elseif meansOfDeath == 42 then
-        return "KAR98"
-    elseif meansOfDeath == 43 then
-        return "GPG40"
-    elseif meansOfDeath == 44 then
-        return "M7"
-    elseif meansOfDeath == 45 then
-        return "LANDMINE"
-    elseif meansOfDeath == 46 then
-        return "SATCHEL"
-    elseif meansOfDeath == 47 then
-        return "TRIPMINE"
-    elseif meansOfDeath == 48 then
-        return "SMOKEBOMB"
-    elseif meansOfDeath == 49 then
-        return "MOBILE_MG42"
-    elseif meansOfDeath == 50 then
-        return "SILENCED_COLT"
-    elseif meansOfDeath == 51 then
-        return "GARAND_SCOPE"
-    elseif meansOfDeath == 52 then
-        return "CRUSH_CONSTRUCTION"
-    elseif meansOfDeath == 53 then
-        return "CRUSH_CONSTRUCTIONDEATH"
-    elseif meansOfDeath == 54 then
-        return "CRUSH_CONSTRUCTIONDEATH_NOATTACKER"
-    elseif meansOfDeath == 55 then
-        return "K43"
-    elseif meansOfDeath == 56 then
-        return "K43_SCOPE"
-    elseif meansOfDeath == 57 then
-        return "MORTAR"
-    elseif meansOfDeath == 58 then
-        return "AKIMBO_COLT"
-    elseif meansOfDeath == 59 then
-        return "AKIMBO_LUGER"
-    elseif meansOfDeath == 60 then
-        return "AKIMBO_SILENCEDCOLT"
-    elseif meansOfDeath == 61 then
-        return "AKIMBO_SILENCEDLUGER"
-    elseif meansOfDeath == 62 then
-        return "SMOKEGRENADE"
-    elseif meansOfDeath == 63 then
-        return "SWAP_SPACES"
-    elseif meansOfDeath == 64 then
-        return "SWITCH_TEAM"
-    end
-end
-
-function multikillProcess(dvtime, currentKillTable, lastKillTable, msg, sound, reset)
-    currentKillTable[killer] = mtime
-
-    if (currentKillTable[killer] - lastKillTable[killer]) <= dvtime then
-        local str = string.gsub(msg, "#killer#", killername)
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, mk_location .. " " .. str .. "\n")
-
-        if k_multikillsounds == 1 then
-            if k_noisereduction == 1 then
-                et.G_ClientSound(killer, sound)
-            else
-                et.G_globalSound(sound)
-            end
-        end
-
-        if reset then
-            multikill[killer] = 0
-        end
-    else
-        multikill[killer] = 0
-        multikill[killer] = multikill[killer] + 1
-        lastKillTable[killer] = mtime
-    end
-
-    return currentKillTable, lastKillTable
-end
-
-function killingSpreeProcess(msg, sound)
-    local str = string.gsub(msg, "#killer#", killername)
-    local str = string.gsub(str, "#kills#", killingspree[killer])
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
-
-    if k_spreesounds == 1 then
-        if k_noisereduction == 1 then
-            et.G_ClientSound(killer, sound)
-        else
-            et.G_globalSound(sound)
-        end
-    end
-end
-
-function kills(victim, killer, meansOfDeath, weapon)
-    weapon = getMeansOfDeathName(meansOfDeath)
-
-    local kil = tonumber(killer)
-    local killername = ""
-
-    victimname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
-    playerLastKilled[killer] = victim
-    killedWithWeapon['killer'][killer] = tostring(weapon)
-    local victimteam = team[victim]
-    local killerteam = team[killer]
-
-    if killer == 1022 then
-        killername = "The World"
-
-        if k_sprees == 1 then
-            if gibbed[victim] == 0 then
-                if killingspree[victim] >= 5 then
-                    local str = string.gsub(k_end_message3, "#victim#", victimname)
-                    local str = string.gsub(str, "#kills#", killingspree[victim])
-                    local str = string.gsub(str, "#killer#", killername)
-
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
-                    killingspree[victim]=0
-                else
-                    killingspree[victim]=0
-                end
-            else
-                gibbed[victim] = 0
-            end
-        end
-
-        if k_spreerecord == 1 then
-            if nbKill[victim] > spreeRecordKills then
-                setSpreeRecord(victim, nbKill[victim])
-            end
-
-            if nbKill[victim] > mapSpreeRecordKills then
-                setMapSpreeRecord(victim, nbKill[victim])
-                nbKill[victim] = 0
-            else
-                nbKill[victim] = 0
-            end
-        end
-
-        flakmonkey[victim]=0
-    else
-        killername = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
-    end
-
-    if killer ~= victim and k_sprees == 1 then
-        deathspree[killer]=0
-    end
-
-    if gameState == 0 then
-        if k_teamkillrestriction == 1 then
-            if victimteam == killerteam and killer ~= victim and killer ~= 1022 then
-                if getAdminLevel(killer) < k_tk_protect then
-                    local warning = (k_tklimit_low + 1)
-                    local pbkiller = killer + 1
-
-                    if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 or meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 57 or meansOfDeath == 30  or meansOfDeath == 27 or meansOfDeath == 49 or meansOfDeath == 3 then
-                        tkIndex[killer] = tkIndex[killer] - 0.75
-                    elseif meansOfDeath == 30  or meansOfDeath == 27 then
-                        tkIndex[killer] = tkIndex[killer] - 0.65
-                    elseif meansOfDeath == 45 then
-                        -- Mines do nothing!
-                    else
-                        tkIndex[killer] = tkIndex[killer] - 1
-                    end
-
-                    if warning > tkIndex[killer] and k_tklimit_low < tkIndex[killer] then
-                        if k_advancedpms == 1 then
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
-                            et.G_ClientSound(killer, pmsound)
-                        else
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. killername .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
-                        end
-                    elseif tkIndex[killer] <= k_tklimit_low then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n")
-                    end
-                end
-            else
-                if killer ~= victim then
-                    if killer ~= 1022 then
-                        tkIndex[killer] = tkIndex[killer] + 1
-
-                        if tkIndex[killer] > k_tklimit_high then
-                            tkIndex[killer] = k_tklimit_high
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    if k_multikills == 1 then
-        if killer ~= victim and victimteam ~= killerteam and killer ~= 1022 then
-            local dvtime = (k_multikill_time * 1000)
-
-            multikill[killer] = multikill[killer] + 1
-
-            if multikill[killer] == 1 then
-                kill[1][killer] = mtime
-            elseif multikill[killer] == 2 then
-                kill[2], kill[1] = multikillProcess(dvtime, kill[2], kill[1], k_mk_message1, doublekillsound)
-            elseif multikill[killer] == 3 then
-                kill[3], kill[2] = multikillProcess(dvtime, kill[3], kill[2], k_mk_message2, multikillsound)
-            elseif multikill[killer] == 4 then
-                kill[4], kill[3] = multikillProcess(dvtime, kill[4], kill[3], k_mk_message3, megakillsound)
-            elseif multikill[killer] == 5 then
-                kill[5], kill[4] = multikillProcess(dvtime, kill[5], kill[4], k_mk_message4, ultrakillsound)
-            elseif multikill[killer] == 6 then
-                kill[6], kill[5] = multikillProcess(dvtime, kill[6], kill[5], k_mk_message5, monsterkillsound)
-            elseif multikill[killer] == 7 then
-                kill[7], kill[6] = multikillProcess(dvtime, kill[7], kill[6], k_mk_message6, ludicrouskillsound)
-            elseif multikill[killer] == 8 then
-                kill[8], kill[7] = multikillProcess(dvtime, kill[8], kill[7], k_mk_message7, holyshitsound, true)
-            end
-        else
-            multikill[killer] = 0
-        end
-    end
-
-    if killer ~= 1022 then
-        if killer ~= victim and victimteam ~= killerteam then
-            if k_spreerecord == 1 then
-                nbKill[killer] = nbKill[killer] + 1
-            end
-
-            if k_sprees == 1 then
-                killingspree[killer] = killingspree[killer] + 1
-
-                if killingspree[killer] == k_spree1_amount then
-                    killingSpreeProcess(k_ks_message1, killingspreesound)
-                elseif killingspree[killer] == k_spree2_amount then
-                    killingSpreeProcess(k_ks_message2, rampagesound)
-                elseif killingspree[killer] == k_spree3_amount then
-                    killingSpreeProcess(k_ks_message3, dominatingsound)
-                elseif killingspree[killer] == k_spree4_amount then
-                    killingSpreeProcess(k_ks_message4, unstopablesound)
-                elseif killingspree[killer] == k_spree5_amount then
-                    killingSpreeProcess(k_ks_message5, godlikesound)
-                elseif killingspree[killer] == k_spree6_amount then
-                    killingSpreeProcess(k_ks_message6, wickedsicksound)
-                end
-
-            end
-        else
-            if killingspree[killer] >= 5 then
-                if killer == victim then
-                    local str = string.gsub(k_end_message2, "#victim#", victimname)
-                    local str = string.gsub(str, "#kills#", killingspree[victim])
-                    local str = string.gsub(str, "#killer#", killername)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
-                    killingspree[killer] = 0
-                else
-                    local str = string.gsub(k_end_message4, "#victim#", victimname)
-                    local str = string.gsub(str, "#kills#", killingspree[killer])
-                    local str = string.gsub(str, "#killer#", killername)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
-                    killingspree[killer] = 0
-                end
-            else
-                killingspree[killer] = 0
-            end
-
-            if k_spreerecord == 1 then
-                if nbKill[victim] > spreeRecordKills then
-                    setSpreeRecord(victim, nbKill[victim])
-                end
-
-                if nbKill[victim] > mapSpreeRecordKills then
-                    setMapSpreeRecord(victim, nbKill[victim])
-                    nbKill[victim] = 0
-                else
-                    nbKill[victim] = 0
-                end
-            end
-        end
-    end
-
-    if k_flakmonkey == 1 then
-        if meansOfDeath == 17 or meansOfDeath == 43 or meansOfDeath == 44 then
-            if killer ~= victim and victimteam ~= killerteam then
-                flakmonkey[killer] = flakmonkey[killer] + 1
-
-                if flakmonkey[killer] == 3 then
-                    local str = string.gsub(k_fm_message, "#killer#", killername)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, fm_location .. " " .. str .. "\n")
-
-                    if k_flakmonkeysound == 1 then
-                        if k_noisereduction == 1 then
-                            et.G_ClientSound(killer, flakmonkeysound)
-                        else
-                            et.G_globalSound(flakmonkeysound)
-                        end
-                    end
-
-                    flakmonkey[killer] = 0
-                end
-
-            else
-                flakmonkey[killer] = 0
-            end
-        else
-            flakmonkey[killer] = 0
-        end
-    end
-end
-
-function deathSpreeProcess(msg, sound)
-    local str = string.gsub(msg, "#victim#", killedname)
-    local str = string.gsub(str, "#deaths#", deathspree[victim])
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, ds_location .. " " .. str .. "\n" )
-
-    if k_deathspreesounds == 1 then
-        if k_noisereduction == 1 then
-            et.G_ClientSound(victim, sound)
-        else
-            et.G_globalSound(sound)
-        end
-    end
-end
-
-function deaths(victim, killer, meansOfDeath, weapon)
-    weapon = getMeansOfDeathName(meansOfDeath)
-
-    local kil = tonumber(killer)
-    local killername = ""
-
-    if killer == 1022 then
-        killername = "The World"
-    else
-        killername = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
-    end
-
-    playerWhoKilled[victim] = killer
-    killedWithWeapon['victim'][victim] = tostring(weapon)
-
-    local victimteam = team[victim]
-    local killerteam = team[killer]
-    local killedname = et.Info_ValueForKey(et.trap_GetUserinfo( victim ), "name")
-
-    if k_spreerecord == 1 then
-        if nbKill[victim] > spreeRecordKills then
-            setSpreeRecord(victim, nbKill[victim])
-        end
-
-        if nbKill[victim] > mapSpreeRecordKills then
-            setMapSpreeRecord(victim, nbKill[victim])
-            nbKill[victim] = 0
-        else
-            nbKill[victim] = 0
-        end
-    end
-
-    if k_deathsprees == 1 then
-        deathspree[victim] = deathspree[victim] + 1
-    end
-
-    if k_sprees == 1 then
-        if killingspree[victim] >= 5 then
-            local str = string.gsub(k_end_message1, "#victim#", killedname)
-            local str = string.gsub(str, "#kills#", killingspree[victim])
-            local str = string.gsub(str, "#killer#", killername)
-
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, ks_location .. " " .. str .. "\n")
-            killingspree[victim] = 0
-        else
-            killingspree[victim] = 0
-        end
-    end
-
-    flakmonkey[victim] = 0
-
-    if k_deathsprees == 1 then
-        if deathspree[victim] == k_deathspree1_amount then
-            deathSpreeProcess(k_ds_message1, deathspreesound1)
-        elseif deathspree[victim] == k_deathspree2_amount then
-            deathSpreeProcess(k_ds_message2, deathspreesound2)
-        elseif deathspree[victim] == k_deathspree3_amount then
-            deathSpreeProcess(k_ds_message3, deathspreesound3)
-        end
-    end
-end
-
--- et_ClientCommand
-
-function curseFilter(PlayerID)
-    local k_cursemode = tonumber(et.trap_Cvar_Get("k_cursemode"))
-    local name = et.gentity_get(PlayerID, "pers.netname")
-    local ref = tonumber(et.gentity_get(PlayerID, "sess.referee"))
-
-    if (k_cursemode - 32) >= 0 then
-        -- Override kill and slap
-        if (k_cursemode - 32) > 7 then
-            k_cursemode = 7
-        else
-            k_cursemode = k_cursemode - 32
-        end
-
-        if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            if team[PlayerID] > 0 or team[PlayerID] < 4 then
-                params["arg1"] = PlayerID
-                dofile(kmod_ng_path .. '/command/gib.lua')
-                execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
-            end
-        end
-    end
-
-    if (k_cursemode - 16) >= 0 then
-        -- Override slap
-        if (k_cursemode - 16) > 7 then
-            k_cursemode = 7
-        else
-            k_cursemode = k_cursemode - 16
-        end
-
-        if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            if team[PlayerID] > 0 or team[PlayerID] < 4 then
-                et.gentity_get(PlayerID, "health", -1)
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto killed for language!\n" )
-            end
-        end
-    end
-
-    if (k_cursemode - 8) >= 0 then
-        k_cursemode = k_cursemode - 16
-
-        if et.gentity_get(PlayerID, "pers.connected") == 2 then
-            if team[PlayerID] > 0 or team[PlayerID] < 4 then
-                params["arg1"] = PlayerID
-                dofile(kmod_ng_path .. '/command/burn.lua')
-                execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
-            end
-        end
-    end
-
-    if (k_cursemode - 4) >= 0 then
-        -- Override kill and slap
-        if (k_cursemode - 4) > 0 then
-            k_cursemode = 0
-        end
-
-        if ref == 0 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n")
-            mute['end'][PlayerID] = -1
-            setMute(PlayerID, -1)
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been permanently muted for language!\n")
-        end
-    end
-
-    if (k_cursemode - 2) >= 0 then
-        -- Override kill and slap
-        if (k_cursemode - 2) > 0 then
-            k_cursemode = 0
-        end
-
-        --Mute time starts at one then doubles each time thereafter
-        if ref == 0 then
-            if mute['multipliers'][PlayerID] == 0 then
-                mute['multipliers'][PlayerID] = 1
-                mute['end'][PlayerID] = mtime + (1 * 60 * 1000)
-            else
-                mute['multipliers'][PlayerID] = mute['multipliers'][PlayerID] + mute['multipliers'][PlayerID]
-                mute['end'][PlayerID] = mtime + (mute['multipliers'][PlayerID] * 60 * 1000)
-            end
-
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted for ^1" .. mute['multipliers'][PlayerID] .. "^7 minute(s)!\n")
-        end
-    end
-
-    if k_cursemode == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. PlayerID .. "\n" )
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted!\n")
-    end
-end
-
-function randomClientFinder()
-    randomClient = {}
-    local m = 0
-
-    for i = 0, clientLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            randomClient[m] = i
-            m = m + 1
-        end
-    end
-
-    local dv = math.random(0, m - 1)
-    return randomClient[dv]
-end
-
-function checkBadWord(clientNum, text)
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "badwords.list", et.FS_READ)
-
-    if len > 0 then
-        local fileStr = et.trap_FS_Read(fd, len)
-
-        for badWord in string.gfind(fileStr, "(%w*)") do
-            for word in string.gfind(text, "([^%s]+)%p*") do
-                if word == badWord then
-                    curseFilter(clientNum)
-                    break
-                end
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
-function parseClientCommand(clientNum, str)
-    local c = tonumber(et.gentity_get(clientNum, "sess.latchPlayerType"))
-    local player_last_victim_name = ""
-    local player_last_killer_name = ""
-    local player_last_victim_cname = ""
-    local player_last_killer_cname = ""
-
-    if playerLastKilled[clientNum] == 1022 then
-        player_last_victim_name = "NO ONE"
-        player_last_victim_cname = "NO ONE"
-    else
-        player_last_victim_name = et.Q_CleanStr(et.gentity_get(playerLastKilled[clientNum], "pers.netname"))
-        player_last_victim_cname = et.gentity_get(playerLastKilled[clientNum], "pers.netname")
-    end
-
-    if playerWhoKilled[clientNum] == 1022 then
-        player_last_killer_name = "NO ONE"
-        player_last_killer_cname = "NO ONE"
-    else
-        player_last_killer_name = et.Q_CleanStr(et.gentity_get(playerWhoKilled[clientNum], "pers.netname"))
-        player_last_killer_cname = et.gentity_get(playerWhoKilled[clientNum], "pers.netname")
-    end
-
-    local pnameID = client2id(Cvar1)
-
-    if not pnameID then
-        pnameID = 1021
-    end
-
-    local PBpnameID = pnameID + 1
-    local PBID = clientNum + 1
-
-    local randomC = randomClientFinder()
-    local randomTeam = teamList[team[randomC]]
-    local randomCName = et.gentity_get(randomC, "pers.netname")
-    local randomName = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
-    local randomClass = class[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
-
-    local str = string.gsub(str, "<CLIENT_ID>", clientNum)
-    local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid"))
-    local str = string.gsub(str, "<COLOR_PLAYER>", et.gentity_get(clientNum, "pers.netname"))
-    local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(clientNum))
-    local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname")))
-    local str = string.gsub(str, "<PLAYER_CLASS>", class[c])
-    local str = string.gsub(str, "<PLAYER_TEAM>", teamList[clientNum])
-    local str = string.gsub(str, "<PARAMETER>", Cvar1 .. Cvar2)
-    local str = string.gsub(str, "<PLAYER_LAST_KILLER_ID>", playerWhoKilled[clientNum])
-    local str = string.gsub(str, "<PLAYER_LAST_KILLER_NAME>", player_last_killer_name)
-    local str = string.gsub(str, "<PLAYER_LAST_KILLER_CNAME>", player_last_killer_cname)
-    local str = string.gsub(str, "<PLAYER_LAST_KILLER_WEAPON>", killedWithWeapon['victim'][clientNum])
-    local str = string.gsub(str, "<PLAYER_LAST_VICTIM_ID>", playerLastKilled[clientNum])
-    local str = string.gsub(str, "<PLAYER_LAST_VICTIM_NAME>", player_last_victim_name)
-    local str = string.gsub(str, "<PLAYER_LAST_VICTIM_CNAME>", player_last_victim_cname)
-    local str = string.gsub(str, "<PLAYER_LAST_VICTIM_WEAPON>", killedWithWeapon['killer'][clientNum])
-    local str = string.gsub(str, "<PNAME2ID>", pnameID)
-    local str = string.gsub(str, "<PBPNAME2ID>", PBpnameID)
-    local str = string.gsub(str, "<PB_ID>", PBID)
-    local str = string.gsub(str, "<RANDOM_ID>", randomC)
-    local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
-    local str = string.gsub(str, "<RANDOM_NAME>", randomName)
-    local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
-    local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
-    --local classnumber = tonumber(et.gentity_get(clientNum, "sess.latchPlayerType"))
-
-    return str
-end
-
-function checkClientCommand(clientNum, lowBangCmd, say_parms)
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
-
-    if len > 0 then
-        local fileStr = et.trap_FS_Read(fd, len)
-
-        for level, comm, str in string.gfind(fileStr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
-            if lowBangCmd == k_commandprefix .. comm then
-                if tonumber(level) <= getAdminLevel(clientNum) then
-                    str = parseClientCommand(clientNum, str)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, str .. "\n")
-
-                    local strNumber = splitWord(str)
-
-                    if strNumber[1] == "forcecvar" then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^3etpro svcmd: ^7forcing client cvar [" .. strNumber[2] .. "] to [" .. Cvar1 .. "]\n")
-                    end
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, say_parms .. " ^7Insufficient Admin status\n")
-                end
-
-                return true
-            end
-        end
-    end
-
-    et.trap_FS_FCloseFile(fd)
-    return false
-end
-
-function runCommandFile(command, params)
-    local result = 0
-    execute_command = nil
-
-    if cmdList[params.command] ~= nil and cmdList[params.command][command] ~= nil then
-        dofile(kmod_ng_path .. cmdList[params.command][command])
-
-        if (type(execute_command) == 'function') then
-            result = execute_command(params)
-            execute_command = nil
-        else
-            et.G_LogPrint('None `execute_command` function defined in command file')
-        end
-    else
-        et.G_LogPrint('Unknow command : ' .. command)
-    end
-
-    return result
-end
-
--- NOTE :
--- Note of ReyalP (http://wolfwiki.anime.net/index.php/Talk:Lua_Mod_API#et_ClientSay_.3F)
--- et_ClientSay is a function you would define yourself to filter or do something with chats.
--- It was it's own callback in earlier version of the API.
--- Not implemented after test in ET pro 3.2.6
-function checkClientSay(params, text)
-    params.nbArg     = et.trap_Argc() - 1
-    params.bangCmd   = et.trap_Argv(1)
-    params["arg1"]   = et.trap_Argv(2)
-    params["arg2"]   = et.trap_Argv(3)
-
-    local lowBangCmd = string.lower(params.bangCmd)
-
-    checkBadWord(params.clientNum, text)
-
-    if checkClientCommand(params.clientNum, lowBangCmd, params.say) then
-        return 1
-    end
-
-    if getAdminLevel(params.clientNum) >= getCommandLevel(params.bangCmd) then
-        if runCommandFile(lowBangCmd, params) == 1 then
-            return 1
-        end
-    end
-
-    return 0
-end
+dofile(kmod_ng_path .. "/core.lua")
 
 -- Enemy Territory callbacks
 
@@ -2682,238 +84,28 @@ end
 --  randomSeed is a number that can be used to seed random number generators.
 --  restart indicates if et_InitGame() is being called due to a map restart (1) or not (0).
 function et_InitGame(levelTime, randomSeed, restart)
-    k_maxAdminLevels = tonumber(et.trap_Cvar_Get("k_maxAdminLevels"))
-    initTime = levelTime
-    clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
+    time["init"] = levelTime
 
-    --loadAdmins()
-    --loadSpreeRecord()
-    --loadMapSpreeRecord()
-    loadMutes()
-
-    local currentver = et.trap_Cvar_Get("mod_version")
-    et.RegisterModname("KMOD version " .. KMODversion .. " " .. et.FindSelf())
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentver .. " - KMOD" .. KMODversion2 .. "\"\n")
-
-    k_panzersperteam = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
+    local currentVersion = et.trap_Cvar_Get("mod_version")
+    et.RegisterModname("KMOD-ng v" .. version .. releaseStatus .. " " .. et.FindSelf())
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - KMOD-ng " .. version .. "\"\n")
 
     for i = 0, clientsLimit, 1 do
-        mute['end'][i] = 0
-        mute['multipliers'][i] = 0
-        selfkills[i] = 0
-        killingspree[i] = 0
-        flakmonkey[i] = 0
-        deathspree[i] = 0
-        multikill[i] = 0
-        playerWhoKilled[i] = 1022
-        killedWithWeapon['killer'][i] = ""
-        killedWithWeapon['victim'][i] = ""
-        playerLastKilled[i] = 1022
-        nbKill[i] = 0
-        tkIndex[i] = 0
-        killerHp[i] = 0
-        clientRespawn[i] = 0
-        switchTeam[i] = 0
-        invincibleDummy[i] = 0
-        --invincibleStart[i] = 0
-        gibbed[i] = 0
-        adrenaline[i] = 0
+        local copy
 
-        antiloopadr1[i] = 0
-        antiloopadr2[i] = 0
-        adrnum[i] = 0
-        adrnum2[i] = 0
-        adrtime[i] = 0
-        adrtime2[i] = 0
-        adrendummy[i] = 0
+        client[i] = {}
 
-        originalClass[i] = ""
-        originalWeapon[i] = ""
-
-        team[i] = 0
-    end
-
-    readConfig()
-
-    et.G_Print("KMOD version " .. KMODversion .. " has been initialized...\n")
-end
-
--- Called when qagame shuts down.
---  restart indicates if the shutdown is being called due to a map_restart (1) or not (0).
-function et_ShutdownGame(restart)
-    gameModeShutdownGame()
-
-    if k_logchat == 1 then
-        logChat("DV", "START", "DV")
-    end
-
-    checkMuteShutdownGame()
-end
-
--- Called when qagame runs a server frame.
---  levelTime is the current level time in milliseconds.
-function et_RunFrame(levelTime)
-    mtime = tonumber(levelTime) -- still cannot remember why i made this but its used in alot of stuff so i'll leave it
-
-    if timeCounter == 0 then
-        timeCounter = (mtime - initTime) / 1000
-        k_panzersperteam2 = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-    end
-
-    if GAMEPAUSED == 1 then
-        if pausedv == 0 then
-            pausetime = mtime
-            pausedv = 1
-        end
-
-        -- Server is paused for 3 minutes (180 seconds)
-        if ((mtime - pausetime) / 1000) >= 180 then
-            GAMEPAUSED = 0
-        end
-    elseif GAMEPAUSED == 0 and pausedv == 1 then
-        if pausedv2 == 0 then
-            pausetime = mtime
-            pausedv2 = 1
-        end
-
-        -- when unpaused before 3 minutes is up it counts down from 10 seconds
-        if ((mtime - pausetime) / 1000) >= 10 then
-            pausedv = 0
-            pausedv2 = 0
-            timedv1 = nil
-            timedv2 = nil
-        end
-    else
-        if timedv == 0 then
-            timedv1 = mtime
-            timedv = 1
-            if type(timedv2) ~= "nil" then
-                timeCounter = timeCounter + ((timedv1 - timedv2) / 1000)
-                s, e, thous = string.find(timeCounter, "%d*%.%d%d(%d*)")
-                if thous == 9999999 then
-                    timeCounter = timeCounter + 0.000000001
-                end
-            end
-        else
-            timedv2 = mtime
-            timedv = 0
-            timeCounter = timeCounter + ((timedv2 - timedv1) / 1000)
-            s, e, thous = string.find(timeCounter, "%d*%.%d%d(%d*)")
-
-            if thous == 9999999 then
-                timeCounter=timeCounter + 0.000000001
-            end
-        end
-    end
-
-    gameState = tonumber(et.trap_Cvar_Get("gamestate"))
-
-    readKmodNgCvar()
-
-    ds_location = getMessageLocation(k_ds_location)
-    ks_location = getMessageLocation(k_ks_location)
-    mk_location = getMessageLocation(k_mk_location)
-    fm_location = getMessageLocation(k_fm_location)
-    fb_location = getMessageLocation(k_fb_location)
-    lb_location = getMessageLocation(k_lb_location)
-
-    --players['axis'] = 0
-    --players['allies'] = 0
-    players['active'] = 0
-    --players['total'] = 0
-
-    for i = 0, clientsLimit, 1 do
-        PlayerName[i] = et.gentity_get(i, "pers.netname")
-
-        if not PlayerName[i] then
-            PlayerName[i] = ""
-        end
-
-        if not Bname[i] then
-            Bname[i] = ""
+        for key, value in pairs(clientDefaultData) do
+            client[i][key] = value
         end
 
         if et.gentity_get(i, "pers.connected") == 2 then
-            if PlayerName[i] ~= Bname[i] then
-                logChat(Bname[i], "NAME_CHANGE", PlayerName[i])
-                Bname[i] = PlayerName[i]
-            end
-
-            --[[
-            if team[i] == 1 then
-                players['axis'] = players['axis'] + 1
-            elseif team[i] == 2 then
-                players['allies'] = players['allies'] + 1
-            end
-            ]]--
-
-            if team[i] == 1 or team[i] == 2 then
-                players['active'] = players['active'] + 1
-            end
-
-            --players['total'] = players['total'] + 1
-        else
-            PlayerName[i] = ""
-            Bname[i] = ""
+            client[i]["name"] = et.gentity_get(i, "pers.netname")
         end
     end
 
-    -- g_inactivity is required or this will not work
-    if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then
-        checkAdvancedSpawn()
-    end
-
-    if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
-        for i = 0, clientsLimit, 1 do
-            if getAdminLevel(i) >= 1 then
-                --if team[i] >= 3 or team[i] < 1 then
-                if team[i] == 3 then
-                    et.gentity_set(i, "client.inactivityTime", mtime)
-                    et.gentity_set(i, "client.inactivityWarning", 1)
-                end
-            end
-        end
-    end
-
-    gameModeRunFrame()
-
-    if crazyGravity['active'] then
-        crazyGravityRunFrame()
-    end
-
-    local ftime = ((mtime - initTime) / 1000)
-
-    if gameState == 3 then
-        if k_lastblood == 1 and lastBloodTrigger == 0 then
-            if lastBlood then
-                local str = string.gsub(k_lb_message, "#killer#", lastBlood)
-
-                et.trap_SendConsoleCommand( et.EXEC_APPEND, lb_location .. " " .. str .. "\n")
-            end
-
-            for i = 0, clientsLimit, 1 do
-                local name = et.gentity_get(i, "pers.netname")
-
-                if killingspree[i] >= 5 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^7" .. name .. "^1's Killing spree was ended! Due to Map's end.\n")
-                end
-
-                killingspree[i] = 0
-            end
-
-            if k_spreerecord == 1 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. currentSpreeRecord .. "\n")
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. currentMapSpreeRecord .. "\n")
-            end
-
-            lastBloodTrigger = 1
-        end
-
-        if k_endroundshuffle == 1 and endRoundShuffleTrigger == 0 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref shuffleteamsxp_norestart\n")
-            endRoundShuffleTrigger = 1
-        end
-    end
+    executeCallbackFunction("InitGame", {["levelTime"] = levelTime, ["restart"] = restart})
+    executeCallbackFunction("ReadConfig")
 
     if k_advancedpms == 1 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 0\n")
@@ -2921,57 +113,135 @@ function et_RunFrame(levelTime)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 2\n")
     end
 
-    if k_sprees == 0 then
-        if killingSpreeResetTrigger == 0 then
-            killingSpreeReset()
-        end
+    et.G_Print("KMOD-ng version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
+end
 
-        killingSpreeResetTrigger = 1
-    elseif k_sprees == 1 then
-        killingSpreeResetTrigger = 0
+-- Called when qagame shuts down.
+--  restart indicates if the shutdown is being called due to a map_restart (1) or not (0).
+function et_ShutdownGame(restart)
+    executeCallbackFunction("ShutdownGame", {["restart"] = restart})
+end
+
+-- Called when qagame runs a server frame.
+--  levelTime is the current level time in milliseconds.
+function et_RunFrame(levelTime)
+    time["frame"] = levelTime
+
+    if time["counter"] == 0 then
+        time["counter"] = (time["frame"] - time["init"]) / 1000
     end
 
-    if k_deathsprees == 0 then
-        if deathSpreeResetTrigger == 0 then
-            deathSpreeReset()
+    if game["paused"] then
+        if not pause["startTrigger"] then
+            pause["time"]         = time["frame"]
+            pause["startTrigger"] = true
         end
 
-        deathSpreeResetTrigger = 1
-    elseif k_deathsprees == 1 then
-        deathSpreeResetTrigger = 0
+        -- Server is paused for 3 minutes (180 seconds)
+        if ((time["frame"] - pause["time"]) / 1000) >= 180 then
+            game["paused"] = false
+        end
+    elseif not game["paused"] and pause["startTrigger"] then
+        if not pause["endTrigger"] then
+            pause["time"]       = time["frame"]
+            pause["endTrigger"] = true
+        end
+
+        -- when unpaused before 3 minutes is up it counts down from 10 seconds
+        if ((time["frame"] - pause["time"]) / 1000) >= 10 then
+            pause["startTrigger"] = false
+            pause["endTrigger"]   = false
+            timedv1 = 0
+            timedv2 = 0
+        end
+    else
+        if not time["trigger"] then
+            timedv1 = time["frame"]
+            time["trigger"] = true
+
+            if timedv2 ~= 0 then
+                time["counter"] = time["counter"] + ((timedv1 - timedv2) / 1000) -- + 0.05
+                local _, _, thous = string.find(time["counter"], "%d*%.%d%d(%d*)")
+
+                if thous == 9999999 then
+                    time["counter"] = time["counter"] + 0.000000001
+                end
+            end
+        else
+            timedv2 = time["frame"]
+            time["trigger"] = false
+            time["counter"] = time["counter"] + ((timedv2 - timedv1) / 1000)
+            local _, _, thous = string.find(time["counter"], "%d*%.%d%d(%d*)")
+
+            if thous == 9999999 then
+                time["counter"] = time["counter"] + 0.000000001
+            end
+        end
     end
 
-    if k_flakmonkey == 0 then
-        if flakMonkeyResetTrigger == 0 then
-            flakMonkeyReset()
-        end
+    -- 1 : warmup, 0 : match, 3 : end round
+    game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
 
-        flakMonkeyResetTrigger = 1
-    elseif k_flakmonkey == 1 then
-        flakMonkeyResetTrigger = 0
+    --players["axis"] = 0
+    --players["allies"] = 0
+    players["active"] = 0
+    --players["total"] = 0
+
+    for i = 0, clientsLimit, 1 do
+        client[i]["name"] = et.gentity_get(i, "pers.netname")
+ 
+        if et.gentity_get(i, "pers.connected") == 2 then
+            if client[i]["name"] ~= client[i]["lastName"] then
+                -- TODO : Check if log module is enabled
+                writeLog("*** " .. client[i]["lastName"] .. " HAS RENAMED TO " .. client[i]["name"] .. " ***\n")
+                client[i]["lastName"] = client[i]["name"]
+            end
+
+            --[[
+            if client[i]["team"] == 1 then
+                players["axis"] = players["axis"] + 1
+            elseif client[i]["team"] == 2 then
+                players["allies"] = players["allies"] + 1
+            end
+            ]]--
+
+            if client[i]["team"] == 1 or client[i]["team"] == 2 then
+                players["active"] = players["active"] + 1
+            end
+
+            --players["total"] = players["total"] + 1
+        else
+            client[i]["name"]     = ""
+            client[i]["lastName"] = ""
+        end
+    end
+
+    if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
+        for i = 0, clientsLimit, 1 do
+            if getAdminLevel(i) >= 1 then
+                --if client[i]["team"] >= 3 or client[i]["team"] < 1 then
+                if client[i]["team"] == 3 then
+                    et.gentity_set(i, "client.inactivityTime", time["frame"])
+                    et.gentity_set(i, "client.inactivityWarning", 1)
+                end
+            end
+        end
+    end
+
+    if game["state"] == 3 then
+        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
+        endRoundTrigger = true
     end
 
 --     if floodprotect == 1 then
---         fpPtime = (mtime - fpProt) / 1000
+--         fpPtime = (time["frame"] - fpProt) / 1000
 -- 
 --         if fpPtime >= 2 then
 --             floodprotect = 0
 --         end
 --     end
 
-    if k_advancedadrenaline == 1 then
-        checkAdvancedAdrenalineFrame()
-    end
-
-    checkMuteRunFrame()
-
-    if k_disablevotes == 1 then
-        disableVoteRunFrame()
-    end
-
-    if k_autopanzerdisable == 1 then
-        autoPanzerDisableRunFrame()
-    end
+    executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
 end
 
 -- Client management
@@ -2979,89 +249,34 @@ end
 -- Called when a client disconnects.
 --  clientNum is the client slot id.
 function et_ClientDisconnect(clientNum)
-    mute['multipliers'][clientNum] = 0
-    selfkills[clientNum] = 0
-    killingspree[clientNum] = 0
-    flakmonkey[clientNum] = 0
-    deathspree[clientNum] = 0
-    multikill[clientNum] = 0
-    playerWhoKilled[clientNum] = 1022
-    killedWithWeapon['killer'][clientNum] = ""
-    killedWithWeapon['victim'][clientNum] = ""
-    playerLastKilled[clientNum] = 1022
-    kill[1][clientNum] = ""
-    kill[2][clientNum] = ""
-    kill[3][clientNum] = ""
-    kill[4][clientNum] = ""
-    kill[5][clientNum] = ""
-    kill[6][clientNum] = ""
-    kill[7][clientNum] = ""
-    kill[8][clientNum] = ""
-    nbKill[clientNum] = 0
-    tkIndex[clientNum] = 0
-    killerHp[clientNum] = 0
-    clientRespawn[clientNum] = 0
-    switchTeam[clientNum] = 0
-    invincibleDummy[clientNum] = 0
-    --invincibleStart[clientNum] = 0
-    gibbed[clientNum] = 0
-    adrenaline[clientNum] = 0
-    
-    antiloopadr1[clientNum] = 0
-    antiloopadr2[clientNum] = 0
-    adrnum[clientNum] = 0
-    adrnum2[clientNum] = 0
-    adrtime[clientNum] = 0
-    adrtime2[clientNum] = 0
-    adrendummy[clientNum] = 0
-
-    originalClass[clientNum] = ""
-    originalWeapon[clientNum] = ""
-
-    PlayerName[clientNum] = ""
-
-    team[clientNum] = 0
-
-    if k_logchat == 1 then
-        logChat(clientNum, "DISCONNECT", "DV2")
-    end
-
-    checkMuteClientDisconnect(clientNum)
+    client[clientNum] = shallowCopy(clientDefaultData)
+    executeCallbackFunction("ClientDisconnect", {["clientNum"] = clientNum})
 end
 
 -- Called when a client begins (becomes active, and enters the gameworld).
 --  clientNum is the client slot id.
 function et_ClientBegin(clientNum)
-    local name = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
+    et.trap_SendServerCommand(clientNum, "cpm \"This server is running the new KMOD-ng version " .. version .. " " .. releaseStatus .. "\n\"")
+    et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
 
-    printModInfo(clientNum)
-    loadAdmins()
+    client[clientNum]["lastName"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
 
-    mute['end'][clientNum] = 0
-    selfkills[clientNum] = 0
-    tkIndex[clientNum] = 0
-
-    loadMutes()
-    checkMuteClentBegin(clientNum)
-
-    Bname[clientNum] = name
-
-    if k_logchat == 1 then
-        logChat(clientNum, "CONN", "DV")
-    end
+    executeCallbackFunction("ClientBegin", {["clientNum"] = clientNum})
 end
 
 -- Called when a client is spawned.
 --  clientNum is the client slot id.
 --  revived is 1 if the client was spawned by being revived.
+-- ET:Legacy => et_ClientSpawn(clientNum, revived, teamChange, restoreHealth)
 function et_ClientSpawn(clientNum, revived)
-    team[clientNum] = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
+    client[clientNum]["team"] = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
-    if team[clientNum] == 1 or team[clientNum] == 2 then
-        gameModeClientSpawn(clientNum)
+    -- TODO : Check if spawn in spectator is possible (lol)
+    if client[clientNum]["team"] == 1 or client[clientNum]["team"] == 2 then
+        --gameModeClientSpawn(clientNum)
 
         if revived == 0 then
-            clientRespawn[clientNum] = 1
+            client[clientNum]["respawn"] = 1
         end
     end
 end
@@ -3074,48 +289,48 @@ end
 --  and 0 if the command was ignored by the mod and should be passed through
 --  to the server (and other mods in the chain).
 function et_ClientCommand(clientNum, command)
-    local cmd  = string.lower(command)
+    local cmd = string.lower(command)
 
-    params = {}
-    params.command   = 'client'
+    params           = {}
+    params.command   = "client"
     params.clientNum = clientNum
 
     if et.gentity_get(clientNum, "sess.muted") == 0 then
         local clientCmdData = {
-            ['say'] = {
-                ['mode']   = et.SAY_ALL,
-                ['sayCmd'] = 'qsay'
+            ["say"] = {
+                ["mode"]   = et.SAY_ALL,
+                ["sayCmd"] = "qsay"
             },
-            ['say_team'] = {
-                ['mode']   = et.SAY_TEAM,
-                ['sayCmd'] = 'qsay'
+            ["say_team"] = {
+                ["mode"]   = et.SAY_TEAM,
+                ["sayCmd"] = "qsay"
             },
-            ['say_buddy'] = {
-                ['mode']   = et.SAY_BUDDY,
-                ['sayCmd'] = 'qsay'
+            ["say_buddy"] = {
+                ["mode"]   = et.SAY_BUDDY,
+                ["sayCmd"] = "qsay"
             },
-            ['say_teamnl'] = {
-                ['mode']   = et.SAY_TEAMNL,
-                ['sayCmd'] = 'qsay'
+            ["say_teamnl"] = {
+                ["mode"]   = et.SAY_TEAMNL,
+                ["sayCmd"] = "qsay"
             },
-            ['vsay'] = {
-                ['mode']   = 'VSAY_ALL'
+            ["vsay"] = {
+                ["mode"]   = "VSAY_ALL"
             },
-            ['vsay_team'] = {
-                ['mode']   = 'VSAY_TEAM'
+            ["vsay_team"] = {
+                ["mode"]   = "VSAY_TEAM"
             },
-            ['vsay_buddy'] = {
-                ['mode']   = 'VSAY_BUDDY'
+            ["vsay_buddy"] = {
+                ["mode"]   = "VSAY_BUDDY"
             }
         }
 
         if clientCmdData[cmd] ~= nil then
             if k_logchat == 1 then
-                logChat(clientNum, clientCmdData[cmd]['mode'], et.ConcatArgs(1))
+                logChat(clientNum, clientCmdData[cmd]["mode"], et.ConcatArgs(1))
             end
 
-            if clientCmdData[cmd]['sayCmd'] ~= nil then
-                params.say = clientCmdData[cmd]['sayCmd']
+            if clientCmdData[cmd]["sayCmd"] ~= nil then
+                params.say = clientCmdData[cmd]["sayCmd"]
                 checkClientSay(params, et.ConcatArgs(1))
             end
         end
@@ -3128,65 +343,11 @@ function et_ClientCommand(clientNum, command)
                     params.say = "m " .. et.gentity_get(clientNum, "pers.netname")
                 end
 
+                -- TODO : Really need to use checkClientSay here?
                 checkClientSay(params, et.ConcatArgs(1))
                 return 1
             end
         end
-
-        --[[
-        if cmd == "say" then
-            if k_logchat == 1 then
-                logChat(clientNum, et.SAY_ALL, et.ConcatArgs(1))
-            end
-
-            params.say = "qsay"
-            checkClientSay(clientNum, et.ConcatArgs(1))
-        elseif cmd == "say_team" then
-            if k_logchat == 1 then
-                logChat(clientNum, et.SAY_TEAM, et.ConcatArgs(1))
-            end
-
-            params.say = "qsay"
-            checkClientSay(clientNum, et.ConcatArgs(1))
-        elseif cmd == "say_buddy" then
-            if k_logchat == 1 then
-                logChat(clientNum, et.SAY_BUDDY, et.ConcatArgs(1))
-            end
-
-            params.say = "qsay"
-            checkClientSay(clientNum, et.ConcatArgs(1))
-        elseif cmd == "say_teamnl" then
-            if k_logchat == 1 then
-                logChat(clientNum, et.SAY_TEAMNL, et.ConcatArgs(1))
-            end
-
-            params.say = "qsay"
-            checkClientSay(clientNum, et.ConcatArgs(1))
-        elseif cmd == "sc" then
-            if getAdminLevel(clientNum) == 3 then
-                if k_advancedpms == 1 then
-                    params.say = "m2 " .. clientNum
-                else
-                    params.say = "m " .. et.gentity_get(clientNum, "pers.netname")
-                end
-
-                checkClientSay(clientNum, et.ConcatArgs(1))
-                return 1
-            end
-        elseif cmd == "vsay" then
-            if k_logchat == 1 then
-                logChat(clientNum, "VSAY_ALL", et.ConcatArgs(1))
-            end
-        elseif cmd == "vsay_team" then
-            if k_logchat == 1 then
-                logChat(clientNum, "VSAY_TEAM", et.ConcatArgs(1))
-            end
-        elseif cmd == "vsay_buddy" then
-            if k_logchat == 1 then
-                logChat(clientNum, "VSAY_BUDDY", et.ConcatArgs(1))
-            end
-        end
-        --]]
     end
 
     if cmd == "m" or cmd == "pm" then
@@ -3202,21 +363,21 @@ function et_ClientCommand(clientNum, command)
     if k_advplayers == 1 then
         if cmd == "players" then
             -- only params.clientNum used
-            dofile(kmod_ng_path .. '/command/client/players.lua')
+            dofile(kmod_ng_path .. "/command/client/players.lua")
             return execute_command(params)
         end
 
         if cmd == "admins" and getAdminLevel(clientNum) >= 2 then
             -- only params.clientNum used
-            dofile(kmod_ng_path .. '/command/client/admins.lua')
+            dofile(kmod_ng_path .. "/command/client/admins.lua")
             return execute_command(params)
         end
     end
 
     --local ref = tonumber(et.gentity_get(clientNum, "sess.referee"))
 
-    if cmd == "team" and team[clientNum] == 3 and et.trap_Argv(1) then
-        switchTeam[clientNum] = 1
+    if cmd == "team" and client[clientNum]["team"] == 3 and et.trap_Argv(1) then
+        client[clientNum]["switchTeam"] = 1
     end
 
     if voteDisabled then
@@ -3246,11 +407,11 @@ function et_ClientCommand(clientNum, command)
     if cmd == "ref" then
         local lowBangCmd = string.lower(et.trap_Argv(1))
 
-        if lowBangCmd == "pause" and pausedv == 0 then
-            GAMEPAUSED = 1
-            dummypause = mtime
-        elseif lowBangCmd == "unpause" and pausedv == 1 and ((mtime - dummypause) / 1000) >= 5 then
-            GAMEPAUSED = 0
+        if lowBangCmd == "pause" and not pause["startTrigger"] then
+            game["paused"]     = true
+            pause["dummyTime"] = time["frame"]
+        elseif lowBangCmd == "unpause" and pause["startTrigger"] and ((time["frame"] - pause["dummyTime"]) / 1000) >= 5 then
+            game["paused"] = false
         end
     end
 
@@ -3262,7 +423,7 @@ function et_ClientCommand(clientNum, command)
                 params["arg1"] = et.trap_Argv(1)
                 params["arg2"] = clientNum
                 params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. '/command/both/private_message.lua')
+                dofile(kmod_ng_path .. "/command/both/private_message.lua")
                 return execute_command(params)
             end
         end
@@ -3291,8 +452,8 @@ function et_ClientCommand(clientNum, command)
         return 1
     end
 
-    if cmd == "kill" and k_slashkilllimit == 1 then
-        return checkSelfkills(playerId)
+    if cmd == "kill" and k_selfkilllimit == 1 then
+        return checkSelfkills(clientNum)
     end
 
     return 0
@@ -3303,10 +464,10 @@ end
 -- and 0 if the command was ignored by the mod and should be passed through
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
-    arg0 = string.lower(et.trap_Argv(0))
+    local arg0 = string.lower(et.trap_Argv(0))
 
     params         = {}
-    params.command = 'console'
+    params.command = "console"
     params.nbArg   = et.trap_Argc()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
@@ -3329,7 +490,7 @@ function et_ConsoleCommand()
             else
                 params["arg2"] = 1022
                 params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. '/command/both/private_message.lua')
+                dofile(kmod_ng_path .. "/command/both/private_message.lua")
                 return execute_command(params)
             end
 
@@ -3361,12 +522,12 @@ function et_ConsoleCommand()
 
             et.G_Print("Private message sent to admins\n")
             return 1
-    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "pause" and pausedv == 0 then
-        GAMEPAUSED = 1
-        dummypause = mtime
+    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "pause" and not pause["startTrigger"] then
+        game["paused"]     = true
+        pause["dummyTime"] = time["frame"]
         return 0
-    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "unpause" and pausedv == 1 then
-        GAMEPAUSED = 0
+    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "unpause" and pause["startTrigger"] then
+        game["paused"] = false
         return 0
     else
         return 0
@@ -3384,7 +545,7 @@ function et_Print(text)
 
     if t[1] == "saneClientCommand:" and t[3] == "callvote" then
         local caller = tonumber(t[2])
-        local vote = t[4]
+        local vote   = t[4]
         local target = tonumber(t[5])
 
         if (vote == "kick" or vote == "mute") and getAdminLevel(caller) < getAdminLevel(target) then
@@ -3394,106 +555,66 @@ function et_Print(text)
 
     if t[1] == "Medic_Revive:" then
         local reviver = tonumber(t[2])
-        tkIndex[reviver] = tkIndex[reviver] + 1
+        client[reviver]["tkIndex"] = client[reviver]["tkIndex"] + 1
 
-        if tkIndex[reviver] > k_tklimit_high then
-            tkIndex[reviver] = k_tklimit_high
+        if client[reviver]["tkIndex"] > k_tklimit_high then
+            client[reviver]["tkIndex"] = k_tklimit_high
         end
     end
 end
 
 -- Called whenever a player is killed.
 function et_Obituary(victim, killer, meansOfDeath)
-    local killername = ""
-    local killedname = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name")
-    local victimteam = team[victim]
-    local killerteam = team[killer]
-    weapon = ""
+    local vars = {
+        ["victim"]       = victim,
+        ["victimName"]   = et.Info_ValueForKey(et.trap_GetUserinfo(victim), "name"),
+        ["killer"]       = killer,
+        ["killerName"]   = "The World",
+        ["meansOfDeath"] = meansOfDeath
+    }
 
-    if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
-        killername  = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
-        lastBlood   = killername
-        killerHp[killer] = (mtime + 5000)
-
-        if killerHp[victim] == nil then
-            killerHp[victim] = 0
-        end
+    -- No tk, to selfkill & not killed by the world
+    if client[victim]["team"] ~= client[killer]["team"] and killer ~= 1022 and killer ~= victim then
+        vars["killerName"]  = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+        obituary["lastKillerName"] = vars["killerName"]
+        executeCallbackFunction("ObituaryEnemyKill", vars)
     end
 
-    if victimteam ~= killerteam and killer ~= 1022 and killer ~= victim then
+    -- Kills
+    client[killer]["yourLastVictim"] = victim
+    client[killer]["killerWeapon"]   = obituary["meansOfDeath"][meansOfDeath]
+
+    if killer == 1022 then
+        executeCallbackFunction("ObituaryWorldKill", vars)
+    else
         if killer ~= victim then
-            if firstBlood == 0 then
-                firstBlood = 1
-
-                if k_firstblood == 1 then
-                    local str = string.gsub(k_fb_message, "#killer#", killername)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, fb_location .. " " .. str .. "\n")
-
-                    if k_firstbloodsound == 1 then
-                        if k_noisereduction == 1 then
-                            et.G_ClientSound(killer, firstbloodsound)
-                        else
-                            et.G_globalSound(firstbloodsound)
-                        end
-                    end
-                end
-            end
+            executeCallbackFunction("ObituaryNoTk", vars)
         end
 
-        local killerhp = et.gentity_get(killer, "health")
-
-        if k_killerhpdisplay == 1 then
-            if killerHp[victim] < mtime then
-                if killerhp >= 75 then
-                    et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
-
-                    if adrenaline[killer] == 1 then
-                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-                    end
-                elseif killerhp >= 50 and killerhp <= 74 then
-                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
-
-                    if adrenaline[killer] == 1 then
-                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-                    end
-                elseif killerhp >= 25 and killerhp <= 49 then
-                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
-
-                    if adrenaline[killer] == 1 then
-                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-                    end
-                elseif killerhp > 0 and killerhp <= 24 then
-                    et.trap_SendServerCommand(victim, string.format("b 8 \"^7" .. killername .. "^" .. k_color .. "'s hp (^o" .. killerhp .. "^" .. k_color .. ")"))
-
-                    if adrenaline[killer] == 1 then
-                        et.trap_SendServerCommand(victim, ("b 8 \"^7" .. killername .. "^" .. k_color .. " is an adrenaline junkie!\""))
-                    end
-                end
-            end
-
-            if killerhp <= 0 then
-                if meansOfDeath == 4 or meansOfDeath == 18 or meansOfDeath == 18 or meansOfDeath == 26 or meansOfDeath == 27 or meansOfDeath == 30 or meansOfDeath == 44 or meansOfDeath == 43 then
-                    et.trap_SendServerCommand(victim, string.format("b 8 \"^" .. k_color .. "You were owned by ^7" .. killername .. "^" .. k_color .. "'s explosive inheritance"))
-                end
-            end
+        if killer == victim or client[victim]["team"] == client[killer]["team"] then
+            executeCallbackFunction("ObituaryTkAndSelfKill", vars)
         end
     end
 
-    kills(victim, killer, meansOfDeath, weapon)
-    deaths(victim, killer, meansOfDeath, weapon)
+    -- deaths
+    client[victim]["whoKilledYou"] = killer
+    client[victim]["victimWeapon"] = obituary["meansOfDeath"][meansOfDeath]
+
+    executeCallbackFunction("Obituary", vars)
 
     if meansOfDeath == 64 or meansOfDeath == 63 then
-        switchTeam[victim] = 1
+        client[victim]["switchTeam"] = 1
     else
-        switchTeam[victim] = 0
+        client[victim]["switchTeam"] = 0
     end
-
-    --Weapons used!
-    weapon = getMeansOfDeathName(meansOfDeath)
 end
 
+-- Plays a global sound soundfile for a certain client only.
+--  clientNum is the client slot id.
+--  soundfile is the sound file to play.
 function et.G_ClientSound(clientNum, soundFile)
-    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), EV_GLOBAL_CLIENT_SOUND)
+    -- EV_GLOBAL_CLIENT_SOUND = 54
+    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
 end

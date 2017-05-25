@@ -8,6 +8,6 @@ function execute_command(params)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "exec kmod/kmod.cfg ; qsay ^3ReadConfig:^7 Config reloaded\n")
     end
 
-    readConfig()
+    executeCallbackFunction('ReadConfig')
     return 1
 end

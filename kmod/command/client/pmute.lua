@@ -11,7 +11,7 @@ function execute_command(params)
 
             if getAdminLevel(params.clientNum) >= getAdminLevel(clientNum) then
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientNum .. "\n")
-                mute['end'][clientNum] = -1
+                client[clientNum]['muteEnd'] = -1
                 setMute(clientNum, -1)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Pmute: ^7" .. name .. " ^7has been muted\n")
             else

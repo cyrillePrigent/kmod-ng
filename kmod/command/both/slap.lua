@@ -16,7 +16,7 @@ function execute_command(params)
     local clientNum = client2id(tonumber(params["arg1"]), 'Slap', params.command, params.say)
 
     if clientNum ~= nil
-        if team[clientNum] ~= 1 and team[clientNum] ~= 2 then
+        if client[clientNum]['team'] ~= 1 and client[clientNum]['team'] ~= 2 then
             if params.command == 'client' then
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, params.say .. " ^3Slap: ^7Client is not actively playing\n")
             elseif params.command == 'console' then

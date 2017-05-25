@@ -67,12 +67,12 @@ function execute_command(params)
     if params.command == 'client' then
         if params["arg2"] ~= 1022 then
             et.trap_SendServerCommand(params["arg2"], ("b 8 \"^dPrivate message sent to " .. rname .. "^d --> ^3" .. params["arg3"] .. "^7"))
-            et.G_ClientSound(params["arg2"], pmsound)
+            et.G_ClientSound(params["arg2"], pmSound)
         end
     elseif params.command == 'console' then
         et.G_Print("Private message sent to " .. rname .. "^d --> ^3" .. params["arg3"] .. "^7\n")
     end
 
     et.trap_SendServerCommand(clientnum, ("b 8 \"^dPrivate message from " .. name .. "^d --> ^3" .. params["arg3"] .. "^7"))
-    et.G_ClientSound(clientnum, pmsound)
+    et.G_ClientSound(clientnum, pmSound)
 end

@@ -10,7 +10,7 @@ function execute_command(params)
             local name = et.gentity_get(clientNum, "pers.netname")
 
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                if team[clientNum] ~= 1 then
+                if client[clientNum]['team'] ~= 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putaxis " .. clientNum .. "\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putaxis: ^7" .. name .. " ^7has been putted axis\n")
                 else
