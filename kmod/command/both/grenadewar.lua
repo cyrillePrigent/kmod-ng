@@ -53,7 +53,7 @@ weaponsList = {
 
 function execute_command(params)
     if params.nbArg < 3 then
-        printCmdMsg(params.command, "^3Grenadewar:^7 Disable or enable Grenadewar \[0-1\]\n")
+        printCmdMsg(params, "Grenadewar", "Disable or enable Grenadewar \[0-1\]\n")
     else
         local grenadewar = tonumber(params["arg1"])
 
@@ -64,13 +64,13 @@ function execute_command(params)
         if grenadewar == 1 then
             if gameMode["current"] ~= 'grenadewar' then
                 if gameMode["current"] == 'panzerwar' then
-                    printCmdMsg(params.command, "^3Grenadewar:^7 Panzerwar must be disabled first\n")
+                    printCmdMsg(params, "Grenadewar", "Panzerwar must be disabled first\n")
                 elseif gameMode["current"] == 'frenzy' then
-                    printCmdMsg(params.command, "^3Grenadewar:^7 Frenzy must be disabled first\n")
+                    printCmdMsg(params, "Grenadewar", "Frenzy must be disabled first\n")
                 elseif gameMode["current"] == 'sniperwar' then
-                    printCmdMsg(params.command, "^3Grenadewar:^7 Sniperwar must be disabled first\n")
+                    printCmdMsg(params, "Grenadewar", "Sniperwar must be disabled first\n")
                 else
-                    printCmdMsg(params.command, "^3Grenadewar:^7 Grenadewar has been Enabled\n")
+                    printCmdMsg(params, "Grenadewar", "Grenadewar has been Enabled\n")
                     et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
                     gameMode["current"] = 'grenadewar'
 
@@ -85,11 +85,11 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params.command, "^3Grenadewar:^7 Grenadewar is already active\n")
+                printCmdMsg(params, "Grenadewar", "Grenadewar is already active\n")
             end
         elseif grenadewar == 0 then
             if gameMode["current"] == 'grenadewar' then
-                printCmdMsg(params.command, "^3Grenadewar:^7 Grenadewar has been Disabled.\n")
+                printCmdMsg(params, "Grenadewar", "Grenadewar has been Disabled.\n")
                 gameMode["current"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
 
@@ -103,10 +103,10 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params.command, "^3Grenadewar:^7 Grenadewar has already been disabled\n")
+                printCmdMsg(params, "Grenadewar", "Grenadewar has already been disabled\n")
             end
         else
-            printCmdMsg(params.command, "^3Grenadewar:^7 Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Grenadewar", "Valid values are \[0-1\]\n")
         end
     end
 end

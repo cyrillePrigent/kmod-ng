@@ -16,21 +16,13 @@ function execute_command(params)
 
     if clientNum ~= nil
         if client[clientNum]['team'] >= 3 or client[clientNum]['team'] < 1 then
-            if params.command == 'client' then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Burn: ^7Client is not actively playing\n")
-            elseif params.command == 'console' then
-                et.G_Print("Client is not actively playing\n")
-            end
+            printCmdMsg(params, "Burn", "Client is not actively playing\n")
 
             return 1
         end
 
         if et.gentity_get(clientNum, "health") <= 0 then
-            if params.command == 'client' then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Burn: ^7Client is currently dead\n")
-            elseif params.command == 'console' then
-                et.G_Print("Client is currently dead\n")
-            end
+            printCmdMsg(params, "Burn", "Client is currently dead\n")
 
             return 1
         end

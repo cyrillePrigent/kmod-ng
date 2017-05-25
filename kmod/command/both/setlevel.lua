@@ -14,17 +14,13 @@ function execute_command(params)
         return 1
     end
 
-    local clientNum = client2id(tonumber(params["arg1"]), 'Setlevel', params.command, params.say)
+    local clientNum = client2id(tonumber(params["arg1"]), 'Setlevel', params)
 
     if clientNum ~= nil
         local level  = tonumber(params["arg2"])
 
         if level < 0 or level > maxAdminLevel then
-            if params.command == 'client' then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7Admin level does not exist! \[0-" .. maxAdminLevel .. "\]\n")
-            elseif params.command == 'console' then
-                et.G_Print("Admin level does not exist! \[0-" .. maxAdminLevel .. "\]\n")
-            end
+            printCmdMsg(params, "Setlevel", "Admin level does not exist! \[0-" .. maxAdminLevel .. "\]\n")
 
             return 1
         end

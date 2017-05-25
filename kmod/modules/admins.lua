@@ -90,17 +90,9 @@ function setRegularUser(clientNum)
         local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name"))
 
         if removeAdminIfExist(clientNum, guid) then
-            if params.command == "client" then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a regular ^7user!\n")
-            elseif params.command == "console" then
-                et.G_Print(name .. "^7 is now a regular ^7user!\n")
-            end
+            printCmdMsg(params, "Setlevel", name .. " is now a regular user!\n")
         else
-            if params.command == "client" then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is already a regular ^7user!\n")
-            elseif params.command == "console" then
-                et.G_Print(name .. "^7 is already a regular ^7user!\n")
-            end
+            printCmdMsg(params, "Setlevel", name .. " is already a regular user!\n")
         end
     end
 end
@@ -144,12 +136,7 @@ function setAdmin(clientNum, level)
             writeAdmin(level, guid, name)
         end
 
-        if params.command == "client" then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel: ^7" .. name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        elseif params.command == "console" then
-            et.G_Print(name .. "^7 is now a level ^1" .. level .. " ^7user!\n")
-        end
-
+        printCmdMsg(params, "Setlevel", name .. " is now a level ^1" .. level .. " ^7user!\n")
         loadAdmins()
     end
 end

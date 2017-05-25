@@ -350,28 +350,23 @@ end
 --  client can be :
 --   * A slot id
 --   * Partial / complete player name (two character minimum)
---  cmd is the command who execute client2id.
---  verbose is if error are displayed or not.
---  cmdSaid is the chat command to display error.
-function client2id(client, cmd, verbose, cmdSaid)
+--  cmdName is the client / console command who execute client2id.
+--  params is parameters passed to the function executed in command file.
+function client2id(client, cmdName, params)
     local clientNum = tonumber(client)
 
     if clientNum then
         if clientNum >= 0 and clientNum < 64 then
             if et.gentity_get(clientNum, "pers.connected") ~= 2 then
-                if verbose == "client" then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7There is no client associated with this slot number\n")
-                elseif verbose == "console" then
-                    et.G_Print("There is no client associated with this slot number\n")
+                if params ~= nil then
+                    printCmdMsg(params, cmdName, "There is no client associated with this slot number\n")
                 end
 
                 return nil
             end
         else
-            if verbose == "client" then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Please enter a slot number between 0 and 63\n")
-            elseif verbose == "console" then
-                et.G_Print("Please enter a slot number between 0 and 63\n")
+            if params ~= nil then
+                printCmdMsg(params, cmdName, "Please enter a slot number between 0 and 63\n")
             end
 
             return nil
@@ -381,10 +376,8 @@ function client2id(client, cmd, verbose, cmdSaid)
 
         if client then
             if string.len(client) <= 2 then
-                if verbose == "client" then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, cmdSaid .. " ^3" .. cmd .. ": ^7Player name requires more than 2 characters\n")
-                elseif verbose == "console" then
-                    et.G_Print("Player name requires more than 2 characters\n")
+                if params ~= nil then
+                    printCmdMsg(params, cmdName, "Player name requires more than 2 characters\n")
                 end
 
                 return nil
@@ -394,10 +387,8 @@ function client2id(client, cmd, verbose, cmdSaid)
         end
 
         if not clientNum then
-            if verbose == "client" then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7Try name again or use slot number\n")
-            elseif verbose == "console" then
-                et.G_Print("Try name again or use slot number\n")
+            if params ~= nil then
+                printCmdMsg(params, cmdName, "Try name again or use slot number\n")
             end
 
             return nil
@@ -452,15 +443,14 @@ function getPlayernameToId(name)
 end
 
 -- Manage client / console message displaying.
---  cmdType is the command type (client or console).
+--  params is parameters passed to the function executed in command file.
+--  cmdName is the client / console command who execute printCmdMsg.
 --  msg is the message content.
--- TODO : Replace in core, module and command file
---function printCmdMsg(cmdType, cmdSaid, caller, msg)
-function printCmdMsg(cmdType, msg)
-    if cmdType == "client" then
-        et.G_Print(msg)
-    elseif cmdType == "console" then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " " .. msg)
+function printCmdMsg(params, cmdName, msg)
+    if params.command == "client" then
+        et.G_Print("^7" .. msg)
+    elseif params.command == "console" then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmdName .. ": ^7" .. msg)
     end
 end
 

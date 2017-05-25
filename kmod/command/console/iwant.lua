@@ -7,7 +7,7 @@ function execute_command(params)
         et.G_Print("Iwant is used to teleport one player to another player\n")
         et.G_Print("useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
     else
-        targetNum = client2id(params["arg1"], 'Iwant', params.command, params.say)
+        targetNum = client2id(params["arg1"], 'Iwant', params)
 
         if targetNum ~= nil and et.gentity_get(params["arg1"], "pers.connected") == 2 and (client[params["arg1"]]['team'] > 0 or client[params["arg1"]]['team'] < 4) then
             local targetOrigin = et.gentity_get(targetNum, "origin")
