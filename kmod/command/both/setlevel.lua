@@ -4,13 +4,7 @@
 -- params["arg2"] => level
 function execute_command(params)
     if params.nbArg < 2 then
-        if params.command == 'console' then
-            et.G_Print("Setlevel is used to set admin status to a player.\n")
-            et.G_Print("useage: !setlevel \[name/PID\] \[level 0-" .. maxAdminLevel .. "\]\n")
-        elseif params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Setlevel:^7 \[partname/id#\] \[level 0-" .. maxAdminLevel .. "\]\n")
-        end
-
+        printCmdMsg(params, "Setlevel", "Useage: setlevel \[partname/id#\] \[level 0-" .. maxAdminLevel .. "\]\n")
         return 1
     end
 

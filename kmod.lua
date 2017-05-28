@@ -289,171 +289,48 @@ end
 --  and 0 if the command was ignored by the mod and should be passed through
 --  to the server (and other mods in the chain).
 function et_ClientCommand(clientNum, command)
-    local cmd = string.lower(command)
-
-    params           = {}
-    params.command   = "client"
-    params.clientNum = clientNum
+    local params = {
+        ["cmdMode"]   = "client",
+        ["clientNum"] = clientNum,
+        ["cmd"]       = string.lower(command)
+    }
 
     if et.gentity_get(clientNum, "sess.muted") == 0 then
-        local clientCmdData = {
-            ["say"] = {
-                ["mode"]   = et.SAY_ALL,
-                ["sayCmd"] = "qsay"
-            },
-            ["say_team"] = {
-                ["mode"]   = et.SAY_TEAM,
-                ["sayCmd"] = "qsay"
-            },
-            ["say_buddy"] = {
-                ["mode"]   = et.SAY_BUDDY,
-                ["sayCmd"] = "qsay"
-            },
-            ["say_teamnl"] = {
-                ["mode"]   = et.SAY_TEAMNL,
-                ["sayCmd"] = "qsay"
-            },
-            ["vsay"] = {
-                ["mode"]   = "VSAY_ALL"
-            },
-            ["vsay_team"] = {
-                ["mode"]   = "VSAY_TEAM"
-            },
-            ["vsay_buddy"] = {
-                ["mode"]   = "VSAY_BUDDY"
-            }
-        }
-
-        if clientCmdData[cmd] ~= nil then
+        if clientCmdData[params.cmd] ~= nil then
             if k_logchat == 1 then
-                logChat(clientNum, clientCmdData[cmd]["mode"], et.ConcatArgs(1))
+                logChat(clientNum, clientCmdData[params.cmd]["mode"], et.ConcatArgs(1))
             end
 
-            if clientCmdData[cmd]["sayCmd"] ~= nil then
-                params.say = clientCmdData[cmd]["sayCmd"]
-                checkClientSay(params, et.ConcatArgs(1))
-            end
-        end
+            if clientCmdData[params.cmd]["sayCmd"] ~= nil then
+                params.say       = clientCmdData[params.cmd]["sayCmd"]
+                params.nbArg     = et.trap_Argc() - 1
+                params.bangCmd   = et.trap_Argv(1)
+                params["arg1"]   = et.trap_Argv(2)
+                params["arg2"]   = et.trap_Argv(3)
 
-        if cmd == "sc" then
-            if getAdminLevel(clientNum) == 3 then
-                if k_advancedpms == 1 then
-                    params.say = "m2 " .. clientNum
-                else
-                    params.say = "m " .. et.gentity_get(clientNum, "pers.netname")
+                if k_cursemode > 0 then
+                    checkBadWord(params.clientNum, et.ConcatArgs(1))
                 end
 
-                -- TODO : Really need to use checkClientSay here?
-                checkClientSay(params, et.ConcatArgs(1))
-                return 1
-            end
-        end
-    end
-
-    if cmd == "m" or cmd == "pm" then
-        if k_logchat == 1 then
-            logChat(clientNum, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
-        end
-    elseif cmd == "ma" or cmd == "pma" or cmd == "msg" then
-        if k_logchat == 1 then
-            logChat(clientNum, "PMADMINS", et.ConcatArgs(1))
-        end
-    end
-
-    if k_advplayers == 1 then
-        if cmd == "players" then
-            -- only params.clientNum used
-            dofile(kmod_ng_path .. "/command/client/players.lua")
-            return execute_command(params)
-        end
-
-        if cmd == "admins" and getAdminLevel(clientNum) >= 2 then
-            -- only params.clientNum used
-            dofile(kmod_ng_path .. "/command/client/admins.lua")
-            return execute_command(params)
-        end
-    end
-
-    --local ref = tonumber(et.gentity_get(clientNum, "sess.referee"))
-
-    if cmd == "team" and client[clientNum]["team"] == 3 and et.trap_Argv(1) then
-        client[clientNum]["switchTeam"] = 1
-    end
-
-    if voteDisabled then
-        if cmd == "callvote" then
-            if getAdminLevel(clientNum) < 3 then
-                local vote = et.trap_Argv(1)
-
-                if vote == "shuffleteamsxp" or vote == "shuffleteamsxp_norestart" or vote == "nextmap" or vote == "swapteams" or vote == "matchreset" or vote == "maprestart" or vote == "map" then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
+                if checkClientCommand(params, string.lower(params.bangCmd)) then
+                    return 1
                 end
             end
         end
     end
 
-    if k_antiunmute == 1 then
-        if et.trap_Argv(1) == "unmute" then
-            local client = et.trap_Argv(2)
-            local clientnumber = client2id(client)
-            local targetmuted = et.gentity_get(clientnumber, "sess.muted")
+    -- mt
 
-            if targetmuted == 1 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Cannot vote to unmute a muted person!\n")
+    if slashCommand[params.cmd] ~= nil then
+        if params.cmd == "callvote" or params.cmd == "ref" then
+            local subCmd = string.lower(et.trap_Argv(1))
+
+            if slashCommand[params.cmd][subCmd] ~= nil then
+                return runSlashCommand(slashCommand[params.cmd][subCmd], params)
             end
+        else
+            return runSlashCommand(slashCommand[params.cmd], params)
         end
-    end
-
-    if cmd == "ref" then
-        local lowBangCmd = string.lower(et.trap_Argv(1))
-
-        if lowBangCmd == "pause" and not pause["startTrigger"] then
-            game["paused"]     = true
-            pause["dummyTime"] = time["frame"]
-        elseif lowBangCmd == "unpause" and pause["startTrigger"] and ((time["frame"] - pause["dummyTime"]) / 1000) >= 5 then
-            game["paused"] = false
-        end
-    end
-
-    if k_advancedpms == 1 then
-        if cmd == "m" or cmd == "msg" or cmd == "pm" then
-            if et.trap_Argv(1) == nil or et.trap_Argv(1) == "" or et.trap_Argv(1) == " " then
-                et.trap_SendServerCommand(clientNum, string.format("print \"Useage:  /m \[pname/ID\] \[message\]\n"))
-            else
-                params["arg1"] = et.trap_Argv(1)
-                params["arg2"] = clientNum
-                params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. "/command/both/private_message.lua")
-                return execute_command(params)
-            end
-        end
-    end
-
-    if cmd == "ma" or cmd == "pma" then
-        for i = 0, clientsLimit, 1 do
-            if getAdminLevel(i) >= 2 then
-                local name = et.gentity_get(clientNum, "pers.netname") 
-                et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-
-                if k_advancedpms == 1 then
-                    et.G_ClientSound(i, pmsound)
-                end
-            end
-        end
-
-        if getAdminLevel(clientNum) < 2 then
-            et.trap_SendServerCommand(clientNum, ("b 8 \"^dPm to admins has been sent^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-
-            if k_advancedpms == 1 then
-                et.G_ClientSound(clientNum, pmsound)
-            end
-        end
-
-        return 1
-    end
-
-    if cmd == "kill" and k_selfkilllimit == 1 then
-        return checkSelfkills(clientNum)
     end
 
     return 0
@@ -464,74 +341,23 @@ end
 -- and 0 if the command was ignored by the mod and should be passed through
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
-    local arg0 = string.lower(et.trap_Argv(0))
+    local params = {
+        ["cmdMode"] = "console",
+        ["nbArg"]   = et.trap_Argc(),
+        ["cmd"]     = string.lower(et.trap_Argv(0)),
+        ["arg1"]    = et.trap_Argv(1),
+        ["arg2"]    = et.trap_Argv(2)
+    }
 
-    params         = {}
-    params.command = "console"
-    params.nbArg   = et.trap_Argc()
-    params["arg1"] = et.trap_Argv(1)
-    params["arg2"] = et.trap_Argv(2)
-
-    if runCommandFile(arg0, params) == 1 then
+    if runCommandFile(params.cmd, params) == 1 then
         return 1
     end
 
-
-    --if arg0 == "k_commandprefix" then
-    --    et.G_Print("Unknown command in line k_commandprefix\n")
-    --    return 1
-    --else
-
-    if arg0 == "m2" then  -- used when advancedpms is enabled
-        if k_advancedpms == 1 then
-            if (et.trap_Argc() < 2) then 
-                et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")
-                return 1
-            else
-                params["arg2"] = 1022
-                params["arg3"] = et.ConcatArgs(2)
-                dofile(kmod_ng_path .. "/command/both/private_message.lua")
-                return execute_command(params)
-            end
-
-            if k_logchat == 1 then
-                logChat(1022, "PMESSAGE", et.ConcatArgs(2), et.trap_Argv(1))
-            end
-        end
-
-        return 1
-    elseif arg0 == "m" or arg0 == "pm" or arg0 == "msg" then
-        if k_advancedpms == 0 then
-            if k_logchat == 1 then
-                logChat(1022, "PMESSAGE", et.ConcatArgs(2),  et.trap_Argv(1))
-            end
-        end
-
-        return 1
-    elseif arg0 == "ma" or arg0 == "pma" then
-            for i = 0, clientsLimit, 1 do
-                if getAdminLevel(i) >= 2 then
-                    et.trap_SendServerCommand(i, ("b 8 \"^dPm to admins from ^1SERVER^d --> ^3" .. et.ConcatArgs(1) .. "^7"))
-                    et.G_ClientSound(i, pmsound)
-                end
-            end
-
-            if k_logchat == 1 then
-                logChat(1022, "PMADMINS", et.ConcatArgs(1))
-            end
-
-            et.G_Print("Private message sent to admins\n")
-            return 1
-    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "pause" and not pause["startTrigger"] then
-        game["paused"]     = true
-        pause["dummyTime"] = time["frame"]
-        return 0
-    elseif arg0 == "ref" and string.lower(et.trap_Argv(1)) == "unpause" and pause["startTrigger"] then
-        game["paused"] = false
-        return 0
-    else
-        return 0
+    if slashCommandConsole[params.cmd] ~= nil then
+        return runSlashCommand(slashCommandConsole[params.cmd], params)
     end
+
+    return 0
 end
 
 -- miscellaneous

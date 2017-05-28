@@ -3,13 +3,7 @@
 -- params["arg1"] => client
 function execute_command(params)
     if params.nbArg < 2 then
-        if params.command == 'console' then
-            et.G_Print("Gib is used to instantly kill a player\n")
-            et.G_Print("useage: gib \[name/PID\]\n")
-        elseif params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Gib:^7 \[partname/id#\]\n")
-        end
-
+        printCmdMsg(params, "Gib", "Useage: gib \[partname/id#\]\n")
         return 1
     end
 

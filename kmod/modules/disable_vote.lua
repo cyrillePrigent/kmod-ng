@@ -8,7 +8,28 @@ voteDisabled = {
     ["modeTime"] = tonumber(et.trap_Cvar_Get("k_dvtime"))
 }
 
+slashCommand["callvote"]["shuffleteamsxp"]           = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["shuffleteamsxp_norestart"] = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["nextmap"]                  = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["swapteams"]                = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["matchreset"]               = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["maprestart"]               = { "function", "disableVoteSlashCommand" }
+slashCommand["callvote"]["map"]                      = { "function", "disableVoteSlashCommand" }
+
+
+
 -- Function
+
+-- Function executed when slash command is called in et_ClientCommand function.
+--  params is parameters passed to the function executed in command file.
+function disableVoteSlashCommand(params)
+    if getAdminLevel(params.clientNum) < 3 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
+        return 1
+    end
+
+    return 0
+end
 
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.

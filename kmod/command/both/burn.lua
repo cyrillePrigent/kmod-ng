@@ -2,17 +2,11 @@
 
 function execute_command(params)
     if params.nbArg < 2 then
-        if params.command == 'console' then
-            et.G_Print("Burn is used to burn a player\n")
-            et.G_Print("useage: burn \[name/PID\]\n")
-        elseif params.command == 'client' then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Burn:^7 \[partname/id#\]\n")
-        end
-
+        printCmdMsg(params, "Burn", "Useage: burn \[partname/id#\]\n")
         return 1
     end
 
-    local clientNum = client2id(tonumber(params["arg1"]), 'Burn', params.command, params.say)
+    local clientNum = client2id(tonumber(params["arg1"]), 'Burn', params)
 
     if clientNum ~= nil
         if client[clientNum]['team'] >= 3 or client[clientNum]['team'] < 1 then

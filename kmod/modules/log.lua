@@ -1,6 +1,37 @@
 -- Log
 
+slashCommand["mt"] = { "function", "teamPrivateMessageSlashCommand" }
+
+--slashCommandConsole["mt"]   = { "function", "teamPrivateMessageSlashCommand" }
+
 -- Function
+
+function teamPrivateMessageSlashCommand(params)
+    -- TODO
+    --[[
+    local time       = os.date("%x %I:%M:%S%p")
+    local clientInfo = et.trap_GetUserinfo(clientNum)
+    local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+    local from       = "SERVER"
+
+    if clientNum ~= 1022 then
+        from = et.gentity_get(clientNum, "pers.netname")
+    end
+
+    if not recipiant then
+        local targetNum = client2id(target)
+
+        if targetNum then
+            local recipiant = et.gentity_get(targetNum, "pers.netname")
+        end
+    end
+
+    if recipiant then
+        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n")
+    end
+    --]]
+end
 
 -- Write a text in log file.
 --  text is the text to write in log file.
@@ -11,16 +42,16 @@ function writeLog(text)
 end
 
 -- Log message in log file.
---  time is the current time and date of message.
 --  clientNum is the client slot id.
 --  msg is the content of chat message.
 --  msgType is the type of log message.
-function logMessage(time, clientNum, msg, msgType)
+function logMessage(clientNum, msg, msgType)
+    local time       = os.date("%x %I:%M:%S%p")
     local clientInfo = et.trap_GetUserinfo(clientNum)
-    local ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-    local name = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
-    local logInfo = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
+    local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+    local name       = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
+    local logInfo    = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
 
     if msgType then
         return logInfo .. " (" .. msgType .. "): " .. msg .. "\n"
@@ -34,63 +65,83 @@ end
 --  mode is the type of chat message. (TEAM, BUDDY, VSAY_TEAM, VSAY_BUDDY OR VSAY)
 --  msg is the content of chat message.
 --  pmId is the slot id / partial or complete name of recipiant player.
--- TODO : Export private message intp separate function.
 function logChat(clientNum, mode, msg, pmId)
-    local msg = et.Q_CleanStr(msg)
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "chat_log.log", et.FS_APPEND)
-    local time = os.date("%x %I:%M:%S%p")
-    local ip
-    local guid
-    local logLine
+    local msgType = "NONE"
 
     if mode == et.SAY_ALL then
-        logLine = logMessage(time, clientNum, msg)
+        msgType = "ALL"
     elseif mode == et.SAY_TEAM then
-        logLine = logMessage(time, clientNum, msg, "TEAM")
+        msgType = "TEAM"
     elseif mode == et.SAY_BUDDY then
-        logLine = logMessage(time, clientNum, msg, "BUDDY")
+        msgType = "BUDDY"
     elseif mode == et.SAY_TEAMNL then
-        logLine = logMessage(time, clientNum, msg, "TEAM")
+        msgType = "TEAM"
     elseif mode == "VSAY_TEAM" then
-        logLine = logMessage(time, clientNum, msg, "VSAY_TEAM")
+        msgType = "VSAY_TEAM"
     elseif mode == "VSAY_BUDDY" then
-        logLine = logMessage(time, clientNum, msg, "VSAY_BUDDY")
+        msgType = "VSAY_BUDDY"
     elseif mode == "VSAY_ALL" then
-        logLine = logMessage(time, clientNum, msg, "VSAY")
-    elseif mode == "PMESSAGE" then
-        local clientInfo = et.trap_GetUserinfo(clientNum)
-        ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-        local from = "SERVER"
-
-        if clientNum ~= 1022 then
-            from = et.gentity_get(clientNum, "pers.netname")
-        end
-
-        local rec1 = client2id(pmId)
-
-        if rec1 then
-            local recipiant = et.gentity_get(rec1,"pers.netname")
-            logLine = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n"
-        end
-    elseif mode == "PMADMINS" then
-        local from = "SERVER"
-
-        if clientNum ~= 1022 then
-            local clientInfo = et.trap_GetUserinfo(clientNum)
-            ip = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-            guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-            from = et.gentity_get(clientNum, "pers.netname")
-        else
-            ip = "127.0.0.1"
-            guid = "NONE!"
-        end
-
-        local recipiant = "ADMINS"
-        logLine = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n"
+        msgType = "VSAY"
     end
 
-    writeLog(logLine)
+    if msgType ~= "NONE" then
+        local msg        = et.Q_CleanStr(msg)
+        local time       = os.date("%x %I:%M:%S%p")
+        local clientInfo = et.trap_GetUserinfo(clientNum)
+        local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+        local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+        local name       = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
+        local logInfo    = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
+
+        if msgType == "ALL" then
+            writeLog(logInfo .. ": " .. msg .. "\n")
+        else
+            writeLog(logInfo .. " (" .. msgType .. "): " .. msg .. "\n")
+        end
+    end
+end
+
+
+function logPrivateMessage(clientNum, msg, target, recipiant)
+    local time       = os.date("%x %I:%M:%S%p")
+    local clientInfo = et.trap_GetUserinfo(clientNum)
+    local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+    local from       = "SERVER"
+
+    if clientNum ~= 1022 then
+        from = et.gentity_get(clientNum, "pers.netname")
+    end
+
+    if not recipiant then
+        local targetNum = client2id(target)
+
+        if targetNum then
+            local recipiant = et.gentity_get(targetNum, "pers.netname")
+        end
+    end
+
+    if recipiant then
+        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n")
+    end
+end
+
+
+function logAdminsPrivateMessage(clientNum, msg)
+    local time = os.date("%x %I:%M:%S%p")
+
+    if clientNum ~= 1022 then
+        local clientInfo = et.trap_GetUserinfo(clientNum)
+        local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+        local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+        local from       = et.gentity_get(clientNum, "pers.netname")
+    else
+        local ip   = "127.0.0.1"
+        local guid = "NONE!"
+        local from = "SERVER"
+    end
+
+    writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to ADMINS (PRIVATE): " .. msg .. "\n")
 end
 
 -- Callback function when client begin.

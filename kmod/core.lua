@@ -82,12 +82,14 @@ cmdList = {
         ["!putaxis"]           = "/command/client/putaxis.lua",
         ["!timelimit"]         = "/command/client/timelimit.lua",
         ["!unmute"]            = "/command/client/unmute.lua",
-        ["!finger"]            = "/command/client/finger.lua"
+        ["!finger"]            = "/command/client/finger.lua",
+        ["goto"]               = "/command/both/goto.lua",
+        ["iwant"]              = "/command/both/iwant.lua",
     },
     ["console"] = {
         ["!setlevel"]      = "/command/both/setlevel.lua",
-        ["goto"]           = "/command/console/goto.lua",
-        ["iwant"]          = "/command/console/iwant.lua",
+        ["goto"]           = "/command/both/goto.lua",
+        ["iwant"]          = "/command/both/iwant.lua",
         ["!showadmins"]    = "/command/console/showadmins.lua",
         ["!readconfig"]    = "/command/console/readconfig.lua",
         ["!spec999"]       = "/command/both/spec999.lua",
@@ -95,6 +97,48 @@ cmdList = {
         ["!slap"]          = "/command/both/slap.lua",
         ["!burn"]          = "/command/both/burn.lua"
     }
+}
+
+clientCmdData = {
+    ["say"] = {
+        ["mode"]   = et.SAY_ALL,
+        ["sayCmd"] = "qsay"
+    },
+    ["say_team"] = {
+        ["mode"]   = et.SAY_TEAM,
+        ["sayCmd"] = "qsay"
+    },
+    ["say_buddy"] = {
+        ["mode"]   = et.SAY_BUDDY,
+        ["sayCmd"] = "qsay"
+    },
+    ["say_teamnl"] = {
+        ["mode"]   = et.SAY_TEAMNL,
+        ["sayCmd"] = "qsay"
+    },
+    ["vsay"] = {
+        ["mode"]   = "VSAY_ALL"
+    },
+    ["vsay_team"] = {
+        ["mode"]   = "VSAY_TEAM"
+    },
+    ["vsay_buddy"] = {
+        ["mode"]   = "VSAY_BUDDY"
+    }
+}
+
+slashCommand = {
+    ["callvote"] = {},
+    ["ref"] = {
+        ["pause"]   = { "function", "pauseSlashCommand" },
+        ["unpause"] = { "function", "unPauseSlashCommand" }
+    },
+    ["team"] = { "function", "teamSlashCommand" }
+}
+
+slashCommandConsole = {
+    ["pause"]   = { "function", "pauseSlashCommand" },
+    ["unpause"] = { "function", "unPauseSlashCommand" }
 }
 
 obituary = {
@@ -238,7 +282,8 @@ k_firstblood          = tonumber(et.trap_Cvar_Get("k_firstblood"))
 k_lastblood           = tonumber(et.trap_Cvar_Get("k_lastblood"))
 k_killerhpdisplay     = tonumber(et.trap_Cvar_Get("k_killerhpdisplay"))
 k_endroundshuffle     = tonumber(et.trap_Cvar_Get("k_endroundshuffle"))
-pmSound               = tostring(et.trap_Cvar_Get("pmsound"))
+pmSound               = et.trap_Cvar_Get("pmsound")
+k_playsound           = et.trap_Cvar_Get("k_playsound")
 
 -- Load modules
 if k_mute_module == 1 then
@@ -314,8 +359,26 @@ if k_endroundshuffle == 1 then
     dofile(kmod_ng_path .. "/modules/end_round_shuffle.lua")
 end
 
+if k_antiunmute == 1 then
+    dofile(kmod_ng_path .. "/modules/anti_unmute.lua")
+end
+
+if k_advancedpms == 1 then
+    dofile(kmod_ng_path .. "/modules/advanced_private_message.lua")
+end
+
+if k_playsound == 1 then
+    dofile(kmod_ng_path .. "/modules/playsound.lua")
+end
+
 dofile(kmod_ng_path .. "/modules/commands.lua")
 dofile(kmod_ng_path .. "/modules/admins.lua")
+dofile(kmod_ng_path .. "/modules/private_message_admin.lua")
+
+if k_advplayers == 1 then
+    slashCommand["players"] = { "file", kmod_ng_path .. "/command/client/players.lua" }
+    slashCommand["admins"]  = { "file", kmod_ng_path .. "/command/client/admins.lua" }
+end
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -430,9 +493,9 @@ function getPlayernameToId(name)
 
     if matchCount >= 2 then
 -- set level
---         if params.command == "client" then
+--         if params.cmdMode == "client" then
 --             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---         elseif params.command == "console" then
+--         elseif params.cmdMode == "console" then
 --             et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
 --         end
 
@@ -447,9 +510,9 @@ end
 --  cmdName is the client / console command who execute printCmdMsg.
 --  msg is the message content.
 function printCmdMsg(params, cmdName, msg)
-    if params.command == "client" then
+    if params.cmdMode == "client" then
         et.G_Print("^7" .. msg)
-    elseif params.command == "console" then
+    elseif params.cmdMode == "console" then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmdName .. ": ^7" .. msg)
     end
 end
@@ -476,8 +539,8 @@ function runCommandFile(command, params)
     local result    = 0
     execute_command = nil
 
-    if cmdList[params.command] ~= nil and cmdList[params.command][command] ~= nil then
-        dofile(kmod_ng_path .. cmdList[params.command][command])
+    if cmdList[params.cmdMode] ~= nil and cmdList[params.cmdMode][command] ~= nil then
+        dofile(kmod_ng_path .. cmdList[params.cmdMode][command])
 
         if (type(execute_command) == "function") then
             result          = execute_command(params)
@@ -492,32 +555,65 @@ function runCommandFile(command, params)
     return result
 end
 
--- Check a client text send by a vocal/chat command.
---  params is parameters of client / console command.
---  text is the content of client command.
-function checkClientSay(params, text)
-    params.nbArg     = et.trap_Argc() - 1
-    params.bangCmd   = et.trap_Argv(1)
-    params["arg1"]   = et.trap_Argv(2)
-    params["arg2"]   = et.trap_Argv(3)
+function runSlashCommand(data, params)
+    local result    = 0
+    execute_command = nil
 
-    local lowBangCmd = string.lower(params.bangCmd)
+    if data[1] == "function" then
+        result = _G[data[2]](params)
+    elseif data[1] == "file" then
+        dofile(kmod_ng_path .. data[2])
 
-    if k_cursemode > 0 then
-        checkBadWord(params.clientNum, text)
-    end
-
-    if checkClientCommand(params, lowBangCmd) then
-        return 1
-    end
-
-    --[[
-    if getAdminLevel(params.clientNum) >= getCommandLevel(params.bangCmd) then
-        if runCommandFile(lowBangCmd, params) == 1 then
-            return 1
+        if (type(execute_command) == "function") then
+            result          = execute_command(params)
+            execute_command = nil
+        else
+            et.G_LogPrint("ERROR : None `execute_command` function defined in command file")
         end
+    else
+        et.G_LogPrint("ERROR : Bad slash command data : " .. tostring(data))
     end
-    --]]
+
+    return result
+end
+
+-- Function executed when slash command is called in et_ClientCommand function.
+--  params is parameters passed to the function executed in command file.
+function pauseSlashCommand(params)
+    if not pause["startTrigger"] then
+        game["paused"]     = true
+        pause["dummyTime"] = time["frame"]
+    end
 
     return 0
 end
+
+-- Function executed when slash command is called in et_ClientCommand function.
+--  params is parameters passed to the function executed in command file.
+function unPauseSlashCommand(params)
+    -- TODO : Why?
+    if params.cmdMode == "client" then
+        if pause["startTrigger"] and ((time["frame"] - pause["dummyTime"]) / 1000) >= 5 then
+            game["paused"] = false
+        end
+    elseif params.cmdMode == "console" then
+        if pause["startTrigger"] then
+            game["paused"] = false
+        end
+    end
+
+    return 0
+end
+
+-- Function executed when slash command is called in et_ClientCommand function.
+--  params is parameters passed to the function executed in command file.
+function teamSlashCommand(params)
+    local teamSelect = et.trap_Argv(1)
+
+    if client[clientNum]["team"] == 3 and (teamSelect == "r" or teamSelect == "b") then
+        client[clientNum]["switchTeam"] = 1
+    end
+
+    return 0
+end
+
