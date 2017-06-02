@@ -2,11 +2,10 @@
 
 -- Global var
 
-slashCommand["ma"]   = { "function", "privateMessageAdminsSlashCommand" }
-slashCommand["pma"]  = { "function", "privateMessageAdminsSlashCommand" }
-
-slashCommandConsole["ma"]   = { "function", "privateMessageAdminsSlashCommand" }
-slashCommandConsole["pma"]  = { "function", "privateMessageAdminsSlashCommand" }
+addSlashCommand("client", "ma", {"function", "privateMessageAdminsSlashCommand"})
+addSlashCommand("client", "pma", {"function", "privateMessageAdminsSlashCommand"})
+addSlashCommand("console", "ma", {"function", "privateMessageAdminsSlashCommand"})
+addSlashCommand("console", "pma", {"function", "privateMessageAdminsSlashCommand"})
 
 -- Function
 

@@ -203,6 +203,6 @@ addCallbackFunction({
     ["ObituaryEnemyKill"] = "checkSpreeRecordObituaryEnemyKill",
     --["ObituaryWorldKill"] = "checkSpreeRecordObituaryWorldKill",
     --["ObituaryTkAndSelfKill"] = "checkSpreeRecordObituaryTkAndSelfKill",
-    ["Obituary"]          = "checkSpreeRecordObituary"
+    ["Obituary"]          = "checkSpreeRecordObituary",
     ["ReadConfig"]        = "loadSpreeRecord"
 })

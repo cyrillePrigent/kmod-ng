@@ -2,14 +2,12 @@
 
 -- Global var
 
-slashCommand["m"]   = { "function", "privateMessageSlashCommand" }
-slashCommand["pm"]  = { "function", "privateMessageSlashCommand" }
-slashCommand["msg"] = { "function", "privateMessageSlashCommand" }
-
-slashCommandConsole["m"]   = { "function", "privateMessageSlashCommand" }
-slashCommandConsole["pm"]  = { "function", "privateMessageSlashCommand" }
-slashCommandConsole["msg"] = { "function", "privateMessageSlashCommand" }
-slashCommandConsole["m2"]  = { "function", "privateMessageSlashCommand" }
+addSlashCommand("client", "m", {"function", "privateMessageSlashCommand"})
+addSlashCommand("client", "pm", {"function", "privateMessageSlashCommand"})
+addSlashCommand("client", "msg", {"function", "privateMessageSlashCommand"})
+addSlashCommand("console", "m", {"function", "privateMessageSlashCommand"})
+addSlashCommand("console", "pm", {"function", "privateMessageSlashCommand"})
+addSlashCommand("console", "msg", {"function", "privateMessageSlashCommand"})
 
 -- Function
 
@@ -18,7 +16,7 @@ slashCommandConsole["m2"]  = { "function", "privateMessageSlashCommand" }
 function privateMessageSlashCommand(params)
     if params.cmdMode == "console" and (params.cmd == "m" or params.cmd == "pm" or params.cmd == "msg") then
         if k_logchat == 1 then
-            logPrivateMessage(params["arg2"], pmContent, et.trap_Argv(1))
+            logPrivateMessage(params["arg2"], et.ConcatArgs(2), et.trap_Argv(1))
         end
 
         return 0

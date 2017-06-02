@@ -31,8 +31,6 @@ end
 --  clientNum is the client slot id.
 --  text is the content of client said.
 function checkBadWord(clientNum, text)
-    local fileStr = et.trap_FS_Read(fd, len)
-
     for _, badWord in ipairs(badWordList) do
         for word in string.gfind(text, "([^%s]+)%p*") do
             if word == badWord then

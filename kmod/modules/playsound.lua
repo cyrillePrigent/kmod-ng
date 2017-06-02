@@ -11,8 +11,8 @@
 -- 0.4 rkp: cleaned-up version for etpro 3.2.3
 -- 0.5 rkp: added playsound_env command
 
-slashCommandConsole["playsound"]     = { "function", "playsoundSlashCommand" }
-slashCommandConsole["playsound_env"] = { "function", "playsoundEnvSlashCommand" }
+addSlashCommand("console", "playsound", {"function", "playsoundSlashCommand"})
+addSlashCommand("console", "playsound_env", {"function", "playsoundEnvSlashCommand"})
 
 -- Function
 

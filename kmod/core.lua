@@ -4,19 +4,22 @@ version       = "0.1"
 releaseStatus = "alpha"
 
 callbackList = {
-    ["ReadConfig"] = {},
-    ["InitGame"] = {},
-    ["ShutdownGame"] = {},
-    ["RunFrame"] = {},
-    ["RunFrameEndRound"] = {},
-    ["ClientDisconnect"] = {},
-    ["ClientBegin"] = {},
-    ["ClientSpawn"] = {},
-    ["ObituaryEnemyKill"] = {},
+    ["ReadConfig"]            = {},
+    ["InitGame"]              = {},
+    ["ShutdownGame"]          = {},
+    ["RunFrame"]              = {},
+    ["RunFrameEndRound"]      = {},
+    ["ClientConnect"]         = {},
+    ["ClientDisconnect"]      = {},
+    ["ClientBegin"]           = {},
+    ["ClientUserinfoChanged"] = {},
+    ["ClientSpawn"]           = {},
+    ["ObituaryEnemyKill"]     = {},
     ["ObituaryTkAndSelfKill"] = {},
-    ["ObituaryWorldKill"] = {},
-    ["ObituaryNoTk"] = {},
-    ["Obituary"] = {}
+    ["ObituaryWorldKill"]     = {},
+    ["ObituaryNoTk"]          = {},
+    ["Obituary"]              = {},
+    ["Print"]                 = {}
 }
 
 -- Client
@@ -127,24 +130,17 @@ clientCmdData = {
     }
 }
 
-slashCommand = {
-    ["callvote"] = {},
-    ["ref"] = {
-        ["pause"]   = { "function", "pauseSlashCommand" },
-        ["unpause"] = { "function", "unPauseSlashCommand" }
-    },
-    ["team"] = { "function", "teamSlashCommand" }
+slashCommandClient = {
+    ["multiple"] = {},
+    ["single"] = {}
 }
 
-slashCommandConsole = {
-    ["pause"]   = { "function", "pauseSlashCommand" },
-    ["unpause"] = { "function", "unPauseSlashCommand" }
-}
+slashCommandConsole = {}
 
 obituary = {
     ["lastKillerName"] = "",
     ["meansOfDeath"] = {
-        [0] = "UNKNOWN"                       -- 0
+        [0] = "UNKNOWN",                      -- 0
         "MACHINEGUN",                         -- 1
         "BROWNING",                           -- 2
         "MG42",                               -- 3
@@ -253,7 +249,7 @@ pause = {
 --  mod_version : 
 --  mod_url = 
 
-kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. "/" .. et.trap_Cvar_Get("gamename") .. "/kmod/"
+
 
 -- Load KMOD-ng cvar
 k_color               = et.trap_Cvar_Get("k_color")
@@ -285,100 +281,6 @@ k_endroundshuffle     = tonumber(et.trap_Cvar_Get("k_endroundshuffle"))
 pmSound               = et.trap_Cvar_Get("pmsound")
 k_playsound           = et.trap_Cvar_Get("k_playsound")
 
--- Load modules
-if k_mute_module == 1 then
-    dofile(kmod_ng_path .. "/modules/mute.lua")
-end
-
-if k_cursemode > 0 then
-    dofile(kmod_ng_path .. "/modules/curse_filter.lua")
-end
-
-if k_disablevotes == 1 then
-    dofile(kmod_ng_path .. "/modules/disable_vote.lua")
-end
-
-if k_advancedadrenaline == 1 then
-    dofile(kmod_ng_path .. "/modules/advanced_adrenaline.lua")
-end
-
--- g_inactivity is required or this will not work
-if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
-    dofile(kmod_ng_path .. "/modules/advanced_spawn.lua")
-end
-
-if k_autopanzerdisable == 1 then
-    dofile(kmod_ng_path .. "/modules/auto_panzer_disable.lua")
-end
-
-if k_selfkilllimit == 1 then
-    dofile(kmod_ng_path .. "/modules/selfkill_limit.lua")
-end
-
-if k_logchat == 1 then
-    dofile(kmod_ng_path .. "/modules/log.lua")
-end
-
-if k_sprees == 1 then
-    dofile(kmod_ng_path .. "/modules/killing_spree.lua")
-end
-
-if k_spreerecord == 1 then
-    dofile(kmod_ng_path .. "/modules/spree_record.lua")
-end
-
-if k_multikills == 1 then
-    dofile(kmod_ng_path .. "/modules/multikill.lua")
-end
-
-if k_flakmonkey == 1 then
-    dofile(kmod_ng_path .. "/modules/flak_monkey.lua")
-end
-
-if k_deathsprees == 1 then
-    dofile(kmod_ng_path .. "/modules/death_spree.lua")
-end
-
-if k_teamkillrestriction == 1 then
-    dofile(kmod_ng_path .. "/modules/teamkill_restriction.lua")
-end
-
-if k_firstblood == 1 then
-    dofile(kmod_ng_path .. "/modules/first_blood.lua")
-end
-
-if k_lastblood == 1 then
-    dofile(kmod_ng_path .. "/modules/last_blood.lua")
-end
-
-if k_killerhpdisplay == 1 then
-    dofile(kmod_ng_path .. "/modules/display_killer_hp.lua")
-end
-
-if k_endroundshuffle == 1 then
-    dofile(kmod_ng_path .. "/modules/end_round_shuffle.lua")
-end
-
-if k_antiunmute == 1 then
-    dofile(kmod_ng_path .. "/modules/anti_unmute.lua")
-end
-
-if k_advancedpms == 1 then
-    dofile(kmod_ng_path .. "/modules/advanced_private_message.lua")
-end
-
-if k_playsound == 1 then
-    dofile(kmod_ng_path .. "/modules/playsound.lua")
-end
-
-dofile(kmod_ng_path .. "/modules/commands.lua")
-dofile(kmod_ng_path .. "/modules/admins.lua")
-dofile(kmod_ng_path .. "/modules/private_message_admin.lua")
-
-if k_advplayers == 1 then
-    slashCommand["players"] = { "file", kmod_ng_path .. "/command/client/players.lua" }
-    slashCommand["admins"]  = { "file", kmod_ng_path .. "/command/client/admins.lua" }
-end
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -555,6 +457,33 @@ function runCommandFile(command, params)
     return result
 end
 
+function setSlashCommandMultipleField(cmdArg, cmdData)
+    local t = _G["slashCommandClient"]["multiple"]
+
+    for _, arg in ipairs(cmdArg) do
+        t[arg] = t[arg] or {}
+        t = t[arg]
+    end
+
+    t = cmdData
+end
+
+function addSlashCommand(cmdType, cmdArg, cmdData)
+    if cmdType == "client" then
+        local cmdArgType = type(cmdArg)
+
+        if cmdArgType == "table" then
+            setSlashCommandMultipleField(cmdArg, cmdData)
+        elseif cmdArgType == "string" then
+            slashCommandClient["single"][cmdArg] = slashCommandClient["single"][cmdArg] or {}
+            table.insert(slashCommandClient["single"][cmdArg], cmdData)
+        end
+    elseif cmdType == "console" then
+        slashCommandConsole[cmdArg] = slashCommandConsole[cmdArg] or {}
+        table.insert(slashCommandConsole[cmdArg], cmdData)
+    end
+end
+
 function runSlashCommand(data, params)
     local result    = 0
     execute_command = nil
@@ -610,10 +539,120 @@ end
 function teamSlashCommand(params)
     local teamSelect = et.trap_Argv(1)
 
-    if client[clientNum]["team"] == 3 and (teamSelect == "r" or teamSelect == "b") then
-        client[clientNum]["switchTeam"] = 1
+    if client[params.clientNum]["team"] == 3 and (teamSelect == "r" or teamSelect == "b") then
+        client[params.clientNum]["switchTeam"] = 1
     end
 
     return 0
 end
 
+et.G_Printf = function(...)
+    et.G_Print(string.format(unpack(arg)))
+end
+
+et.G_LogPrintf = function(...)
+    et.G_LogPrint(string.format(unpack(arg)))
+end
+
+-- Load modules
+dofile(kmod_ng_path .. "/mods/etpro.lua")
+
+if k_mute_module == 1 then
+    dofile(kmod_ng_path .. "/modules/mute.lua")
+end
+
+if k_cursemode > 0 then
+    dofile(kmod_ng_path .. "/modules/curse_filter.lua")
+end
+
+if k_disablevotes == 1 then
+    dofile(kmod_ng_path .. "/modules/disable_vote.lua")
+end
+
+if k_advancedadrenaline == 1 then
+    dofile(kmod_ng_path .. "/modules/advanced_adrenaline.lua")
+end
+
+-- g_inactivity is required or this will not work
+if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
+    dofile(kmod_ng_path .. "/modules/advanced_spawn.lua")
+end
+
+if k_autopanzerdisable == 1 then
+    dofile(kmod_ng_path .. "/modules/auto_panzer_disable.lua")
+end
+
+if k_selfkilllimit == 1 then
+    dofile(kmod_ng_path .. "/modules/selfkill_limit.lua")
+end
+
+if k_logchat == 1 then
+    dofile(kmod_ng_path .. "/modules/log.lua")
+end
+
+if k_sprees == 1 then
+    dofile(kmod_ng_path .. "/modules/killing_spree.lua")
+end
+
+if k_spreerecord == 1 then
+    dofile(kmod_ng_path .. "/modules/spree_record.lua")
+end
+
+if k_multikills == 1 then
+    dofile(kmod_ng_path .. "/modules/multikill.lua")
+end
+
+if k_flakmonkey == 1 then
+    dofile(kmod_ng_path .. "/modules/flak_monkey.lua")
+end
+
+if k_deathsprees == 1 then
+    dofile(kmod_ng_path .. "/modules/death_spree.lua")
+end
+
+if k_teamkillrestriction == 1 then
+    dofile(kmod_ng_path .. "/modules/teamkill_restriction.lua")
+end
+
+if k_firstblood == 1 then
+    dofile(kmod_ng_path .. "/modules/first_blood.lua")
+end
+
+if k_lastblood == 1 then
+    dofile(kmod_ng_path .. "/modules/last_blood.lua")
+end
+
+if k_killerhpdisplay == 1 then
+    dofile(kmod_ng_path .. "/modules/display_killer_hp.lua")
+end
+
+if k_endroundshuffle == 1 then
+    dofile(kmod_ng_path .. "/modules/end_round_shuffle.lua")
+end
+
+if k_antiunmute == 1 then
+    dofile(kmod_ng_path .. "/modules/anti_unmute.lua")
+end
+
+if k_advancedpms == 1 then
+    dofile(kmod_ng_path .. "/modules/advanced_private_message.lua")
+end
+
+if k_playsound == 1 then
+    dofile(kmod_ng_path .. "/modules/playsound.lua")
+end
+
+dofile(kmod_ng_path .. "/modules/commands.lua")
+dofile(kmod_ng_path .. "/modules/admins.lua")
+dofile(kmod_ng_path .. "/modules/private_message_admin.lua")
+
+if k_advplayers == 1 then
+    addSlashCommand("client", "players", {"file", "/command/client/players.lua"})
+    addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
+end
+
+addSlashCommand("client", {"ref", "pause"}, {"function", "pauseSlashCommand"})
+addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"})
+addSlashCommand("client", "team", {"function", "teamSlashCommand"})
+addSlashCommand("console", "pause", {"function", "pauseSlashCommand"})
+addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})

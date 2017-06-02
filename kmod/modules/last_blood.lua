@@ -3,7 +3,7 @@
 -- Global var
 
 lastBlood = {
-    ["message"]   = et.trap_Cvar_Get("k_lb_message")
+    ["message"]   = et.trap_Cvar_Get("k_lb_message"),
     ["location"]  = getMessageLocation(tonumber(et.trap_Cvar_Get("k_lb_location")))
 }
 

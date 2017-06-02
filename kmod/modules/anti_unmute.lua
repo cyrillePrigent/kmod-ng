@@ -2,7 +2,7 @@
 
 -- Global var
 
-slashCommand["callvote"]["unmute"] = { "function", "antiUnmuteSlashCommand" }
+addSlashCommand("client", {"callvote", "unmute"}, {"function", "antiUnmuteSlashCommand"})
 
 -- Function
 

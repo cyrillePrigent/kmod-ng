@@ -7,7 +7,7 @@ nbSelfkillMax = tonumber(et.trap_Cvar_Get("k_selfkills"))
 -- Set default client data.
 clientDefaultData["selfkills"] = 0
 
-slashCommand["kill"] = { "function", "selfkillLimitSlashCommand" }
+addSlashCommand("client", "kill", {"function", "selfkillLimitSlashCommand"})
 
 -- Function
 

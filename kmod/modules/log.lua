@@ -1,8 +1,7 @@
 -- Log
 
-slashCommand["mt"] = { "function", "teamPrivateMessageSlashCommand" }
-
---slashCommandConsole["mt"]   = { "function", "teamPrivateMessageSlashCommand" }
+addSlashCommand("client", "mt", {"function", "teamPrivateMessageSlashCommand"})
+--addSlashCommand("console", "mt", {"function", "teamPrivateMessageSlashCommand"})
 
 -- Function
 

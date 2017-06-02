@@ -73,6 +73,7 @@ SOURCES:
     The rest of the code is mine :D
 --]]
 
+kmod_ng_path = et.trap_Cvar_Get("fs_basepath") .. "/" .. et.trap_Cvar_Get("gamename") .. "/kmod/"
 dofile(kmod_ng_path .. "/core.lua")
 
 -- Enemy Territory callbacks
@@ -91,8 +92,6 @@ function et_InitGame(levelTime, randomSeed, restart)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - KMOD-ng " .. version .. "\"\n")
 
     for i = 0, clientsLimit, 1 do
-        local copy
-
         client[i] = {}
 
         for key, value in pairs(clientDefaultData) do
@@ -246,10 +245,23 @@ end
 
 -- Client management
 
+-- Called when a client connect.
+--  clientNum is the client slot id.
+--  firstTime indicates if this is a new connection (1) or a reconnection (0).
+--  isBot indicates if the client is a bot (1) or not (0).
+function et_ClientConnect(clientNum, firstTime, isBot)
+    executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
+end
+
 -- Called when a client disconnects.
 --  clientNum is the client slot id.
 function et_ClientDisconnect(clientNum)
-    client[clientNum] = shallowCopy(clientDefaultData)
+    client[clientNum] = {}
+
+    for key, value in pairs(clientDefaultData) do
+        client[clientNum][key] = value
+    end
+
     executeCallbackFunction("ClientDisconnect", {["clientNum"] = clientNum})
 end
 
@@ -263,6 +275,15 @@ function et_ClientBegin(clientNum)
 
     executeCallbackFunction("ClientBegin", {["clientNum"] = clientNum})
 end
+
+-- Called when a client’s Userinfo string has changed.
+--  clientNum is the client slot id.
+-- NOTE : This only gets called when the players CS_PLAYERS config string changes,
+-- rather than every time the userinfo changes. This only happens for a subset of userinfo fields.
+function et_ClientUserinfoChanged(clientNum)
+    executeCallbackFunction("ClientUserinfoChanged", {["clientNum"] = clientNum})
+end
+
 
 -- Called when a client is spawned.
 --  clientNum is the client slot id.
@@ -319,17 +340,23 @@ function et_ClientCommand(clientNum, command)
         end
     end
 
-    -- mt
+    if slashCommandClient["multiple"][params.cmd] ~= nil then
+        local subCmd = string.lower(et.trap_Argv(1))
 
-    if slashCommand[params.cmd] ~= nil then
-        if params.cmd == "callvote" or params.cmd == "ref" then
-            local subCmd = string.lower(et.trap_Argv(1))
-
-            if slashCommand[params.cmd][subCmd] ~= nil then
-                return runSlashCommand(slashCommand[params.cmd][subCmd], params)
+        if slashCommandClient["multiple"][params.cmd][subCmd] ~= nil then
+            if slashCommandClient["multiple"][params.cmd][subCmd] ~= nil then
+                for _, cmdData in ipairs(slashCommandClient["multiple"][params.cmd][subCmd]) do
+                    if runSlashCommand(cmdData, params) == 1 then
+                        return 1
+                    end
+                end
             end
-        else
-            return runSlashCommand(slashCommand[params.cmd], params)
+        end
+    elseif slashCommandClient["single"][params.cmd] ~= nil then
+        for _, cmdData in ipairs(slashCommandClient["single"][params.cmd]) do
+            if runSlashCommand(cmdData, params) == 1 then
+                return 1
+            end
         end
     end
 
@@ -354,7 +381,12 @@ function et_ConsoleCommand()
     end
 
     if slashCommandConsole[params.cmd] ~= nil then
-        return runSlashCommand(slashCommandConsole[params.cmd], params)
+
+        for _, cmdData in ipairs(slashCommandConsole[params.cmd]) do
+            if runSlashCommand(cmdData, params) == 1 then
+                return 1
+            end
+        end
     end
 
     return 0
@@ -367,6 +399,8 @@ end
 -- This makes it very easy to spoof.
 -- DO NOT TRUST STRINGS OBTAINED IN THIS WAY
 function et_Print(text)
+    executeCallbackFunction("Print", {["text"] = text})
+
     local t = splitWord(text)
 
     if t[1] == "saneClientCommand:" and t[3] == "callvote" then

@@ -8,15 +8,13 @@ voteDisabled = {
     ["modeTime"] = tonumber(et.trap_Cvar_Get("k_dvtime"))
 }
 
-slashCommand["callvote"]["shuffleteamsxp"]           = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["shuffleteamsxp_norestart"] = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["nextmap"]                  = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["swapteams"]                = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["matchreset"]               = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["maprestart"]               = { "function", "disableVoteSlashCommand" }
-slashCommand["callvote"]["map"]                      = { "function", "disableVoteSlashCommand" }
-
-
+addSlashCommand("client", {"callvote", "shuffleteamsxp"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "shuffleteamsxp_norestart"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "nextmap"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "swapteams"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "matchreset"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "maprestart"}, {"function", "disableVoteSlashCommand"})
+addSlashCommand("client", {"callvote", "map"}, {"function", "disableVoteSlashCommand"})
 
 -- Function
 
@@ -34,12 +32,14 @@ end
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function disableVoteRunFrame(vars)
+    local cancelTime
+
     if voteDisabled["mode"] == 1 then
-        local cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) - voteDisabled["modeTime"]) * 60
+        cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) - voteDisabled["modeTime"]) * 60
     elseif voteDisabled["mode"] == 3 then
-        local cancelTime = voteDisabled["modeTime"] * 60
+        cancelTime = voteDisabled["modeTime"] * 60
     else
-        local cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) * (voteDisabled["modeTime"] / 100)) * 60
+        cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) * (voteDisabled["modeTime"] / 100)) * 60
     end
 
     if time["counter"] >= cancelTime then
