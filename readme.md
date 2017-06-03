@@ -1,6 +1,4 @@
-<snippet>
-  <content><![CDATA[
-# ${1:Project Name}
+# KMOD-ng
 
 This lua was created to replace etadmin & kmod mod.
 It's a complete rewriting of kmod, much modulable.
@@ -71,39 +69,36 @@ exec "kmod-ng/kmod-ng.cfg"
 ## Sources
 
 Kmod SOURCES:
-    Some code and ideas dirived from G073nks which can be found here<br />
-        [http://wolfwiki.anime.net/index.php/User:Gotenks](http://wolfwiki.anime.net/index.php/User:Gotenks)<br />
-    Code to get slot number from name was from the slap command I found on the ETPro forum here<br />
-        [http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap](http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap)<br />
-    Infty's NoKill lua code was used and edited for the slashkill limit which can be found here<br />
-        [http://wolfwiki.anime.net/index.php/User:Infty](http://wolfwiki.anime.net/index.php/User:Infty)<br />
-    Ideas dirived from ETAdmin_mod found here<br />
-        [http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page](http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page)<br />
+    Some code and ideas dirived from G073nks which can be found here
+        [http://wolfwiki.anime.net/index.php/User:Gotenks](http://wolfwiki.anime.net/index.php/User:Gotenks)
+    Code to get slot number from name was from the slap command I found on the ETPro forum here
+        [http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap](http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap)
+    Infty's NoKill lua code was used and edited for the slashkill limit which can be found here
+        [http://wolfwiki.anime.net/index.php/User:Infty](http://wolfwiki.anime.net/index.php/User:Infty)
+    Ideas dirived from ETAdmin_mod found here
+        [http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page](http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page)
 
 ## Credits
 
-Kmod AUTHOR:<br />
-    Clutch152<br />
-<br />
-Kmod CREDITS:<br />
-    Special to<br />
-        Noobology<br />
-        Armymen<br />
-        Rikku<br />
-        Monkey Spawn<br />
-        Brunout<br />
-        Dominator<br />
-        James<br />
-        Pantsless Victims<br />
-<br />
-        And the entire -=War-torn=- Clan<br />
-        For helping with testing<br />
+Kmod AUTHOR:
+    Clutch152
+
+Kmod CREDITS:
+    Special to
+        Noobology
+        Armymen
+        Rikku
+        Monkey Spawn
+        Brunout
+        Dominator
+        James
+        Pantsless Victims
+
+        And the entire -=War-torn=- Clan
+        For helping with testing
 
 ## License
 
 This program is free software. you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License.
-]]></content>
-  <tabTrigger>readme</tabTrigger>
-</snippet>
