@@ -71,14 +71,14 @@ exec "kmod-ng/kmod-ng.cfg"
 ## Sources
 
 Kmod SOURCES:
-    Some code and ideas dirived from G073nks which can be found here
-        [http://wolfwiki.anime.net/index.php/User:Gotenks](http://wolfwiki.anime.net/index.php/User:Gotenks)
-    Code to get slot number from name was from the slap command I found on the ETPro forum here
-        [http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap](http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap)
-    Infty's NoKill lua code was used and edited for the slashkill limit which can be found here
-        [http://wolfwiki.anime.net/index.php/User:Infty](http://wolfwiki.anime.net/index.php/User:Infty)
-    Ideas dirived from ETAdmin_mod found here
-        [http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page](http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page)
+    Some code and ideas dirived from G073nks which can be found here<br />
+        [http://wolfwiki.anime.net/index.php/User:Gotenks](http://wolfwiki.anime.net/index.php/User:Gotenks)<br />
+    Code to get slot number from name was from the slap command I found on the ETPro forum here<br />
+        [http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap](http://bani.anime.net/banimod/forums/viewtopic.php?t=6579&highlight=slap)<br />
+    Infty's NoKill lua code was used and edited for the slashkill limit which can be found here<br />
+        [http://wolfwiki.anime.net/index.php/User:Infty](http://wolfwiki.anime.net/index.php/User:Infty)<br />
+    Ideas dirived from ETAdmin_mod found here<br />
+        [http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page](http://et.d1p.de/etadmin_mod/wiki/index.php/Main_Page)<br />
 
 ## Credits
 
@@ -97,7 +97,7 @@ Kmod CREDITS:<br />
         Pantsless Victims<br />
 <br />
         And the entire -=War-torn=- Clan<br />
-    For helping with testing<br />
+        For helping with testing<br />
 
 ## License
 
