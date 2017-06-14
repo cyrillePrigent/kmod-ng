@@ -1,7 +1,7 @@
 
 
 function execute_command(params)
-    if params.nbArg < 3 then
+    if params.nbArg < 2 then
         printCmdMsg(params, "Crazygravity", "Disable or enable crazygravity \[0-1\]\n")
     else
         local cgValue = tonumber(params["arg1"])

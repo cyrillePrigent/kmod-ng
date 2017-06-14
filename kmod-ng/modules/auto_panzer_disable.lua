@@ -31,14 +31,14 @@ function autoPanzerDisableRunFrame(vars)
             if autoPanzerDisable["disabledMsg"] == false then
                 autoPanzerDisable["disabledMsg"] = true
                 autoPanzerDisable["enabledMsg"]  = false
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:  ^7Panzers have been disabled.\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been disabled.\n")
             end
 
             if activePanzers then
                 if autoPanzerDisable["warning"] == 0 then
                     autoPanzerDisable["time"]    = vars["levelTime"]
                     autoPanzerDisable["warning"] = 1
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers 0\n")
                 end
 
@@ -47,7 +47,7 @@ function autoPanzerDisableRunFrame(vars)
                 if remainingTime > 30 then
                     if autoPanzerDisable["warning"] == 1 then
                         autoPanzerDisable["warning"] = 2
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit:^7  Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!\n")
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!\n")
                     end
                 end
 
@@ -78,7 +78,7 @@ function autoPanzerDisableRunFrame(vars)
 
             if autoPanzerDisable["enabledMsg"] == false then
                 autoPanzerDisable["enabledMsg"] = true
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled.  Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled. Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
             end
         end
     end

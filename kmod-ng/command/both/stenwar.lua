@@ -5,12 +5,12 @@ weaponsList = {
     false,  --  2 WP_LUGER
     false,  --  3 WP_MP40
     false,  --  4 WP_GRENADE_LAUNCHER
-    true,   --  5 WP_PANZERFAUST
+    false,  --  5 WP_PANZERFAUST
     false,  --  6 WP_FLAMETHROWER
     false,  --  7 WP_COLT              // equivalent american weapon to german luger
     false,  --  8 WP_THOMPSON          // equivalent american weapon to german mp40
     false,  --  9 WP_GRENADE_PINEAPPLE
-    false,  -- 10 WP_STEN              // silenced sten sub-machinegun
+    true,   -- 10 WP_STEN              // silenced sten sub-machinegun
     false,  -- 11 WP_MEDIC_SYRINGE     // JPW NERVE -- broken out from CLASS_SPECIAL per Id request
     false,  -- 12 WP_AMMO              // JPW NERVE likewise
     false,  -- 13 WP_ARTY
@@ -28,7 +28,7 @@ weaponsList = {
     false,  -- 25 WP_GARAND
     false,  -- 26 WP_LANDMINE
     false,  -- 27 WP_SATCHEL
-    false,  -- 28 WP_SATCHEL_DET
+    nil,    -- 28 WP_SATCHEL_DET
     nil,    -- 29
     false,  -- 30 WP_SMOKE_BOMB
     false,  -- 31 WP_MOBILE_MG42
@@ -53,42 +53,27 @@ weaponsList = {
 
 gameMode["clientSettingsModified"] = true
 
---[[
--- Callback function when a client is spawned.
---  vars is the local vars passed from et_ClientSpawn function.
-function panzerwarClientSpawn(vars)
-    local doubleHealth = tonumber(et.gentity_get(vars["clientNum"], "health")) * 2
-    et.gentity_set(vars["clientNum"], "health", doubleHealth)
-end
-
--- Add callback panzerwar function.
-addCallbackFunction({
-    ["ClientSpawn"] = "panzerwarClientSpawn"
-})
---]]
-
 function gameModeRunFramePlayerCallback(clientNum)
-    et.gentity_set(clientNum, "sess.latchPlayerWeapon", 5)
+    et.gentity_set(clientNum, "sess.latchPlayerWeapon", 10)
 end
 
 function execute_command(params)
     if params.nbArg < 3 then
-        printCmdMsg(params, "Panzerwar", "Disable or enable panzerwar \[0-1\]\n")
+        printCmdMsg(params, "Stenwar", "Disable or enable Stenwar \[0-1\]\n")
     else
-        local panzerwar = tonumber(params["arg1"])
+        local stenwar = tonumber(params["arg1"])
 
         if gameMode == nil then
             dofile(kmod_ng_path .. '/modules/game_mode.lua')
         end
 
-        if panzerwar == 1 then
-            if gameMode["current"] ~= 'panzerwar' then
-                if not gameModeIsActive("panzerwar", params) then
+        if stenwar == 1 then
+            if gameMode["current"] ~= 'stenwar' then
+                if not gameModeIsActive("stenwar", params) then
                     saveServerClassSetting()
-                    local speed = originalSettings['g_speed'] * 2
-                    printCmdMsg(params, "Panzerwar", "Panzerwar has been Enabled\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime 0\n")
-                    gameMode["current"] = 'panzerwar'
+                    printCmdMsg(params, "Stenwar", "Stenwar has been Enabled\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                    gameMode["current"] = 'stenwar'
 
                     for p = 0, clientsLimit, 1 do
                         if client[p]['team'] == 1 or client[p]['team'] == 2 then
@@ -101,21 +86,17 @@ function execute_command(params)
                                 et.gentity_set(p, "health", (et.gentity_get(p, "health") - 400))
                             end
                         end
-
-                        et.gentity_set(p, "sess.latchPlayerType", 0)
-                        et.gentity_set(p, "sess.latchPlayerWeapon", 5)
                     end
                 end
             else
-                printCmdMsg(params, "Panzerwar", "Panzerwar is already active\n")
+                printCmdMsg(params, "Stenwar", "Stenwar is already active\n")
             end
-        elseif panzerwar == 0 then
-            if gameMode["current"] == 'panzerwar' then
-                printCmdMsg(params, "Panzerwar", "Panzerwar has been Disabled.\n")
+        elseif stenwar == 0 then
+            if gameMode["current"] == 'stenwar' then
+                printCmdMsg(params, "Stenwar", "Stenwar has been Disabled.\n")
                 gameMode["current"] = false
                 gameMode["clientSettingsModified"] = false
-                --removeCallbackFunction("ClientSpawn", "panzerwarClientSpawn")
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; g_speed " .. originalSettings['g_speed'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
 
                 for p = 0, clientsLimit, 1 do
                     if client[p]['team'] == 1 or client[p]['team'] == 2 then
@@ -130,10 +111,10 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Panzerwar", "Panzerwar has already been disabled\n")
+                printCmdMsg(params, "Stenwar", "Stenwar has already been disabled\n")
             end
         else
-            printCmdMsg(params, "Panzerwar", "Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Stenwar", "Valid values are \[0-1\]\n")
         end
     end
 end

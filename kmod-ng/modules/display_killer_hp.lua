@@ -14,29 +14,11 @@ function displayKillerHpObituaryEnemyKill(vars)
     local killerHp = et.gentity_get(vars["killer"], "health")
 
     if client[vars["victim"]]["killerHp"] < time["frame"] then
-        if killerHp >= 75 then
-            et.trap_SendServerCommand(vars["victim"], ("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")"))
+        if killerHp > 0 then
+            et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")")
 
             if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(vars["victim"], ("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\""))
-            end
-        elseif killerHp >= 50 and killerHp <= 74 then
-            et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")"))
-
-            if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(vars["victim"], ("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\""))
-            end
-        elseif killerHp >= 25 and killerHp <= 49 then
-            et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")"))
-
-            if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(vars["victim"], ("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\""))
-            end
-        elseif killerHp > 0 and killerHp <= 24 then
-            et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")"))
-
-            if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(vars["victim"], ("b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\""))
+                et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\"")
             end
         end
     end

@@ -239,6 +239,10 @@ pause = {
 
 -- **********************************************
 
+-- fs_homepath (default win xp) :
+-- fs_homepath (default gnu/linux) :
+
+
 -- Under etpro mod :
 --  fs_game : etpro
 --  fs_basegame : 
@@ -297,6 +301,19 @@ function addCallbackFunction(settings)
         else
             et.G_LogPrint("ERROR : Function " .. functionName .. " don't exist!")
         end
+    end
+end
+
+function removeCallbackFunction(callbackType, removeFunctionName)
+    if callbackList[callbackType] ~= nil then
+        for key, functionName in ipairs(callbackList[callbackType]) do
+            if functionName ~= removeFunctionName then
+                table.remove(callbackList[callbackType], key)
+                break
+            end
+        end
+    else
+        et.G_LogPrint("ERROR : CallbackType " .. callbackType .. " don't exist!")
     end
 end
 
@@ -414,9 +431,9 @@ end
 --  cmdName is the client / console command who execute printCmdMsg.
 --  msg is the message content.
 function printCmdMsg(params, cmdName, msg)
-    if params.cmdMode == "client" then
+    if params.cmdMode == "console" then
         et.G_Print("^7" .. msg)
-    elseif params.cmdMode == "console" then
+    elseif params.cmdMode == "client" then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmdName .. ": ^7" .. msg)
     end
 end
@@ -452,8 +469,6 @@ function runCommandFile(command, params)
         else
             et.G_LogPrint("ERROR : None `execute_command` function defined in command file")
         end
-    else
-        et.G_LogPrint("ERROR : Unknow command : " .. command)
     end
 
     return result
@@ -556,8 +571,24 @@ et.G_LogPrintf = function(...)
     et.G_LogPrint(string.format(unpack(arg)))
 end
 
+--et.trap_FS_fileExists = function(name)
+--    local f = io.open(name, "rb")
+--
+--    if f then
+--        f:close()
+--        return true
+--    end
+--
+--    return false
+--end
+
 -- Load modules
 dofile(kmod_ng_path .. "/mods/etpro.lua")
+
+
+if tonumber(et.trap_Cvar_Get("k_crazygravity_module")) == 1 then
+    dofile(kmod_ng_path .. "/modules/crazygravity.lua")
+end
 
 if k_mute_module == 1 then
     dofile(kmod_ng_path .. "/modules/mute.lua")
@@ -812,7 +843,7 @@ function et_RunFrame(levelTime)
 
     if game["state"] == 3 then
         executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
-        endRoundTrigger = true
+        game["endRoundTrigger"] = true
     end
 
 --     if floodprotect == 1 then
@@ -896,24 +927,42 @@ function et_ClientCommand(clientNum, command)
     local params = {
         ["cmdMode"]   = "client",
         ["clientNum"] = clientNum,
-        ["cmd"]       = string.lower(command)
+        ["cmd"]       = string.lower(et.trap_Argv(0))
     }
 
     if et.gentity_get(clientNum, "sess.muted") == 0 then
         if clientCmdData[params.cmd] ~= nil then
+            local sayContent = et.ConcatArgs(1)
+            
             if k_logchat == 1 then
-                logChat(clientNum, clientCmdData[params.cmd]["mode"], et.ConcatArgs(1))
+                logChat(clientNum, clientCmdData[params.cmd]["mode"], sayContent)
             end
 
             if clientCmdData[params.cmd]["sayCmd"] ~= nil then
-                params.say       = clientCmdData[params.cmd]["sayCmd"]
-                params.nbArg     = et.trap_Argc() - 1
-                params.bangCmd   = et.trap_Argv(1)
-                params["arg1"]   = et.trap_Argv(2)
-                params["arg2"]   = et.trap_Argv(3)
+                params.say   = clientCmdData[params.cmd]["sayCmd"]
+                params.nbArg = 0
 
+                local _, _, first, second, third = string.find(sayContent, "^%s*([^%s]+)%s*([^%s]*)%s*([^%s]*)")
+
+                if first ~= "" then
+                    params.nbArg = 1
+
+                    if second ~= "" then
+                        params.nbArg = 2
+
+                        if third ~= "" then
+                            params.nbArg = 3
+                        end
+                    end
+                end
+
+                params.bangCmd = first
+                params["arg1"] = second
+                params["arg2"] = third
+
+                --debug("et_ClientCommand params", params)
                 if k_cursemode > 0 then
-                    checkBadWord(params.clientNum, et.ConcatArgs(1))
+                    checkBadWord(params.clientNum, sayContent)
                 end
 
                 if checkClientCommand(params, string.lower(params.bangCmd)) then
@@ -1060,4 +1109,64 @@ function et.G_ClientSound(clientNum, soundFile)
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
+end
+
+
+function debug(name, value)
+	local valueStr = ""
+	local varType = type(value)
+
+	if varType == "table" then
+		valueStr = debugTable(value, 0)
+	elseif varType == "number" then
+		valueStr = tostring(value)
+	elseif varType == "boolean" then
+		if value then
+			valueStr = "true"
+		else
+			valueStr = "false"
+		end
+	elseif varType == "string" then
+		valueStr = "\"" .. value .. "\""
+	elseif varType == "nil" then
+		valueStr = "nil"
+	else
+		valueStr = value
+	end
+
+	et.G_Print("\n\n" .. name .. " = " .. valueStr .. "\n\n")
+end
+
+function debugTable(data, indent)
+	local allTableStr = "{\n"
+	local valueStr = ""
+	local nb = table.getn(data)
+
+	table.foreach(data,
+		function(key, value)
+			local varType = type(value)
+
+			if varType == "table" then
+				valueStr = debugTable(value, indent + 1)
+			elseif varType == "number" then
+				valueStr = tostring(value)
+			elseif varType == "boolean" then
+				if value then
+					valueStr = "true"
+				else
+					valueStr = "false"
+				end
+			elseif varType == "string" then
+				valueStr = "\"" .. value .. "\""
+			elseif varType == "nil" then
+				valueStr = "nil"
+			else
+				valueStr = value
+			end
+
+			allTableStr = allTableStr .. string.rep("\t", indent + 1) .. key .. " = " .. valueStr .. "\n"
+		end
+	)
+
+	return allTableStr .. string.rep("\t", indent) .. "}"
 end

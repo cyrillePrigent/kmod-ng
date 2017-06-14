@@ -51,6 +51,12 @@ weaponsList = {
     false   -- 48 WP_AKIMBO_SILENCEDLUGER
 }
 
+gameMode["clientSettingsModified"] = false
+
+function gameModeRunFramePlayerCallback(clientNum)
+    -- Nothing to do
+end
+
 function execute_command(params)
     if params.nbArg < 3 then
         printCmdMsg(params, "Grenadewar", "Disable or enable Grenadewar \[0-1\]\n")
@@ -63,15 +69,10 @@ function execute_command(params)
 
         if grenadewar == 1 then
             if gameMode["current"] ~= 'grenadewar' then
-                if gameMode["current"] == 'panzerwar' then
-                    printCmdMsg(params, "Grenadewar", "Panzerwar must be disabled first\n")
-                elseif gameMode["current"] == 'frenzy' then
-                    printCmdMsg(params, "Grenadewar", "Frenzy must be disabled first\n")
-                elseif gameMode["current"] == 'sniperwar' then
-                    printCmdMsg(params, "Grenadewar", "Sniperwar must be disabled first\n")
-                else
+                if not gameModeIsActive("grenadewar", params) then
+                    saveServerClassSetting()
                     printCmdMsg(params, "Grenadewar", "Grenadewar has been Enabled\n")
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers -1 ; team_maxmortars -1 ; team_maxmg42s -1 ; team_maxpanzers -1\n")
                     gameMode["current"] = 'grenadewar'
 
                     for p = 0, clientsLimit, 1 do

@@ -22,18 +22,35 @@ maxAdminLevel = 0
 
 -- Read command file and store command data.
 function loadCommands()
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "commands.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile("commands.cfg", et.FS_READ)
 
     if len > 0 then
         local fileStr = et.trap_FS_Read(fd, len)
 
-        for lvl, cmd, str in string.gfind(fileStr, "[^%#](%d)%s*%-%s*([%w%_]*)%s*%=%s*([^%\n]*)") do
-            lvl = tonumber(lvl)
-            commands["alias"][cmd] = str
-            commands["level"][cmd] = lvl
+        for lvl, str in string.gfind(fileStr, "[^%#](%d)%s*%-%s*([^%\r%\n]*)") do
+            local s, e, cmd, alias = string.find(str, "^([%w%_]*)%s*%=%s*([^%\r%\n]*)$")
 
-            if lvl > maxAdminLevel then
-                maxAdminLevel = lvl
+            if s and e then
+                cmd = "!" .. cmd
+                lvl = tonumber(lvl)
+                commands["alias"][cmd] = alias
+                commands["level"][cmd] = lvl
+
+                if lvl > maxAdminLevel then
+                    maxAdminLevel = lvl
+                end
+            end
+
+            local s, e, cmd = string.find(str, "^([^%=]*)$")
+
+            if s and e then
+                cmd = "!" .. cmd
+                lvl = tonumber(lvl)
+                commands["level"][cmd] = lvl
+
+                if lvl > maxAdminLevel then
+                    maxAdminLevel = lvl
+                end
             end
         end
     end
@@ -44,12 +61,12 @@ end
 -- Return a random slot id of connected player.
 function randomClientFinder()
     local randomClient = {}
-    local m = 1
+    local m = 0
 
-    for i = 0, clientLimit, 1 do
+    for i = 0, clientsLimit, 1 do
         if et.gentity_get(i, "pers.connected") == 2 then
-            randomClient[m] = i
             m = m + 1
+            randomClient[m] = i
         end
     end
 
@@ -95,11 +112,11 @@ function parseClientCommand(params, str)
     local pbPlayerName2Id = playerName2Id + 1
     local pbId            = params.clientNum + 1
 
-    local randomC     = randomClientFinder()
-    local randomTeam  = teamList[client[randomC]["team"]]
-    local randomCName = et.gentity_get(randomC, "pers.netname")
-    local randomName  = et.Q_CleanStr(et.gentity_get(randomC, "pers.netname"))
-    local randomClass = classList[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
+    local randomC         = randomClientFinder()
+    local randomTeam      = teamList[client[randomC]["team"]]
+    local randomName      = et.gentity_get(randomC, "pers.netname")
+    local randomNameClean = et.Q_CleanStr(randomName)
+    local randomClass     = classList[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
 
     local str = string.gsub(str, "<CLIENT_ID>", params.clientNum)
     local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(params.clientNum), "cl_guid"))
@@ -121,8 +138,8 @@ function parseClientCommand(params, str)
     local str = string.gsub(str, "<PBPNAME2ID>", pbPlayerName2Id)
     local str = string.gsub(str, "<PB_ID>", pbId)
     local str = string.gsub(str, "<RANDOM_ID>", randomC)
-    local str = string.gsub(str, "<RANDOM_CNAME>", randomCName)
-    local str = string.gsub(str, "<RANDOM_NAME>", randomName)
+    local str = string.gsub(str, "<RANDOM_CNAME>", randomName)
+    local str = string.gsub(str, "<RANDOM_NAME>", randomNameClean)
     local str = string.gsub(str, "<RANDOM_CLASS>", randomClass)
     local str = string.gsub(str, "<RANDOM_TEAM>", randomTeam)
     --local classnumber = tonumber(et.gentity_get(params.clientNum, "sess.latchPlayerType"))
@@ -134,12 +151,40 @@ end
 --  params is parameters of client / console command.
 --  lowBangCmd is the command execute if exist.
 function checkClientCommand(params, lowBangCmd)
+    --debug("DEBUG checkClientCommand params", params)
+
+    if commands["level"][lowBangCmd] ~= nil then
+        if commands["level"][lowBangCmd] <= getAdminLevel(params["clientNum"]) then
+            if commands["alias"][lowBangCmd] == nil then
+                if cmdList["client"][lowBangCmd] ~= nil then
+                    if runCommandFile(lowBangCmd, params) == 1 then
+                        return true
+                    end
+                end
+            else
+                local str = parseClientCommand(params, commands["alias"][lowBangCmd])
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, str .. "\n")
+
+                local strPart = splitWord(str)
+
+                if strPart[1] == "forcecvar" then
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3etpro svcmd: ^7forcing client cvar [" .. strPart[2] .. "] to [" .. params["arg1"] .. "]\n")
+                end
+            end
+        else
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^7Insufficient Admin status\n")
+        end
+
+        return true
+    end
+
+    --[[
     if commands["alias"][lowBangCmd] ~= nil then
-        if commands["level"][lowBangCmd] <= getAdminLevel(params.clientNum) then
+        if commands["level"][lowBangCmd] <= getAdminLevel(params["clientNum"]) then
             local str = commands["alias"][lowBangCmd]
 
             if cmdList["client"][k_commandprefix .. str] ~= nil then
-                if runCommandFile(lowBangCmd, params) == 1 then
+                if runCommandFile(k_commandprefix .. str, params) == 1 then
                     return true
                 end
             end
@@ -158,6 +203,7 @@ function checkClientCommand(params, lowBangCmd)
 
         return true
     end
+    --]]
 
     return false
 end

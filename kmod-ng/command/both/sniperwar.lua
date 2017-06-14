@@ -51,6 +51,24 @@ weaponsList = {
     false   -- 48 WP_AKIMBO_SILENCEDLUGER
 }
 
+gameMode["clientSettingsModified"] = true
+
+function gameModeRunFramePlayerCallback(clientNum)
+    if tonumber(et.gentity_get(clientNum, "sess.latchPlayerType")) ~= 4 then
+        et.gentity_set(clientNum, "sess.latchPlayerType", 4)
+    end
+
+    local latchPlayerWeapon = tonumber(et.gentity_get(clientNum, "sess.latchPlayerWeapon"))
+
+    if latchPlayerWeapon ~= 33 and (latchPlayerWeapon ~= 32 or latchPlayerWeapon ~= 25 or latchPlayerWeapon ~= 42 or latchPlayerWeapon ~= 43) then
+        if client[clientNum]["team"] == 1 then
+            et.gentity_set(clientNum, "sess.latchPlayerWeapon", 32)
+        elseif client[clientNum]["team"] == 2 then
+            et.gentity_set(clientNum, "sess.latchPlayerWeapon", 25)
+        end
+    end
+end
+
 function execute_command(params)
     if params.nbArg < 3 then
         printCmdMsg(params, "Sniperwar", "Disable or enable Sniperwar \[0-1\]\n")
@@ -63,22 +81,17 @@ function execute_command(params)
 
         if sniperwar == 1 then
             if gameMode["current"] ~= 'sniperwar' then
-                if gameMode["current"] == 'panzerwar' then
-                    printCmdMsg(params, "Sniperwar", "Panzerwar must be disabled first\n")
-                elseif gameMode["current"] == 'frenzy' then
-                    printCmdMsg(params, "Sniperwar", "Frenzy must be disabled first\n")
-                elseif gameMode["current"] == 'grenadewar' then
-                    printCmdMsg(params, "Sniperwar", "Grenadewar must be disabled first\n")
-                else
+                if not gameModeIsActive("sniperwar", params) then
+                    saveServerClassSetting()
                     printCmdMsg(params, "Sniperwar", "Sniperwar has been Enabled\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
                     gameMode["current"] = 'sniperwar'
 
                     for p = 0, clientsLimit, 1 do
-                        client[p]['originalClass'] = tonumber(et.gentity_get(p, "sess.latchPlayerType"))
-                        client[p]['originalWeapon'] = tonumber(et.gentity_get(p, "sess.latchPlayerWeapon"))
-
                         if client[p]['team'] == 1 or client[p]['team'] == 2 then
+                            client[p]['originalClass']  = tonumber(et.gentity_get(p, "sess.latchPlayerType"))
+                            client[p]['originalWeapon'] = tonumber(et.gentity_get(p, "sess.latchPlayerWeapon"))
+
                             if et.gentity_get(p, "health") > 0 then
                                 et.G_Damage(p, p, 1022, 400, 24, 0)
                                 -- in case they recently spawned and are protected by spawn shield
@@ -93,7 +106,8 @@ function execute_command(params)
         elseif sniperwar == 0 then
             if gameMode["current"] == 'sniperwar' then
                 printCmdMsg(params, "Sniperwar", "Sniperwar has been Disabled.\n")
-                gameMode["current"] == false
+                gameMode["current"] = false
+                gameMode["clientSettingsModified"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
 
                 for p = 0, clientsLimit, 1 do

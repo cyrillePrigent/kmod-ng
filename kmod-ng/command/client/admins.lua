@@ -2,7 +2,7 @@
 
 -- params["arg1"] => player ID
 function execute_command(params)
-    if getAdminLevel(clientNum) >= 2 then
+    if getAdminLevel(params.clientNum) >= 2 then
         et.trap_SendServerCommand(params.clientNum, string.format("print \"^3 ID ^1:^3 Player                   ^1: ^3 Level ^1 : ^3 AdminName\n"))
         et.trap_SendServerCommand(params.clientNum, string.format("print \"^1----------------------------------------------------------------\n"))
         local pteam = { "^1X" , "^4L" , " " }

@@ -1,12 +1,18 @@
 
 
 function execute_command(params)
-    local fdadm, len = et.trap_FS_FOpenFile(kmod_ng_path .. "sprees/spree_record.dat", et.FS_WRITE)
+    local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
+    et.trap_FS_Write("", 0 , fd)
+    et.trap_FS_FCloseFile(fd)
 
-    SPREE = ''
-
-    et.trap_FS_Write(SPREE, string.len(SPREE) ,fdadm)
-    et.trap_FS_FCloseFile(fdadm)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Spree record: ^7Spree record has been reset!\n")
-    loadspreerecord()
+
+    spree = {
+        ["killsRecord"] = 0,
+        ["msg"]         = {
+            ["oldShort"] = "^3[Old: ^7N/A^3]",
+            ["oldLong"]  = "^3Spree Record: ^7There is no current spree record",
+            ["current"]  = "Current spree record: ^7N/A"
+        }
+    }
 end

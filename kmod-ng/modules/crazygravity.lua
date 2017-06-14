@@ -32,7 +32,7 @@ function checkCrazyGravityRunFrame(vars)
             crazyGravity["change"]  = true
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity has been changed to ^1" .. crazyGravity["gravity"] .. "^7!\n")
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity " .. crazyGravity["gravity"] .. "\n")
-        elseif remainingTime / 1000 == 5 then
+        elseif remainingTime == 5 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Crazygravity: ^7The gravity will be changed in ^15^7 seconds!\n")
         end
     end

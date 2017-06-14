@@ -2,4 +2,5 @@
 version 0.1
  - Complete rewriting of kmod, much modulable.
  - ETpro fix added
+ - Fix spree record save pending end round
 
