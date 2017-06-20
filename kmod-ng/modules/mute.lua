@@ -21,18 +21,18 @@ mute = {
 }
 
 -- Set default client data.
-clientDefaultData["muteEnd"]     = 0
-clientDefaultData["multipliers"] = 0
+clientDefaultData["muteEnd"]         = 0
+clientDefaultData["muteMultipliers"] = 0
 
 -- Function
 
 -- Initializes mutes data.
 -- Load mutes entry of mutes.cfg file.
 function loadMutes()
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
 
     if len == -1 then
-        et.G_LogPrint("ERROR: mutes.cfg file not readable!\n")
+        et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
     elseif len == 0 then
         et.G_Print("WARNING: No Mutes Defined!\n")
     else
@@ -48,9 +48,10 @@ end
 
 -- Open mutes.cfg file and append mute entry.
 --  clientNum is the client slot id.
+--  ip is the client address ip.
 --  muteTime is the mute duration in seconds, -1 is permanently mute.
-function writeMute(clientNum, muteTime)
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
+function writeMute(clientNum, ip, muteTime)
+    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
 
     if len == -1 then
         et.G_LogPrint("ERROR: mutes.cfg file not writable!\n")
@@ -71,14 +72,14 @@ end
 --  muteTime is the mute duration in seconds, -1 is permanently mute.
 function setMute(clientNum, muteTime)
     local edit = false
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_APPEND)
+    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
     local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
     local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
 
     et.trap_FS_FCloseFile(fd)
 
     if len == -1 then
-        et.G_LogPrint("ERROR: mutes.cfg file not writable!\n")
+        et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
     elseif len == 0 then
         edit = true
     else
@@ -93,23 +94,23 @@ function setMute(clientNum, muteTime)
     end
 
     if edit then
-        writeMute(clientNum, muteTime)
-        loadMutes()
+        writeMute(clientNum, ip, muteTime)
+        mute["duration"][ip] = muteTime
     end
 end
 
 -- Remove a mute.
 --  clientNum is the client slot id.
 function removeMute(clientNum)
-    local fdIn, lenIn = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-    local fdOut, lenOut = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.tmp.cfg", et.FS_WRITE)
+    local fdIn, lenIn = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+    local fdOut, lenOut = et.trap_FS_FOpenFile("mutes.tmp.cfg", et.FS_WRITE)
     local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
     local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
 
     if lenIn == -1 then
-        et.G_LogPrint("ERROR: mutes.cfg file not readable!\n")
+        et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
     elseif lenOut == -1 then
-        et.G_LogPrint("ERROR: mutes.tmp.cfg file not writable!\n")
+        et.G_LogPrint("WARNING: mutes.tmp.cfg file no found / not readable!\n")
     elseif lenIn == 0 then
         et.G_Print("There is no Mutes to remove \n")
     else
@@ -126,7 +127,7 @@ function removeMute(clientNum)
     et.trap_FS_FCloseFile(fdIn)
     et.trap_FS_FCloseFile(fdOut)
     et.trap_FS_Rename("mutes.tmp.cfg", "mutes.cfg")
-    loadMutes()
+    mute["duration"][ip] = nil
 end
 
 -- Callback function when qagame shuts down.
@@ -185,35 +186,21 @@ function checkMuteClientBegin(vars)
     local ip = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "ip")
     local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
 
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "mutes.cfg", et.FS_READ)
-
     client[vars["clientNum"]]["muteEnd"] = 0
 
-    -- TODO : Really need here?
-    loadMutes()
+    local ref = tonumber(et.gentity_get(vars["clientNum"], "sess.referee"))
 
-    if len == -1 then
-        et.G_LogPrint("ERROR: mutes.cfg file not readable!\n")
-    elseif len > 0 then
-        local ref = tonumber(et.gentity_get(vars["clientNum"], "sess.referee"))
-        local fileStr = et.trap_FS_Read(fd, len)
-
-        for time in string.gfind(fileStr, "(%-*%d+)%s%-%s%d+%.%d+%.%d+%.%d+%s%-%s*") do
-            if mute["duration"][ip] ~= nil and ref == 0 then
-                if mute["duration"][ip] > 0 then
-                    client[vars["clientNum"]]["muteEnd"] = time["frame"] + (mute["duration"][ip] * 1000)
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[clientNum][vars["clientNum"]]["lastName"] .. "^7 has not yet finished his mute sentance.  (^1" .. mute["duration"][ip] .. "^7) seconds.\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
-                elseif mute["duration"][ip] == -1 then
-                    client[vars["clientNum"]]["muteEnd"] = -1
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[vars["clientNum"]]["lastName"] .. "^7 has been permanently muted\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
-                end
-            end
+    if mute["duration"][ip] ~= nil and ref == 0 then
+        if mute["duration"][ip] > 0 then
+            client[vars["clientNum"]]["muteEnd"] = time["frame"] + (mute["duration"][ip] * 1000)
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[clientNum][vars["clientNum"]]["lastName"] .. "^7 has not yet finished his mute sentance.  (^1" .. mute["duration"][ip] .. "^7) seconds.\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
+        elseif mute["duration"][ip] == -1 then
+            client[vars["clientNum"]]["muteEnd"] = -1
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[vars["clientNum"]]["lastName"] .. "^7 has been permanently muted\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
         end
     end
-
-    et.trap_FS_FCloseFile(fd)
 end
 
 -- Callback function when client disconnect.

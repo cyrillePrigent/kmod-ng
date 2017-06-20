@@ -71,9 +71,9 @@ function setRegularUser(params, clientNum)
     local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
 
     if removeAdminIfExist(clientNum, guid) then
-        printCmdMsg(params, "Setlevel", name .. " is now a regular user!\n")
+        printCmdMsg(params, name .. " is now a regular user!\n")
     else
-        printCmdMsg(params, "Setlevel", name .. " is already a regular user!\n")
+        printCmdMsg(params, name .. " is already a regular user!\n")
     end
 end
 
@@ -116,7 +116,7 @@ function setAdmin(params, clientNum, level)
         writeAdmin(level, guid, name)
     end
 
-    printCmdMsg(params, "Setlevel", name .. " is now a level ^1" .. level .. " ^7user!\n")
+    printCmdMsg(params, name .. " is now a level ^1" .. level .. " ^7user!\n")
 end
 
 -- Remove a admin.
@@ -157,14 +157,14 @@ end
 -- Test admin level and return result.
 -- Used for finger & admintest command.
 --  params is parameters passed to the function executed in command file.
---  caller is the name of command used to call adminStatus function.
-function adminStatus(params, caller)
+function adminStatus(params)
     local userInfo = et.trap_GetUserinfo(params.clientNum)
     local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
     local name     = et.gentity_get(params.clientNum, "pers.netname")
+    local cmd      = params.bangCmd or params.cmd
 
     for i = maxAdminLevel, 0, -1 do
-        if caller == "finger" then
+        if params.bangCmd == k_commandprefix .. "finger" then
             if admin["level"][i][guid] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
                 break
@@ -172,7 +172,7 @@ function adminStatus(params, caller)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
                 break
             end
-        elseif caller == "admintest" then
+        elseif params.bangCmd == k_commandprefix .. "admintest" then
             if admin["level"][i][guid] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
                 break

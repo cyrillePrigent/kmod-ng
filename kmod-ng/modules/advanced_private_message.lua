@@ -2,114 +2,65 @@
 
 -- Global var
 
+
+addSlashCommand("console", "m2", {"function", "privateMessage2SlashCommand"})
+
 addSlashCommand("client", "m", {"function", "privateMessageSlashCommand"})
 addSlashCommand("client", "pm", {"function", "privateMessageSlashCommand"})
 addSlashCommand("client", "msg", {"function", "privateMessageSlashCommand"})
-addSlashCommand("console", "m", {"function", "privateMessageSlashCommand"})
-addSlashCommand("console", "pm", {"function", "privateMessageSlashCommand"})
-addSlashCommand("console", "msg", {"function", "privateMessageSlashCommand"})
 
 -- Function
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Note in ETpro, m / pm / msg don't work in server console. Use m2 command instead.
 --  params is parameters passed to the function executed in command file.
 function privateMessageSlashCommand(params)
-    if params.cmdMode == "console" and (params.cmd == "m" or params.cmd == "pm" or params.cmd == "msg") then
-        if k_logchat == 1 then
-            logPrivateMessage(params["arg2"], et.ConcatArgs(2), et.trap_Argv(1))
-        end
+    
+    if params.nbArg < 2 then
+        et.trap_SendServerCommand(params.clientNum, "print \"Useage: /m \[pname/ID\] \[message\]\n")
+    else
+        params.pm = true
+        local pmContent = et.ConcatArgs(2)
+        local targetNum = client2id(et.trap_Argv(1), params)
 
-        return 0
+        if targetNum ~= nil then
+            local name  = et.gentity_get(params.clientNum, "pers.netname")
+            local rname = et.gentity_get(targetNum, "pers.netname")
+
+            if k_logchat == 1 then
+                logPrivateMessage(targetNum, pmContent, nil, rname)
+            end
+
+            et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPrivate message sent to " .. rname .. "^d --> ^3" .. pmContent .. "^7")
+            et.G_ClientSound(params.clientNum, pmSound)
+
+            et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from " .. name .. "^d --> ^3" .. pmContent .. "^7")
+            et.G_ClientSound(targetNum, pmSound)
+        end
     end
 
-    if params.nbArg < 2 then
-        if params.cmdMode == "client" then
-            et.trap_SendServerCommand(params.clientNum, "print \"Useage:  /m \[pname/ID\] \[message\]\n")
-        elseif params.cmdMode == "console" then
-            et.G_Print("Useage:  /m \[pname/ID\] \[message\]\n")
-        end
+    return 1
+end
+
+function privateMessage2SlashCommand(params)
+    if params.nbArg < 2 then 
+        et.G_Print("Useage: /m2 \[pname/ID\] \[message\]\n")
     else
-        target = et.trap_Argv(1)
+        params.pm = true
+        local message   = et.ConcatArgs(2)
+        local targetNum = client2id(et.trap_Argv(1), params)
 
-        if params.cmdMode == "client" then
-            clientNum = params.clientNum
-        elseif params.cmdMode == "console" then
-            clientNum = 1022
-        end
+        if targetNum ~= nil then
+            local rname = et.gentity_get(targetNum, "pers.netname")
 
-        local pmContent = et.ConcatArgs(2)
-        local targetNum = tonumber(target)
+            et.G_Print("Private message sent to " .. rname .. "^d --> ^3" .. message .. "^7\n")
+            et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from ^1SERVER ^d--> ^3" .. message .. "^7")
+            et.G_ClientSound(targetNum, pmSound)
 
-        if targetNum then
-            if targetNum >= 0 and targetNum < 64 then
-                if et.gentity_get(targetNum, "pers.connected") ~= 2 then
-                    if params.cmdMode == 'client' then
-                        et.trap_SendServerCommand(clientNum, "print \"There is no client associated with this slot number\n")
-                    elseif params.cmdMode == 'console' then
-                        et.G_Print("There is no client associated with this slot number\n")
-                    end
-
-                    return 1
-                end
-            else
-                if params.cmdMode == 'client' then
-                    et.trap_SendServerCommand(clientNum, "print \"Please enter a slot number between 0 and 63\n")
-                elseif params.cmdMode == 'console' then
-                    et.G_Print("Please enter a slot number between 0 and 63\n")
-                end
-
-                return 1
-            end
-        else
-            if target then
-                s, e = string.find(target, target)
-
-                if e <= 2 then
-                    if params.cmdMode == 'client' then
-                        et.trap_SendServerCommand(clientNum, "print \"Player name requires more than 2 characters\n")
-                    elseif params.cmdMode == 'console' then
-                        et.G_Print("Player name requires more than 2 characters\n")
-                    end
-
-                    return 1
-                else
-                    targetNum = getPlayernameToId(target)
-                end
-            end
-
-            if not targetNum then
-                if params.cmdMode == 'client' then
-                    et.trap_SendServerCommand(clientNum, "print \"Try name again or use slot number\n")
-                elseif params.cmdMode == 'console' then
-                    et.G_Print("Try name again or use slot number\n")
-                end
-
-                return 1
+            if k_logchat == 1 then
+                logPrivateMessage(1022, message, nil, rname)
             end
         end
-
-        local name  = et.gentity_get(clientNum, "pers.netname")
-        local rname = et.gentity_get(targetNum, "pers.netname")
-
-        if k_logchat == 1 then
-            logPrivateMessage(params["arg2"], pmContent, nil, rname)
-        end
-
-        if clientNum == 1022 then
-            name = "^1SERVER"
-        end
-
-        if params.cmdMode == 'client' then
-            if clientNum ~= 1022 then
-                et.trap_SendServerCommand(clientNum, "b 8 \"^dPrivate message sent to " .. rname .. "^d --> ^3" .. pmContent .. "^7")
-                et.G_ClientSound(clientNum, pmSound)
-            end
-        elseif params.cmdMode == 'console' then
-            et.G_Print("Private message sent to " .. rname .. "^d --> ^3" .. pmContent .. "^7\n")
-        end
-
-        et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from " .. name .. "^d --> ^3" .. pmContent .. "^7")
-        et.G_ClientSound(targetNum, pmSound)
     end
 
     return 1

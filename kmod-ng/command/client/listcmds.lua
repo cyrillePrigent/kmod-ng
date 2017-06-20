@@ -1,5 +1,5 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     for i = 0, maxAdminLevel, 1 do
         if getAdminLevel(params.clientNum) >= i then
@@ -14,8 +14,8 @@ function execute_command(params)
             local nbCmds = table.getn(listCmds)
 
             if nbCmds > 0 then
-                et.trap_SendServerCommand(params.clientNum, string.format("print \"Level " .. i .. " Commands\n"))
-                et.trap_SendServerCommand(params.clientNum, string.format("print \"^1-------------------------------------------------------------------\n"))
+                et.trap_SendServerCommand(params.clientNum, "print \"Level " .. i .. " Commands\n")
+                et.trap_SendServerCommand(params.clientNum, "print \"^1-------------------------------------------------------------------\n")
 
                 for q = 1, table.getn(listCmds), 3 do
                     local cmd1 = " "
@@ -41,7 +41,7 @@ function execute_command(params)
                     et.trap_SendServerCommand(params.clientNum, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', cmd1, cmd2, cmd3))
                 end
 
-                et.trap_SendServerCommand(params.clientNum, string.format("print \"^1-------------------------------------------------------------------\n\n"))
+                et.trap_SendServerCommand(params.clientNum, "print \"^1-------------------------------------------------------------------\n\n")
             end
         end
     end

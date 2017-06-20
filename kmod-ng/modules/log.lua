@@ -35,7 +35,7 @@ end
 -- Write a text in log file.
 --  text is the text to write in log file.
 function writeLog(text)
-    local fd, len = et.trap_FS_FOpenFile(kmod_ng_path .. "chat_log.log", et.FS_APPEND)
+    local fd, len = et.trap_FS_FOpenFile("chat_log.log", et.FS_APPEND)
     et.trap_FS_Write(text, string.len(text) ,fd)
     et.trap_FS_FCloseFile(fd)
 end
@@ -116,7 +116,7 @@ function logPrivateMessage(clientNum, msg, target, recipiant)
         local targetNum = client2id(target)
 
         if targetNum then
-            local recipiant = et.gentity_get(targetNum, "pers.netname")
+            recipiant = et.gentity_get(targetNum, "pers.netname")
         end
     end
 
@@ -128,16 +128,19 @@ end
 
 function logAdminsPrivateMessage(clientNum, msg)
     local time = os.date("%x %I:%M:%S%p")
+    local ip
+    local guid
+    local from
 
     if clientNum ~= 1022 then
         local clientInfo = et.trap_GetUserinfo(clientNum)
-        local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-        local from       = et.gentity_get(clientNum, "pers.netname")
+        ip   = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
+        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+        from = et.gentity_get(clientNum, "pers.netname")
     else
-        local ip   = "127.0.0.1"
-        local guid = "NONE!"
-        local from = "SERVER"
+        ip   = "127.0.0.1"
+        guid = "NONE!"
+        from = "SERVER"
     end
 
     writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to ADMINS (PRIVATE): " .. msg .. "\n")
@@ -162,7 +165,7 @@ end
 
 -- Callback function when qagame shuts down.
 function logShutdownGame(vars)
-    writeLog("\n    ***SERVER RESTART OR MAP CHANGE***\n\n")
+    writeLog("\n***SERVER RESTART OR MAP CHANGE***\n\n")
 end
 
 -- Add callback mute function.

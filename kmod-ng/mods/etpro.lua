@@ -338,8 +338,8 @@ function etProFixRunFrame(vars)
 
 -- TODO : Check if needed
 -- globalconbined.lua start
-    if et.gentity_get(userinfoCheck["clientNum"], "pers.connected") ~= 0  then
-        if et.gentity_get(userinfoCheck["clientNum"], "ps.ping") ~= 0 then
+--    if et.gentity_get(userinfoCheck["clientNum"], "pers.connected") ~= 0  then
+--        if et.gentity_get(userinfoCheck["clientNum"], "ps.ping") ~= 0 then
 -- globalconbined.lua end
             if et.gentity_get(userinfoCheck["clientNum"], "inuse") then
                 local userinfo = et.trap_GetUserinfo(userinfoCheck["clientNum"])
@@ -351,8 +351,8 @@ function etProFixRunFrame(vars)
                     et.trap_DropClient(userinfoCheck["clientNum"], "bad userinfo", 0)
                 end
             end
-        end
-    end
+--        end
+--    end
 
     if userinfoCheck["clientNum"] >= clientsLimit then
         userinfoCheck["clientNum"] = 0
@@ -377,20 +377,20 @@ function etProFixClientUserinfoChanged(vars)
 
 -- TODO : Check if needed
 -- globalconbined.lua start
-    local guid = string.upper(et.Info_ValueForKey(userinfo, "cl_guid"))
-    local name = et.Info_ValueForKey(userinfo, "name")
-
-    for client = 0, clientsLimit do
-        local player_userinfo = et.trap_GetUserinfo(client)
-        local player_guid     = string.upper(et.Info_ValueForKey(player_userinfo, "cl_guid"))
-        local player_name     = et.Info_ValueForKey(player_userinfo, "name")
-
-        if player_name == name and name ~= "ETPlayer" and name ~= "UnnamedPlayer" and vars["clientNum"] ~= client then
-            badUserinfo(vars["clientNum"], "duplicate name")
-        elseif player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= client then
-            badUserinfo(vars["clientNum"], "duplicate guid")
-        end
-    end
+--    local guid = string.upper(et.Info_ValueForKey(userinfo, "cl_guid"))
+--    local name = et.Info_ValueForKey(userinfo, "name")
+--
+--    for client = 0, clientsLimit do
+--        local player_userinfo = et.trap_GetUserinfo(client)
+--        local player_guid     = string.upper(et.Info_ValueForKey(player_userinfo, "cl_guid"))
+--        local player_name     = et.Info_ValueForKey(player_userinfo, "name")
+--
+--        if player_name == name and name ~= "ETPlayer" and name ~= "UnnamedPlayer" and vars["clientNum"] ~= client then
+--            badUserinfo(vars["clientNum"], "duplicate name")
+--        elseif player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= client then
+--            badUserinfo(vars["clientNum"], "duplicate guid")
+--        end
+--    end
 -- globalconbined.lua end
 end
 

@@ -19,9 +19,9 @@ callbackList = {
     ["ClientUserinfoChanged"] = {},
     ["ClientSpawn"]           = {},
     ["ObituaryEnemyKill"]     = {},
-    ["ObituaryTkAndSelfKill"] = {},
+    ["ObituarySelfKill"]      = {},
+    ["ObituaryTeamKill"]      = {},
     ["ObituaryWorldKill"]     = {},
-    ["ObituaryNoTk"]          = {},
     ["Obituary"]              = {},
     ["Print"]                 = {}
 }
@@ -141,75 +141,72 @@ slashCommandClient = {
 
 slashCommandConsole = {}
 
-obituary = {
-    ["lastKillerName"] = "",
-    ["meansOfDeath"] = {
-        [0] = "UNKNOWN",                      -- 0
-        "MACHINEGUN",                         -- 1
-        "BROWNING",                           -- 2
-        "MG42",                               -- 3
-        "GRENADE",                            -- 4
-        "ROCKET",                             -- 5
-        "KNIFE",                              -- 6
-        "LUGER",                              -- 7
-        "COLT",                               -- 8
-        "MP40",                               -- 9
-        "THOMPSON",                           -- 10
-        "STEN",                               -- 11
-        "GARAND",                             -- 12
-        "SNOOPERSCOPE",                       -- 13
-        "SILENCER",                           -- 14
-        "FG42",                               -- 15
-        "FG42SCOPE",                          -- 16
-        "PANZERFAUST",                        -- 17
-        "GRENADE_LAUNCHER",                   -- 18
-        "FLAMETHROWER",                       -- 19
-        "GRENADE_PINEAPPLE",                  -- 20
-        "CROSS",                              -- 21
-        "MAPMORTAR",                          -- 22
-        "MAPMORTAR_SPLASH",                   -- 23
-        "KICKED",                             -- 24
-        "GRABBER",                            -- 25
-        "DYNAMITE",                           -- 26
-        "AIRSTRIKE",                          -- 27
-        "SYRINGE",                            -- 28
-        "AMMO",                               -- 29
-        "ARTY",                               -- 30
-        "WATER",                              -- 31
-        "SLIME",                              -- 32
-        "LAVA",                               -- 33
-        "CRUSH",                              -- 34
-        "TELEFRAG",                           -- 35
-        "FALLING",                            -- 36
-        "SUICIDE",                            -- 37
-        "TARGET_LASER",                       -- 38
-        "TRIGGER_HURT",                       -- 39
-        "EXPLOSIVE",                          -- 40
-        "CARBINE",                            -- 41
-        "KAR98",                              -- 42
-        "GPG40",                              -- 43
-        "M7",                                 -- 44
-        "LANDMINE",                           -- 45
-        "SATCHEL",                            -- 46
-        "TRIPMINE",                           -- 47
-        "SMOKEBOMB",                          -- 48
-        "MOBILE_MG42",                        -- 49
-        "SILENCED_COLT",                      -- 50
-        "GARAND_SCOPE",                       -- 51
-        "CRUSH_CONSTRUCTION",                 -- 52
-        "CRUSH_CONSTRUCTIONDEATH",            -- 53
-        "CRUSH_CONSTRUCTIONDEATH_NOATTACKER", -- 54
-        "K43",                                -- 55
-        "K43_SCOPE",                          -- 56
-        "MORTAR",                             -- 57
-        "AKIMBO_COLT",                        -- 58
-        "AKIMBO_LUGER",                       -- 59
-        "AKIMBO_SILENCEDCOLT",                -- 60
-        "AKIMBO_SILENCEDLUGER",               -- 61
-        "SMOKEGRENADE",                       -- 62
-        "SWAP_SPACES",                        -- 63
-        "SWITCH_TEAM"                         -- 64
-    }
+meansOfDeathList = {
+    [0] = "UNKNOWN",                      -- 0
+    "MACHINEGUN",                         -- 1
+    "BROWNING",                           -- 2
+    "MG42",                               -- 3
+    "GRENADE",                            -- 4
+    "ROCKET",                             -- 5
+    "KNIFE",                              -- 6
+    "LUGER",                              -- 7
+    "COLT",                               -- 8
+    "MP40",                               -- 9
+    "THOMPSON",                           -- 10
+    "STEN",                               -- 11
+    "GARAND",                             -- 12
+    "SNOOPERSCOPE",                       -- 13
+    "SILENCER",                           -- 14
+    "FG42",                               -- 15
+    "FG42SCOPE",                          -- 16
+    "PANZERFAUST",                        -- 17
+    "GRENADE_LAUNCHER",                   -- 18
+    "FLAMETHROWER",                       -- 19
+    "GRENADE_PINEAPPLE",                  -- 20
+    "CROSS",                              -- 21
+    "MAPMORTAR",                          -- 22
+    "MAPMORTAR_SPLASH",                   -- 23
+    "KICKED",                             -- 24
+    "GRABBER",                            -- 25
+    "DYNAMITE",                           -- 26
+    "AIRSTRIKE",                          -- 27
+    "SYRINGE",                            -- 28
+    "AMMO",                               -- 29
+    "ARTY",                               -- 30
+    "WATER",                              -- 31
+    "SLIME",                              -- 32
+    "LAVA",                               -- 33
+    "CRUSH",                              -- 34
+    "TELEFRAG",                           -- 35
+    "FALLING",                            -- 36
+    "SUICIDE",                            -- 37
+    "TARGET_LASER",                       -- 38
+    "TRIGGER_HURT",                       -- 39
+    "EXPLOSIVE",                          -- 40
+    "CARBINE",                            -- 41
+    "KAR98",                              -- 42
+    "GPG40",                              -- 43
+    "M7",                                 -- 44
+    "LANDMINE",                           -- 45
+    "SATCHEL",                            -- 46
+    "TRIPMINE",                           -- 47
+    "SMOKEBOMB",                          -- 48
+    "MOBILE_MG42",                        -- 49
+    "SILENCED_COLT",                      -- 50
+    "GARAND_SCOPE",                       -- 51
+    "CRUSH_CONSTRUCTION",                 -- 52
+    "CRUSH_CONSTRUCTIONDEATH",            -- 53
+    "CRUSH_CONSTRUCTIONDEATH_NOATTACKER", -- 54
+    "K43",                                -- 55
+    "K43_SCOPE",                          -- 56
+    "MORTAR",                             -- 57
+    "AKIMBO_COLT",                        -- 58
+    "AKIMBO_LUGER",                       -- 59
+    "AKIMBO_SILENCEDCOLT",                -- 60
+    "AKIMBO_SILENCEDLUGER",               -- 61
+    "SMOKEGRENADE",                       -- 62
+    "SWAP_SPACES",                        -- 63
+    "SWITCH_TEAM"                         -- 64
 }
 
 game = {
@@ -249,6 +246,8 @@ pause = {
 --  gamename : etpro
 --  mod_version : 3.2.6
 --  mod_url = http://etpro.anime.net/
+--  lua version 5.0.2
+
 
 -- Under et-legacy :
 --  fs_game : 
@@ -256,13 +255,13 @@ pause = {
 --  gamename : 
 --  mod_version : 
 --  mod_url = 
+--  lua version 
 
 -- Load KMOD-ng cvar
 k_color               = et.trap_Cvar_Get("k_color")
 k_panzersperteam      = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 --k_panzersperteam    = tonumber(et.trap_Cvar_Get("k_panzersperteam"))
 k_advplayers          = tonumber(et.trap_Cvar_Get("k_advplayers"))
-k_tklimit_high        = tonumber(et.trap_Cvar_Get("k_tklimit_high"))
 k_noisereduction      = tonumber(et.trap_Cvar_Get("k_noisereduction"))
 k_advancedpms         = tonumber(et.trap_Cvar_Get("k_advancedpms"))
 k_antiunmute          = tonumber(et.trap_Cvar_Get("k_antiunmute"))
@@ -272,7 +271,7 @@ k_disablevotes        = tonumber(et.trap_Cvar_Get("k_disablevotes"))
 k_advancedadrenaline  = tonumber(et.trap_Cvar_Get("k_advancedadrenaline"))
 k_advancedspawn       = tonumber(et.trap_Cvar_Get("k_advancedspawn"))
 k_autopanzerdisable   = tonumber(et.trap_Cvar_Get("k_autopanzerdisable"))
-k_selfkilllimit       = tonumber(et.trap_Cvar_Get("k_selfkilllimit"))
+k_selfkill_limit      = tonumber(et.trap_Cvar_Get("k_selfkill_limit"))
 k_logchat             = tonumber(et.trap_Cvar_Get("k_logchat"))
 k_multikills          = tonumber(et.trap_Cvar_Get("k_multikills"))
 k_flakmonkey          = tonumber(et.trap_Cvar_Get("k_flakmonkey"))
@@ -285,7 +284,7 @@ k_lastblood           = tonumber(et.trap_Cvar_Get("k_lastblood"))
 k_killerhpdisplay     = tonumber(et.trap_Cvar_Get("k_killerhpdisplay"))
 k_endroundshuffle     = tonumber(et.trap_Cvar_Get("k_endroundshuffle"))
 pmSound               = et.trap_Cvar_Get("pmsound")
-k_playsound           = et.trap_Cvar_Get("k_playsound")
+k_playsound           = tonumber(et.trap_Cvar_Get("k_playsound"))
 
 
 -- Store a settings function list in main callback function list.
@@ -296,14 +295,17 @@ function addCallbackFunction(settings)
             if callbackList[callbackType] ~= nil then
                 table.insert(callbackList[callbackType], functionName)
             else
-                et.G_LogPrint("ERROR : CallbackType " .. callbackType .. " don't exist!")
+                et.G_LogPrint("ERROR addCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
             end
         else
-            et.G_LogPrint("ERROR : Function " .. functionName .. " don't exist!")
+            et.G_LogPrint("ERROR addCallbackFunction : Function " .. functionName .. " don't exist!\n")
         end
     end
 end
 
+-- Remove a function in main callback function list.
+--  callbackType is the callback type list to remove.
+--  removeName is the function / file name to remove.
 function removeCallbackFunction(callbackType, removeFunctionName)
     if callbackList[callbackType] ~= nil then
         for key, functionName in ipairs(callbackList[callbackType]) do
@@ -313,7 +315,7 @@ function removeCallbackFunction(callbackType, removeFunctionName)
             end
         end
     else
-        et.G_LogPrint("ERROR : CallbackType " .. callbackType .. " don't exist!")
+        et.G_LogPrint("ERROR removeCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
     end
 end
 
@@ -326,7 +328,7 @@ function executeCallbackFunction(callbackType, vars)
             _G[functionName](vars)
         end
     else
-        et.G_LogPrint("ERROR : CallbackType " .. callbackType .. " don't exist!")
+        et.G_LogPrint("ERROR executeCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
     end
 end
 
@@ -334,23 +336,22 @@ end
 --  client can be :
 --   * A slot id
 --   * Partial / complete player name (two character minimum)
---  cmdName is the client / console command who execute client2id.
 --  params is parameters passed to the function executed in command file.
-function client2id(client, cmdName, params)
+function client2id(client, params)
     local clientNum = tonumber(client)
 
     if clientNum then
         if clientNum >= 0 and clientNum < 64 then
             if et.gentity_get(clientNum, "pers.connected") ~= 2 then
                 if params ~= nil then
-                    printCmdMsg(params, cmdName, "There is no client associated with this slot number\n")
+                    printCmdMsg(params, "There is no client associated with this slot number\n")
                 end
 
                 return nil
             end
         else
             if params ~= nil then
-                printCmdMsg(params, cmdName, "Please enter a slot number between 0 and 63\n")
+                printCmdMsg(params, "Please enter a slot number between 0 and " .. clientsLimit .. "\n")
             end
 
             return nil
@@ -361,7 +362,7 @@ function client2id(client, cmdName, params)
         if client then
             if string.len(client) <= 2 then
                 if params ~= nil then
-                    printCmdMsg(params, cmdName, "Player name requires more than 2 characters\n")
+                    printCmdMsg(params, "Player name requires more than 2 characters\n")
                 end
 
                 return nil
@@ -372,7 +373,7 @@ function client2id(client, cmdName, params)
 
         if not clientNum then
             if params ~= nil then
-                printCmdMsg(params, cmdName, "Try name again or use slot number\n")
+                printCmdMsg(params, "Try name again or use slot number\n")
             end
 
             return nil
@@ -428,13 +429,22 @@ end
 
 -- Manage client / console message displaying.
 --  params is parameters passed to the function executed in command file.
---  cmdName is the client / console command who execute printCmdMsg.
 --  msg is the message content.
-function printCmdMsg(params, cmdName, msg)
+function printCmdMsg(params, msg)
     if params.cmdMode == "console" then
-        et.G_Print("^7" .. msg)
+        if not params.pm then
+            msg = "^7" .. msg
+        end
+
+        et.G_Print(msg)
     elseif params.cmdMode == "client" then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmdName .. ": ^7" .. msg)
+        if params.pm then
+            et.trap_SendServerCommand(params.clientNum, "print \"" .. msg .. "\"")
+        else
+            local cmd = params.bangCmd or params.cmd
+            cmd = string.gsub(cmd, "^" .. k_commandprefix .. "%l", string.upper)
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7" .. msg)
+        end
     end
 end
 
@@ -467,30 +477,31 @@ function runCommandFile(command, params)
             result          = execute_command(params)
             execute_command = nil
         else
-            et.G_LogPrint("ERROR : None `execute_command` function defined in command file")
+            et.G_LogPrint("ERROR runCommandFile : None `execute_command` function defined in command file\n")
         end
     end
 
     return result
 end
 
-function setSlashCommandMultipleField(cmdArg, cmdData)
-    local t = _G["slashCommandClient"]["multiple"]
-
-    for _, arg in ipairs(cmdArg) do
-        t[arg] = t[arg] or {}
-        t = t[arg]
-    end
-
-    t = cmdData
-end
-
+-- Set function / file to execute when a slash command is executed by client.
+--  cmdType is the command type (client or console).
+--  cmdArg is the slash commande name or table with list of command name.
+--  cmdData is the slash command data.
 function addSlashCommand(cmdType, cmdArg, cmdData)
     if cmdType == "client" then
         local cmdArgType = type(cmdArg)
 
         if cmdArgType == "table" then
-            setSlashCommandMultipleField(cmdArg, cmdData)
+            local t = _G["slashCommandClient"]["multiple"]
+
+            for _, arg in ipairs(cmdArg) do
+                t[arg] = t[arg] or {}
+                t = t[arg]
+            end
+
+            t = t or {}
+            table.insert(t, cmdData)
         elseif cmdArgType == "string" then
             slashCommandClient["single"][cmdArg] = slashCommandClient["single"][cmdArg] or {}
             table.insert(slashCommandClient["single"][cmdArg], cmdData)
@@ -501,6 +512,55 @@ function addSlashCommand(cmdType, cmdArg, cmdData)
     end
 end
 
+-- Remove function / file of the slash command list.
+--  cmdType is the command type (client or console).
+--  cmdArg is the slash commande name or table with list of command name.
+--  removeName is the function / file name to remove.
+function removeSlashCommand(cmdType, cmdArg, removeName)
+    if cmdType == "client" then
+        local cmdArgType = type(cmdArg)
+
+        if cmdArgType == "table" then
+            local t = _G["slashCommandClient"]["multiple"]
+
+            for _, arg in ipairs(cmdArg) do
+                if t[arg] then
+                    t = t[arg]
+                else
+                    et.G_LogPrint("ERROR removeSlashCommand : Cannot remove slash command '" .. table.concat(cmdArg, " ") .. "'\n")
+                    return
+                end
+            end
+
+            if t then
+                for key, functionName in ipairs(slashCommandClient["single"]) do
+                    if functionName ~= removeName then
+                        table.remove(t, key)
+                        break
+                    end
+                end
+            end
+        elseif cmdArgType == "string" then
+            for key, functionName in ipairs(slashCommandClient["single"]) do
+                if functionName ~= removeName then
+                    table.remove(slashCommandClient["single"], key)
+                    break
+                end
+            end
+        end
+    elseif cmdType == "console" then
+        for key, functionName in ipairs(slashCommandConsole) do
+            if functionName ~= removeName then
+                table.remove(slashCommandConsole, key)
+                break
+            end
+        end
+    end
+end
+
+-- Execute function / file of slash command called by client.
+--  data is the slash command data.
+--  params is parameters passed to the function executed the slash command.
 function runSlashCommand(data, params)
     local result    = 0
     execute_command = nil
@@ -514,10 +574,10 @@ function runSlashCommand(data, params)
             result          = execute_command(params)
             execute_command = nil
         else
-            et.G_LogPrint("ERROR : None `execute_command` function defined in command file")
+            et.G_LogPrint("ERROR runSlashCommand : None `execute_command` function defined in command file\n")
         end
     else
-        et.G_LogPrint("ERROR : Bad slash command data : " .. tostring(data))
+        et.G_LogPrint("ERROR runSlashCommand : Bad slash command data : " .. tostring(data) .. "\n")
     end
 
     return result
@@ -563,24 +623,16 @@ function teamSlashCommand(params)
     return 0
 end
 
+-- printf wrapper
 et.G_Printf = function(...)
     et.G_Print(string.format(unpack(arg)))
 end
 
+-- printf wrapper
 et.G_LogPrintf = function(...)
     et.G_LogPrint(string.format(unpack(arg)))
 end
 
---et.trap_FS_fileExists = function(name)
---    local f = io.open(name, "rb")
---
---    if f then
---        f:close()
---        return true
---    end
---
---    return false
---end
 
 -- Load modules
 dofile(kmod_ng_path .. "/mods/etpro.lua")
@@ -589,6 +641,8 @@ dofile(kmod_ng_path .. "/mods/etpro.lua")
 if tonumber(et.trap_Cvar_Get("k_crazygravity_module")) == 1 then
     dofile(kmod_ng_path .. "/modules/crazygravity.lua")
 end
+
+dofile(kmod_ng_path .. '/modules/game_mode.lua')
 
 if k_mute_module == 1 then
     dofile(kmod_ng_path .. "/modules/mute.lua")
@@ -615,7 +669,7 @@ if k_autopanzerdisable == 1 then
     dofile(kmod_ng_path .. "/modules/auto_panzer_disable.lua")
 end
 
-if k_selfkilllimit == 1 then
+if k_selfkill_limit == 1 then
     dofile(kmod_ng_path .. "/modules/selfkill_limit.lua")
 end
 
@@ -727,6 +781,7 @@ function et_InitGame(levelTime, randomSeed, restart)
     end
 
     et.G_Print("KMOD-ng version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
+    --et.G_Print("lua version : " .. _VERSION)
 end
 
 -- Called when qagame shuts down.
@@ -870,13 +925,13 @@ end
 -- Called when a client disconnects.
 --  clientNum is the client slot id.
 function et_ClientDisconnect(clientNum)
+    executeCallbackFunction("ClientDisconnect", {["clientNum"] = clientNum})
+
     client[clientNum] = {}
 
     for key, value in pairs(clientDefaultData) do
         client[clientNum][key] = value
     end
-
-    executeCallbackFunction("ClientDisconnect", {["clientNum"] = clientNum})
 end
 
 -- Called when a client begins (becomes active, and enters the gameworld).
@@ -886,6 +941,7 @@ function et_ClientBegin(clientNum)
     et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
 
     client[clientNum]["lastName"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
+    client[clientNum]["team"]     = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
     executeCallbackFunction("ClientBegin", {["clientNum"] = clientNum})
 end
@@ -911,7 +967,7 @@ function et_ClientSpawn(clientNum, revived)
         --gameModeClientSpawn(clientNum)
 
         if revived == 0 then
-            client[clientNum]["respawn"] = 1
+            client[clientNum]["respawn"] = 1 
         end
     end
 end
@@ -929,6 +985,8 @@ function et_ClientCommand(clientNum, command)
         ["clientNum"] = clientNum,
         ["cmd"]       = string.lower(et.trap_Argv(0))
     }
+
+    debug("DEBUG params", params)
 
     if et.gentity_get(clientNum, "sess.muted") == 0 then
         if clientCmdData[params.cmd] ~= nil then
@@ -962,7 +1020,7 @@ function et_ClientCommand(clientNum, command)
 
                 --debug("et_ClientCommand params", params)
                 if k_cursemode > 0 then
-                    checkBadWord(params.clientNum, sayContent)
+                    checkBadWord(params, sayContent)
                 end
 
                 if checkClientCommand(params, string.lower(params.bangCmd)) then
@@ -972,22 +1030,26 @@ function et_ClientCommand(clientNum, command)
         end
     end
 
+    params.nbArg = et.trap_Argc()
+    params["arg1"] = et.trap_Argv(1)
+    params["arg2"] = et.trap_Argv(2)
+
+    if slashCommandClient["single"][params.cmd] ~= nil then
+        for _, cmdData in ipairs(slashCommandClient["single"][params.cmd]) do
+            if runSlashCommand(cmdData, params) == 1 then
+                return 1
+            end
+        end
+    end
+
     if slashCommandClient["multiple"][params.cmd] ~= nil then
         local subCmd = string.lower(et.trap_Argv(1))
 
         if slashCommandClient["multiple"][params.cmd][subCmd] ~= nil then
-            if slashCommandClient["multiple"][params.cmd][subCmd] ~= nil then
-                for _, cmdData in ipairs(slashCommandClient["multiple"][params.cmd][subCmd]) do
-                    if runSlashCommand(cmdData, params) == 1 then
-                        return 1
-                    end
+            for _, cmdData in ipairs(slashCommandClient["multiple"][params.cmd][subCmd]) do
+                if runSlashCommand(cmdData, params) == 1 then
+                    return 1
                 end
-            end
-        end
-    elseif slashCommandClient["single"][params.cmd] ~= nil then
-        for _, cmdData in ipairs(slashCommandClient["single"][params.cmd]) do
-            if runSlashCommand(cmdData, params) == 1 then
-                return 1
             end
         end
     end
@@ -1001,19 +1063,22 @@ end
 -- to the server (and other mods in the chain).
 function et_ConsoleCommand()
     local params = {
-        ["cmdMode"] = "console",
-        ["nbArg"]   = et.trap_Argc(),
-        ["cmd"]     = string.lower(et.trap_Argv(0)),
-        ["arg1"]    = et.trap_Argv(1),
-        ["arg2"]    = et.trap_Argv(2)
+        ["cmdMode"]   = "console",
+        ["clientNum"] = 1022,
+        ["nbArg"]     = et.trap_Argc(),
+        ["cmd"]       = string.lower(et.trap_Argv(0)),
+        ["arg1"]      = et.trap_Argv(1),
+        ["arg2"]      = et.trap_Argv(2)
     }
+
+    --debug("DEBUG params", params)
 
     if runCommandFile(params.cmd, params) == 1 then
         return 1
     end
 
     if slashCommandConsole[params.cmd] ~= nil then
-
+        debug("DEBUG slashCommandConsole", slashCommandConsole)
         for _, cmdData in ipairs(slashCommandConsole[params.cmd]) do
             if runSlashCommand(cmdData, params) == 1 then
                 return 1
@@ -1031,28 +1096,20 @@ end
 -- This makes it very easy to spoof.
 -- DO NOT TRUST STRINGS OBTAINED IN THIS WAY
 function et_Print(text)
-    executeCallbackFunction("Print", {["text"] = text})
+    local arg = splitWord(text)
+    executeCallbackFunction("Print", {["text"] = text, ["arg"] = arg})
 
-    local t = splitWord(text)
-
-    if t[1] == "saneClientCommand:" and t[3] == "callvote" then
-        local caller = tonumber(t[2])
-        local vote   = t[4]
-        local target = tonumber(t[5])
+    if arg[1] == "saneClientCommand:" and arg[3] == "callvote" then
+        local caller = tonumber(arg[2])
+        local vote   = arg[4]
+        local target = tonumber(arg[5])
 
         if (vote == "kick" or vote == "mute") and getAdminLevel(caller) < getAdminLevel(target) then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n")
         end
     end
 
-    if t[1] == "Medic_Revive:" then
-        local reviver = tonumber(t[2])
-        client[reviver]["tkIndex"] = client[reviver]["tkIndex"] + 1
-
-        if client[reviver]["tkIndex"] > k_tklimit_high then
-            client[reviver]["tkIndex"] = k_tklimit_high
-        end
-    end
+    --local junk1,junk2,medic,zombie = string.find(text, "^Medic_Revive:%s+(%d+)%s+(%d+)")
 end
 
 -- Called whenever a player is killed.
@@ -1065,32 +1122,27 @@ function et_Obituary(victim, killer, meansOfDeath)
         ["meansOfDeath"] = meansOfDeath
     }
 
-    -- No tk, to selfkill & not killed by the world
-    if client[victim]["team"] ~= client[killer]["team"] and killer ~= 1022 and killer ~= victim then
-        vars["killerName"]  = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
-        obituary["lastKillerName"] = vars["killerName"]
-        executeCallbackFunction("ObituaryEnemyKill", vars)
-    end
-
-    -- Kills
-    client[killer]["yourLastVictim"] = victim
-    client[killer]["killerWeapon"]   = obituary["meansOfDeath"][meansOfDeath]
-
     if killer == 1022 then
         executeCallbackFunction("ObituaryWorldKill", vars)
     else
-        if killer ~= victim then
-            executeCallbackFunction("ObituaryNoTk", vars)
-        end
+        client[killer]["yourLastVictim"] = victim
+        client[killer]["killerWeapon"]   = meansOfDeathList[meansOfDeath]
 
-        if killer == victim or client[victim]["team"] == client[killer]["team"] then
-            executeCallbackFunction("ObituaryTkAndSelfKill", vars)
+        vars["killerName"] = et.Info_ValueForKey(et.trap_GetUserinfo(killer), "name")
+
+        if killer ~= victim then
+            if client[victim]["team"] ~= client[killer]["team"] then
+                executeCallbackFunction("ObituaryEnemyKill", vars)
+            else
+                executeCallbackFunction("ObituaryTeamKill", vars)
+            end
+        else
+            executeCallbackFunction("ObituarySelfKill", vars)
         end
     end
 
-    -- deaths
     client[victim]["whoKilledYou"] = killer
-    client[victim]["victimWeapon"] = obituary["meansOfDeath"][meansOfDeath]
+    client[victim]["victimWeapon"] = meansOfDeathList[meansOfDeath]
 
     executeCallbackFunction("Obituary", vars)
 
@@ -1134,7 +1186,12 @@ function debug(name, value)
 		valueStr = value
 	end
 
-	et.G_Print("\n\n" .. name .. " = " .. valueStr .. "\n\n")
+    local line = "\n" .. name .. " = " .. valueStr .. "\n"
+    local fd, len = et.trap_FS_FOpenFile("debug.cfg", et.FS_APPEND)
+    et.trap_FS_Write(line, string.len(line), fd)
+    et.trap_FS_FCloseFile(fd)
+    
+	--et.G_LogPrint("\n\n" .. name .. " = " .. valueStr .. "\n\n")
 end
 
 function debugTable(data, indent)

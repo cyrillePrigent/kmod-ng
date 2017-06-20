@@ -57,10 +57,42 @@ function multikillProcess(vars, msg, sound, reset)
     end
 end
 
+-- Callback function when a player kill a enemy.
+--  vars is the local vars of et_Obituary function.
+function checkMultiKillObituaryEnemyKill(vars)
+    client[vars["killer"]]["multikill"] = client[vars["killer"]]["multikill"] + 1
+
+    if client[vars["killer"]]["multikill"] == 1 then
+        client[vars["killer"]]["lastKillTime"] = time["frame"]
+    elseif client[vars["killer"]]["multikill"] == 2 then
+        multikillProcess(vars, multikill["message1"], multikill["sound1"])
+    elseif client[vars["killer"]]["multikill"] == 3 then
+        multikillProcess(vars, multikill["message2"], multikill["sound2"])
+    elseif client[vars["killer"]]["multikill"] == 4 then
+        multikillProcess(vars, multikill["message3"], multikill["sound3"])
+    elseif client[vars["killer"]]["multikill"] == 5 then
+        multikillProcess(vars, multikill["message4"], multikill["sound4"])
+    elseif client[vars["killer"]]["multikill"] == 6 then
+        multikillProcess(vars, multikill["message5"], multikill["sound5"])
+    elseif client[vars["killer"]]["multikill"] == 7 then
+        multikillProcess(vars, multikill["message6"], multikill["sound6"])
+    elseif client[vars["killer"]]["multikill"] == 8 then
+        multikillProcess(vars, multikill["message7"], multikill["sound7"], true)
+    end
+end
+
+-- Callback function when a player is killed by the world, a team mate or himself.
+--  vars is the local vars of et_Obituary function.
+function multiKillReset(vars)
+    client[vars["killer"]]["multikill"]    = 0
+    client[vars["killer"]]["lastKillTime"] = 0
+end
+
+
 -- Callback function of et_Obituary function.
 --  vars is the local vars of et_Obituary function.
 function checkMultiKillObituary(vars)
-    if client[vars["victim"]]["team"] ~= client[vars["killer"]]["team"] and vars["killer"] ~= 1022 and vars["killer"] ~= vars["victim"] then
+    if vars["killer"] ~= 1022 and client[vars["victim"]]["team"] ~= client[vars["killer"]]["team"] and vars["killer"] ~= vars["victim"] then
         client[vars["killer"]]["multikill"] = client[vars["killer"]]["multikill"] + 1
 
         if client[vars["killer"]]["multikill"] == 1 then
@@ -88,5 +120,8 @@ end
 
 -- Add callback multikill function.
 addCallbackFunction({
-    ["Obituary"] = "checkMultiKillObituary"
+    ["ObituaryEnemyKill"] = "checkMultiKillObituaryEnemyKill",
+    ["ObituaryTeamKill"]  = "multiKillReset",
+    ["ObituarySelfKill"]  = "multiKillReset",
+    --["Obituary"] = "checkMultiKillObituary"
 })

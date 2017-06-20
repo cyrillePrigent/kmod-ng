@@ -19,7 +19,7 @@ addSlashCommand("console", "playsound_env", {"function", "playsoundEnvSlashComma
 -- Function executed when slash command is called in et_ConsoleCommand function.
 --  params is parameters passed to the function executed in command file.
 function playsoundSlashCommand(params)
-    if params["nbArg"] ~= 3 then
+    if params["nbArg"] ~= 2 then
         et.G_Print("playsound plays a sound that everybody on the server can hear\n")
         et.G_Print("usage: playsound path_to_sound.wav\n")
     else
@@ -32,7 +32,7 @@ end
 -- Function executed when slash command is called in et_ConsoleCommand function.
 --  params is parameters passed to the function executed in command file.
 function playsoundEnvSlashCommand(params)
-    if params["nbArg"] ~= 3 then
+    if params["nbArg"] ~= 2 then
         et.G_Print("playsound_env plays a sound that you can hear in the proximity of the player with slot -playerslot-\n")
         et.G_Print("usage: playsound_env playerslot path_to_sound.wav\n")
     else

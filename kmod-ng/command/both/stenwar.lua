@@ -1,4 +1,4 @@
-
+-- Global var
 
 weaponsList = {
     nil,    --  1
@@ -53,26 +53,36 @@ weaponsList = {
 
 gameMode["clientSettingsModified"] = true
 
+-- Function
+
+-- Callback function executed when qagame runs a server frame.
+--  clientNum is the client slot id.
 function gameModeRunFramePlayerCallback(clientNum)
-    et.gentity_set(clientNum, "sess.latchPlayerWeapon", 10)
+    if tonumber(et.gentity_get(clientNum, "sess.latchPlayerType")) ~= 4 then
+        et.gentity_set(clientNum, "sess.latchPlayerType", 4)
+    end
+
+    if tonumber(et.gentity_get(clientNum, "sess.latchPlayerWeapon")) ~= 10 then
+        et.gentity_set(clientNum, "sess.latchPlayerWeapon", 10)
+    end
 end
 
+-- Enabled / disabled stenwar game mode.
+-- Require : game mode module
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => new stenwar value
 function execute_command(params)
-    if params.nbArg < 3 then
-        printCmdMsg(params, "Stenwar", "Disable or enable Stenwar \[0-1\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: stenwar \[0-1\]\n")
     else
         local stenwar = tonumber(params["arg1"])
-
-        if gameMode == nil then
-            dofile(kmod_ng_path .. '/modules/game_mode.lua')
-        end
 
         if stenwar == 1 then
             if gameMode["current"] ~= 'stenwar' then
                 if not gameModeIsActive("stenwar", params) then
                     saveServerClassSetting()
-                    printCmdMsg(params, "Stenwar", "Stenwar has been Enabled\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                    printCmdMsg(params, "Stenwar has been Enabled\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxSoldiers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
                     gameMode["current"] = 'stenwar'
 
                     for p = 0, clientsLimit, 1 do
@@ -89,11 +99,11 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Stenwar", "Stenwar is already active\n")
+                printCmdMsg(params, "Stenwar is already active\n")
             end
         elseif stenwar == 0 then
             if gameMode["current"] == 'stenwar' then
-                printCmdMsg(params, "Stenwar", "Stenwar has been Disabled.\n")
+                printCmdMsg(params, "Stenwar has been Disabled.\n")
                 gameMode["current"] = false
                 gameMode["clientSettingsModified"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
@@ -111,10 +121,12 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Stenwar", "Stenwar has already been disabled\n")
+                printCmdMsg(params, "Stenwar has already been disabled\n")
             end
         else
-            printCmdMsg(params, "Stenwar", "Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Valid values are \[0-1\]\n")
         end
     end
+
+    return 1
 end

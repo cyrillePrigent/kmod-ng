@@ -53,16 +53,17 @@ function checkDeathSpreeObituary(vars)
     end
 end
 
--- Callback function when victim is killed without team kill.
+-- Callback function when victim is killed by enemy or team.
 --  vars is the local vars of et_Obituary function.
-function checkDeathSpreeObituaryNoTk(vars)
-    if k_sprees == 1 then -- TODO : Why?
+function checkDeathSpreeObituaryEnemyAndTeamKill(vars)
+    --if k_sprees == 1 then -- TODO : Why?
         client[vars["killer"]]["deathspree"] = 0
-    end
+    --end
 end
 
 -- Add callback death spree function.
 addCallbackFunction({
-    ["Obituary"]     = "checkDeathSpreeObituary",
-    ["ObituaryNoTk"] = "checkDeathSpreeObituaryNoTk"
+    ["Obituary"]          = "checkDeathSpreeObituary",
+    ["ObituaryEnemyKill"] = "checkDeathSpreeObituaryEnemyAndTeamKill",
+    ["ObituaryTeamKill"]  = "checkDeathSpreeObituaryEnemyAndTeamKill"
 })

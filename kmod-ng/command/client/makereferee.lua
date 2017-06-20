@@ -1,12 +1,13 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => client
 function execute_command(params)
-    if params.nbArg < 3 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Makereferee:^7 \[partname/id#\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: makereferee \[partname/id#\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Makereferee', params)
+        clientNum = client2id(params["arg1"], params)
 
-        if clientNum ~= nil
+        if clientNum ~= nil then
             et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref referee " .. clientNum .. "\n" )
         end
     end

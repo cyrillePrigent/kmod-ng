@@ -1,23 +1,24 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => client
 function execute_command(params)
-    if params.nbArg < 3 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putallies:^7 \[partname/id#\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: putallies \[partname/id#\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Putallies', params)
+        clientNum = client2id(params["arg1"], params)
 
-        if clientNum ~= nil
-            local name = et.gentity_get(clientNum, "pers.netname")
-
+        if clientNum ~= nil then
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
+                local name = et.gentity_get(clientNum, "pers.netname")
+
                 if client[clientNum]['team'] ~= 2 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putallies " .. clientNum .. "\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putallies: ^7" .. name .. " ^7has been putted allies\n")
+                    printCmdMsg(params, name .. " ^7has been putted allies\n")
                 else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putspec: ^7" .. name .. " ^7is already allies\n")
+                    printCmdMsg(params, name .. " ^7is already allies\n")
                 end
             else
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Putallies:^7 Cannot put allies a higher admin\n")
+                printCmdMsg(params, "Cannot put allies a higher admin\n")
             end
         end
     end

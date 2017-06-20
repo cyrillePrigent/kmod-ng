@@ -1,18 +1,19 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => client
+--   * params["arg2"] => reason
 function execute_command(params)
     if params.nbArg < 3 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Kick:^7 \[partname/id#\] \[time\] \[reason\]\n")
+        printCmdMsg(params, "Useage: kick \[partname/id#\] \[time\] \[reason\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Kick', params)
+        clientNum = client2id(params["arg1"], params)
 
-        if clientNum ~= nil
-            local client = clientNum + 1
-
+        if clientNum ~= nil then
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. client .. " " .. params["arg2"] .. "\n")
+                local pbClient = clientNum + 1
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbClient .. " " .. params["arg2"] .. "\n")
             else
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Kick:^7 Cannot kick a higher admin\n")
+                printCmdMsg(params, "Cannot kick a higher admin\n")
             end
         end
     end

@@ -1,4 +1,4 @@
-
+-- Global var
 
 weaponsList = {
     nil,    --  1
@@ -53,6 +53,8 @@ weaponsList = {
 
 gameMode["clientSettingsModified"] = true
 
+-- Function
+
 --[[
 -- Callback function when a client is spawned.
 --  vars is the local vars passed from et_ClientSpawn function.
@@ -67,27 +69,30 @@ addCallbackFunction({
 })
 --]]
 
+-- Callback function executed when qagame runs a server frame.
+--  clientNum is the client slot id.
 function gameModeRunFramePlayerCallback(clientNum)
     et.gentity_set(clientNum, "sess.latchPlayerWeapon", 5)
 end
 
+
+-- Enabled / disabled panzerwar game mode.
+-- Require : game mode module
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => new panzerwar value
 function execute_command(params)
-    if params.nbArg < 3 then
-        printCmdMsg(params, "Panzerwar", "Disable or enable panzerwar \[0-1\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: panzerwar \[0-1\]\n")
     else
         local panzerwar = tonumber(params["arg1"])
-
-        if gameMode == nil then
-            dofile(kmod_ng_path .. '/modules/game_mode.lua')
-        end
 
         if panzerwar == 1 then
             if gameMode["current"] ~= 'panzerwar' then
                 if not gameModeIsActive("panzerwar", params) then
                     saveServerClassSetting()
                     local speed = originalSettings['g_speed'] * 2
-                    printCmdMsg(params, "Panzerwar", "Panzerwar has been Enabled\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime 0\n")
+                    printCmdMsg(params, "Panzerwar has been Enabled\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxSoldiers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime 0\n")
                     gameMode["current"] = 'panzerwar'
 
                     for p = 0, clientsLimit, 1 do
@@ -107,11 +112,11 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Panzerwar", "Panzerwar is already active\n")
+                printCmdMsg(params, "Panzerwar is already active\n")
             end
         elseif panzerwar == 0 then
             if gameMode["current"] == 'panzerwar' then
-                printCmdMsg(params, "Panzerwar", "Panzerwar has been Disabled.\n")
+                printCmdMsg(params, "Panzerwar has been Disabled.\n")
                 gameMode["current"] = false
                 gameMode["clientSettingsModified"] = false
                 --removeCallbackFunction("ClientSpawn", "panzerwarClientSpawn")
@@ -130,10 +135,12 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Panzerwar", "Panzerwar has already been disabled\n")
+                printCmdMsg(params, "Panzerwar has already been disabled\n")
             end
         else
-            printCmdMsg(params, "Panzerwar", "Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Valid values are \[0-1\]\n")
         end
     end
+
+    return 1
 end

@@ -1,5 +1,5 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     local status
     local name = et.Info_ValueForKey(et.trap_GetUserinfo(params.clientNum), "name")

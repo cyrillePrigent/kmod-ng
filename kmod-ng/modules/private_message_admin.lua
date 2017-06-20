@@ -26,7 +26,7 @@ function privateMessageAdminsSlashCommand(params)
                 et.trap_SendServerCommand(i, "b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. pmContent .. "^7")
 
                 if k_advancedpms == 1 then
-                    et.G_ClientSound(i, pmsound)
+                    et.G_ClientSound(i, pmSound)
                 end
             end
         end
@@ -35,7 +35,7 @@ function privateMessageAdminsSlashCommand(params)
             et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPm to admins has been sent^d --> ^3" .. pmContent .. "^7")
 
             if k_advancedpms == 1 then
-                et.G_ClientSound(params.clientNum, pmsound)
+                et.G_ClientSound(params.clientNum, pmSound)
             end
         end
     elseif params.cmdMode == "console" then
@@ -48,7 +48,7 @@ function privateMessageAdminsSlashCommand(params)
         for i = 0, clientsLimit, 1 do
             if getAdminLevel(i) >= 2 then
                 et.trap_SendServerCommand(i, "b 8 \"^dPm to admins from ^1SERVER^d --> ^3" .. pmContent .. "^7")
-                et.G_ClientSound(i, pmsound)
+                et.G_ClientSound(i, pmSound)
             end
         end
 

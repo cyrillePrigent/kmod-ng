@@ -1,11 +1,10 @@
-
-
+-- Reset spree record.
+-- Require : spree record module
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
     et.trap_FS_Write("", 0 , fd)
     et.trap_FS_FCloseFile(fd)
-
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Spree record: ^7Spree record has been reset!\n")
 
     spree = {
         ["killsRecord"] = 0,
@@ -15,4 +14,8 @@ function execute_command(params)
             ["current"]  = "Current spree record: ^7N/A"
         }
     }
+
+    printCmdMsg(params, "Spree record has been reset!\n")
+
+    return 1
 end

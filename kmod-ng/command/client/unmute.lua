@@ -1,15 +1,17 @@
 
-
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => client
 function execute_command(params)
-    if params.nbArg < 3 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Unmute:^7 \[partname/id#\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: unmute \[partname/id#\]\n")
     else
-        clientNum = client2id(params["arg1"], 'Unmute', params)
+        clientNum = client2id(params["arg1"], params)
 
-        if clientNum ~= nil
+        if clientNum ~= nil then
+            removeMute(clientNum)
             local name = et.gentity_get(clientNum, "pers.netname")
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute " .. clientNum .. "\n")
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Unmute: ^7" .. name .. " ^7has been unmuted\n")
+            printCmdMsg(params, name .. " ^7has been unmuted\n")
         end
     end
 

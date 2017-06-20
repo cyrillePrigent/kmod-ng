@@ -1,4 +1,4 @@
-
+-- Global var
 
 weaponsList = {
     nil,    --  1
@@ -53,6 +53,10 @@ weaponsList = {
 
 gameMode["clientSettingsModified"] = true
 
+-- Function
+
+-- Callback function executed when qagame runs a server frame.
+--  clientNum is the client slot id.
 function gameModeRunFramePlayerCallback(clientNum)
     if tonumber(et.gentity_get(clientNum, "sess.latchPlayerType")) ~= 4 then
         et.gentity_set(clientNum, "sess.latchPlayerType", 4)
@@ -69,22 +73,22 @@ function gameModeRunFramePlayerCallback(clientNum)
     end
 end
 
+-- Enabled / disabled sniperwar game mode.
+-- Require : game mode module
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => new sniperwar value
 function execute_command(params)
-    if params.nbArg < 3 then
-        printCmdMsg(params, "Sniperwar", "Disable or enable Sniperwar \[0-1\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: sniperwar \[0-1\]\n")
     else
         local sniperwar = tonumber(params["arg1"])
-
-        if gameMode == nil then
-            dofile(kmod_ng_path .. '/modules/game_mode.lua')
-        end
 
         if sniperwar == 1 then
             if gameMode["current"] ~= 'sniperwar' then
                 if not gameModeIsActive("sniperwar", params) then
                     saveServerClassSetting()
-                    printCmdMsg(params, "Sniperwar", "Sniperwar has been Enabled\n")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
+                    printCmdMsg(params, "Sniperwar has been Enabled\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxSoldiers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
                     gameMode["current"] = 'sniperwar'
 
                     for p = 0, clientsLimit, 1 do
@@ -101,11 +105,11 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Sniperwar", "Sniperwar is already active\n")
+                printCmdMsg(params, "Sniperwar is already active\n")
             end
         elseif sniperwar == 0 then
             if gameMode["current"] == 'sniperwar' then
-                printCmdMsg(params, "Sniperwar", "Sniperwar has been Disabled.\n")
+                printCmdMsg(params, "Sniperwar has been Disabled.\n")
                 gameMode["current"] = false
                 gameMode["clientSettingsModified"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
@@ -123,10 +127,12 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Sniperwar", "Sniperwar has already been disabled\n")
+                printCmdMsg(params, "Sniperwar has already been disabled\n")
             end
         else
-            printCmdMsg(params, "Sniperwar", "Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Valid values are \[0-1\]\n")
         end
     end
+
+    return 1
 end

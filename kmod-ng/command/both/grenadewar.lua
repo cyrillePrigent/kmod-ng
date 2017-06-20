@@ -1,4 +1,4 @@
-
+-- Global var
 
 weaponsList = {
     nil,    --  1
@@ -53,26 +53,30 @@ weaponsList = {
 
 gameMode["clientSettingsModified"] = false
 
+-- Function
+
+-- Callback function executed when qagame runs a server frame.
+--  clientNum is the client slot id.
 function gameModeRunFramePlayerCallback(clientNum)
     -- Nothing to do
 end
 
+-- Enabled / disabled grenadewar game mode.
+-- Require : game mode module
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--   * params["arg1"] => new grenadewar value
 function execute_command(params)
-    if params.nbArg < 3 then
-        printCmdMsg(params, "Grenadewar", "Disable or enable Grenadewar \[0-1\]\n")
+    if params.nbArg < 2 then
+        printCmdMsg(params, "Useage: grenadewar \[0-1\]\n")
     else
         local grenadewar = tonumber(params["arg1"])
-
-        if gameMode == nil then
-            dofile(kmod_ng_path .. '/modules/game_mode.lua')
-        end
 
         if grenadewar == 1 then
             if gameMode["current"] ~= 'grenadewar' then
                 if not gameModeIsActive("grenadewar", params) then
                     saveServerClassSetting()
-                    printCmdMsg(params, "Grenadewar", "Grenadewar has been Enabled\n")
-                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxflamers -1 ; team_maxmortars -1 ; team_maxmg42s -1 ; team_maxpanzers -1\n")
+                    printCmdMsg(params, "Grenadewar has been Enabled\n")
+                    et.trap_SendConsoleCommand( et.EXEC_APPEND, "team_maxmedics -1 ; team_maxcovertops -1 ; team_maxfieldops -1 ; team_maxengineers -1 ; team_maxSoldiers -1 ; team_maxflamers -1 ; team_maxmortars -1 ; team_maxmg42s -1 ; team_maxpanzers -1\n")
                     gameMode["current"] = 'grenadewar'
 
                     for p = 0, clientsLimit, 1 do
@@ -86,11 +90,11 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Grenadewar", "Grenadewar is already active\n")
+                printCmdMsg(params, "Grenadewar is already active\n")
             end
         elseif grenadewar == 0 then
             if gameMode["current"] == 'grenadewar' then
-                printCmdMsg(params, "Grenadewar", "Grenadewar has been Disabled.\n")
+                printCmdMsg(params, "Grenadewar has been Disabled.\n")
                 gameMode["current"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
 
@@ -104,10 +108,12 @@ function execute_command(params)
                     end
                 end
             else
-                printCmdMsg(params, "Grenadewar", "Grenadewar has already been disabled\n")
+                printCmdMsg(params, "Grenadewar has already been disabled\n")
             end
         else
-            printCmdMsg(params, "Grenadewar", "Valid values are \[0-1\]\n")
+            printCmdMsg(params, "Valid values are \[0-1\]\n")
         end
     end
+
+    return 1
 end

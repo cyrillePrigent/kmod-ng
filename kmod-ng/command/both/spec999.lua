@@ -1,5 +1,5 @@
-
-
+-- Put all afk player(999 ping) to spectator.
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     local matches = 0
 
@@ -12,5 +12,7 @@ function execute_command(params)
         end
     end
 
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Spec999: ^7Moving ^1" .. matches .. " ^7players to spectator\n")
+    printCmdMsg(params, "Moving ^1" .. matches .. " ^7players to spectator\n")
+
+    return 1
 end

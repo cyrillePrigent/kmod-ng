@@ -97,6 +97,12 @@ function checkKillingSpreeObituaryEnemyKill(vars)
     elseif client[vars["killer"]]["killingspree"] == killingSpree["amount6"] then
         killingSpreeProcess(vars, killingSpree["message6"], killingSpree["sound6"])
     end
+
+    if client[vars["victim"]]["killingspree"] >= 5 then
+        killingSpreeEndProcess(vars, killingSpree["endMessage1"], vars["victim"], vars["victim"])
+    else
+        client[vars["victim"]]["killingspree"] = 0
+    end
 end
 
 -- Callback function when world kill a player.
@@ -109,15 +115,21 @@ function checkKillingSpreeObituaryWorldKill(vars)
     end
 end
 
--- Callback function when victim have team kill or self kill.
+-- Callback function when victim is killed by mate (team kill).
 --  vars is the local vars of et_Obituary function.
-function checkKillingSpreeObituaryTkAndSelfKill(vars)
+function checkKillingSpreeObituaryTeamKill(vars)
     if client[vars["killer"]]["killingspree"] >= 5 then
-        if vars["killer"] == vars["victim"] then
-            killingSpreeEndProcess(vars, killingSpree["endMessage2"], vars["victim"], vars["killer"])
-        else
-            killingSpreeEndProcess(vars, killingSpree["endMessage4"], vars["killer"], vars["killer"])
-        end
+        killingSpreeEndProcess(vars, killingSpree["endMessage4"], vars["killer"], vars["killer"])
+    else
+        client[vars["killer"]]["killingspree"] = 0
+    end
+end
+
+-- Callback function when victim is killed himself (self kill).
+--  vars is the local vars of et_Obituary function.
+function checkKillingSpreeObituarySelfKill(vars)
+    if client[vars["killer"]]["killingspree"] >= 5 then
+        killingSpreeEndProcess(vars, killingSpree["endMessage2"], vars["victim"], vars["killer"])
     else
         client[vars["killer"]]["killingspree"] = 0
     end
@@ -125,19 +137,20 @@ end
 
 -- Callback function of et_Obituary function.
 --  vars is the local vars of et_Obituary function.
-function checkKillingSpreeObituary(vars)
-    if client[vars["victim"]]["killingspree"] >= 5 then
-        killingSpreeEndProcess(vars, killingSpree["endMessage1"], vars["victim"], vars["victim"])
-    else
-        client[vars["victim"]]["killingspree"] = 0
-    end
-end
+--function checkKillingSpreeObituary(vars)
+--    if client[vars["victim"]]["killingspree"] >= 5 then
+--        killingSpreeEndProcess(vars, killingSpree["endMessage1"], vars["victim"], vars["victim"])
+--    else
+--        client[vars["victim"]]["killingspree"] = 0
+--    end
+--end
 
 -- Add callback killing spree function.
 addCallbackFunction({
-    ["RunFrameEndRound"]      = "checkKillingSpreeRunFrameEndRound",
-    ["ObituaryEnemyKill"]     = "checkKillingSpreeObituaryEnemyKill",
-    ["ObituaryWorldKill"]     = "checkKillingSpreeObituaryWorldKill",
-    ["ObituaryTkAndSelfKill"] = "checkKillingSpreeObituaryTkAndSelfKill",
-    ["Obituary"]              = "checkKillingSpreeObituary"
+    ["RunFrameEndRound"]  = "checkKillingSpreeRunFrameEndRound",
+    ["ObituaryEnemyKill"] = "checkKillingSpreeObituaryEnemyKill",
+    ["ObituaryWorldKill"] = "checkKillingSpreeObituaryWorldKill",
+    ["ObituaryTeamKill"]  = "checkKillingSpreeObituaryTeamKill",
+    ["ObituarySelfKill"]  = "checkKillingSpreeObituarySelfKill",
+    --["Obituary"]          = "checkKillingSpreeObituary"
 })

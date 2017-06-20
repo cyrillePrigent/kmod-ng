@@ -12,6 +12,7 @@ gameMode = {
 }
 
 originalSettings = {
+    ["team_maxSoldiers"]    = "",
     ["team_maxmortars"]     = "",
     ["team_maxpanzers"]     = "",
     ["team_maxflamers"]     = "",
@@ -35,12 +36,14 @@ cmdList["client"]["!grenadewar"]  = "/command/both/grenadewar.lua"
 cmdList["client"]["!sniperwar"]   = "/command/both/sniperwar.lua"
 cmdList["client"]["!stenwar"]     = "/command/both/stenwar.lua"
 cmdList["client"]["!lugerwar"]    = "/command/both/lugerwar.lua"
+cmdList["client"]["!knifewar"]    = "/command/both/knifewar.lua"
 cmdList["console"]["!panzerwar"]  = "/command/both/panzerwar.lua"
 cmdList["console"]["!frenzy"]     = "/command/both/frenzy.lua"
 cmdList["console"]["!grenadewar"] = "/command/both/grenadewar.lua"
 cmdList["console"]["!sniperwar"]  = "/command/both/sniperwar.lua"
 cmdList["console"]["!stenwar"]    = "/command/both/stenwar.lua"
 cmdList["console"]["!lugerwar"]   = "/command/both/lugerwar.lua"
+cmdList["console"]["!knifewar"]    = "/command/both/knifewar.lua"
 
 -- Function
 
@@ -79,7 +82,6 @@ function setWeaponAmmo(weaponList, clientNum)
             et.gentity_set(clientNum, "ps.ammoclip", i, 0)
             et.gentity_set(clientNum, "ps.ammo", i, 0)
         else
-            et.gentity_set(clientNum, "ps.ammoclip", i, 999)
             et.gentity_set(clientNum, "ps.ammo", i, 999)
         end
     end
@@ -132,17 +134,17 @@ end
 
 function gameModeIsActive(newGameMode, params)
     if newGameMode ~= "panzerwar" and gameMode["current"] == "panzerwar" then
-        printCmdMsg(params, string.upper(newGameMode), "Panzerwar must be disabled first\n")
+        printCmdMsg(params, "Panzerwar must be disabled first\n")
     elseif newGameMode ~= "grenadewar" and gameMode["current"] == "grenadewar" then
-        printCmdMsg(params, string.upper(newGameMode), "Grenadewar must be disabled first\n")
+        printCmdMsg(params, "Grenadewar must be disabled first\n")
     elseif newGameMode ~= "sniperwar" and gameMode["current"] == "sniperwar" then
-        printCmdMsg(params, string.upper(newGameMode), "Sniperwar must be disabled first\n")
+        printCmdMsg(params, "Sniperwar must be disabled first\n")
     elseif newGameMode ~= "stenwar" and gameMode["current"] == "stenwar" then
-        printCmdMsg(params, string.upper(newGameMode), "Stenwar must be disabled first\n")
+        printCmdMsg(params, "Stenwar must be disabled first\n")
     elseif newGameMode ~= "frenzy" and gameMode["current"] == "frenzy" then
-        printCmdMsg(params, string.upper(newGameMode), "Frenzy must be disabled first\n")
+        printCmdMsg(params, "Frenzy must be disabled first\n")
     elseif newGameMode ~= "lugerwar" and gameMode["current"] == "lugerwar" then
-        printCmdMsg(params, string.upper(newGameMode), "Lugerwar must be disabled first\n")
+        printCmdMsg(params, "Lugerwar must be disabled first\n")
     else
         return false
     end
@@ -151,6 +153,7 @@ function gameModeIsActive(newGameMode, params)
 end
 
 function saveServerClassSetting()
+    originalSettings["team_maxSoldiers"]    = tonumber(et.trap_Cvar_Get("team_maxSoldiers"))
     originalSettings["team_maxmortars"]     = tonumber(et.trap_Cvar_Get("team_maxmortars"))
     originalSettings["team_maxpanzers"]     = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
     originalSettings["team_maxflamers"]     = tonumber(et.trap_Cvar_Get("team_maxflamers"))
