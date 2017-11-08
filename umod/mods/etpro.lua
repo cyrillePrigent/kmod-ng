@@ -176,8 +176,10 @@ function etProFixClientConnect(vars)
     -- every time doesn't hurt much
 
     -- validate userinfo to filter out the people blindly using luigi's code
-    if et.Info_ValueForKey(userinfo, "rate") == "15000" then
-    --and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
+--    if et.Info_ValueForKey(userinfo, "rate") == "15000" then
+--    --and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
+    
+    if et.Info_ValueForKey(userinfo, "rate") == "1500" and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
         et.G_Printf("fake player limit: invalid userinfo from %s\n", ip)
         return "invalid connection"
     end

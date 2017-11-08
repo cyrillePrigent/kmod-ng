@@ -36,6 +36,7 @@ clientDefaultData = {
     ["respawn"]        = 0,
     ["switchTeam"]     = 0,
     ["name"]           = "",
+    ["guid"]           = "",
     ["lastName"]       = "",
     ["team"]           = 0,
     ["whoKilledYou"]   = 1022,
@@ -47,10 +48,11 @@ clientDefaultData = {
 
 -- Players stats
 players = {
-    ["allies"] = 0,
-    ["axis"]   = 0,
-    ["active"] = 0,
-    ["total"]  = 0
+    ["allies"]    = 0,
+    ["axis"]      = 0,
+    ["spectator"] = 0,
+    ["active"]    = 0,
+    ["total"]     = 0
 }
 
 -- Command (client & console)
@@ -239,8 +241,7 @@ pause = {
 
 -- Under etpro mod :
 --  fs_homepath (default win xp) : 
---  fs_homepath (default gnu/linux) : /home/$USER/.etwolf  with logued user
---  fs_homepath (default gnu/linux) : /root/.etwolf        with root
+--  fs_homepath (default gnu/linux) : 
 
 --  fs_game : etpro
 --  fs_basegame : 
@@ -292,7 +293,7 @@ k_killerhpdisplay     = tonumber(et.trap_Cvar_Get("k_killerhpdisplay"))
 k_endroundshuffle     = tonumber(et.trap_Cvar_Get("k_endroundshuffle"))
 pmSound               = et.trap_Cvar_Get("pmsound")
 k_playsound           = tonumber(et.trap_Cvar_Get("k_playsound"))
-
+k_revive_spree        = tonumber(et.trap_Cvar_Get("k_revive_spree"))
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -354,7 +355,7 @@ function client2id(client, params)
     local clientNum = tonumber(client)
 
     if clientNum then
-        if clientNum >= 0 and clientNum < 64 then
+        if clientNum >= 0 and clientNum < clientsLimit then
             if et.gentity_get(clientNum, "pers.connected") ~= 2 then
                 if params ~= nil then
                     printCmdMsg(params, "There is no client associated with this slot number\n")
@@ -646,6 +647,21 @@ et.G_LogPrintf = function(...)
     et.G_LogPrint(string.format(unpack(arg)))
 end
 
+function kick(clientNum, reason, timeout)
+    timeout = timeout or 0
+
+    -- if punkbuster then
+        local pbClient = clientNum + 1
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbClient .. " " .. timeout .. " " .. reason .. "\n")
+    -- else
+        --&say( $tmphash{$client_id}{'name'} . "^7 kicked. Reason: ^3" . $reason . "^7." ) if ($public_output);
+        --&cmd("clientkick $client_id $timeout");
+    -- end
+    
+    --if k_logchat == 1 then
+    --    writeLog("Teamgib: Private Notice... (Info)")
+    --end
+end
 
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
@@ -743,6 +759,10 @@ end
 
 if k_playsound == 1 then
     dofile(umod_path .. "/modules/playsound.lua")
+end
+
+if k_revive_spree == 1 then
+    dofile(umod_path .. "/modules/revive_spree.lua")
 end
 
 dofile(umod_path .. "/modules/commands.lua")
@@ -866,34 +886,36 @@ function et_RunFrame(levelTime)
     -- 1 : warmup, 0 : match, 3 : end round
     game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
 
-    --players["axis"] = 0
-    --players["allies"] = 0
+    players["axis"]   = 0
+    players["allies"] = 0
     players["active"] = 0
-    --players["total"] = 0
+    players["total"]  = 0
 
     for i = 0, clientsLimit, 1 do
         client[i]["name"] = et.gentity_get(i, "pers.netname")
  
         if et.gentity_get(i, "pers.connected") == 2 then
             if client[i]["name"] ~= client[i]["lastName"] then
-                -- TODO : Check if log module is enabled
-                writeLog("*** " .. client[i]["lastName"] .. " HAS RENAMED TO " .. client[i]["name"] .. " ***\n")
+                if k_logchat == 1 then
+                    writeLog("*** " .. client[i]["lastName"] .. " HAS RENAMED TO " .. client[i]["name"] .. " ***\n")
+                end
+
                 client[i]["lastName"] = client[i]["name"]
             end
 
-            --[[
             if client[i]["team"] == 1 then
                 players["axis"] = players["axis"] + 1
             elseif client[i]["team"] == 2 then
                 players["allies"] = players["allies"] + 1
+            elseif client[i]["team"] == 3 then
+                players["spectator"] = players["spectator"] + 1
             end
-            ]]--
 
             if client[i]["team"] == 1 or client[i]["team"] == 2 then
                 players["active"] = players["active"] + 1
             end
 
-            --players["total"] = players["total"] + 1
+            players["total"] = players["total"] + 1
         else
             client[i]["name"]     = ""
             client[i]["lastName"] = ""
@@ -938,6 +960,8 @@ function et_ClientConnect(clientNum, firstTime, isBot)
     local result
     result = executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
 
+    client[clientNum]["guid"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
+
     if result then
         return result
     end
@@ -961,6 +985,7 @@ function et_ClientBegin(clientNum)
     et.trap_SendServerCommand(clientNum, "cpm \"This server is running the new KMOD-ng version " .. version .. " " .. releaseStatus .. "\n\"")
     et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
 
+    
     client[clientNum]["lastName"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
     client[clientNum]["team"]     = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
@@ -1097,7 +1122,6 @@ function et_ConsoleCommand()
     end
 
     if slashCommandConsole[params.cmd] ~= nil then
-        debug("DEBUG slashCommandConsole", slashCommandConsole)
         for _, cmdData in ipairs(slashCommandConsole[params.cmd]) do
             if runSlashCommand(cmdData, params) == 1 then
                 return 1

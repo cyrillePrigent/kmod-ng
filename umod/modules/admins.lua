@@ -131,7 +131,7 @@ function removeAdmin(clientNum)
     elseif lenOut == -1 then
         et.G_LogPrint("WARNING: shrubbot.tmp.cfg file no found / not readable!\n")
     elseif lenIn == 0 then
-        et.G_Print("There is no Power User IP to remove \n")
+        et.G_Print("There is no Power User IP to remove\n")
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
 

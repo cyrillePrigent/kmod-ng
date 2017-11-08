@@ -28,7 +28,7 @@ clientDefaultData["deathspree"] = 0
 function deathSpreeProcess(vars, msg, sound)
     msg = string.gsub(msg, "#victim#", vars["victimName"])
     msg = string.gsub(msg, "#deaths#", client[vars["victim"]]["deathspree"])
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, deathSpree["location"] .. " " .. msg .. "\n" )
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, deathSpree["location"] .. " " .. msg .. "\n")
 
     if deathSpree["enabledSound"] == 1 then
         if k_noisereduction == 1 then
