@@ -3,30 +3,30 @@
 -- Global var
 
 killingSpree = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("k_spreesounds")),
-    ["amount1"]      = tonumber(et.trap_Cvar_Get("k_spree1_amount")),
-    ["amount2"]      = tonumber(et.trap_Cvar_Get("k_spree2_amount")),
-    ["amount3"]      = tonumber(et.trap_Cvar_Get("k_spree3_amount")),
-    ["amount4"]      = tonumber(et.trap_Cvar_Get("k_spree4_amount")),
-    ["amount5"]      = tonumber(et.trap_Cvar_Get("k_spree5_amount")),
-    ["amount6"]      = tonumber(et.trap_Cvar_Get("k_spree6_amount")),
-    ["sound1"]       = et.trap_Cvar_Get("killingspreesound1"),
-    ["sound2"]       = et.trap_Cvar_Get("killingspreesound2"),
-    ["sound3"]       = et.trap_Cvar_Get("killingspreesound3"),
-    ["sound4"]       = et.trap_Cvar_Get("killingspreesound4"),
-    ["sound5"]       = et.trap_Cvar_Get("killingspreesound5"),
-    ["sound6"]       = et.trap_Cvar_Get("killingspreesound6"),
-    ["message1"]     = et.trap_Cvar_Get("k_ks_message1"),
-    ["message2"]     = et.trap_Cvar_Get("k_ks_message2"),
-    ["message3"]     = et.trap_Cvar_Get("k_ks_message3"),
-    ["message4"]     = et.trap_Cvar_Get("k_ks_message4"),
-    ["message5"]     = et.trap_Cvar_Get("k_ks_message5"),
-    ["message6"]     = et.trap_Cvar_Get("k_ks_message6"),
-    ["endMessage1"]  = et.trap_Cvar_Get("k_end_message1"),
-    ["endMessage2"]  = et.trap_Cvar_Get("k_end_message2"),
-    ["endMessage3"]  = et.trap_Cvar_Get("k_end_message3"),
-    ["endMessage4"]  = et.trap_Cvar_Get("k_end_message4"),
-    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("k_ks_location")))
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_s_sounds")),
+    ["amount1"]      = tonumber(et.trap_Cvar_Get("u_spree1_amount")),
+    ["amount2"]      = tonumber(et.trap_Cvar_Get("u_spree2_amount")),
+    ["amount3"]      = tonumber(et.trap_Cvar_Get("u_spree3_amount")),
+    ["amount4"]      = tonumber(et.trap_Cvar_Get("u_spree4_amount")),
+    ["amount5"]      = tonumber(et.trap_Cvar_Get("u_spree5_amount")),
+    ["amount6"]      = tonumber(et.trap_Cvar_Get("u_spree6_amount")),
+    ["sound1"]       = et.trap_Cvar_Get("u_killingspreesound1"),
+    ["sound2"]       = et.trap_Cvar_Get("u_killingspreesound2"),
+    ["sound3"]       = et.trap_Cvar_Get("u_killingspreesound3"),
+    ["sound4"]       = et.trap_Cvar_Get("u_killingspreesound4"),
+    ["sound5"]       = et.trap_Cvar_Get("u_killingspreesound5"),
+    ["sound6"]       = et.trap_Cvar_Get("u_killingspreesound6"),
+    ["message1"]     = et.trap_Cvar_Get("u_ks_message1"),
+    ["message2"]     = et.trap_Cvar_Get("u_ks_message2"),
+    ["message3"]     = et.trap_Cvar_Get("u_ks_message3"),
+    ["message4"]     = et.trap_Cvar_Get("u_ks_message4"),
+    ["message5"]     = et.trap_Cvar_Get("u_ks_message5"),
+    ["message6"]     = et.trap_Cvar_Get("u_ks_message6"),
+    ["endMessage1"]  = et.trap_Cvar_Get("u_end_message1"),
+    ["endMessage2"]  = et.trap_Cvar_Get("u_end_message2"),
+    ["endMessage3"]  = et.trap_Cvar_Get("u_end_message3"),
+    ["endMessage4"]  = et.trap_Cvar_Get("u_end_message4"),
+    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("u_ks_location")))
 }
 
 -- Set default client data.
@@ -58,7 +58,7 @@ function killingSpreeProcess(vars, msg, sound)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, killingSpree["location"] .. " " .. msg .. "\n")
 
     if killingSpree["enabledSound"] == 1 then
-        if k_noisereduction == 1 then
+        if noiseReduction == 1 then
             et.G_ClientSound(vars["killer"], sound)
         else
             et.G_globalSound(sound)

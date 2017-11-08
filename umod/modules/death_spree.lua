@@ -3,17 +3,17 @@
 -- Global var
 
 deathSpree = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("k_deathspreesounds")),
-    ["amount1"]      = tonumber(et.trap_Cvar_Get("k_deathspree1_amount")),
-    ["amount2"]      = tonumber(et.trap_Cvar_Get("k_deathspree2_amount")),
-    ["amount3"]      = tonumber(et.trap_Cvar_Get("k_deathspree3_amount")),
-    ["sound1"]       = et.trap_Cvar_Get("deathspreesound1"),
-    ["sound2"]       = et.trap_Cvar_Get("deathspreesound2"),
-    ["sound3"]       = et.trap_Cvar_Get("deathspreesound3"),
-    ["message1"]     = et.trap_Cvar_Get("k_ds_message1"),
-    ["message2"]     = et.trap_Cvar_Get("k_ds_message2"),
-    ["message3"]     = et.trap_Cvar_Get("k_ds_message3"),
-    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("k_ds_location")))
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ds_sound")),
+    ["amount1"]      = tonumber(et.trap_Cvar_Get("u_deathspree1_amount")),
+    ["amount2"]      = tonumber(et.trap_Cvar_Get("u_deathspree2_amount")),
+    ["amount3"]      = tonumber(et.trap_Cvar_Get("u_deathspree3_amount")),
+    ["sound1"]       = et.trap_Cvar_Get("u_deathspreesound1"),
+    ["sound2"]       = et.trap_Cvar_Get("u_deathspreesound2"),
+    ["sound3"]       = et.trap_Cvar_Get("u_deathspreesound3"),
+    ["message1"]     = et.trap_Cvar_Get("u_ds_message1"),
+    ["message2"]     = et.trap_Cvar_Get("u_ds_message2"),
+    ["message3"]     = et.trap_Cvar_Get("u_ds_message3"),
+    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("u_ds_location")))
 }
 
 -- Set default client data.
@@ -31,7 +31,7 @@ function deathSpreeProcess(vars, msg, sound)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, deathSpree["location"] .. " " .. msg .. "\n")
 
     if deathSpree["enabledSound"] == 1 then
-        if k_noisereduction == 1 then
+        if noiseReduction == 1 then
             et.G_ClientSound(vars["victim"], sound)
         else
             et.G_globalSound(sound)
@@ -56,9 +56,7 @@ end
 -- Callback function when victim is killed by enemy or team.
 --  vars is the local vars of et_Obituary function.
 function checkDeathSpreeObituaryEnemyAndTeamKill(vars)
-    --if k_sprees == 1 then -- TODO : Why?
-        client[vars["killer"]]["deathspree"] = 0
-    --end
+    client[vars["killer"]]["deathspree"] = 0
 end
 
 -- Add callback death spree function.

@@ -13,7 +13,7 @@ function checkNameStealingProtectionClientUserinfoChanged(vars)
                 if i ~= vars["clientNum"] and client[i]["name"] ~= "" then
                     if $guid ~= client[i]["guid"] and testName == et.Q_CleanStr(string.gsub(client[i]["name"], "^%s*(.-)%s*$", "%1")) then
                         -- $GUID is a name faker
-                        if k_logchat == 1 then
+                        if logChatModule == 1 then
                             writeLog("$guid ($name) is a name faker. Stole name of " .. client[i]["name"] .. " (" .. client[i]["guid"] .. ")")
                         end
 

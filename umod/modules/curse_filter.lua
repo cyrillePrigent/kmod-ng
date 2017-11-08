@@ -46,14 +46,14 @@ end
 function curseFilter(params)
     local name     = et.gentity_get(params.clientNum, "pers.netname")
     local ref      = tonumber(et.gentity_get(params.clientNum, "sess.referee"))
-    local curseMod = k_cursemode
+    local tmpCurseMode = curseMode
 
-    if (curseMod - 32) >= 0 then
+    if (tmpCurseMode - 32) >= 0 then
         -- Override kill and slap
-        if (curseMod - 32) > 7 then
-            curseMod = 7
+        if (tmpCurseMode - 32) > 7 then
+            tmpCurseMode = 7
         else
-            curseMod = curseMod - 32
+            tmpCurseMode = tmpCurseMode - 32
         end
 
         if et.gentity_get(params.clientNum, "pers.connected") == 2 then
@@ -68,12 +68,12 @@ function curseFilter(params)
         end
     end
 
-    if (curseMod - 16) >= 0 then
+    if (tmpCurseMode - 16) >= 0 then
         -- Override slap
-        if (curseMod - 16) > 7 then
-            curseMod = 7
+        if (tmpCurseMode - 16) > 7 then
+            tmpCurseMode = 7
         else
-            curseMod = curseMod - 16
+            tmpCurseMode = tmpCurseMode - 16
         end
 
         if et.gentity_get(params.clientNum, "pers.connected") == 2 then
@@ -86,8 +86,8 @@ function curseFilter(params)
         end
     end
 
-    if (curseMod - 8) >= 0 then
-        curseMod = curseMod - 16
+    if (tmpCurseMode - 8) >= 0 then
+        tmpCurseMode = tmpCurseMode - 16
 
         if et.gentity_get(params.clientNum, "pers.connected") == 2 then
             if client[params.clientNum]["team"] > 0 or client[params.clientNum]["team"] < 4 then
@@ -101,16 +101,16 @@ function curseFilter(params)
         end
     end
 
-    if (curseMod - 4) >= 0 then
+    if (tmpCurseMode - 4) >= 0 then
         -- Override kill and slap
-        if (curseMod - 4) > 0 then
-            curseMod = 0
+        if (tmpCurseMode - 4) > 0 then
+            tmpCurseMode = 0
         end
 
         if ref == 0 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute \"" .. params.clientNum .. "\"\n")
 
-            if k_mute_module == 1 then
+            if muteModule == 1 then
                 client[params.clientNum]["muteEnd"] = -1
                 setMute(params.clientNum, -1)
             end
@@ -119,17 +119,17 @@ function curseFilter(params)
         end
     end
 
-    if (curseMod - 2) >= 0 then
+    if (tmpCurseMode - 2) >= 0 then
         -- Override kill and slap
-        if (curseMod - 2) > 0 then
-            curseMod = 0
+        if (tmpCurseMode - 2) > 0 then
+            tmpCurseMode = 0
         end
 
         --Mute time starts at one then doubles each time thereafter
         if ref == 0 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute \"" .. params.clientNum .. "\"\n" )
 
-            if k_mute_module == 1 then
+            if muteModule == 1 then
                 if client[params.clientNum]["muteMultipliers"] == 0 then
                     client[params.clientNum]["muteMultipliers"] = 1
                     client[params.clientNum]["muteEnd"]         = time["frame"] + (1 * 60 * 1000)
@@ -145,7 +145,7 @@ function curseFilter(params)
         end
     end
 
-    if curseMod == 1 then
+    if tmpCurseMode == 1 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute \"" .. params.clientNum .. "\"\n" )
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted!\n")
     end

@@ -7,10 +7,8 @@ autoPanzerDisable = {
     ["enabledMsg"]  = false,
     ["warning"]     = 0,
     ["time"]        = 0,
-    ["playerLimit"] = tonumber(et.trap_Cvar_Get("k_panzerplayerlimit"))
+    ["playerLimit"] = tonumber(et.trap_Cvar_Get("u_panzerplayerlimit"))
 }
-
--- k_panzersperteam = team_maxpanzers
 
 -- Function
 
@@ -57,7 +55,7 @@ function autoPanzerDisableRunFrame(vars)
                             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
                             et.gentity_set(i, "sess.latchPlayerWeapon", 3)
 
-                            if k_advancedpms == 1 then
+                            if advancedPms == 1 then
                                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. i .. " ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
                             else
                                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "m \"" .. client[i]["name"] .. "\" ^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\n")
@@ -74,11 +72,11 @@ function autoPanzerDisableRunFrame(vars)
         else
             autoPanzerDisable["disabledMsg"] = false
             autoPanzerDisable["warning"]     = 0
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. panzersPerTeam .. "\n")
 
             if autoPanzerDisable["enabledMsg"] == false then
                 autoPanzerDisable["enabledMsg"] = true
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled. Each team is allowed only ^1" .. k_panzersperteam .. "^7 panzer(s) per team!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled. Each team is allowed only ^1" .. panzersPerTeam .. "^7 panzer(s) per team!\n")
             end
         end
     end

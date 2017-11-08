@@ -40,7 +40,7 @@ function checkGibProtectorPrint(vars)
                 if client[killerId]["teamGib"] < 3 then
                     local msg = "^7You just gibbed a teammate! Don't do this again! (" .. client[killerId]["teamGib"] .. " time)/n"
                     
-                    if k_advancedpms == 1 then
+                    if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
                         local name = et.gentity_get(killerId, "pers.netname")
@@ -49,7 +49,7 @@ function checkGibProtectorPrint(vars)
                 elseif client[killerId]["teamGib"] >= 3 then
                     local msg = "^7You are gibbing too much teammates! Don't do this again or you will be kicked! (" .. client[killerId]["teamGib"] .. " time)\n"
 
-                    if k_advancedpms == 1 then
+                    if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
                         local name = et.gentity_get(killerId, "pers.netname")
@@ -59,7 +59,7 @@ function checkGibProtectorPrint(vars)
                     local killerName = et.gentity_get(killerId, "pers.netname")
                     local msg = "^7" .. killerName .. " is gibbing teammates (to collect binoculars) ... 5 minute temp ban!\n"
                     
-                    if k_advancedpms == 1 then
+                    if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. killerName .. " " .. msg)

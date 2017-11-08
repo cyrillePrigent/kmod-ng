@@ -4,8 +4,8 @@
 
 voteDisabled = {
     ["active"]   = false,
-    ["mode"]     = tonumber(et.trap_Cvar_Get("k_dvmode")),
-    ["modeTime"] = tonumber(et.trap_Cvar_Get("k_dvtime"))
+    ["mode"]     = tonumber(et.trap_Cvar_Get("u_dvmode")),
+    ["modeTime"] = tonumber(et.trap_Cvar_Get("u_dvtime"))
 }
 
 

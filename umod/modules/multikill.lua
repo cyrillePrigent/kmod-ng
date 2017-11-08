@@ -3,23 +3,23 @@
 -- Global var
 
 multikill = {
-    ["maxElapsedTime"] = tonumber(et.trap_Cvar_Get("k_multikill_time")),
-    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("k_multikillsounds")),
-    ["message1"]       = et.trap_Cvar_Get("k_mk_message1"),
-    ["message2"]       = et.trap_Cvar_Get("k_mk_message2"),
-    ["message3"]       = et.trap_Cvar_Get("k_mk_message3"),
-    ["message4"]       = et.trap_Cvar_Get("k_mk_message4"),
-    ["message5"]       = et.trap_Cvar_Get("k_mk_message5"),
-    ["message6"]       = et.trap_Cvar_Get("k_mk_message6"),
-    ["message7"]       = et.trap_Cvar_Get("k_mk_message7"),
-    ["sound1"]         = et.trap_Cvar_Get("multikill1"),
-    ["sound2"]         = et.trap_Cvar_Get("multikill2"),
-    ["sound3"]         = et.trap_Cvar_Get("multikill3"),
-    ["sound4"]         = et.trap_Cvar_Get("multikill4"),
-    ["sound5"]         = et.trap_Cvar_Get("multikill5"),
-    ["sound6"]         = et.trap_Cvar_Get("multikill6"),
-    ["sound7"]         = et.trap_Cvar_Get("multikill7"),
-    ["location"]       = getMessageLocation(tonumber(et.trap_Cvar_Get("k_mk_location")))
+    ["maxElapsedTime"] = tonumber(et.trap_Cvar_Get("u_multikill_time")),
+    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_mk_sounds")),
+    ["message1"]       = et.trap_Cvar_Get("u_mk_message1"),
+    ["message2"]       = et.trap_Cvar_Get("u_mk_message2"),
+    ["message3"]       = et.trap_Cvar_Get("u_mk_message3"),
+    ["message4"]       = et.trap_Cvar_Get("u_mk_message4"),
+    ["message5"]       = et.trap_Cvar_Get("u_mk_message5"),
+    ["message6"]       = et.trap_Cvar_Get("u_mk_message6"),
+    ["message7"]       = et.trap_Cvar_Get("u_mk_message7"),
+    ["sound1"]         = et.trap_Cvar_Get("u_multikill1"),
+    ["sound2"]         = et.trap_Cvar_Get("u_multikill2"),
+    ["sound3"]         = et.trap_Cvar_Get("u_multikill3"),
+    ["sound4"]         = et.trap_Cvar_Get("u_multikill4"),
+    ["sound5"]         = et.trap_Cvar_Get("u_multikill5"),
+    ["sound6"]         = et.trap_Cvar_Get("u_multikill6"),
+    ["sound7"]         = et.trap_Cvar_Get("u_multikill7"),
+    ["location"]       = getMessageLocation(tonumber(et.trap_Cvar_Get("u_mk_location")))
 }
 
 -- Set default client data.
@@ -40,7 +40,7 @@ function multikillProcess(vars, msg, sound, reset)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, multikill["location"] .. " " .. str .. "\n")
 
         if multikill["enabledSound"] == 1 then
-            if k_noisereduction == 1 then
+            if noiseReduction == 1 then
                 et.G_ClientSound(vars["killer"], sound)
             else
                 et.G_globalSound(sound)

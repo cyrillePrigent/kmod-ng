@@ -3,9 +3,9 @@
 -- Global var
 
 tkRestriction = {
-    ["limitLow"]  = tonumber(et.trap_Cvar_Get("k_tklimit_low")),
-    ["limitHigh"] = tonumber(et.trap_Cvar_Get("k_tklimit_high")),
-    ["protect"]   = tonumber(et.trap_Cvar_Get("k_tk_protect"))
+    ["limitLow"]  = tonumber(et.trap_Cvar_Get("u_tklimit_low")),
+    ["limitHigh"] = tonumber(et.trap_Cvar_Get("u_tklimit_high")),
+    ["protect"]   = tonumber(et.trap_Cvar_Get("u_tk_protect"))
 }
 
 -- Function
@@ -27,7 +27,7 @@ function checkTeamkillRestrictionObituaryTeamKill(vars)
 
             --if (tkRestriction["limitLow"] + 1) > client[vars["killer"]]["tkIndex"] and tkRestriction["limitLow"] < client[vars["killer"]]["tkIndex"] then
             if (tkRestriction["limitLow"] + 1) == client[vars["killer"]]["tkIndex"] then
-                if k_advancedpms == 1 then
+                if advancedPms == 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. et.Q_CleanStr(vars["killerName"]) .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
                     --et.G_ClientSound(vars["killer"], pmSound)
                 else

@@ -3,10 +3,10 @@
 -- Global var
 
 firstBlood = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("k_firstbloodsound")),
-    ["sound"]        = et.trap_Cvar_Get("firstbloodsound"),
-    ["message"]      = et.trap_Cvar_Get("k_fb_message"),
-    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("k_fb_location"))),
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_fb_sound")),
+    ["sound"]        = et.trap_Cvar_Get("u_firstbloodsound"),
+    ["message"]      = et.trap_Cvar_Get("u_fb_message"),
+    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("u_fb_location"))),
     ["apply"]        = false
 }
 
@@ -22,7 +22,7 @@ function checkFirstBloodRunObituaryEnemyKill(vars)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, firstBlood["location"] .. " " .. str .. "\n")
 
         if firstBlood["enabledSound"] == 1 then
-            if k_noisereduction == 1 then
+            if noiseReduction == 1 then
                 et.G_ClientSound(vars["killer"], firstBlood["sound"])
             else
                 et.G_globalSound(firstBlood["sound"])

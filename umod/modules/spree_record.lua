@@ -46,8 +46,8 @@ function checkSpreeRecordRunFrameEndRound(vars)
             end
         end
 
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. spree["msg"]["current"] .. "\n")
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. k_color .. mapSpree["msg"]["current"] .. "\n")
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. color .. spree["msg"]["current"] .. "\n")
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^" .. color .. mapSpree["msg"]["current"] .. "\n")
     end
 end
 

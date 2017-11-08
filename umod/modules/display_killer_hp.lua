@@ -15,17 +15,17 @@ function displayKillerHpObituaryEnemyKill(vars)
 
     if client[vars["victim"]]["killerHp"] < time["frame"] then
         if killerHp > 0 then
-            et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. "'s hp (^o" .. killerHp .. "^" .. k_color .. ")")
+            et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. color .. "'s hp (^o" .. killerHp .. "^" .. color .. ")")
 
             if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. k_color .. " is an adrenaline junkie!\"")
+                et.trap_SendServerCommand(vars["victim"], "b 8 \"^7" .. vars["killerName"] .. "^" .. color .. " is an adrenaline junkie!\"")
             end
         end
     end
 
     if killerHp <= 0 then
         if vars["meansOfDeath"] == 4 or vars["meansOfDeath"] == 18 or vars["meansOfDeath"] == 18 or vars["meansOfDeath"] == 26 or vars["meansOfDeath"] == 27 or vars["meansOfDeath"] == 30 or vars["meansOfDeath"] == 44 or vars["meansOfDeath"] == 43 then
-            et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^" .. k_color .. "You were owned by ^7" .. vars["killerName"] .. "^" .. k_color .. "'s explosive inheritance"))
+            et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^" .. color .. "You were owned by ^7" .. vars["killerName"] .. "^" .. color .. "'s explosive inheritance"))
         end
     end
 end

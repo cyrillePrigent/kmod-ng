@@ -3,10 +3,10 @@
 -- Global var
 
 flakmonkey = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("k_flakmonkeysound")),
-    ["sound"]        = et.trap_Cvar_Get("flakmonkeysound"),
-    ["message"]      = et.trap_Cvar_Get("k_fm_message"),
-    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("k_fm_location")))
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_fm_sound")),
+    ["sound"]        = et.trap_Cvar_Get("u_flakmonkeysound"),
+    ["message"]      = et.trap_Cvar_Get("u_fm_message"),
+    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("u_fm_location")))
 }
 
 -- Set default client data.
@@ -38,7 +38,7 @@ function checkFlakMonkeyObituary(vars)
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, flakmonkey["location"] .. " " .. str .. "\n")
 
                     if flakmonkey["enabledSound"] == 1 then
-                        if k_noisereduction == 1 then
+                        if noiseReduction == 1 then
                             et.G_ClientSound(vars["killer"], flakmonkey["sound"])
                         else
                             et.G_globalSound(flakmonkey["sound"])

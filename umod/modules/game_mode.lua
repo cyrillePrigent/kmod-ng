@@ -57,7 +57,7 @@ function checkGameModeShutdownGame()
         end
     end
 
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. k_panzersperteam .. "\n")
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. panzersPerTeam .. "\n")
 
     -- checkGameModeRunFrameEndRound do this
     --[[

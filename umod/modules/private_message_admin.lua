@@ -15,7 +15,7 @@ function privateMessageAdminsSlashCommand(params)
     if params.cmdMode == "client" then
         local pmContent = et.ConcatArgs(1)
 
-        if k_logchat == 1 then
+        if logChatModule == 1 then
             logAdminsPrivateMessage(params.clientNum, pmContent)
         end
 
@@ -25,7 +25,7 @@ function privateMessageAdminsSlashCommand(params)
             if getAdminLevel(i) >= 2 then
                 et.trap_SendServerCommand(i, "b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. pmContent .. "^7")
 
-                if k_advancedpms == 1 then
+                if advancedPms == 1 then
                     et.G_ClientSound(i, pmSound)
                 end
             end
@@ -34,14 +34,14 @@ function privateMessageAdminsSlashCommand(params)
         if getAdminLevel(params.clientNum) < 2 then
             et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPm to admins has been sent^d --> ^3" .. pmContent .. "^7")
 
-            if k_advancedpms == 1 then
+            if advancedPms == 1 then
                 et.G_ClientSound(params.clientNum, pmSound)
             end
         end
     elseif params.cmdMode == "console" then
         local pmContent = et.ConcatArgs(1)
 
-        if k_logchat == 1 then
+        if logChatModule == 1 then
             logAdminsPrivateMessage(1022, pmContent)
         end
 

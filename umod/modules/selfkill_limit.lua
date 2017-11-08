@@ -2,7 +2,7 @@
 
 -- Global var
 
-nbSelfkillMax = tonumber(et.trap_Cvar_Get("k_selfkills"))
+nbSelfkillMax = tonumber(et.trap_Cvar_Get("u_selfkills"))
 
 -- Set default client data.
 clientDefaultData["selfkills"] = 0
@@ -19,7 +19,7 @@ function selfkillLimitSlashCommand(params)
             client[params.clientNum]["selfkills"] = client[params.clientNum]["selfkills"] + 1
 
             if client[params.clientNum]["selfkills"] == nbSelfkillMax then
-                if k_advancedpms == 1 then
+                if advancedPms == 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
                     --et.G_ClientSound(params.clientNum, pmSound)
                 else
@@ -27,7 +27,7 @@ function selfkillLimitSlashCommand(params)
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
                 end
             elseif client[params.clientNum]["selfkills"] == (nbSelfkillMax - 1) then
-                if k_advancedpms == 1 then
+                if advancedPms == 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You have ^11^7 /kill left for this map.\n")
                     --et.G_ClientSound(params.clientNum, pmSound)
                 else
@@ -36,7 +36,7 @@ function selfkillLimitSlashCommand(params)
                 end
             end
         else
-            if k_advancedpms == 1 then
+            if advancedPms == 1 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You may no longer /kill for the rest of this map!\n")
                 --et.G_ClientSound(params.clientNum, pmSound)
             else

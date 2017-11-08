@@ -6,7 +6,7 @@ crazyGravity = {
     ["active"]          = false,
     ["gravity"]         = 800,
     ["change"]          = false,
-    ["intervalChange"]  = tonumber(et.trap_Cvar_Get("k_crazygravityinterval")),
+    ["intervalChange"]  = tonumber(et.trap_Cvar_Get("u_crazygravityinterval")),
     ["time"]            = 0
 }
 

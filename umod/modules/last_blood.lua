@@ -4,8 +4,8 @@
 
 lastBlood = {
     ["killerName"] = "",
-    ["message"]    = et.trap_Cvar_Get("k_lb_message"),
-    ["location"]   = getMessageLocation(tonumber(et.trap_Cvar_Get("k_lb_location")))
+    ["message"]    = et.trap_Cvar_Get("u_lb_message"),
+    ["location"]   = getMessageLocation(tonumber(et.trap_Cvar_Get("u_lb_location")))
 }
 
 -- Function

@@ -27,7 +27,7 @@ function privateMessageSlashCommand(params)
             local name  = et.gentity_get(params.clientNum, "pers.netname")
             local rname = et.gentity_get(targetNum, "pers.netname")
 
-            if k_logchat == 1 then
+            if logChatModule == 1 then
                 logPrivateMessage(targetNum, pmContent, nil, rname)
             end
 
@@ -57,7 +57,7 @@ function privateMessage2SlashCommand(params)
             et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from ^1SERVER ^d--> ^3" .. message .. "^7")
             et.G_ClientSound(targetNum, pmSound)
 
-            if k_logchat == 1 then
+            if logChatModule == 1 then
                 logPrivateMessage(1022, message, nil, rname)
             end
         end
