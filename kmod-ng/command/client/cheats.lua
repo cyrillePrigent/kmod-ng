@@ -8,11 +8,11 @@ function execute_command(params)
         local cheat = tonumber(params["arg1"])
 
         if cheat == 0 or cheat == 1 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar sv_cheats " .. cheat .. "\n")
-
             if cheat == 1 then
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_disable ; forcecvar sv_cheats 1\n")
                 printCmdMsg(params, "Cheats have been Enabled\n")
             else
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar sv_cheats 0 ; pb_sv_enable\n")
                 printCmdMsg(params, "Cheats have been Disabled\n")
             end
         else

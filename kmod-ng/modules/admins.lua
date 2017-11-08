@@ -102,7 +102,7 @@ function setAdmin(params, clientNum, level)
     local userInfo = et.trap_GetUserinfo(clientNum)
     local name     = et.Q_CleanStr(et.Info_ValueForKey(userInfo, "name"))
     local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
-    --local ip = et.Info_ValueForKey(userinfo, "ip")
+    local ip = et.Info_ValueForKey(userinfo, "ip")
 
     removeAdminIfExist(clientNum, guid)
 

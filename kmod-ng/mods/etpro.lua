@@ -16,6 +16,9 @@
 
  * Prevent various borkage by invalid userinfo
 
+ * Prevent team overrun exploit
+   TY 
+
  Special thanks :
    - McSteve
 --]]
@@ -58,6 +61,7 @@ badNames = {
 }
 
 addSlashCommand("client", "ws", {"function", "fixWsSlashCommand"})
+addSlashCommand("client", "team", {"function", "fixTeamSlashCommand"}) 
 addSlashCommand("client", "callvote", {"function", "fixCrlfAbuseSlashCommand"})
 addSlashCommand("client", "ref", {"function", "fixCrlfAbuseSlashCommand"})
 addSlashCommand("client", "sa", {"function", "fixCrlfAbuseSlashCommand"})
@@ -84,6 +88,34 @@ function fixWsSlashCommand(params)
 
     if n < 0 or n > 21 then
         et.G_LogPrintf("ws fix: client %d bad ws %d\n", params.clientNum, n)
+        return 1
+    end
+
+    return 0
+end
+
+-- Prevent team overrun exploit.
+-- Function executed when slash command is called in et_ClientCommand function.
+--  params is parameters passed to the function executed in command file.
+function fixTeamSlashCommand(params)
+    local allowedArg = {
+        -- spectator
+        ["spectator"] = true,
+        ["s"]         = true,
+        -- axis
+        ["red"]       = true,
+        ["r"]         = true,
+        ["axis"]      = true,
+        -- allies
+        ["blue"]      = true,
+        ["b"]         = true,
+        ["allies"]    = true
+    }
+
+    local teamArg = et.trap_Argv(1)
+
+    if teamArg and not allowedArg[teamArg] then
+        et.G_LogPrintf("team fix: client %d bad team argument [%s]\n", params.clientNum, tostring(et.trap_Argv(1)))
         return 1
     end
 
@@ -144,7 +176,8 @@ function etProFixClientConnect(vars)
     -- every time doesn't hurt much
 
     -- validate userinfo to filter out the people blindly using luigi's code
-    if et.Info_ValueForKey(userinfo, "rate") == "" then
+    if et.Info_ValueForKey(userinfo, "rate") == "15000" then
+    --and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
         et.G_Printf("fake player limit: invalid userinfo from %s\n", ip)
         return "invalid connection"
     end
@@ -160,7 +193,6 @@ function etProFixClientConnect(vars)
 
                 if count > ipMaxPerClients then
                     et.G_Printf("fake player limit: too many connections from %s\n", ip)
-                    -- TODO should we drop / ban all connections from this IP ?
                     return string.format("only %d connections per IP are allowed on this server", ipMaxPerClients)
                 end
             end

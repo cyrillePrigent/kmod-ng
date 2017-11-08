@@ -56,6 +56,7 @@ players = {
 -- Command (client & console)
 cmdList = {
     ["client"] = {
+        ["!about"]             = "/command/client/about.lua",
         ["!admintest"]         = "/command/client/admintest.lua",
         ["!time"]              = "/command/client/time.lua",
         ["!date"]              = "/command/client/date.lua",
@@ -236,11 +237,11 @@ pause = {
 
 -- **********************************************
 
--- fs_homepath (default win xp) :
--- fs_homepath (default gnu/linux) :
-
-
 -- Under etpro mod :
+--  fs_homepath (default win xp) : 
+--  fs_homepath (default gnu/linux) : /home/$USER/.etwolf  with logued user
+--  fs_homepath (default gnu/linux) : /root/.etwolf        with root
+
 --  fs_game : etpro
 --  fs_basegame : 
 --  gamename : etpro
@@ -248,14 +249,20 @@ pause = {
 --  mod_url = http://etpro.anime.net/
 --  lua version 5.0.2
 
+-- **********************************************
 
 -- Under et-legacy :
---  fs_game : 
+--  fs_homepath (default win xp) : 
+--  fs_homepath (default gnu/linux) : 
+
+--  fs_game : legacy
 --  fs_basegame : 
---  gamename : 
+--  gamename : legacy
 --  mod_version : 
---  mod_url = 
---  lua version 
+--  mod_url = www.etlegacy.com
+--  lua version 5.3
+
+-- **********************************************
 
 -- Load KMOD-ng cvar
 k_color               = et.trap_Cvar_Get("k_color")
@@ -323,9 +330,15 @@ end
 --  callbackType is the callback type list to execute.
 --  vars is the local vars passed to callback function.
 function executeCallbackFunction(callbackType, vars)
+    local result
+    
     if callbackList[callbackType] ~= nil then
         for _, functionName in ipairs(callbackList[callbackType]) do
-            _G[functionName](vars)
+            result = _G[functionName](vars)
+
+            if result then
+                return result
+            end
         end
     else
         et.G_LogPrint("ERROR executeCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
@@ -635,8 +648,11 @@ end
 
 
 -- Load modules
-dofile(kmod_ng_path .. "/mods/etpro.lua")
+local modUrl = et.trap_Cvar_Get("mod_url")
 
+if modUrl == "http://etpro.anime.net/" then
+    dofile(kmod_ng_path .. "/mods/etpro.lua")
+end
 
 if tonumber(et.trap_Cvar_Get("k_crazygravity_module")) == 1 then
     dofile(kmod_ng_path .. "/modules/crazygravity.lua")
@@ -919,7 +935,12 @@ end
 --  firstTime indicates if this is a new connection (1) or a reconnection (0).
 --  isBot indicates if the client is a bot (1) or not (0).
 function et_ClientConnect(clientNum, firstTime, isBot)
-    executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
+    local result
+    result = executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
+
+    if result then
+        return result
+    end
 end
 
 -- Called when a client disconnects.
@@ -985,8 +1006,6 @@ function et_ClientCommand(clientNum, command)
         ["clientNum"] = clientNum,
         ["cmd"]       = string.lower(et.trap_Argv(0))
     }
-
-    debug("DEBUG params", params)
 
     if et.gentity_get(clientNum, "sess.muted") == 0 then
         if clientCmdData[params.cmd] ~= nil then
@@ -1161,69 +1180,4 @@ function et.G_ClientSound(clientNum, soundFile)
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
-end
-
-
-function debug(name, value)
-	local valueStr = ""
-	local varType = type(value)
-
-	if varType == "table" then
-		valueStr = debugTable(value, 0)
-	elseif varType == "number" then
-		valueStr = tostring(value)
-	elseif varType == "boolean" then
-		if value then
-			valueStr = "true"
-		else
-			valueStr = "false"
-		end
-	elseif varType == "string" then
-		valueStr = "\"" .. value .. "\""
-	elseif varType == "nil" then
-		valueStr = "nil"
-	else
-		valueStr = value
-	end
-
-    local line = "\n" .. name .. " = " .. valueStr .. "\n"
-    local fd, len = et.trap_FS_FOpenFile("debug.cfg", et.FS_APPEND)
-    et.trap_FS_Write(line, string.len(line), fd)
-    et.trap_FS_FCloseFile(fd)
-    
-	--et.G_LogPrint("\n\n" .. name .. " = " .. valueStr .. "\n\n")
-end
-
-function debugTable(data, indent)
-	local allTableStr = "{\n"
-	local valueStr = ""
-	local nb = table.getn(data)
-
-	table.foreach(data,
-		function(key, value)
-			local varType = type(value)
-
-			if varType == "table" then
-				valueStr = debugTable(value, indent + 1)
-			elseif varType == "number" then
-				valueStr = tostring(value)
-			elseif varType == "boolean" then
-				if value then
-					valueStr = "true"
-				else
-					valueStr = "false"
-				end
-			elseif varType == "string" then
-				valueStr = "\"" .. value .. "\""
-			elseif varType == "nil" then
-				valueStr = "nil"
-			else
-				valueStr = value
-			end
-
-			allTableStr = allTableStr .. string.rep("\t", indent + 1) .. key .. " = " .. valueStr .. "\n"
-		end
-	)
-
-	return allTableStr .. string.rep("\t", indent) .. "}"
 end
