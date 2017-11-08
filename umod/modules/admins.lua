@@ -164,7 +164,7 @@ function adminStatus(params)
     local cmd      = params.bangCmd or params.cmd
 
     for i = maxAdminLevel, 0, -1 do
-        if params.bangCmd == k_commandprefix .. "finger" then
+        if params.bangCmd == cmdPrefix .. "finger" then
             if admin["level"][i][guid] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
                 break
@@ -172,7 +172,7 @@ function adminStatus(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
                 break
             end
-        elseif params.bangCmd == k_commandprefix .. "admintest" then
+        elseif params.bangCmd == cmdPrefix .. "admintest" then
             if admin["level"][i][guid] and i ~= 0 then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
                 break

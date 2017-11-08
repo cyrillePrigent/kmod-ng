@@ -1,6 +1,6 @@
 
 -- Change this to your desired prefix
-k_commandprefix = "!"
+cmdPrefix = "!"
 
 -- Global vars
 
@@ -264,7 +264,7 @@ pause = {
 
 -- **********************************************
 
--- Load KMOD-ng cvar
+-- Load Uber Mod cvar
 k_color               = et.trap_Cvar_Get("k_color")
 k_panzersperteam      = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 --k_panzersperteam    = tonumber(et.trap_Cvar_Get("k_panzersperteam"))
@@ -455,7 +455,7 @@ function printCmdMsg(params, msg)
             et.trap_SendServerCommand(params.clientNum, "print \"" .. msg .. "\"")
         else
             local cmd = params.bangCmd or params.cmd
-            cmd = string.gsub(cmd, "^" .. k_commandprefix .. "%l", string.upper)
+            cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7" .. msg)
         end
     end
@@ -484,7 +484,7 @@ function runCommandFile(command, params)
     execute_command = nil
 
     if cmdList[params.cmdMode] ~= nil and cmdList[params.cmdMode][command] ~= nil then
-        dofile(kmod_ng_path .. cmdList[params.cmdMode][command])
+        dofile(umod_path .. cmdList[params.cmdMode][command])
 
         if (type(execute_command) == "function") then
             result          = execute_command(params)
@@ -581,7 +581,7 @@ function runSlashCommand(data, params)
     if data[1] == "function" then
         result = _G[data[2]](params)
     elseif data[1] == "file" then
-        dofile(kmod_ng_path .. data[2])
+        dofile(umod_path .. data[2])
 
         if (type(execute_command) == "function") then
             result          = execute_command(params)
@@ -651,103 +651,103 @@ end
 local modUrl = et.trap_Cvar_Get("mod_url")
 
 if modUrl == "http://etpro.anime.net/" then
-    dofile(kmod_ng_path .. "/mods/etpro.lua")
+    dofile(umod_path .. "/mods/etpro.lua")
 end
 
 if tonumber(et.trap_Cvar_Get("k_crazygravity_module")) == 1 then
-    dofile(kmod_ng_path .. "/modules/crazygravity.lua")
+    dofile(umod_path .. "/modules/crazygravity.lua")
 end
 
-dofile(kmod_ng_path .. '/modules/game_mode.lua')
+dofile(umod_path .. '/modules/game_mode.lua')
 
 if k_mute_module == 1 then
-    dofile(kmod_ng_path .. "/modules/mute.lua")
+    dofile(umod_path .. "/modules/mute.lua")
 end
 
 if k_cursemode > 0 then
-    dofile(kmod_ng_path .. "/modules/curse_filter.lua")
+    dofile(umod_path .. "/modules/curse_filter.lua")
 end
 
 if k_disablevotes == 1 then
-    dofile(kmod_ng_path .. "/modules/disable_vote.lua")
+    dofile(umod_path .. "/modules/disable_vote.lua")
 end
 
 if k_advancedadrenaline == 1 then
-    dofile(kmod_ng_path .. "/modules/advanced_adrenaline.lua")
+    dofile(umod_path .. "/modules/advanced_adrenaline.lua")
 end
 
 -- g_inactivity is required or this will not work
 if k_advancedspawn == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
-    dofile(kmod_ng_path .. "/modules/advanced_spawn.lua")
+    dofile(umod_path .. "/modules/advanced_spawn.lua")
 end
 
 if k_autopanzerdisable == 1 then
-    dofile(kmod_ng_path .. "/modules/auto_panzer_disable.lua")
+    dofile(umod_path .. "/modules/auto_panzer_disable.lua")
 end
 
 if k_selfkill_limit == 1 then
-    dofile(kmod_ng_path .. "/modules/selfkill_limit.lua")
+    dofile(umod_path .. "/modules/selfkill_limit.lua")
 end
 
 if k_logchat == 1 then
-    dofile(kmod_ng_path .. "/modules/log.lua")
+    dofile(umod_path .. "/modules/log.lua")
 end
 
 if k_sprees == 1 then
-    dofile(kmod_ng_path .. "/modules/killing_spree.lua")
+    dofile(umod_path .. "/modules/killing_spree.lua")
 end
 
 if k_spreerecord == 1 then
-    dofile(kmod_ng_path .. "/modules/spree_record.lua")
+    dofile(umod_path .. "/modules/spree_record.lua")
 end
 
 if k_multikills == 1 then
-    dofile(kmod_ng_path .. "/modules/multikill.lua")
+    dofile(umod_path .. "/modules/multikill.lua")
 end
 
 if k_flakmonkey == 1 then
-    dofile(kmod_ng_path .. "/modules/flak_monkey.lua")
+    dofile(umod_path .. "/modules/flak_monkey.lua")
 end
 
 if k_deathsprees == 1 then
-    dofile(kmod_ng_path .. "/modules/death_spree.lua")
+    dofile(umod_path .. "/modules/death_spree.lua")
 end
 
 if k_teamkillrestriction == 1 then
-    dofile(kmod_ng_path .. "/modules/teamkill_restriction.lua")
+    dofile(umod_path .. "/modules/teamkill_restriction.lua")
 end
 
 if k_firstblood == 1 then
-    dofile(kmod_ng_path .. "/modules/first_blood.lua")
+    dofile(umod_path .. "/modules/first_blood.lua")
 end
 
 if k_lastblood == 1 then
-    dofile(kmod_ng_path .. "/modules/last_blood.lua")
+    dofile(umod_path .. "/modules/last_blood.lua")
 end
 
 if k_killerhpdisplay == 1 then
-    dofile(kmod_ng_path .. "/modules/display_killer_hp.lua")
+    dofile(umod_path .. "/modules/display_killer_hp.lua")
 end
 
 if k_endroundshuffle == 1 then
-    dofile(kmod_ng_path .. "/modules/end_round_shuffle.lua")
+    dofile(umod_path .. "/modules/end_round_shuffle.lua")
 end
 
 if k_antiunmute == 1 then
-    dofile(kmod_ng_path .. "/modules/anti_unmute.lua")
+    dofile(umod_path .. "/modules/anti_unmute.lua")
 end
 
 if k_advancedpms == 1 then
-    dofile(kmod_ng_path .. "/modules/advanced_private_message.lua")
+    dofile(umod_path .. "/modules/advanced_private_message.lua")
 end
 
 if k_playsound == 1 then
-    dofile(kmod_ng_path .. "/modules/playsound.lua")
+    dofile(umod_path .. "/modules/playsound.lua")
 end
 
-dofile(kmod_ng_path .. "/modules/commands.lua")
-dofile(kmod_ng_path .. "/modules/admins.lua")
-dofile(kmod_ng_path .. "/modules/private_message_admin.lua")
+dofile(umod_path .. "/modules/commands.lua")
+dofile(umod_path .. "/modules/admins.lua")
+dofile(umod_path .. "/modules/private_message_admin.lua")
 
 if k_advplayers == 1 then
     addSlashCommand("client", "players", {"file", "/command/client/players.lua"})

@@ -1,4 +1,4 @@
-# KMOD-ng
+# Uber Mod
 
 This lua was created to replace etadmin & kmod mod.
 It's a complete rewriting of kmod, much modulable.
@@ -8,14 +8,14 @@ ETpro fix is included.
 ## Installation
 
 Extract all files into the etpro folder on your server.
-Dont forget to add the kmod.pk3 to your fast download site!
+Dont forget to add the umod.pk3 to your fast download site!
 
 Open the server.cfg from your server and copy and paste the following lines at the bottom then restart your server:
 
 ```
-set lua_modules "kmod-ng.lua"
-set lua_allowedmodules "374529E3DF838F71B4CF0107413D3D318279DDAF"
-exec "kmod-ng/kmod-ng.cfg"
+set lua_modules "umod.lua"
+set lua_allowedmodules "66552302E29506A4C3D9E042F900B30316922E58"
+exec "umod/umod.cfg"
 ```
 
 ## Usage

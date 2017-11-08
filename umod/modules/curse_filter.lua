@@ -61,7 +61,7 @@ function curseFilter(params)
                 params.bangCmd = "gib"
                 params["arg1"] = params.clientNum
                 params.nbArg   = 2
-                dofile(kmod_ng_path .. "command/both/gib.lua")
+                dofile(umod_path .. "command/both/gib.lua")
                 execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
             end
@@ -94,7 +94,7 @@ function curseFilter(params)
                 params.bangCmd = "slap"
                 params["arg1"] = params.clientNum
                 params.nbArg   = 2
-                dofile(kmod_ng_path .. "command/both/slap.lua")
+                dofile(umod_path .. "command/both/slap.lua")
                 execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
             end

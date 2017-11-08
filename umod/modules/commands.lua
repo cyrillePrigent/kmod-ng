@@ -183,8 +183,8 @@ function checkClientCommand(params, lowBangCmd)
         if commands["level"][lowBangCmd] <= getAdminLevel(params["clientNum"]) then
             local str = commands["alias"][lowBangCmd]
 
-            if cmdList["client"][k_commandprefix .. str] ~= nil then
-                if runCommandFile(k_commandprefix .. str, params) == 1 then
+            if cmdList["client"][cmdPrefix .. str] ~= nil then
+                if runCommandFile(cmdPrefix .. str, params) == 1 then
                     return true
                 end
             end
