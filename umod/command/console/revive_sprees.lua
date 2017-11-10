@@ -7,7 +7,7 @@ function execute_command(params)
         if client[i]["reviveSpree"] ~= nil and client[i]["reviveSpree"] ~= 0 then
             et.G_Printf("^7rsprees: %d %s^7 (%s)^7\n", 
                         client[i]["reviveSpree"],
-                        playerName(i),
+                        client[i]["name"],
                         teamName(tonumber(et.gentity_get(i, "sess.sessionTeam"))))
         end
     end
@@ -15,7 +15,7 @@ function execute_command(params)
     et.G_Printf("^7rsprees: --------------------\n")
 
     if reviveSpree["maxId"] ~= nil then
-        et.G_Printf("^7Max: %s^7 with %d\n", playerName(reviveSpree["maxId"]), reviveSpree["maxSpree"])
+        et.G_Printf("^7Max: %s^7 with %d\n", client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"])
     end
 
     return 1

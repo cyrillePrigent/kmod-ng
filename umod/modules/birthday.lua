@@ -78,7 +78,7 @@ end
 function removeBirthday(name)
     local fdIn, lenIn = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
     local fdOut, lenOut = et.trap_FS_FOpenFile("birthday.tmp.cfg", et.FS_WRITE)
-    local guid = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
+    --local guid = client[clientNum]["guid"]
 
     if lenIn == -1 then
         et.G_LogPrint("WARNING: birthday.cfg file no found / not readable!\n")

@@ -9,13 +9,11 @@ function execute_command(params)
 
         if clientNum ~= nil then 
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                local name = et.gentity_get(clientNum, "pers.netname")
-
                 if client[clientNum]['team'] ~= 3 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. clientNum .. "\n")
-                    printCmdMsg(params, name .. " ^7has been putted spectator\n")
+                    printCmdMsg(params, client[clientNum]["name"] .. " ^7has been putted spectator\n")
                 else
-                    printCmdMsg(params, name .. " ^7is already spectator\n")
+                    printCmdMsg(params, client[clientNum]["name"] .. " ^7is already spectator\n")
                 end
             else
                 printCmdMsg(params, "Cannot put spectator a higher admin\n")

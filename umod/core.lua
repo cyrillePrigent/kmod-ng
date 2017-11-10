@@ -272,7 +272,8 @@ panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 noiseReduction        = tonumber(et.trap_Cvar_Get("u_noisereduction"))
 advancedPms           = tonumber(et.trap_Cvar_Get("u_advancedpms"))
 pmSound               = et.trap_Cvar_Get("u_pmsound")
-
+dateFormat            = et.trap_Cvar_Get("u_date_format")
+mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
 logChatModule         = tonumber(et.trap_Cvar_Get("u_logchat"))
@@ -620,6 +621,24 @@ function teamSlashCommand(params)
     return 0
 end
 
+function getFormatedDate(dateValue, displayTime)
+    local str
+
+    if displayTime then
+        str = dateFormat .. ", %H:%M:%S"
+    else
+        str = dateFormat
+    end
+
+    local returnValue, result = pcall(os.date, str, dateValue)
+
+    if returnValue then
+        return result
+    else
+        return os.date(str, dateValue)
+    end
+end
+
 -- printf wrapper
 et.G_Printf = function(...)
     et.G_Print(string.format(unpack(arg)))
@@ -775,8 +794,8 @@ function et_InitGame(levelTime, randomSeed, restart)
     time["init"] = levelTime
 
     local currentVersion = et.trap_Cvar_Get("mod_version")
-    et.RegisterModname("KMOD-ng v" .. version .. releaseStatus .. " " .. et.FindSelf())
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - KMOD-ng " .. version .. "\"\n")
+    et.RegisterModname("uMod v" .. version .. releaseStatus .. " " .. et.FindSelf())
+    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - uMod " .. version .. "\"\n")
 
     for i = 0, clientsLimit, 1 do
         client[i] = {}
@@ -786,7 +805,7 @@ function et_InitGame(levelTime, randomSeed, restart)
         end
 
         if et.gentity_get(i, "pers.connected") == 2 then
-            client[i]["name"] = et.gentity_get(i, "pers.netname")
+            client[i]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(i), "name")
         end
     end
 
@@ -799,7 +818,7 @@ function et_InitGame(levelTime, randomSeed, restart)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 2\n")
     end
 
-    et.G_Print("KMOD-ng version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
+    et.G_Print("uMod version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
     --et.G_Print("lua version : " .. _VERSION)
 end
 
@@ -875,9 +894,9 @@ function et_RunFrame(levelTime)
     players["total"]  = 0
 
     for i = 0, clientsLimit, 1 do
-        client[i]["name"] = et.gentity_get(i, "pers.netname")
- 
         if et.gentity_get(i, "pers.connected") == 2 then
+            client[i]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(i), "name")
+
             if client[i]["name"] ~= client[i]["lastName"] then
                 if logChatModule == 1 then
                     writeLog("*** " .. client[i]["lastName"] .. " HAS RENAMED TO " .. client[i]["name"] .. " ***\n")
@@ -941,9 +960,10 @@ end
 --  isBot indicates if the client is a bot (1) or not (0).
 function et_ClientConnect(clientNum, firstTime, isBot)
     local result
-    result = executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
 
     client[clientNum]["guid"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
+
+    result = executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
 
     if result then
         return result
@@ -965,10 +985,8 @@ end
 -- Called when a client begins (becomes active, and enters the gameworld).
 --  clientNum is the client slot id.
 function et_ClientBegin(clientNum)
-    et.trap_SendServerCommand(clientNum, "cpm \"This server is running the new KMOD-ng version " .. version .. " " .. releaseStatus .. "\n\"")
-    et.trap_SendServerCommand(clientNum, "cpm \"Created by Clutch152.\n\"")
+    et.trap_SendServerCommand(clientNum, "cpm \"This server is running UberMod v" .. version .. " " .. releaseStatus .. "\n\"")
 
-    
     client[clientNum]["lastName"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
     client[clientNum]["team"]     = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 

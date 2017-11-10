@@ -8,9 +8,7 @@ function execute_command(params)
         clientNum = client2id(params["arg1"], params)
 
         if clientNum ~= nil then
-            local guid = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
-            local name = et.gentity_get(clientNum, "pers.netname")
-            et.trap_SendServerCommand(params.clientNum, "b 8 \"^3Getguid: " .. name .. "^7's GUID is " .. guid)
+            et.trap_SendServerCommand(params.clientNum, "b 8 \"^3Getguid: " .. client[clientNum]["name"] .. "^7's GUID is " .. client[clientNum]["guid"])
         end
     end
 

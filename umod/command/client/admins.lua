@@ -12,11 +12,9 @@ function execute_command(params)
 
             if level >= 1 then
                 if et.gentity_get(i, "pers.connected") == 2 then
-                    local userinfo = et.trap_GetUserinfo(i)
-                    local guid     = et.Info_ValueForKey(userinfo, "cl_guid")
-                    local name     = string.lower(et.Q_CleanStr(et.Info_ValueForKey(userinfo, "name")))
+                    local name     = string.lower(et.Q_CleanStr(client[i]["name"]))
                     local space    = string.rep(" ", 22 - tonumber(string.len(name)))
-                    local adname   = admin['name'][string.upper(guid)]
+                    local adname   = admin['name'][string.upper(client[i]["guid"])]
 
                     et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n"', pteam[client[i]['team']], i, name, space, level, adname))
                     playercount = playercount + 1

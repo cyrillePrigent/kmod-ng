@@ -2,8 +2,6 @@
 
 -- Global var
 
-mapName = et.trap_Cvar_Get("mapname")
-
 spree = {
     ["killsRecord"] = 0,
     ["msg"]         = {

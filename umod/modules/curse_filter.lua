@@ -44,7 +44,6 @@ end
 -- Apply sentence of curse mode.
 --  params is parameters passed to the function executed in command file.
 function curseFilter(params)
-    local name     = et.gentity_get(params.clientNum, "pers.netname")
     local ref      = tonumber(et.gentity_get(params.clientNum, "sess.referee"))
     local tmpCurseMode = curseMode
 
@@ -63,7 +62,7 @@ function curseFilter(params)
                 params.nbArg   = 2
                 dofile(umod_path .. "command/both/gib.lua")
                 execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto gibbed for language!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto gibbed for language!\n")
             end
         end
     end
@@ -81,7 +80,7 @@ function curseFilter(params)
                 local health = et.gentity_get(params.clientNum, "health")
                 et.G_Damage(params.clientNum, params.clientNum, 1022, health - 1, 24, 0)
                 et.gentity_set(params.clientNum, "health", -1)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto killed for language!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto killed for language!\n")
             end
         end
     end
@@ -96,7 +95,7 @@ function curseFilter(params)
                 params.nbArg   = 2
                 dofile(umod_path .. "command/both/slap.lua")
                 execute_command(params)
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto slapped for language!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto slapped for language!\n")
             end
         end
     end
@@ -115,7 +114,7 @@ function curseFilter(params)
                 setMute(params.clientNum, -1)
             end
 
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been permanently muted for language!\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been permanently muted for language!\n")
         end
     end
 
@@ -138,16 +137,16 @@ function curseFilter(params)
                     client[params.clientNum]["muteEnd"]         = time["frame"] + (client[params.clientNum]["muteMultipliers"] * 60 * 1000)
                 end
 
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted for ^1" .. client[params.clientNum]["muteMultipliers"] .. "^7 minute(s)!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto muted for ^1" .. client[params.clientNum]["muteMultipliers"] .. "^7 minute(s)!\n")
             else
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto muted!\n")
             end
         end
     end
 
     if tmpCurseMode == 1 then
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute \"" .. params.clientNum .. "\"\n" )
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. name .. " ^7has been auto muted!\n")
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto muted!\n")
     end
 end
 

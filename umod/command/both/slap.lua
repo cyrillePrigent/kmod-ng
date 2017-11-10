@@ -16,7 +16,7 @@ function execute_command(params)
                 else
                     et.G_Damage(params.clientNum, params.clientNum, 1022, 5, 24, 0)
                     et.G_ClientSound(clientNum, "sound/misc/slap.wav")
-                    et.trap_SendServerCommand(-1, "b 16 \"^7" .. et.gentity_get(clientNum, "pers.netname") .. " ^7was Slapped^7")
+                    et.trap_SendServerCommand(-1, "b 16 \"^7" .. client[clientNum]["name"] .. " ^7was Slapped^7")
                 end
             end
         end

@@ -68,9 +68,8 @@ end
 function setRegularUser(params, clientNum)
     local userInfo = et.trap_GetUserinfo(clientNum)
     local name     = et.Q_CleanStr(et.Info_ValueForKey(userInfo, "name"))
-    local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
 
-    if removeAdminIfExist(clientNum, guid) then
+    if removeAdminIfExist(clientNum, client[clientNum]["guid"]) then
         printCmdMsg(params, name .. " is now a regular user!\n")
     else
         printCmdMsg(params, name .. " is already a regular user!\n")
@@ -101,8 +100,8 @@ end
 function setAdmin(params, clientNum, level)
     local userInfo = et.trap_GetUserinfo(clientNum)
     local name     = et.Q_CleanStr(et.Info_ValueForKey(userInfo, "name"))
-    local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
-    local ip = et.Info_ValueForKey(userinfo, "ip")
+    local ip       = et.Info_ValueForKey(userinfo, "ip")
+    local guid     = client[clientNum]["guid"]
 
     removeAdminIfExist(clientNum, guid)
 
@@ -124,7 +123,6 @@ end
 function removeAdmin(clientNum)
     local fdIn, lenIn = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
     local fdOut, lenOut = et.trap_FS_FOpenFile("shrubbot.tmp.cfg", et.FS_WRITE)
-    local guid = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
 
     if lenIn == -1 then
         et.G_LogPrint("WARNING: shrubbot.cfg file no found / not readable!\n")
@@ -134,6 +132,7 @@ function removeAdmin(clientNum)
         et.G_Print("There is no Power User IP to remove\n")
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
+        local guid    = client[clientNum]["guid"]
 
         for lvl, _guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
             if _guid == guid then
@@ -159,8 +158,8 @@ end
 --  params is parameters passed to the function executed in command file.
 function adminStatus(params)
     local userInfo = et.trap_GetUserinfo(params.clientNum)
-    local guid     = et.Info_ValueForKey(userInfo, "cl_guid")
-    local name     = et.gentity_get(params.clientNum, "pers.netname")
+    local guid     = client[params.clientNum]["guid"]
+    local name     = client[params.clientNum]["name"]
     local cmd      = params.bangCmd or params.cmd
 
     for i = maxAdminLevel, 0, -1 do
@@ -188,7 +187,7 @@ end
 --  clientNum is the client slot id.
 function getAdminLevel(clientNum)
     if clientNum ~= -1 then
-        local guid = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
+        local guid = client[clientNum]["guid"]
 
         for i = maxAdminLevel, 1, -1 do
             if admin["level"][i][guid] then

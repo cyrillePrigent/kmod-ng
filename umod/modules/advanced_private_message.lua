@@ -24,17 +24,14 @@ function privateMessageSlashCommand(params)
         local targetNum = client2id(et.trap_Argv(1), params)
 
         if targetNum ~= nil then
-            local name  = et.gentity_get(params.clientNum, "pers.netname")
-            local rname = et.gentity_get(targetNum, "pers.netname")
-
             if logChatModule == 1 then
-                logPrivateMessage(targetNum, pmContent, nil, rname)
+                logPrivateMessage(targetNum, pmContent, nil, client[targetNum]["name"])
             end
 
-            et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPrivate message sent to " .. rname .. "^d --> ^3" .. pmContent .. "^7")
+            et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPrivate message sent to " .. client[targetNum]["name"] .. "^d --> ^3" .. pmContent .. "^7")
             et.G_ClientSound(params.clientNum, pmSound)
 
-            et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from " .. name .. "^d --> ^3" .. pmContent .. "^7")
+            et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from " .. client[params.clientNum]["name"] .. "^d --> ^3" .. pmContent .. "^7")
             et.G_ClientSound(targetNum, pmSound)
         end
     end
@@ -51,14 +48,12 @@ function privateMessage2SlashCommand(params)
         local targetNum = client2id(et.trap_Argv(1), params)
 
         if targetNum ~= nil then
-            local rname = et.gentity_get(targetNum, "pers.netname")
-
-            et.G_Print("Private message sent to " .. rname .. "^d --> ^3" .. message .. "^7\n")
+            et.G_Print("Private message sent to " .. client[targetNum]["name"] .. "^d --> ^3" .. message .. "^7\n")
             et.trap_SendServerCommand(targetNum, "b 8 \"^dPrivate message from ^1SERVER ^d--> ^3" .. message .. "^7")
             et.G_ClientSound(targetNum, pmSound)
 
             if logChatModule == 1 then
-                logPrivateMessage(1022, message, nil, rname)
+                logPrivateMessage(1022, message, nil, client[targetNum]["name"])
             end
         end
     end

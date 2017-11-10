@@ -2,8 +2,8 @@
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    local guid = getGuid(params.clientNum)
-    local name = playerName(params.clientNum)
+    local guid = string.lower(client[params.clientNum]["guid"])
+    local name = client[params.clientNum]["name"]
     local stats_msg
 
     if type(reviveSpree["serverRecords"][guid]) ~= "table" then

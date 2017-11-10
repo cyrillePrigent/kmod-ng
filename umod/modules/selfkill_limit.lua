@@ -23,16 +23,14 @@ function selfkillLimitSlashCommand(params)
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
                     --et.G_ClientSound(params.clientNum, pmSound)
                 else
-                    local name = et.gentity_get(params.clientNum, "pers.netname")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[params.clientNum]["name"] .. " ^7You have reached your /kill limit!  You can no longer /kill for the rest of this map.\n")
                 end
             elseif client[params.clientNum]["selfkills"] == (nbSelfkillMax - 1) then
                 if advancedPms == 1 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You have ^11^7 /kill left for this map.\n")
                     --et.G_ClientSound(params.clientNum, pmSound)
                 else
-                    local name = et.gentity_get(params.clientNum, "pers.netname")
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You have ^11^7 /kill left for this map.\n")
+                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[params.clientNum]["name"] .. " ^7You have ^11^7 /kill left for this map.\n")
                 end
             end
         else
@@ -40,8 +38,7 @@ function selfkillLimitSlashCommand(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. params.clientNum .. " ^7You may no longer /kill for the rest of this map!\n")
                 --et.G_ClientSound(params.clientNum, pmSound)
             else
-                local name = et.gentity_get(params.clientNum, "pers.netname")
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " ^7You may no longer /kill for the rest of this map!\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[params.clientNum]["name"] .. " ^7You may no longer /kill for the rest of this map!\n")
             end
 
             return 1

@@ -77,7 +77,6 @@ end
 --  params is parameters of client / console command.
 --  str is the command to parse.
 function parseClientCommand(params, str)
-    local playerName          = et.gentity_get(params.clientNum, "pers.netname")
     local class               = tonumber(et.gentity_get(params.clientNum, "sess.latchPlayerType"))
     local lastVictimName      = ""
     local lastVictimNameClean = ""
@@ -91,7 +90,7 @@ function parseClientCommand(params, str)
         lastVictimName      = "NO ONE"
         lastVictimNameClean = "NO ONE"
     else
-        lastVictimName      = et.gentity_get(client[params.clientNum]["yourLastVictim"], "pers.netname")
+        lastVictimName      = client[client[params.clientNum]["yourLastVictim"]]["name"]
         lastVictimNameClean = et.Q_CleanStr(lastVictimName)
     end
 
@@ -99,7 +98,7 @@ function parseClientCommand(params, str)
         lastKillerName      = "NO ONE"
         lastKillerNameClean = "NO ONE"
     else
-        lastKillerName      = et.gentity_get(client[params.clientNum]["whoKilledYou"], "pers.netname")
+        lastKillerName      = client[client[params.clientNum]["whoKilledYou"]]["name"]
         lastKillerNameClean = et.Q_CleanStr(lastKillerName)
     end
 
@@ -114,15 +113,15 @@ function parseClientCommand(params, str)
 
     local randomC         = randomClientFinder()
     local randomTeam      = teamList[client[randomC]["team"]]
-    local randomName      = et.gentity_get(randomC, "pers.netname")
+    local randomName      = client[randomC]["name"]
     local randomNameClean = et.Q_CleanStr(randomName)
     local randomClass     = classList[tonumber(et.gentity_get(randomC, "sess.latchPlayerType"))]
 
     local str = string.gsub(str, "<CLIENT_ID>", params.clientNum)
-    local str = string.gsub(str, "<GUID>", et.Info_ValueForKey(et.trap_GetUserinfo(params.clientNum), "cl_guid"))
-    local str = string.gsub(str, "<COLOR_PLAYER>", playerName)
+    local str = string.gsub(str, "<GUID>", client[params.clientNum]["guid"])
+    local str = string.gsub(str, "<COLOR_PLAYER>", client[params.clientNum]["name"])
     local str = string.gsub(str, "<ADMINLEVEL>", getAdminLevel(params.clientNum))
-    local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(playerName))
+    local str = string.gsub(str, "<PLAYER>", et.Q_CleanStr(client[params.clientNum]["name"]))
     local str = string.gsub(str, "<PLAYER_CLASS>", classList[class])
     local str = string.gsub(str, "<PLAYER_TEAM>", teamList[client[params.clientNum]["team"]])
     local str = string.gsub(str, "<PARAMETER>", params["arg1"] .. params["arg2"])

@@ -9,9 +9,8 @@ function execute_command(params)
 
         if clientNum ~= nil then
             removeMute(clientNum)
-            local name = et.gentity_get(clientNum, "pers.netname")
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute " .. clientNum .. "\n")
-            printCmdMsg(params, name .. " ^7has been unmuted\n")
+            printCmdMsg(params, client[clientNum]["name"] .. " ^7has been unmuted\n")
         end
     end
 

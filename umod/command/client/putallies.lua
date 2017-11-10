@@ -9,13 +9,11 @@ function execute_command(params)
 
         if clientNum ~= nil then
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                local name = et.gentity_get(clientNum, "pers.netname")
-
                 if client[clientNum]['team'] ~= 2 then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref putallies " .. clientNum .. "\n")
-                    printCmdMsg(params, name .. " ^7has been putted allies\n")
+                    printCmdMsg(params, client[clientNum]["name"] .. " ^7has been putted allies\n")
                 else
-                    printCmdMsg(params, name .. " ^7is already allies\n")
+                    printCmdMsg(params, client[clientNum]["name"] .. " ^7is already allies\n")
                 end
             else
                 printCmdMsg(params, "Cannot put allies a higher admin\n")

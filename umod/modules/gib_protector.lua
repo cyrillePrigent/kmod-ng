@@ -43,8 +43,7 @@ function checkGibProtectorPrint(vars)
                     if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
-                        local name = et.gentity_get(killerId, "pers.netname")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " " .. msg)
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[killerId]["name"] .. " " .. msg)
                     end
                 elseif client[killerId]["teamGib"] >= 3 then
                     local msg = "^7You are gibbing too much teammates! Don't do this again or you will be kicked! (" .. client[killerId]["teamGib"] .. " time)\n"
@@ -52,17 +51,15 @@ function checkGibProtectorPrint(vars)
                     if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
-                        local name = et.gentity_get(killerId, "pers.netname")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. name .. " " .. msg)
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[killerId]["name"] .. " " .. msg)
                     end
                 elseif client[killerId]["teamGib"] > 4 then
-                    local killerName = et.gentity_get(killerId, "pers.netname")
-                    local msg = "^7" .. killerName .. " is gibbing teammates (to collect binoculars) ... 5 minute temp ban!\n"
+                    local msg = "^7" .. client[killerId]["name"] .. " is gibbing teammates (to collect binoculars) ... 5 minute temp ban!\n"
                     
                     if advancedPms == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. killerId .. " " .. msg)
                     else
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. killerName .. " " .. msg)
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. client[killerId]["name"] .. " " .. msg)
                     end
 
                     kick(killerId, "You too many team gibs!")

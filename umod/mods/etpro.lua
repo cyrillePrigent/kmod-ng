@@ -177,9 +177,9 @@ function etProFixClientConnect(vars)
 
     -- validate userinfo to filter out the people blindly using luigi's code
 --    if et.Info_ValueForKey(userinfo, "rate") == "15000" then
---    --and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
+--    --and string.find(client[vars["clientNum"]]["guid"], "%d+%.%d+%.%d+%.%d+") == nil then
     
-    if et.Info_ValueForKey(userinfo, "rate") == "1500" and string.find(et.Info_ValueForKey(userinfo, "cl_guid"), "%d+%.%d+%.%d+%.%d+") == nil then
+    if et.Info_ValueForKey(userinfo, "rate") == "1500" and string.find(client[vars["clientNum"]]["guid"], "%d+%.%d+%.%d+%.%d+") == nil then
         et.G_Printf("fake player limit: invalid userinfo from %s\n", ip)
         return "invalid connection"
     end
@@ -238,8 +238,7 @@ function checkGuidLinePrint(vars)
 
     --NETNAME]\n
     text = string.sub(text, mend + 1)
-    netname = et.gentity_get(clientNum, "pers.netname")
-    mstart, mend = string.find(text, netname, 1, true)
+    mstart, mend = string.find(text, client[clientNum]["name"], 1, true)
 
     if not mstart or mstart ~= 1 then
         badGuid(clientNum, "couldn't parse name")
@@ -411,17 +410,16 @@ function etProFixClientUserinfoChanged(vars)
 
 -- TODO : Check if needed
 -- globalconbined.lua start
---    local guid = string.upper(et.Info_ValueForKey(userinfo, "cl_guid"))
---    local name = et.Info_ValueForKey(userinfo, "name")
+--    local guid = string.upper(client[vars["clientNum"]]["guid"])
+--    local name = client[vars["clientNum"]]["name"]
 --
---    for client = 0, clientsLimit do
+--    for i = 0, clientsLimit do
 --        local player_userinfo = et.trap_GetUserinfo(client)
---        local player_guid     = string.upper(et.Info_ValueForKey(player_userinfo, "cl_guid"))
---        local player_name     = et.Info_ValueForKey(player_userinfo, "name")
+--        local player_guid     = string.upper(client[client]["guid"])
 --
---        if player_name == name and name ~= "ETPlayer" and name ~= "UnnamedPlayer" and vars["clientNum"] ~= client then
+--        if client[i]["name"] == name and name ~= "ETPlayer" and name ~= "UnnamedPlayer" and vars["clientNum"] ~= i then
 --            badUserinfo(vars["clientNum"], "duplicate name")
---        elseif player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= client then
+--        elseif player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= i then
 --            badUserinfo(vars["clientNum"], "duplicate guid")
 --        end
 --    end

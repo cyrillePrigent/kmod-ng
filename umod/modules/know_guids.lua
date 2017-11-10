@@ -49,7 +49,7 @@ end
 -- Initializes know guids data.
 -- Load know guids entry of known_guids.cfg file.
 function loadKnownGuids()
-	if knownGuids["forceWait"] == 1 then
+    if knownGuids["forceWait"] == 1 then
         local fd, len = et.trap_FS_FOpenFile("known_guids.cfg", et.FS_READ)
 
         if len == -1 then
@@ -69,10 +69,10 @@ end
 -- Callback function when  a client begins (becomes active, and enters the gameworld).
 --  vars is the local vars passed from et_ClientBegin function.
 function checkKnownGuidsClientBegin(vars)
-	local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "cl_guid"))
+    local guid = client[vars["clientNum"]]["guid"]
 
-	-- check the guid is 32 chars and hex	
-	if guidValidityCheck(guid) then
+    -- check the guid is 32 chars and hex	
+    if guidValidityCheck(guid) then
         if knownGuids["forceWait"] == 0 then
             writeKnownGuid(guid)
         else
@@ -82,9 +82,9 @@ function checkKnownGuidsClientBegin(vars)
             end
             
         end
-	else
+    else
         et.trap_DropClient(vars["clientNum"], "The instruction at 0x00000000 referenced memory at 0x00000000. The memory could not be read.")
-	end
+    end
 end
 
 -- Write a new guid entry in known_guids.cfg file.
@@ -99,7 +99,7 @@ end
 -- Function executed when slash command is called in et_ClientCommand function.
 --  params is parameters passed to the function executed in command file.
 function checkKnownGuidsTeamEntrance(params)
-	if client[params.clientNum]["enterTime"] ~= 0 and client[params.clientNum]["team"] == 3 then
+    if client[params.clientNum]["enterTime"] ~= 0 and client[params.clientNum]["team"] == 3 then
         --if connect_time < wait_time then deny team join
         local timeConnected = et.trap_Milliseconds() - client[params.clientNum]["enterTime"]
 
@@ -109,30 +109,30 @@ function checkKnownGuidsTeamEntrance(params)
         else
             -- if timeConnected is NOT < wait_time, AND client[params.clientNum]["enterTime"] is non-zero, then a client
             --  with a new guid has served his wait time, so we can add the guid to file
-            local guid = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(params.clientNum), "cl_guid"))
+            local guid = string.upper(client[params.clientNum]["guid"])
             writeKnownGuid(guid)
 
             -- set enter_time for this client to 0 so the client is not subjected to testing again
             client[params.clientNum]["enterTime"] = 0
             knownGuids["list"][guid] = true
         end
-	end
+    end
 
-	return 0
+    return 0
 end
 
 -- Check guid validity (length & content).
 --  guid is the player guid to check.
 function guidValidityCheck(guid)
     if string.len(guid) ~= 32 then
-		return false
-	end
+        return false
+    end
 
     if string.find(guid, "^%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x$") == nil then
         return false
     end
 
-	return true
+    return true
 end
 
 -- Add callback known guids function.

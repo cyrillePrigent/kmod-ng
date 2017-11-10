@@ -9,9 +9,9 @@ function execute_command(params)
     end
 
     if map_max[3] ~= nil then
-        map_msg = string.format("^1map: ^7%s^1: ^7%s^1 (^7%d^1) @ %s", getMapName(), map_max[3], map_max[1], os.date(date_fmt, map_max[2]))
+        map_msg = string.format("^1map: ^7%s^1: ^7%s^1 (^7%d^1) @ %s", mapName, map_max[3], map_max[1], os.date(date_fmt, map_max[2]))
     else
-        map_msg = string.format("^1map: ^7%s^1: ^7no record", getMapName())
+        map_msg = string.format("^1map: ^7%s^1: ^7no record", mapName)
     end
 
     local all_msg = ""

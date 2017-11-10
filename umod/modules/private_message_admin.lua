@@ -19,11 +19,9 @@ function privateMessageAdminsSlashCommand(params)
             logAdminsPrivateMessage(params.clientNum, pmContent)
         end
 
-        local name = et.gentity_get(params.clientNum, "pers.netname")
-
         for i = 0, clientsLimit, 1 do
             if getAdminLevel(i) >= 2 then
-                et.trap_SendServerCommand(i, "b 8 \"^dPm to admins from " .. name .. "^d --> ^3" .. pmContent .. "^7")
+                et.trap_SendServerCommand(i, "b 8 \"^dPm to admins from " .. client[params.clientNum]["name"] .. "^d --> ^3" .. pmContent .. "^7")
 
                 if advancedPms == 1 then
                     et.G_ClientSound(i, pmSound)

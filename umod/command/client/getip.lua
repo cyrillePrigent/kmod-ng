@@ -9,8 +9,7 @@ function execute_command(params)
 
         if clientNum ~= nil then
             local ip   = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip")
-            local name = et.gentity_get(clientNum, "pers.netname")
-            et.trap_SendServerCommand(params.clientNum, "b 8 \"^3Getip: " .. name .. "^7's IP is " .. ip)
+            et.trap_SendServerCommand(params.clientNum, "b 8 \"^3Getip: " .. client[clientNum]["name"] .. "^7's IP is " .. ip)
         end
     end
 

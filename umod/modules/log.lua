@@ -11,23 +11,22 @@ function teamPrivateMessageSlashCommand(params)
     local time       = os.date("%x %I:%M:%S%p")
     local clientInfo = et.trap_GetUserinfo(clientNum)
     local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
     local from       = "SERVER"
 
     if clientNum ~= 1022 then
-        from = et.gentity_get(clientNum, "pers.netname")
+        from = client[clientNum]["name"]
     end
 
     if not recipiant then
         local targetNum = client2id(target)
 
         if targetNum then
-            local recipiant = et.gentity_get(targetNum, "pers.netname")
+            local recipiant = client[targetNum]["name"]
         end
     end
 
     if recipiant then
-        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n")
+        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. client[clientNum]["guid"] .. ") " .. from .. " to " .. recipiant .. " (PRIVATE): " .. msg .. "\n")
     end
     --]]
 end
@@ -48,8 +47,8 @@ function logMessage(clientNum, msg, msgType)
     local time       = os.date("%x %I:%M:%S%p")
     local clientInfo = et.trap_GetUserinfo(clientNum)
     local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-    local name       = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
+    local guid       = string.upper(client[clientNum]["guid"] )
+    local name       = et.Q_CleanStr(client[clientNum]["name"])
     local logInfo    = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
 
     if msgType then
@@ -88,8 +87,8 @@ function logChat(clientNum, mode, msg, pmId)
         local time       = os.date("%x %I:%M:%S%p")
         local clientInfo = et.trap_GetUserinfo(clientNum)
         local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-        local name       = et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname"))
+        local guid       = string.upper(client[clientNum]["guid"] )
+        local name       = et.Q_CleanStr(client[clientNum]["name"])
         local logInfo    = "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") " .. name
 
         if msgType == "ALL" then
@@ -105,18 +104,18 @@ function logPrivateMessage(clientNum, msg, target, recipiant)
     local time       = os.date("%x %I:%M:%S%p")
     local clientInfo = et.trap_GetUserinfo(clientNum)
     local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid       = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
+    local guid       = string.upper(client[clientNum]["guid"] )
     local from       = "SERVER"
 
     if clientNum ~= 1022 then
-        from = et.gentity_get(clientNum, "pers.netname")
+        from = client[clientNum]["name"]
     end
 
     if not recipiant then
         local targetNum = client2id(target)
 
         if targetNum then
-            recipiant = et.gentity_get(targetNum, "pers.netname")
+            recipiant = client[targetNum]["name"]
         end
     end
 
@@ -135,8 +134,8 @@ function logAdminsPrivateMessage(clientNum, msg)
     if clientNum ~= 1022 then
         local clientInfo = et.trap_GetUserinfo(clientNum)
         ip   = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-        from = et.gentity_get(clientNum, "pers.netname")
+        guid = string.upper(client[clientNum]["guid"] )
+        from = client[clientNum]["name"]
     else
         ip   = "127.0.0.1"
         guid = "NONE!"
@@ -151,15 +150,15 @@ end
 function logClientBegin(vars)
     local clientInfo = et.trap_GetUserinfo(vars["clientNum"])
     local ip   = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-    local guid = string.upper(et.Info_ValueForKey(clientInfo, "cl_guid"))
-    local name = et.Q_CleanStr(et.gentity_get(vars["clientNum"], "pers.netname"))
+    local guid = string.upper(client[vars["clientNum"]]["guid"] )
+    local name = et.Q_CleanStr(client[vars["clientNum"]]["name"])
     writeLog("*** " .. name .. " HAS ENTERED THE GAME  (IP: " .. ip .. " GUID: " .. guid .. ") ***\n")
 end
 
 -- Callback function when client disconnect.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function logClientDisconnect(vars)
-    local name = et.Q_CleanStr(et.gentity_get(vars["clientNum"], "pers.netname"))
+    local name = et.Q_CleanStr(client[vars["clientNum"]]["name"])
     writeLog("*** " .. name .. " HAS DISCONNECTED ***\n")
 end
 

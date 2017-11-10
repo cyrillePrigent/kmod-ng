@@ -15,10 +15,10 @@ function execute_command(params)
                     printCmdMsg(params, "Client is currently dead\n")
                 else
                     if client[clientNum]["own"] == 0 then
-                        et.trap_SendServerCommand(-1, "b 16 \"^7" .. et.gentity_get(clientNum, "pers.netname") .. " ^7is not Owned^7")
+                        et.trap_SendServerCommand(-1, "b 16 \"^7" .. client[clientNum]["name"] .. " ^7is not Owned^7")
                     else
                         client[clientNum]["own"] = 0
-                        et.trap_SendServerCommand(-1, "b 16 \"^7" .. et.gentity_get(clientNum, "pers.netname") .. " ^7was Ownage stopped^7")
+                        et.trap_SendServerCommand(-1, "b 16 \"^7" .. client[clientNum]["name"] .. " ^7was Ownage stopped^7")
                     end
                 end
             end

@@ -137,14 +137,6 @@ function playClients(snd)
     end
 end
 
-function getMapName() 
-    return string.lower(et.trap_Cvar_Get("mapname"))
-end
-
-function getGuid(id) 
-    return string.lower(et.Info_ValueForKey(et.trap_GetUserinfo(id), "cl_guid"))
-end
-
 function teamName(t) 
     if t < 0 or t > 3 then
         t = 3
@@ -153,12 +145,8 @@ function teamName(t)
     return teams[t]
 end
 
-function playerName(id)
-    return et.Info_ValueForKey(et.trap_GetUserinfo(id), "name")
-end
-
 function findMaxSpree() 
-    local max = reviveSpree["stats"][getMapName()]
+    local max = reviveSpree["stats"][mapName]
 
     if max == nil then
         max = {}
@@ -271,11 +259,10 @@ function checkMultiRevive(id, guid)
         client[id]["multiRevive"][2] = client[id]["multiRevive"][2] + 1 
 
         if client[id]["multiRevive"][2] == 3 then
-            local m_name = playerName(id)
-            et.G_Printf("Multirevive: %d (%s)\n", id, m_name)
+            et.G_Printf("Multirevive: %d (%s)\n", id, client[id]["name"])
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
-                sayClients(reviveSpree["multiRevivePosition"], string.format(reviveSpree["multiReviveMsg"], m_name))
+                sayClients(reviveSpree["multiRevivePosition"], string.format(reviveSpree["multiReviveMsg"], client[id]["name"]))
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
@@ -287,11 +274,10 @@ function checkMultiRevive(id, guid)
             end
 
         elseif client[id]["multiRevive"][2] == 5 then
-            local m_name = playerName(id)
-            et.G_Printf("Monsterrevive: %d (%s)\n", id, m_name)
+            et.G_Printf("Monsterrevive: %d (%s)\n", id, client[id]["name"])
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
-                sayClients(reviveSpree["monsterRevivePosition"], string.format(reviveSpree["monsterReviveMsg"], m_name))
+                sayClients(reviveSpree["monsterRevivePosition"], string.format(reviveSpree["monsterReviveMsg"], client[id]["name"]))
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
@@ -306,9 +292,9 @@ function checkMultiRevive(id, guid)
                 local fd,len = et.trap_FS_FOpenFile("awards.txt", et.FS_APPEND)
 
                 if len == -1 then
-                    et.G_Printf("failed to save monsterrevive award for %s\n", playerName(id))
+                    et.G_Printf("failed to save monsterrevive award for %s\n", client[id]["name"])
                 else
-                    local msg = playerName(id) .. " - Monsterrevive- " .. os.date() .. "\n"
+                    local msg = client[id]["name"] .. " - Monsterrevive- " .. os.date() .. "\n"
                     et.trap_FS_Write(msg, string.len(msg), fd)
                     et.trap_FS_FCloseFile(fd)
                 end
@@ -351,14 +337,14 @@ function checkSprees(id)
         end
 
         if spree ~= nil then
-            sayClients(reviveSpree["reviveSpreePosition"], string.format("%s^%s %s (^7%d^%s revives in a row)", playerName(id), reviveSpree["reviveSpreeColor"], spree, client[id]["reviveSpree"], reviveSpree["reviveSpreeColor"]))
+            sayClients(reviveSpree["reviveSpreePosition"], string.format("%s^%s %s (^7%d^%s revives in a row)", client[id]["name"], reviveSpree["reviveSpreeColor"], spree, client[id]["reviveSpree"], reviveSpree["reviveSpreeColor"]))
         end
     end
 end 
 
 function checkSpreeEnd(id, killer, normal_kill)
     if client[id]["reviveSpree"] > 0 then
-        local m_name = playerName(id)
+        local m_name = client[id]["name"]
 
         if m_name == nil or m_name == "" then
             -- this only happens if a player leaves / disconnects
@@ -374,7 +360,7 @@ function checkSpreeEnd(id, killer, normal_kill)
         elseif killer == 1023 then
             k_name = "unknown reasons"
         else
-            k_name = playerName(killer)
+            k_name = client[killer]["name"]
         end
 
         local record = false
@@ -387,13 +373,13 @@ function checkSpreeEnd(id, killer, normal_kill)
             if table.getn(max) == 3 and reviveSpree["maxSpree"] > max[1] then
                 -- insert max record on death... 
                 -- then a player gets the reward, if he disconnects before EOMap
-                reviveSpree["stats"][getMapName()] = { reviveSpree["maxSpree"], os.date("%s"), m_name } 
-                reviveSpree["mapRecord"]        = true
-                record                          = true
+                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), m_name } 
+                reviveSpree["mapRecord"]      = true
+                record                        = true
             elseif table.getn(max) == 0 then -- no previous record for this map
-                reviveSpree["stats"][getMapName()] = { reviveSpree["maxSpree"], os.date("%s"), m_name }
-                reviveSpree["mapRecord"]        = true
-                record                          = true
+                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), m_name }
+                reviveSpree["mapRecord"]      = true
+                record                        = true
             end
         end
 
@@ -449,7 +435,7 @@ function reviveSpreeInitGame(vars)
 
     local i = 0
 
-    --et.G_Printf("rspree.lua: running on map '%s'\n", getMapName())
+    --et.G_Printf("rspree.lua: running on map '%s'\n", mapName)
 
     i = readStats()
     et.G_Printf("rspree.lua: loaded %d alltime stats from revivingspree.txt\n", i)
@@ -471,7 +457,7 @@ function checkReviveSpreePrint(vars)
         zombie = tonumber(vars["arg"][3])
 
         if reviveSpree["announceRevives"] == 1 then
-            sayClients(reviveSpree["revivePosition"], string.format("%s ^%s was revived by ^7%s", playerName(zombie), reviveSpree["reviveColor"], playerName(medic)))
+            sayClients(reviveSpree["revivePosition"], string.format("%s ^%s was revived by ^7%s", client[zombie]["name"], reviveSpree["reviveColor"], client[medic]["name"]))
         end
 
         if et.gentity_get(zombie, "enemy") == medic then -- tk&revive
@@ -480,15 +466,15 @@ function checkReviveSpreePrint(vars)
             end
         else -- not a tk&revive
             client[medic]["reviveSpree"] = client[medic]["reviveSpree"] + 1
-            local guid = getGuid(medic)
+            local guid = string.lower(client[medic]["guid"])
 
             if reviveSpree["srvRecord"] == 1 then
                 if type(reviveSpree["serverRecords"][guid]) ~= "table" then
                     --  guid;    multi;monster;revive;nick;firstseen;lastseen
-                    reviveSpree["serverRecords"][guid] = { 0, 0, 0, playerName(medic), tonumber(os.date("%s")), 0 }
+                    reviveSpree["serverRecords"][guid] = { 0, 0, 0, client[medic]["name"], tonumber(os.date("%s")), 0 }
                 elseif table.getn(reviveSpree["serverRecords"][guid]) ~= 6 then
                     --  guid;    multi;monster;revive;nick;firstseen;lastseen 
-                    reviveSpree["serverRecords"][guid] = { 0, 0, 0, playerName(medic), tonumber(os.date("%s")), 0 }
+                    reviveSpree["serverRecords"][guid] = { 0, 0, 0, client[medic]["name"], tonumber(os.date("%s")), 0 }
                 end
 
                 reviveSpree["serverRecords"][guid][3] = reviveSpree["serverRecords"][guid][3] + 1
@@ -497,7 +483,7 @@ function checkReviveSpreePrint(vars)
                 -- set k_record_last_nick to 1 in config section to update
                 -- every time
                 if reviveSpree["recordLastNick"] == 1 or (reviveSpree["serverRecords"][guid][4] == nil) then 
-                    reviveSpree["serverRecords"][guid][4] = playerName(medic)
+                    reviveSpree["serverRecords"][guid][4] = client[medic]["name"]
                 end
             end
 
@@ -530,7 +516,7 @@ function checkReviveSpreePrint(vars)
                     end
                 end
 
-                local msg = string.format("^7Longest reviving spree: %s^7 with %d revives!%s", playerName(reviveSpree["maxId"]), reviveSpree["maxSpree"], longest)
+                local msg = string.format("^7Longest reviving spree: %s^7 with %d revives!%s", client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"], longest)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \""..msg.."^7\"\n")
                 -- sayClients("b 8", msg)
             end

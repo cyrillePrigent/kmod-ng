@@ -10,7 +10,7 @@ function execute_command(params)
 
         if clientNum ~= nil then
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                local name = string.lower(et.Q_CleanStr(et.gentity_get(clientNum, "pers.netname")))
+                local name = string.lower(et.Q_CleanStr(client[clientNum]["name"]))
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref warn \"" .. name .. "\" \"" .. params["arg2"] .. "\"\n")
             else
                 printCmdMsg(params, "Cannot warn a higher admin\n")
