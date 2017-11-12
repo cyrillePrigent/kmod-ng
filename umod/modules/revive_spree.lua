@@ -243,7 +243,7 @@ function checkMultiRevive(id, guid)
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
-                local snd = "sound/misc/multirevive.wav"
+                local soundFile = "sound/misc/multirevive.wav"
 
                 if noiseReduction == 1 then
                     playSound(soundFile, "reviveSpreeMsg", id)
@@ -268,7 +268,7 @@ function checkMultiRevive(id, guid)
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
-                local snd = "sound/misc/monsterrevive.wav"
+                local soundFile = "sound/misc/monsterrevive.wav"
 
                 if noiseReduction == 1 then
                     playSound(soundFile, "reviveSpreeMsg", id)
