@@ -4,7 +4,7 @@
 
 multikill = {
     ["maxElapsedTime"] = tonumber(et.trap_Cvar_Get("u_mk_time")),
-    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_mk_sounds")),
+    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_mk_enable_sound")),
     ["message1"]       = et.trap_Cvar_Get("u_mk_message1"),
     ["message2"]       = et.trap_Cvar_Get("u_mk_message2"),
     ["message3"]       = et.trap_Cvar_Get("u_mk_message3"),

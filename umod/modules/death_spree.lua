@@ -3,7 +3,7 @@
 -- Global var
 
 deathSpree = {
-    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_ds_sound")),
+    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_ds_enable_sound")),
     ["amount1"]        = tonumber(et.trap_Cvar_Get("u_ds_amount1")),
     ["amount2"]        = tonumber(et.trap_Cvar_Get("u_ds_amount2")),
     ["amount3"]        = tonumber(et.trap_Cvar_Get("u_ds_amount3")),

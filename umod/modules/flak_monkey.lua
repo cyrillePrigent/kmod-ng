@@ -2,64 +2,117 @@
 
 -- Global var
 
-flakmonkey = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_fm_sound")),
-    ["sound"]        = et.trap_Cvar_Get("u_flakmonkeysound"),
-    ["message"]      = et.trap_Cvar_Get("u_fm_message"),
-    ["location"]     = getMessageLocation(tonumber(et.trap_Cvar_Get("u_fm_location")))
+flakMonkey = {
+    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_fm_enable_sound")),
+    ["sound"]          = et.trap_Cvar_Get("u_fm_sound"),
+    ["message"]        = et.trap_Cvar_Get("u_fm_message"),
+    ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_fm_msg_default")),
+    ["msgPosition"]    = et.trap_Cvar_Get("u_fm_msg_position"),
+    ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_fm_noise_reduction"))
 }
 
 -- Set default client data.
-clientDefaultData["flakmonkey"] = 0
+clientDefaultData["flakMonkey"]    = 0
+clientDefaultData["flakMonkeyMsg"] = false
+
+addSlashCommand("client", "fmonkey", {"function", "flakMonkeySlashCommand"})
 
 -- Function
 
--- Callback function when world kill a player.
---  vars is the local vars of et_Obituary function.
-function checkFlakMonkeyObituaryWorldKill(vars)
-    client[vars["victim"]]["flakmonkey"] = 0
+-- Set client data & client user info if flak monkey message & sound is enabled or not.
+--  clientNum is the client slot id.
+--  value is the boolen value if flak monkey message & sound is enabled or not..
+function setFlakMonkeyMsg(clientNum, value)
+    client[clientNum]["flakMonkeyMsg"] = value
+
+    if value then
+        value = "1"
+    else
+        value = "0"
+    end
+
+    et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fmonkey", value))
+end
+
+-- Function executed when slash command is called in et_ClientCommand function
+-- `fmonkey` command here.
+--  params is parameters passed to the function executed in command file.
+function flakMonkeySlashCommand(params)
+    if params["arg1"] == "" then
+        local status = "^8on^7"
+
+        if client[params.clientNum]["flakMonkeyMsg"] == false then
+            status = "^8off^7"
+        end
+
+        et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(fmonkey):^7 Messages are %s\"", status))
+    elseif tonumber(params["arg1"]) == 0 then
+        setFlakMonkeyMsg(params.clientNum, false)
+        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fmonkey):^7 Messages are now ^8off^7\"")
+    else
+        setFlakMonkeyMsg(params.clientNum, true)
+        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fmonkey):^7 Messages are now ^8on^7\"")
+    end
+
+    return 1
+end
+
+-- Callback function when a client’s Userinfo string has changed.
+--  vars is the local vars of et_ClientUserinfoChanged function.
+function flakMonkeyUpdateClientUserinfo(vars)
+    local fm = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_fmonkey")
+
+    if fm == "" then
+        setFlakMonkeyMsg(vars["clientNum"], flakMonkey["msgDefault"])
+    elseif tonumber(fm) == 0 then
+        client[vars["clientNum"]]["flakMonkeyMsg"] = false
+    else
+        client[vars["clientNum"]]["flakMonkeyMsg"] = true
+    end
 end
 
 -- Callback function of et_Obituary function.
 --  vars is the local vars of et_Obituary function.
 function checkFlakMonkeyObituary(vars)
-    -- Kills
-    client[vars["victim"]]["flakmonkey"] = 0
+    client[vars["victim"]]["flakMonkey"] = 0
+end
 
-    -- Deaths
-    if killer ~= 1022 then
-        if vars["meansOfDeath"] == 17 or vars["meansOfDeath"] == 43 or vars["meansOfDeath"] == 44 then
-            -- Enemy kill
-            if vars["killer"] ~= vars["victim"] and client[vars["victim"]]["team"] ~= client[vars["killer"]]["team"] then
-                client[vars["killer"]]["flakmonkey"] = client[vars["killer"]]["flakmonkey"] + 1
+-- Callback function when a player kill a enemy.
+--  vars is the local vars of et_Obituary function.
+function checkFlakMonkeyObituaryEnemyKill(vars)
+    if vars["meansOfDeath"] == 17 or vars["meansOfDeath"] == 43 or vars["meansOfDeath"] == 44 then
+        client[vars["killer"]]["flakMonkey"] = client[vars["killer"]]["flakMonkey"] + 1
 
-                if client[vars["killer"]]["flakmonkey"] == 3 then
-                    local str = string.gsub(flakmonkey["message"], "#killer#", vars["killerName"])
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, flakmonkey["location"] .. " " .. str .. "\n")
+        if client[vars["killer"]]["flakMonkey"] == 3 then
+            local str = string.gsub(flakMonkey["message"], "#killer#", vars["killerName"])
+            sayClients("flakMonkeyMsg", flakMonkey["msgPosition"], str)
 
-                    if flakmonkey["enabledSound"] == 1 then
-                        if noiseReduction == 1 then
-                            et.G_ClientSound(vars["killer"], flakmonkey["sound"])
-                        else
-                            et.G_globalSound(flakmonkey["sound"])
-                        end
-                    end
-
-                    client[vars["killer"]]["flakmonkey"] = 0
+            if flakMonkey["enabledSound"] == 1 then
+                if flakMonkey["noiseReduction"] == 1 then
+                    playSound(flakMonkey["sound"], "flakMonkeyMsg", vars["killer"])
+                else
+                    playSound(flakMonkey["sound"], "flakMonkeyMsg")
                 end
-            -- Teamkill & Selfkill
-            else
-                client[vars["killer"]]["flakmonkey"] = 0
             end
-        -- No flak monkey means of death
-        else
-            client[vars["killer"]]["flakmonkey"] = 0
+
+            client[vars["killer"]]["flakMonkey"] = 0
         end
+    else
+        client[vars["killer"]]["flakMonkey"] = 0
     end
+end
+
+-- Callback function when victim is killed himself (self kill).
+--  vars is the local vars of et_Obituary function.
+function checkFlakMonkeyObituaryTeamKill(vars)
+    client[vars["killer"]]["flakMonkey"] = 0
 end
 
 -- Add callback flak monkey function.
 addCallbackFunction({
-    ["ObituaryWorldKill"] = "checkFlakMonkeyObituaryWorldKill",
-    ["Obituary"]          = "checkFlakMonkeyObituary"
+    ["ClientBegin"]           = "flakMonkeyUpdateClientUserinfo",
+    ["ClientUserinfoChanged"] = "flakMonkeyUpdateClientUserinfo",
+    ["Obituary"]              = "checkFlakMonkeyObituary",
+    ["ObituaryEnemyKill"]     = "checkFlakMonkeyObituaryEnemyKill",
+    ["ObituaryTeamKill"]      = "checkFlakMonkeyObituaryTeamKill",
 })
