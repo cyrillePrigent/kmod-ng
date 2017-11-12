@@ -84,8 +84,8 @@ reviveSpree = {
 
 -- Set default client data.
 clientDefaultData["reviveSpree"]    = 0
-clientDefaultData["lastKillTime"]   = 0
-clientDefaultData["multiRevive"]    = { [1] = 0, [2] = 0 } -- [1] => counter, [2] => last revive
+clientDefaultData["lastReviveTime"] = 0
+clientDefaultData["multiRevive"]    = 0
 clientDefaultData["reviveSpreeMsg"] = false
 
 -- Set module command.
@@ -109,33 +109,6 @@ addSlashCommand("client", "rsprees", {"function", "reviveSpreeSlashCommand"})
 
 
 -- Function
-
-function sayClients(pos, msg)
-    local message = string.format("%s \"%s^7\"", pos, msg)
-
-    for i = 0, clientsLimit, 1 do
-        if client[i]["reviveSpreeMsg"] then
-            et.trap_SendServerCommand(i, message)
-        end
-    end
-end
-
-function playClients(snd)
-    local sndId = et.G_SoundIndex(snd)
-
-    if sndId == nil then
-        return 
-    end
-
-    for i = 0, clientsLimit, 1 do
-        if client[i]["reviveSpreeMsg"] then
-            -- EV_GLOBAL_CLIENT_SOUND = 54
-            local t_ent = et.G_TempEntity(et.gentity_get(i, "r.currentOrigin"), 54)
-            et.gentity_set(t_ent, "s.teamNum", i)
-            et.gentity_set(t_ent, "s.eventParm", sndId)
-        end
-    end
-end
 
 function teamName(t) 
     if t < 0 or t > 3 then
@@ -255,33 +228,53 @@ function checkMultiRevive(id, guid)
     --                    between each revive
     local lvltime = et.trap_Milliseconds()
 
-    if (lvltime - client[id]["multiRevive"][1]) < 3000 then
-        client[id]["multiRevive"][2] = client[id]["multiRevive"][2] + 1 
+    if (lvltime - client[id]["lastReviveTime"]) < 3000 then
+        client[id]["multiRevive"] = client[id]["multiRevive"] + 1 
 
-        if client[id]["multiRevive"][2] == 3 then
+        if client[id]["multiRevive"] == 3 then
             et.G_Printf("Multirevive: %d (%s)\n", id, client[id]["name"])
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
-                sayClients(reviveSpree["multiRevivePosition"], string.format(reviveSpree["multiReviveMsg"], client[id]["name"]))
+                sayClients(
+                    "reviveSpreeMsg",
+                    reviveSpree["multiRevivePosition"],
+                    string.format(reviveSpree["multiReviveMsg"], client[id]["name"])
+                )
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
-                playClients("sound/misc/multirevive.wav")
+                local snd = "sound/misc/multirevive.wav"
+
+                if noiseReduction == 1 then
+                    playSound(soundFile, "reviveSpreeMsg", id)
+                else
+                    playSound(soundFile, "reviveSpreeMsg")
+                end
             end
        
             if reviveSpree["srvRecord"] == 1 then
                 reviveSpree["serverRecords"][guid][1] = reviveSpree["serverRecords"][guid][1] + 1
             end
 
-        elseif client[id]["multiRevive"][2] == 5 then
+        elseif client[id]["multiRevive"] == 5 then
             et.G_Printf("Monsterrevive: %d (%s)\n", id, client[id]["name"])
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
-                sayClients(reviveSpree["monsterRevivePosition"], string.format(reviveSpree["monsterReviveMsg"], client[id]["name"]))
+                sayClients(
+                    "reviveSpreeMsg",
+                    reviveSpree["monsterRevivePosition"],
+                    string.format(reviveSpree["monsterReviveMsg"], client[id]["name"])
+                )
             end
 
             if reviveSpree["multiReviveSound"] == 1 then
-                playClients("sound/misc/monsterrevive.wav")
+                local snd = "sound/misc/monsterrevive.wav"
+
+                if noiseReduction == 1 then
+                    playSound(soundFile, "reviveSpreeMsg", id)
+                else
+                    playSound(soundFile, "reviveSpreeMsg")
+                end
             end
 
             if reviveSpree["srvRecord"] == 1 then
@@ -301,14 +294,15 @@ function checkMultiRevive(id, guid)
             end
         end
     else
-        client[id]["multiRevive"][2] = 1
+        client[id]["multiRevive"] = 1
     end
 
-    client[id]["multiRevive"][1] = lvltime
+    client[id]["lastReviveTime"] = lvltime
 end
 
 function resetMulti(id) 
-    client[id]["multiRevive"] = { [1]=0, [2]=0, } -- [1] => counter, [2] => last revive
+    client[id]["multiRevive"]    = 0
+    client[id]["lastReviveTime"] = 0
 end
 
 function resetSpree(id)
@@ -318,49 +312,49 @@ end
 function checkSprees(id) 
     -- et.G_Printf("checkSprees %d\n", id)
     if client[id]["reviveSpree"] ~= 0 then
-        local spree
+        local msg
 
         if reviveSpree["amount1"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message1"]
+            msg = reviveSpree["message1"]
         elseif reviveSpree["amount2"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message2"]
+            msg = reviveSpree["message2"]
         elseif reviveSpree["amount3"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message3"]
+            msg = reviveSpree["message3"]
         elseif reviveSpree["amount4"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message4"]
+            msg = reviveSpree["message4"]
         elseif reviveSpree["amount5"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message5"]
+            msg = reviveSpree["message5"]
         elseif reviveSpree["amount6"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message6"]
+            msg = reviveSpree["message6"]
         elseif reviveSpree["amount7"] == client[id]["reviveSpree"] then
-            spree = reviveSpree["message7"]
+            msg = reviveSpree["message7"]
         end
 
-        if spree ~= nil then
-            sayClients(reviveSpree["reviveSpreePosition"], string.format("%s^%s %s (^7%d^%s revives in a row)", client[id]["name"], reviveSpree["reviveSpreeColor"], spree, client[id]["reviveSpree"], reviveSpree["reviveSpreeColor"]))
+        if msg ~= nil then
+            sayClients(
+                "reviveSpreeMsg",
+                reviveSpree["reviveSpreePosition"],
+                string.format(
+                    "%s^%s %s (^7%d^%s revives in a row)",
+                    client[id]["name"], reviveSpree["reviveSpreeColor"],
+                    msg,
+                    client[id]["reviveSpree"],
+                    reviveSpree["reviveSpreeColor"]
+                )
+            )
         end
     end
 end 
 
 function checkSpreeEnd(id, killer, normal_kill)
     if client[id]["reviveSpree"] > 0 then
-        local m_name = client[id]["name"]
+        local medicName = client[id]["name"]
 
-        if m_name == nil or m_name == "" then
+        if medicName == "" then
             -- this only happens if a player leaves / disconnects
             -- while on a spree. Fill with something, an empty player
             -- name just looks weird ;-)
-            m_name = "(disconnected)" 
-        end
-
-        local k_name = ""
-
-        if killer == 1022 then
-            k_name = "End of round"
-        elseif killer == 1023 then
-            k_name = "unknown reasons"
-        else
-            k_name = client[killer]["name"]
+            medicName = "(disconnected)" 
         end
 
         local record = false
@@ -373,11 +367,11 @@ function checkSpreeEnd(id, killer, normal_kill)
             if table.getn(max) == 3 and reviveSpree["maxSpree"] > max[1] then
                 -- insert max record on death... 
                 -- then a player gets the reward, if he disconnects before EOMap
-                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), m_name } 
+                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), medicName } 
                 reviveSpree["mapRecord"]      = true
                 record                        = true
             elseif table.getn(max) == 0 then -- no previous record for this map
-                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), m_name }
+                reviveSpree["stats"][mapName] = { reviveSpree["maxSpree"], os.date("%s"), medicName }
                 reviveSpree["mapRecord"]      = true
                 record                        = true
             end
@@ -385,16 +379,56 @@ function checkSpreeEnd(id, killer, normal_kill)
 
         if client[id]["reviveSpree"] >= 5 then
             if normal_kill then -- i.e. no TK or suicide
-                sayClients(reviveSpree["reviveSpreePosition"], string.format("%s^%s's reviving spree ended (^7%d^%s revives), killed by ^7%s^%s!", m_name, reviveSpree["reviveSpreeColor"], client[id]["reviveSpree"], reviveSpree["reviveSpreeColor"], k_name, reviveSpree["reviveSpreeColor"]))
+                local killerName = ""
 
-                if record then
-                    sayClients(reviveSpree["reviveSpreePosition"], "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7")
+                if killer == 1022 then
+                    killerName = "End of round"
+                elseif killer == 1023 then
+                    killerName = "unknown reasons"
+                else
+                    killerName = client[killer]["name"]
                 end
 
+                sayClients(
+                    "reviveSpreeMsg",
+                    reviveSpree["reviveSpreePosition"],
+                    string.format(
+                        "%s^%s's reviving spree ended (^7%d^%s revives), killed by ^7%s^%s!",
+                        medicName,
+                        reviveSpree["reviveSpreeColor"],
+                        client[id]["reviveSpree"],
+                        reviveSpree["reviveSpreeColor"],
+                        killerName,
+                        reviveSpree["reviveSpreeColor"]
+                    )
+                )
+
+                if record then
+                    sayClients(
+                        "reviveSpreeMsg",
+                        reviveSpree["reviveSpreePosition"],
+                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7"
+                    )
+                end
             else
                 if record and killer <= clientsLimit + 1 then
-                    sayClients(reviveSpree["reviveSpreePosition"], string.format("%s^%s's reviving spree ended (^7%d^%s revives).", m_name, reviveSpree["reviveSpreeColor"], client[id]["reviveSpree"], reviveSpree["reviveSpreeColor"]))
-                    sayClients(reviveSpree["reviveSpreePosition"], "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7")
+                    sayClients(
+                        "reviveSpreeMsg",
+                        reviveSpree["reviveSpreePosition"],
+                        string.format(
+                            "%s^%s's reviving spree ended (^7%d^%s revives).",
+                            medicName,
+                            reviveSpree["reviveSpreeColor"],
+                            client[id]["reviveSpree"],
+                            reviveSpree["reviveSpreeColor"]
+                        )
+                    )
+
+                    sayClients(
+                        "reviveSpreeMsg",
+                        reviveSpree["reviveSpreePosition"],
+                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7"
+                    )
                 end
             end
         end
@@ -411,18 +445,6 @@ function setRSpreeMsg(id, value)
     end
 
     et.trap_SetUserinfo(id, et.Info_SetValueForKey(et.trap_GetUserinfo(id), "v_rsprees", value))
-end
-
-function updateUInfoStatus(id)
-    local rs = et.Info_ValueForKey(et.trap_GetUserinfo(id), "v_rsprees")
-
-    if rs == "" then
-        setRSpreeMsg(id, reviveSpree["msgDefault"])
-    elseif tonumber(rs) == 0 then
-        client[id]["reviveSpreeMsg"] = false
-    else
-        client[id]["reviveSpreeMsg"] = true
-    end
 end
 
 
@@ -457,12 +479,21 @@ function checkReviveSpreePrint(vars)
         zombie = tonumber(vars["arg"][3])
 
         if reviveSpree["announceRevives"] == 1 then
-            sayClients(reviveSpree["revivePosition"], string.format("%s ^%s was revived by ^7%s", client[zombie]["name"], reviveSpree["reviveColor"], client[medic]["name"]))
+            sayClients(
+                "reviveSpreeMsg",
+                reviveSpree["revivePosition"],
+                string.format(
+                    "%s ^%s was revived by ^7%s",
+                    client[zombie]["name"],
+                    reviveSpree["reviveColor"],
+                    client[medic]["name"]
+                )
+            )
         end
 
         if et.gentity_get(zombie, "enemy") == medic then -- tk&revive
-            if reviveSpree["allowTkRevive"] == 1 and client[medic]["multiRevive"][2] > 0 then
-                client[medic]["multiRevive"][1] = et.trap_Milliseconds()
+            if reviveSpree["allowTkRevive"] == 1 and client[medic]["multiRevive"] > 0 then
+                client[medic]["lastReviveTime"] = et.trap_Milliseconds()
             end
         else -- not a tk&revive
             client[medic]["reviveSpree"] = client[medic]["reviveSpree"] + 1
@@ -518,7 +549,7 @@ function checkReviveSpreePrint(vars)
 
                 local msg = string.format("^7Longest reviving spree: %s^7 with %d revives!%s", client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"], longest)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \""..msg.."^7\"\n")
-                -- sayClients("b 8", msg)
+                -- sayClients("reviveSpreeMsg", "b 8", msg)
             end
 
             if reviveSpree["srvRecord"] == 1 then
@@ -575,7 +606,6 @@ function reviveSpreeObituaryTeamKill(vars)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
--- Note in ETpro, m / pm / msg don't work in server console. Use m2 command instead.
 --  params is parameters passed to the function executed in command file.
 function reviveSpreeSlashCommand(params)
     if params["arg1"] == "" then
@@ -598,7 +628,15 @@ function reviveSpreeSlashCommand(params)
 end
 
 function reviveSpreeUpdateClientUserinfo(vars)
-    updateUInfoStatus(vars["clientNum"])
+    local rs = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "v_rsprees")
+
+    if rs == "" then
+        setRSpreeMsg(vars["clientNum"], reviveSpree["msgDefault"])
+    elseif tonumber(rs) == 0 then
+        client[vars["clientNum"]]["reviveSpreeMsg"] = false
+    else
+        client[vars["clientNum"]]["reviveSpreeMsg"] = true
+    end
 end
 
 -- Add callback revive spree function.

@@ -1196,6 +1196,7 @@ function et_Obituary(victim, killer, meansOfDeath)
     end
 end
 
+-- TODO : Remove it later...
 -- Plays a global sound soundfile for a certain client only.
 --  clientNum is the client slot id.
 --  soundfile is the sound file to play.
@@ -1204,4 +1205,49 @@ function et.G_ClientSound(clientNum, soundFile)
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
+end
+
+-- Set a sound index for a certain client only.
+--  clientNum is the client slot id.
+--  soundIndex is the sound index to set.
+function setClientSoundIndex(clientNum, soundIndex)
+    -- EV_GLOBAL_CLIENT_SOUND = 54
+    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
+    et.gentity_set(tmpEntity, "s.teamNum", clientNum)
+    et.gentity_set(tmpEntity, "s.eventParm", soundIndex)
+end
+
+
+function playSound(soundFile, playKey, clientNum)
+    local soundIndex = et.G_SoundIndex(soundFile)
+
+    if soundIndex == nil or clientDefaultData[playKey] == nil then
+        return 
+    end
+
+    if clientNum == nil then
+        for i = 0, clientsLimit, 1 do
+            if client[i][playKey] then
+                setClientSoundIndex(i, soundIndex)
+            end
+        end
+    else
+        if client[clientNum][playKey] then
+            setClientSoundIndex(clientNum, soundIndex)
+        end
+    end
+end
+
+function sayClients(msgKey, pos, msg)
+    if clientDefaultData[msgKey] == nil then
+        return 
+    end
+
+    local message = string.format("%s \"%s^7\"", pos, msg)
+
+    for i = 0, clientsLimit, 1 do
+        if client[i][msgKey] then
+            et.trap_SendServerCommand(i, message)
+        end
+    end
 end
