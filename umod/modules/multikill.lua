@@ -21,7 +21,7 @@ multikill = {
     ["sound7"]         = et.trap_Cvar_Get("u_mk_sound7"),
     ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_mk_msg_default")),
     ["msgPosition"]    = et.trap_Cvar_Get("u_mk_msg_position"),
-    ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_mk_noise_reduction")),
+    ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_mk_noise_reduction"))
 }
 
 -- Set default client data.
