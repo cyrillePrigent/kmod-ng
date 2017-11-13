@@ -3,7 +3,10 @@
 -- Global var
 
 unevenTeam = {
-    ["time"]              = 0,
+    ["time"]              = {
+        ["check"]             = 0,
+        ["notify"]            = 0,
+    },
     ["notify"]            = 0,
     ["playersDifference"] = tonumber(et.trap_Cvar_Get("u_ut_teams_difference")),
     ["escalationCmd"]     = et.trap_Cvar_Get("u_ut_escalation_cmd"),
@@ -19,24 +22,25 @@ unevenTeam = {
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkUnevenTeamRunFrame(vars)
-    -- Do i have all required information from ALL players?
-    --if players["axis"] + players["allies"] + players["spectator"] == players["total"] then
+    if vars["levelTime"] - unevenTeam["time"]["check"] > 3 then
         local diff = math.abs(players["axis"] - players["allies"])
 
         --if diff >= unevenTeam["playersDifference"] or diff <= -1 * unevenTeam["playersDifference"] then
         if diff >= unevenTeam["playersDifference"] then
             -- Teams are uneven
-            if unevenTeam["time"] == 0 then
-                unevenTeam["time"] = vars["levelTime"] - 27
+            if unevenTeam["time"]["notify"] == 0 then
+                unevenTeam["time"]["notify"] = vars["levelTime"] - 27
             end
         else
             -- Teams are even again.
-            unevenTeam["time"]   = 0
+            unevenTeam["time"]["notify"]   = 0
             unevenTeam["notify"] = 0
         end
-    --end
+
+        unevenTeam["time"]["check"] = vars["levelTime"] -- Next checking in 3 seconds.
+    end
     
-    if unevenTeam["time"] and vars["levelTime"] - unevenTeam["time"] > 30 then
+    if unevenTeam["time"]["notify"] and vars["levelTime"] - unevenTeam["time"]["notify"] > 30 then
         if unevenTeam["notify"] == 0 then
             et.trap_SendConsoleCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message1"] .. "\n")
             unevenTeam["notify"] = 1
@@ -55,7 +59,7 @@ function checkUnevenTeamRunFrame(vars)
 
                 -- Workarround for shuffleteamsxp_norestart
                 if string.find(unevenTeam["escalationCmd"], "ref%sshuffleteamsxp_norestart") ~= nil then
-                    unevenTeam["time"] = 0
+                    unevenTeam["time"]["notify"] = 0
                 end
             end
 
@@ -65,7 +69,7 @@ function checkUnevenTeamRunFrame(vars)
             et.trap_SendConsoleCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message4"] .. "\n")
         end
 
-        unevenTeam["time"] = vars["levelTime"] -- Next notification in 30 seconds.
+        unevenTeam["time"]["notify"] = vars["levelTime"] -- Next notification in 30 seconds.
     end
 end
 
