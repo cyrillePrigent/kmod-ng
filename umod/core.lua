@@ -760,6 +760,10 @@ if tonumber(et.trap_Cvar_Get("u_name_stealing_protection")) == 1 then
     dofile(umod_path .. "/modules/name_stealing_protection.lua")
 end
 
+if tonumber(et.trap_Cvar_Get("u_birthday")) == 1 then
+    dofile(umod_path .. "/modules/birthday.lua")
+end
+
 dofile(umod_path .. "/modules/commands.lua")
 dofile(umod_path .. "/modules/admins.lua")
 dofile(umod_path .. "/modules/private_message_admin.lua")
