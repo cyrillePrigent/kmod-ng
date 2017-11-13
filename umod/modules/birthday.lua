@@ -7,7 +7,7 @@ birthday = {
     ["nameList"] = {},
     ["guidList"] = {},
     ["msg"]      = "",
-    ["sound"]    = et.trap_Cvar_Get("k_birthdaysoundfile") -- sound/misc/rank_up.wav
+    --["sound"]    = et.trap_Cvar_Get("k_birthdaysoundfile") -- sound/misc/rank_up.wav
 }
 
 -- Set module command.

@@ -4,8 +4,7 @@
 
 lastBlood = {
     ["killerName"] = "",
-    ["message"]    = et.trap_Cvar_Get("u_lb_message"),
-    ["location"]   = getMessageLocation(tonumber(et.trap_Cvar_Get("u_lb_location")))
+    ["message"]    = et.trap_Cvar_Get("u_lb_message")
 }
 
 -- Function
@@ -21,7 +20,7 @@ end
 function checkLastBloodRunFrameEndRound(vars)
     if not game["endRoundTrigger"] and lastBlood["killerName"] then
         local str = string.gsub(lastBlood["message"], "#killer#", lastBlood["killerName"])
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, lastBlood["location"] .. " " .. str .. "\n")
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay " .. str .. "\n")
     end
 end
 

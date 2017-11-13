@@ -446,21 +446,6 @@ function printCmdMsg(params, msg)
     end
 end
 
--- Get location of displayed message on client screen.
---  location value can be :
---   1 : chat area
---   2 : center screen area
---   3 : top of screen
-function getMessageLocation(location)
-    if location == 2 then
-        return "cp"
-    elseif location == 3 then
-        return "bp"
-    else
-        return "qsay"
-    end
-end
-
 -- Check if a command exist and execute his command file.
 --  command is command name to execute.
 --  params is parameters passed to the function executed in command file.
@@ -765,6 +750,10 @@ end
 
 if tonumber(et.trap_Cvar_Get("u_revive_spree")) == 1 then
     dofile(umod_path .. "/modules/revive_spree.lua")
+end
+
+if tonumber(et.trap_Cvar_Get("u_uneven_team")) == 1 then
+    dofile(umod_path .. "/modules/uneven_team.lua")
 end
 
 dofile(umod_path .. "/modules/commands.lua")
