@@ -411,15 +411,12 @@ function etProFixClientUserinfoChanged(vars)
 -- TODO : Check if needed
 -- globalconbined.lua start
 --    local guid = string.upper(client[vars["clientNum"]]["guid"])
---    local name = client[vars["clientNum"]]["name"]
 --
 --    for i = 0, clientsLimit do
 --        local player_userinfo = et.trap_GetUserinfo(client)
 --        local player_guid     = string.upper(client[client]["guid"])
 --
---        if client[i]["name"] == name and name ~= "ETPlayer" and name ~= "UnnamedPlayer" and vars["clientNum"] ~= i then
---            badUserinfo(vars["clientNum"], "duplicate name")
---        elseif player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= i then
+--        if player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= i then
 --            badUserinfo(vars["clientNum"], "duplicate guid")
 --        end
 --    end
