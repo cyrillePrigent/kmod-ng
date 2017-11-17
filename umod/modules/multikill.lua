@@ -93,7 +93,7 @@ end
 function multikillProcess(vars, msg, sndFile, reset)
     if (time["frame"] - client[vars["killer"]]["lastKillTime"]) <= (multikill["maxElapsedTime"] * 1000) then
         client[vars["killer"]]["lastKillTime"] = time["frame"]
-        sayClients("multikillMsg", multikill["msgPosition"], string.gsub(msg, "#killer#", vars["killerName"]))
+        sayClients(multikill["msgPosition"], string.gsub(msg, "#killer#", vars["killerName"]), "multikillMsg")
 
         if multikill["enabledSound"] == 1 then
             if multikill["noiseReduction"] == 1 then

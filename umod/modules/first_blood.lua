@@ -78,7 +78,7 @@ function checkFirstBloodRunObituaryEnemyKill(vars)
         firstBlood["apply"] = true
 
         local msg = string.gsub(firstBlood["message"], "#killer#", vars["killerName"])
-        sayClients("firstBloodMsg", firstBlood["msgPosition"], msg)
+        sayClients(firstBlood["msgPosition"], msg, "firstBloodMsg")
 
         if firstBlood["enabledSound"] == 1 then
             if firstBlood["noiseReduction"] == 1 then

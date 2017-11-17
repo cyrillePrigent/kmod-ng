@@ -236,9 +236,9 @@ function checkMultiRevive(id, guid)
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
                 sayClients(
-                    "reviveSpreeMsg",
                     reviveSpree["multiRevivePosition"],
-                    string.format(reviveSpree["multiReviveMsg"], client[id]["name"])
+                    string.format(reviveSpree["multiReviveMsg"], client[id]["name"]),
+                    "reviveSpreeMsg"
                 )
             end
 
@@ -261,9 +261,9 @@ function checkMultiRevive(id, guid)
 
             if reviveSpree["multiReviveAnnounce"] == 1 then
                 sayClients(
-                    "reviveSpreeMsg",
                     reviveSpree["monsterRevivePosition"],
-                    string.format(reviveSpree["monsterReviveMsg"], client[id]["name"])
+                    string.format(reviveSpree["monsterReviveMsg"], client[id]["name"]),
+                    "reviveSpreeMsg"
                 )
             end
 
@@ -332,7 +332,6 @@ function checkSprees(id)
 
         if msg ~= nil then
             sayClients(
-                "reviveSpreeMsg",
                 reviveSpree["reviveSpreePosition"],
                 string.format(
                     "%s^%s %s (^7%d^%s revives in a row)",
@@ -340,7 +339,8 @@ function checkSprees(id)
                     msg,
                     client[id]["reviveSpree"],
                     reviveSpree["reviveSpreeColor"]
-                )
+                ),
+                "reviveSpreeMsg"
             )
         end
     end
@@ -390,7 +390,6 @@ function checkSpreeEnd(id, killer, normal_kill)
                 end
 
                 sayClients(
-                    "reviveSpreeMsg",
                     reviveSpree["reviveSpreePosition"],
                     string.format(
                         "%s^%s's reviving spree ended (^7%d^%s revives), killed by ^7%s^%s!",
@@ -400,20 +399,20 @@ function checkSpreeEnd(id, killer, normal_kill)
                         reviveSpree["reviveSpreeColor"],
                         killerName,
                         reviveSpree["reviveSpreeColor"]
-                    )
+                    ),
+                    "reviveSpreeMsg"
                 )
 
                 if record then
                     sayClients(
-                        "reviveSpreeMsg",
                         reviveSpree["reviveSpreePosition"],
-                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7"
+                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7",
+                        "reviveSpreeMsg"
                     )
                 end
             else
                 if record and killer <= clientsLimit + 1 then
                     sayClients(
-                        "reviveSpreeMsg",
                         reviveSpree["reviveSpreePosition"],
                         string.format(
                             "%s^%s's reviving spree ended (^7%d^%s revives).",
@@ -421,13 +420,14 @@ function checkSpreeEnd(id, killer, normal_kill)
                             reviveSpree["reviveSpreeColor"],
                             client[id]["reviveSpree"],
                             reviveSpree["reviveSpreeColor"]
-                        )
+                        ),
+                        "reviveSpreeMsg"
                     )
 
                     sayClients(
-                        "reviveSpreeMsg",
                         reviveSpree["reviveSpreePosition"],
-                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7"
+                        "^" .. reviveSpree["reviveSpreeColor"] .. "This is a new map record!^7",
+                        "reviveSpreeMsg"
                     )
                 end
             end
@@ -480,14 +480,14 @@ function checkReviveSpreePrint(vars)
 
         if reviveSpree["announceRevives"] == 1 then
             sayClients(
-                "reviveSpreeMsg",
                 reviveSpree["revivePosition"],
                 string.format(
                     "%s ^%s was revived by ^7%s",
                     client[zombie]["name"],
                     reviveSpree["reviveColor"],
                     client[medic]["name"]
-                )
+                ),
+                "reviveSpreeMsg"
             )
         end
 
@@ -549,7 +549,6 @@ function checkReviveSpreePrint(vars)
 
                 local msg = string.format("^7Longest reviving spree: %s^7 with %d revives!%s", client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"], longest)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \""..msg.."^7\"\n")
-                -- sayClients("reviveSpreeMsg", "b 8", msg)
             end
 
             if reviveSpree["srvRecord"] == 1 then

@@ -272,6 +272,7 @@ panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
 noiseReduction        = tonumber(et.trap_Cvar_Get("u_noisereduction"))
 advancedPms           = tonumber(et.trap_Cvar_Get("u_advancedpms"))
 pmSound               = et.trap_Cvar_Get("u_pmsound")
+selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
 dateFormat            = et.trap_Cvar_Get("u_date_format")
 mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
@@ -688,8 +689,12 @@ if tonumber(et.trap_Cvar_Get("u_autopanzerdisable")) == 1 then
     dofile(umod_path .. "/modules/auto_panzer_disable.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_selfkill_limit")) == 1 then
-    dofile(umod_path .. "/modules/selfkill_limit.lua")
+if selfkillMode == 1 then
+    dofile(umod_path .. "/modules/selfkill/disabled.lua")
+elseif selfkillMode == 2 then
+    dofile(umod_path .. "/modules/selfkill/in_fight.lua")
+elseif selfkillMode == 3 then
+    dofile(umod_path .. "/modules/selfkill/limit.lua")
 end
 
 if logChatModule == 1 then
@@ -1014,6 +1019,8 @@ function et_ClientSpawn(clientNum, revived)
             client[clientNum]["respawn"] = 1 
         end
     end
+    
+    executeCallbackFunction("ClientSpawn", {["clientNum"] = clientNum, ["revived"] = revived})
 end
 
 -- commands
@@ -1235,16 +1242,16 @@ function playSound(soundFile, playKey, clientNum)
     end
 end
 
-function sayClients(msgKey, pos, msg)
+function sayClients(pos, msg, msgKey)
+    msg = string.format("%s \"%s^7\"", pos, msg)
+
     if clientDefaultData[msgKey] == nil then
-        return 
-    end
-
-    local message = string.format("%s \"%s^7\"", pos, msg)
-
-    for i = 0, clientsLimit, 1 do
-        if client[i][msgKey] then
-            et.trap_SendServerCommand(i, message)
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, msg)
+    else
+        for i = 0, clientsLimit, 1 do
+            if client[i][msgKey] then
+                et.trap_SendServerCommand(i, msg)
+            end
         end
     end
 end

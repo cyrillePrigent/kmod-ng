@@ -97,7 +97,7 @@ function checkKillingSpreeRunFrameEndRound(vars)
     if not game["endRoundTrigger"] then
         for i = 0, clientsLimit, 1 do
             if client[i]["killingSpree"] >= 5 then
-                sayClients("killingSpreeMsg", "qsay", "^7" .. client[i]["name"] .. "^1's Killing spree was ended! Due to Map's end.\n")
+                sayClients("qsay", "^7" .. client[i]["name"] .. "^1's Killing spree was ended! Due to Map's end.\n", "killingSpreeMsg")
             end
 
             client[i]["killingSpree"] = 0
@@ -112,7 +112,7 @@ end
 function killingSpreeProcess(vars, msg, sndFile)
     msg = string.gsub(msg, "#killer#", vars["killerName"])
     msg = string.gsub(msg, "#kills#", client[vars["killer"]]["killingSpree"])
-    sayClients("killingSpreeMsg", killingSpree["msgPosition"], msg)
+    sayClients(killingSpree["msgPosition"], msg, "killingSpreeMsg")
 
     if killingSpree["enabledSound"] == 1 then
         if killingSpree["noiseReduction"] == 1 then
@@ -132,7 +132,7 @@ function killingSpreeEndProcess(vars, msg, killsClientNum, ksResetClientNum)
     msg = string.gsub(msg, "#victim#", vars["victimName"])
     msg = string.gsub(msg, "#kills#", client[killsClientNum]["killingSpree"])
     msg = string.gsub(msg, "#killer#", vars["killerName"])
-    sayClients("killingSpreeMsg", killingSpree["msgPosition"], msg)
+    sayClients(killingSpree["msgPosition"], msg, "killingSpreeMsg")
     client[ksResetClientNum]["killingSpree"] = 0
 end
 

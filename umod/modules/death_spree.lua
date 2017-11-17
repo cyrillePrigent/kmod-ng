@@ -86,7 +86,7 @@ function deathSpreeProcess(vars, msg, sndFile)
     msg = string.gsub(msg, "#victim#", vars["victimName"])
     msg = string.gsub(msg, "#deaths#", client[vars["victim"]]["deathSpree"])
 
-    sayClients("deathSpreeMsg", deathSpree["msgPosition"], msg)
+    sayClients(deathSpree["msgPosition"], msg, "deathSpreeMsg")
 
     if deathSpree["enabledSound"] == 1 then
         if deathSpree["noiseReduction"] == 1 then

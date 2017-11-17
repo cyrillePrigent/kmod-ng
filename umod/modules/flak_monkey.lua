@@ -85,7 +85,7 @@ function checkFlakMonkeyObituaryEnemyKill(vars)
 
         if client[vars["killer"]]["flakMonkey"] == 3 then
             local str = string.gsub(flakMonkey["message"], "#killer#", vars["killerName"])
-            sayClients("flakMonkeyMsg", flakMonkey["msgPosition"], str)
+            sayClients(flakMonkey["msgPosition"], str, "flakMonkeyMsg")
 
             if flakMonkey["enabledSound"] == 1 then
                 if flakMonkey["noiseReduction"] == 1 then
