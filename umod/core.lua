@@ -213,9 +213,10 @@ meansOfDeathList = {
 }
 
 game = {
-    ["paused"] = false,
-    ["state"]  = 0,
-    ["endRoundTrigger"] = false
+    ["paused"]            = false,
+    ["state"]             = 0,
+    ["endRoundTrigger"]   = false,
+    ["firstFrameTrigger"] = false
 }
 
 time = {
@@ -767,6 +768,10 @@ end
 
 if tonumber(et.trap_Cvar_Get("u_birthday")) == 1 then
     dofile(umod_path .. "/modules/birthday.lua")
+end
+
+if tonumber(et.trap_Cvar_Get("u_landmines_limit")) == 1 then
+    dofile(umod_path .. "/modules/landmines_limit.lua")
 end
 
 dofile(umod_path .. "/modules/commands.lua")
