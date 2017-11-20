@@ -86,7 +86,7 @@ reviveSpree = {
 clientDefaultData["reviveSpree"]    = 0
 clientDefaultData["lastReviveTime"] = 0
 clientDefaultData["multiRevive"]    = 0
-clientDefaultData["reviveSpreeMsg"] = false
+clientDefaultData["reviveSpreeMsg"] = 0
 
 -- Set module command.
 if rspree_cmd_enabled then
@@ -437,19 +437,13 @@ end
 
 function setRSpreeMsg(id, value)
     client[id]["reviveSpreeMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(id, et.Info_SetValueForKey(et.trap_GetUserinfo(id), "v_rsprees", value))
 end
 
 
 
--- called when game inits
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
 function reviveSpreeInitGame(vars)
     local func_start = et.trap_Milliseconds()
 
@@ -472,6 +466,8 @@ function reviveSpreeInitGame(vars)
     --et.G_Printf("Vetinari's rspree.lua version "..version.." activated...\n")
 end
 
+-- Callback function whenever the server or qagame prints a string to the console.
+--  vars is the local vars of et_Print function.
 function checkReviveSpreePrint(vars)
     if vars["arg"][1] == "Medic_Revive:" then
     --if medic ~= nil and zombie ~= nil then
@@ -610,16 +606,16 @@ function reviveSpreeSlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["reviveSpreeMsg"] == false then
+        if client[params.clientNum]["reviveSpreeMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(rsprees):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setRSpreeMsg(params.clientNum, false)
+        setRSpreeMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(rsprees):^7 Messages are now ^8off^7\"")
     else
-        setRSpreeMsg(params.clientNum, true)
+        setRSpreeMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(rsprees):^7 Messages are now ^8on^7\"")
     end
 
@@ -632,9 +628,9 @@ function reviveSpreeUpdateClientUserinfo(vars)
     if rs == "" then
         setRSpreeMsg(vars["clientNum"], reviveSpree["msgDefault"])
     elseif tonumber(rs) == 0 then
-        client[vars["clientNum"]]["reviveSpreeMsg"] = false
+        client[vars["clientNum"]]["reviveSpreeMsg"] = 0
     else
-        client[vars["clientNum"]]["reviveSpreeMsg"] = true
+        client[vars["clientNum"]]["reviveSpreeMsg"] = 1
     end
 end
 

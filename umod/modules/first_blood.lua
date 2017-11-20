@@ -13,7 +13,7 @@ firstBlood = {
 }
 
 -- Set default client data.
-clientDefaultData["firstBloodMsg"] = false
+clientDefaultData["firstBloodMsg"] = 0
 
 addSlashCommand("client", "fblood", {"function", "firstBloodSlashCommand"})
 
@@ -24,13 +24,6 @@ addSlashCommand("client", "fblood", {"function", "firstBloodSlashCommand"})
 --  value is the boolen value if first blood message & sound is enabled or not..
 function setFirstBloodMsg(clientNum, value)
     client[clientNum]["firstBloodMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fblood", value))
 end
 
@@ -41,16 +34,16 @@ function firstBloodSlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["firstBloodMsg"] == false then
+        if client[params.clientNum]["firstBloodMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(fblood):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setFirstBloodMsg(params.clientNum, false)
+        setFirstBloodMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fblood):^7 Messages are now ^8off^7\"")
     else
-        setFirstBloodMsg(params.clientNum, true)
+        setFirstBloodMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fblood):^7 Messages are now ^8on^7\"")
     end
 
@@ -65,9 +58,9 @@ function firstBloodUpdateClientUserinfo(vars)
     if ds == "" then
         setFirstBloodMsg(vars["clientNum"], firstBlood["msgDefault"])
     elseif tonumber(ds) == 0 then
-        client[vars["clientNum"]]["firstBloodMsg"] = false
+        client[vars["clientNum"]]["firstBloodMsg"] = 0
     else
-        client[vars["clientNum"]]["firstBloodMsg"] = true
+        client[vars["clientNum"]]["firstBloodMsg"] = 1
     end
 end
 

@@ -13,7 +13,7 @@ flakMonkey = {
 
 -- Set default client data.
 clientDefaultData["flakMonkey"]    = 0
-clientDefaultData["flakMonkeyMsg"] = false
+clientDefaultData["flakMonkeyMsg"] = 0
 
 addSlashCommand("client", "fmonkey", {"function", "flakMonkeySlashCommand"})
 
@@ -24,13 +24,6 @@ addSlashCommand("client", "fmonkey", {"function", "flakMonkeySlashCommand"})
 --  value is the boolen value if flak monkey message & sound is enabled or not..
 function setFlakMonkeyMsg(clientNum, value)
     client[clientNum]["flakMonkeyMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fmonkey", value))
 end
 
@@ -41,16 +34,16 @@ function flakMonkeySlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["flakMonkeyMsg"] == false then
+        if client[params.clientNum]["flakMonkeyMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(fmonkey):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setFlakMonkeyMsg(params.clientNum, false)
+        setFlakMonkeyMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fmonkey):^7 Messages are now ^8off^7\"")
     else
-        setFlakMonkeyMsg(params.clientNum, true)
+        setFlakMonkeyMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fmonkey):^7 Messages are now ^8on^7\"")
     end
 
@@ -65,9 +58,9 @@ function flakMonkeyUpdateClientUserinfo(vars)
     if fm == "" then
         setFlakMonkeyMsg(vars["clientNum"], flakMonkey["msgDefault"])
     elseif tonumber(fm) == 0 then
-        client[vars["clientNum"]]["flakMonkeyMsg"] = false
+        client[vars["clientNum"]]["flakMonkeyMsg"] = 0
     else
-        client[vars["clientNum"]]["flakMonkeyMsg"] = true
+        client[vars["clientNum"]]["flakMonkeyMsg"] = 1
     end
 end
 

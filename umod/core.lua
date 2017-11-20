@@ -774,6 +774,10 @@ if tonumber(et.trap_Cvar_Get("u_landmines_limit")) == 1 then
     dofile(umod_path .. "/modules/landmines_limit.lua")
 end
 
+if tonumber(et.trap_Cvar_Get("u_dynamite_timer")) == 1 then
+    dofile(umod_path .. "/modules/dynamite_timer.lua")
+end
+
 dofile(umod_path .. "/modules/commands.lua")
 dofile(umod_path .. "/modules/admins.lua")
 dofile(umod_path .. "/modules/private_message_admin.lua")
@@ -1236,12 +1240,12 @@ function playSound(soundFile, playKey, clientNum)
 
     if clientNum == nil then
         for i = 0, clientsLimit, 1 do
-            if client[i][playKey] then
+            if client[i][playKey] == 1 then
                 setClientSoundIndex(i, soundIndex)
             end
         end
     else
-        if client[clientNum][playKey] then
+        if client[clientNum][playKey] == 1 then
             setClientSoundIndex(clientNum, soundIndex)
         end
     end
@@ -1254,7 +1258,7 @@ function sayClients(pos, msg, msgKey)
         et.trap_SendConsoleCommand(et.EXEC_APPEND, msg)
     else
         for i = 0, clientsLimit, 1 do
-            if client[i][msgKey] then
+            if client[i][msgKey] == 1 then
                 et.trap_SendServerCommand(i, msg)
             end
         end

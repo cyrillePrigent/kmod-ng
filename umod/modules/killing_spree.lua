@@ -33,7 +33,7 @@ killingSpree = {
 
 -- Set default client data.
 clientDefaultData["killingSpree"]    = 0
-clientDefaultData["killingSpreeMsg"] = false
+clientDefaultData["killingSpreeMsg"] = 0
 
 addSlashCommand("client", "kspree", {"function", "killingSpreeSlashCommand"})
 
@@ -44,13 +44,6 @@ addSlashCommand("client", "kspree", {"function", "killingSpreeSlashCommand"})
 --  value is the boolen value if killing spree message & sound is enabled or not..
 function setKillingSpreeMsg(clientNum, value)
     client[clientNum]["killingSpreeMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_kspree", value))
 end
 
@@ -61,16 +54,16 @@ function killingSpreeSlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["killingSpreeMsg"] == false then
+        if client[params.clientNum]["killingSpreeMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(kspree):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setKillingSpreeMsg(params.clientNum, false)
+        setKillingSpreeMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(kspree):^7 Messages are now ^8off^7\"")
     else
-        setKillingSpreeMsg(params.clientNum, true)
+        setKillingSpreeMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(kspree):^7 Messages are now ^8on^7\"")
     end
 
@@ -85,9 +78,9 @@ function killingSpreeUpdateClientUserinfo(vars)
     if ks == "" then
         setKillingSpreeMsg(vars["clientNum"], killingSpree["msgDefault"])
     elseif tonumber(ks) == 0 then
-        client[vars["clientNum"]]["killingSpreeMsg"] = false
+        client[vars["clientNum"]]["killingSpreeMsg"] = 0
     else
-        client[vars["clientNum"]]["killingSpreeMsg"] = true
+        client[vars["clientNum"]]["killingSpreeMsg"] = 1
     end
 end
 
@@ -97,7 +90,11 @@ function checkKillingSpreeRunFrameEndRound(vars)
     if not game["endRoundTrigger"] then
         for i = 0, clientsLimit, 1 do
             if client[i]["killingSpree"] >= 5 then
-                sayClients("qsay", "^7" .. client[i]["name"] .. "^1's Killing spree was ended! Due to Map's end.\n", "killingSpreeMsg")
+                sayClients(
+                    "qsay",
+                    "^7" .. client[i]["name"] .. "^1's Killing spree was ended! Due to Map's end.\n",
+                    "killingSpreeMsg"
+                )
             end
 
             client[i]["killingSpree"] = 0
@@ -206,7 +203,6 @@ end
 addCallbackFunction({
     ["ClientBegin"]           = "killingSpreeUpdateClientUserinfo",
     ["ClientUserinfoChanged"] = "killingSpreeUpdateClientUserinfo",
-    
     ["RunFrameEndRound"]      = "checkKillingSpreeRunFrameEndRound",
     ["ObituaryEnemyKill"]     = "checkKillingSpreeObituaryEnemyKill",
     ["ObituaryWorldKill"]     = "checkKillingSpreeObituaryWorldKill",

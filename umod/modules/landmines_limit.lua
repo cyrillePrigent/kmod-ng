@@ -23,12 +23,12 @@ landminesLimit = {
 function checkMaxMinesRunFrame(vars)
     if vars["levelTime"] - landminesLimit["time"] > 3 then
         local maxMines
-        
-        if players > 8 then
+
+        if players["active"] > 8 then
             maxMines = 15
-        elseif players > 6 then
+        elseif players["active"] > 6 then
             maxMines = 10
-        elseif players > 4 then
+        elseif players["active"] > 4 then
             maxMines = 8
         else
             maxMines = 5

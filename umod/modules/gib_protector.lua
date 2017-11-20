@@ -24,7 +24,8 @@ gibWeapon = (
 
 -- Function
 
-
+-- Callback function whenever the server or qagame prints a string to the console.
+--  vars is the local vars of et_Print function.
 function checkGibProtectorPrint(vars)
     -- Workaround for shrub bug (gibs in warmup)
     if game["state"] == 0 then

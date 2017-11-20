@@ -27,7 +27,7 @@ multikill = {
 -- Set default client data.
 clientDefaultData["multikill"]    = 0
 clientDefaultData["lastKillTime"] = 0
-clientDefaultData["multikillMsg"] = false
+clientDefaultData["multikillMsg"] = 0
 
 addSlashCommand("client", "mkill", {"function", "multikillSlashCommand"})
 
@@ -38,13 +38,6 @@ addSlashCommand("client", "mkill", {"function", "multikillSlashCommand"})
 --  value is the boolen value if multikill message & sound is enabled or not..
 function setMultikillMsg(clientNum, value)
     client[clientNum]["multikillMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_mkill", value))
 end
 
@@ -55,16 +48,16 @@ function multikillSlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["multikillMsg"] == false then
+        if client[params.clientNum]["multikillMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(mkill):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setMultikillMsg(params.clientNum, false)
+        setMultikillMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(mkill):^7 Messages are now ^8off^7\"")
     else
-        setMultikillMsg(params.clientNum, true)
+        setMultikillMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(mkill):^7 Messages are now ^8on^7\"")
     end
 
@@ -79,9 +72,9 @@ function multikillUpdateClientUserinfo(vars)
     if mk == "" then
         setMultikillMsg(vars["clientNum"], multikill["msgDefault"])
     elseif tonumber(mk) == 0 then
-        client[vars["clientNum"]]["multikillMsg"] = false
+        client[vars["clientNum"]]["multikillMsg"] = 0
     else
-        client[vars["clientNum"]]["multikillMsg"] = true
+        client[vars["clientNum"]]["multikillMsg"] = 1
     end
 end
 

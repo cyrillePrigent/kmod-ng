@@ -20,7 +20,7 @@ deathSpree = {
 
 -- Set default client data.
 clientDefaultData["deathSpree"]    = 0
-clientDefaultData["deathSpreeMsg"] = false
+clientDefaultData["deathSpreeMsg"] = 0
 
 addSlashCommand("client", "dskill", {"function", "deathSpreeSlashCommand"})
 
@@ -31,13 +31,6 @@ addSlashCommand("client", "dskill", {"function", "deathSpreeSlashCommand"})
 --  value is the boolen value if death spree message & sound is enabled or not..
 function setDeathSpreeMsg(clientNum, value)
     client[clientNum]["deathSpreeMsg"] = value
-
-    if value then
-        value = "1"
-    else
-        value = "0"
-    end
-
     et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dspree", value))
 end
 
@@ -48,16 +41,16 @@ function deathSpreeSlashCommand(params)
     if params["arg1"] == "" then
         local status = "^8on^7"
 
-        if client[params.clientNum]["deathSpreeMsg"] == false then
+        if client[params.clientNum]["deathSpreeMsg"] == 0 then
             status = "^8off^7"
         end
 
         et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(dspree):^7 Messages are %s\"", status))
     elseif tonumber(params["arg1"]) == 0 then
-        setDeathSpreeMsg(params.clientNum, false)
+        setDeathSpreeMsg(params.clientNum, 0)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dspree):^7 Messages are now ^8off^7\"")
     else
-        setDeathSpreeMsg(params.clientNum, true)
+        setDeathSpreeMsg(params.clientNum, 1)
         et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dspree):^7 Messages are now ^8on^7\"")
     end
 
@@ -72,9 +65,9 @@ function deathSpreeUpdateClientUserinfo(vars)
     if ds == "" then
         setDeathSpreeMsg(vars["clientNum"], deathSpree["msgDefault"])
     elseif tonumber(ds) == 0 then
-        client[vars["clientNum"]]["deathSpreeMsg"] = false
+        client[vars["clientNum"]]["deathSpreeMsg"] = 0
     else
-        client[vars["clientNum"]]["deathSpreeMsg"] = true
+        client[vars["clientNum"]]["deathSpreeMsg"] = 1
     end
 end
 
