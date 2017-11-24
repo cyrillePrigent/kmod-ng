@@ -37,8 +37,3 @@ function checkCrazyGravityRunFrame(vars)
         end
     end
 end
-
--- Add callback crazy gravity function.
-addCallbackFunction({
-    ["RunFrame"] = "checkCrazyGravityRunFrame"
-})

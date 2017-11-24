@@ -13,6 +13,7 @@ function execute_command(params)
                 printCmdMsg(params, "Crazygravity has been Enabled\n")
                 crazyGravity['active'] = true
                 crazyGravity['change'] = true
+                addCallbackFunction({ ["RunFrame"] = "checkCrazyGravityRunFrame" })
             else
                 printCmdMsg(params, "Crazygravity is already active\n")
             end
@@ -22,6 +23,7 @@ function execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
                 crazyGravity['active'] = false
                 crazyGravity['change'] = false
+                removeCallbackFunction("RunFrame", "checkCrazyGravityRunFrame")
             else
                 printCmdMsg(params, "Crazygravity has already been disabled\n")
             end

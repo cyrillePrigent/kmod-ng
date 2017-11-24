@@ -169,7 +169,6 @@ end
 -- Add callback game mode function.
 addCallbackFunction({
     ["ShutdownGame"]     = "checkGameModeShutdownGame",
-    ["RunFrame"]         = "checkGameModeRunFrame",
     ["RunFrameEndRound"] = "checkGameModeRunFrameEndRound",
     --["ClientSpawn"]    = "checkGameModeClientSpawn"
 })
