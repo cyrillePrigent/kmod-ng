@@ -57,7 +57,8 @@ disarm = {
         true,   -- 46 WP_MEDIC_ADRENALINE
         false,  -- 47 WP_AKIMBO_SILENCEDCOLT
         false   -- 48 WP_AKIMBO_SILENCEDLUGER
-    }
+    },
+    ["count"] = 0
 }
 
 -- Set default client data.
@@ -92,8 +93,3 @@ function checkDisarmRunFrame(vars)
         end
     end
 end
-
--- Add callback disarm function.
-addCallbackFunction({
-    ["RunFrame"] = "checkDisarmRunFrame"
-})

@@ -19,6 +19,12 @@ function execute_command(params)
                     else
                         client[clientNum]["disarm"] = 1
                         et.trap_SendServerCommand(-1, "b 16 \"^7" .. client[clientNum]["name"] .. " ^7was Disarmed^7")
+
+                        if disarm["count"] == 0 then
+                            addCallbackFunction({ ["RunFrame"] = "checkDisarmRunFrame" })
+                        end
+
+                        disarm["count"] = disarm["count"] + 1
                     end
                 end
             end

@@ -15,6 +15,8 @@ function execute_command(params)
         end
 
         printCmdMsg(params, "^1" .. count .. " ^7players rearmed\n")
+        disarm["count"] = 0
+        removeCallbackFunction("RunFrame", "checkDisarmRunFrame")
     end
 
     return 1
