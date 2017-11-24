@@ -90,20 +90,18 @@ end
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkGameModeRunFrame(vars)
-    if gameMode["current"] ~= false then
-        if not gameMode["refresh"]["trigger"] then
-            gameMode["refresh"]["time"]    = vars["levelTime"]
-            gameMode["refresh"]["trigger"] = true
-        end
+    if not gameMode["refresh"]["trigger"] then
+        gameMode["refresh"]["time"]    = vars["levelTime"]
+        gameMode["refresh"]["trigger"] = true
+    end
 
-        -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
-        if vars["levelTime"] - gameMode["refresh"]["time"] >= 250 then
-            gameMode["refresh"]["trigger"] = false
+    -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
+    if vars["levelTime"] - gameMode["refresh"]["time"] >= 250 then
+        gameMode["refresh"]["trigger"] = false
 
-            for i = 0, clientsLimit, 1 do
-                setWeaponAmmo(weaponsList, i)
-                gameModeRunFramePlayerCallback(i)
-            end
+        for i = 0, clientsLimit, 1 do
+            setWeaponAmmo(weaponsList, i)
+            gameModeRunFramePlayerCallback(i)
         end
     end
 end

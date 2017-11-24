@@ -22,7 +22,7 @@ cmdList["console"]["!own_reset"] = "/command/both/own_reset.lua"
 --  vars is the local vars of et_Obituary function.
 function checkOwnObituary(vars)
     -- if the killer is flagged for ownage, then own the bastard
-    if own_client[vars["killer"]] == 1 then
+    if client[vars["killer"]]["own"] == 1 then
         -- explanation -  et.G_Damage( target, inflictor, attacker, damage, dflags, mod ), mod 0 = unknown
         et.G_Damage(vars["killer"], 80, vars["victim"], 1000, 8, vars["meansOfDeath"])
 

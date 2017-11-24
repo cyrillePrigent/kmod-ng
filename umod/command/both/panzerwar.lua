@@ -90,10 +90,11 @@ function execute_command(params)
             if gameMode["current"] ~= 'panzerwar' then
                 if not gameModeIsActive("panzerwar", params) then
                     if autoPanzerDisable == 1 then
-                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame" )
+                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame")
                     end
 
                     saveServerClassSetting()
+                    addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
                     local speed = originalSettings['g_speed'] * 2
                     printCmdMsg(params, "Panzerwar has been Enabled\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops 0 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxSoldiers -1 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers -1 ; g_speed " .. speed .. " ; forcecvar g_soldierchargetime 0\n")
@@ -125,6 +126,8 @@ function execute_command(params)
                 gameMode["clientSettingsModified"] = false
                 --removeCallbackFunction("ClientSpawn", "panzerwarClientSpawn")
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; g_speed " .. originalSettings['g_speed'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. "\n")
+
+                removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
 
                 for p = 0, clientsLimit, 1 do
                     if client[p]['team'] == 1 or client[p]['team'] == 2 then

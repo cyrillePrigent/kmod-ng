@@ -12,10 +12,11 @@ function execute_command(params)
             if gameMode["current"] ~= 'knifewar' then
                 if not gameModeIsActive("knifewar", params) then
                     if autoPanzerDisable == 1 then
-                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame" )
+                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame")
                     end
 
                     saveServerClassSetting()
+                    addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
                     printCmdMsg(params, "Knifewar has been Enabled\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_knifeonly 1\n")
                     gameMode["current"] = 'knifewar'
@@ -41,6 +42,8 @@ function execute_command(params)
                 printCmdMsg(params, "Knifewar has been Disabled.\n")
                 gameMode["current"] = false
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings['team_maxmedics'] .. " ; team_maxcovertops " .. originalSettings['team_maxcovertops'] .. " ; team_maxfieldops " .. originalSettings['team_maxfieldops'] .. " ; team_maxengineers " .. originalSettings['team_maxengineers'] .. " ; team_maxflamers " .. originalSettings['team_maxflamers'] .. " ; team_maxmortars " .. originalSettings['team_maxmortars'] .. " ; team_maxmg42s " .. originalSettings['team_maxmg42s'] .. " ; team_maxpanzers " .. originalSettings['team_maxpanzers'] .. " ; forcecvar g_soldierchargetime " .. originalSettings['g_soldierchargetime'] .. " ; g_knifeonly 0\n")
+
+                removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
 
                 for p = 0, clientsLimit, 1 do
                     if client[p]['team'] == 1 or client[p]['team'] == 2 then
