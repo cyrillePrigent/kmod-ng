@@ -3,14 +3,14 @@
 -- Global var
 
 tkRestriction = {
-    ["limitLow"]  = tonumber(et.trap_Cvar_Get("u_tklimit_low")),
-    ["limitHigh"] = tonumber(et.trap_Cvar_Get("u_tklimit_high")),
+    ["limitLow"]  = tonumber(et.trap_Cvar_Get("u_tk_limit_low")),
+    ["limitHigh"] = tonumber(et.trap_Cvar_Get("u_tk_limit_high")),
     ["protect"]   = tonumber(et.trap_Cvar_Get("u_tk_protect"))
 }
 
 -- Function
 
--- Callback function when victim is killed by mate (team kill).
+-- Callback function when victim is killed by mate (teamkill).
 --  vars is the local vars of et_Obituary function.
 function checkTeamkillRestrictionObituaryTeamKill(vars)
     if game["state"] == 0 then
@@ -25,14 +25,13 @@ function checkTeamkillRestrictionObituaryTeamKill(vars)
                 client[vars["killer"]]["tkIndex"] = client[vars["killer"]]["tkIndex"] - 1
             end
 
-            --if (tkRestriction["limitLow"] + 1) > client[vars["killer"]]["tkIndex"] and tkRestriction["limitLow"] < client[vars["killer"]]["tkIndex"] then
             if (tkRestriction["limitLow"] + 1) == client[vars["killer"]]["tkIndex"] then
-                if advancedPms == 1 then
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m2 " .. et.Q_CleanStr(vars["killerName"]) .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
-                    --et.G_ClientSound(vars["killer"], pmSound)
-                else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "m " .. et.Q_CleanStr(vars["killerName"]) .. " ^1You are making to many teamkills please be more careful or you will be kicked!\n")
-                end
+                et.trap_SendServerCommand(
+                    vars["killer"],
+                    "b 8 ^1You are making to many teamkills please be more careful or you will be kicked!\n"
+                )
+                
+                et.G_ClientSound(vars["killer"], "sound/misc/referee.wav")
             elseif client[vars["killer"]]["tkIndex"] <= tkRestriction["limitLow"] then
                 local pbkiller = vars["killer"] + 1
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n")

@@ -31,8 +31,7 @@ function checkOwnObituary(vars)
         -- et.gentity_set(vars["victim"], "health", 100)
 
         -- sends message via qsay, method taken from hadro's anti-sk bot
-        local msg = string.format("%s ^7just got owned!", vars["killerName"])
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, string.format("qsay %s\n", msg))
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, string.format("qsay %s ^7just got owned!\n", vars["killerName"]))
     end
 end
 

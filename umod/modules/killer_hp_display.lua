@@ -24,7 +24,7 @@ function displayKillerHpObituaryEnemyKill(vars)
     end
 
     if killerHp <= 0 then
-        if vars["meansOfDeath"] == 4 or vars["meansOfDeath"] == 18 or vars["meansOfDeath"] == 18 or vars["meansOfDeath"] == 26 or vars["meansOfDeath"] == 27 or vars["meansOfDeath"] == 30 or vars["meansOfDeath"] == 44 or vars["meansOfDeath"] == 43 then
+        if vars["meansOfDeath"] == 4 or vars["meansOfDeath"] == 18 or vars["meansOfDeath"] == 26 or vars["meansOfDeath"] == 27 or vars["meansOfDeath"] == 30 or vars["meansOfDeath"] == 44 or vars["meansOfDeath"] == 43 then
             et.trap_SendServerCommand(vars["victim"], string.format("b 8 \"^" .. color .. "You were owned by ^7" .. vars["killerName"] .. "^" .. color .. "'s explosive inheritance"))
         end
     end

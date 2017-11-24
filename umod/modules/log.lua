@@ -1,6 +1,6 @@
 -- Log
 
-addSlashCommand("client", "mt", {"function", "teamPrivateMessageSlashCommand"})
+
 --addSlashCommand("console", "mt", {"function", "teamPrivateMessageSlashCommand"})
 
 -- Function

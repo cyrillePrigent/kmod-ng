@@ -1,4 +1,4 @@
--- Game mode (frenzy, grenadewar, panzerwar & sniperwar)
+-- Game mode (frenzy, grenadewar, panzerwar, sniperwar, stenwar, lugerwar & knifewar)
 
 -- Global var
 
@@ -145,10 +145,12 @@ function gameModeIsActive(newGameMode, params)
         printCmdMsg(params, "Frenzy must be disabled first\n")
     elseif newGameMode ~= "lugerwar" and gameMode["current"] == "lugerwar" then
         printCmdMsg(params, "Lugerwar must be disabled first\n")
+    elseif newGameMode ~= "knifewar" and gameMode["current"] == "knifewar" then
+        printCmdMsg(params, "Knifewar must be disabled first\n")
     else
         return false
     end
-
+    
     return true
 end
 

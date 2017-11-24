@@ -1,6 +1,6 @@
 -- Based on RoadKillPuppy's PlaySound / etpro lua module
--- ex. 'rcon rconpass playsound -1 sound/etpro/hit.wav'
---     'rcon rconpass playsound_env 10 sound/etpro/hit.wav'
+-- ex. 'rcon rconpass playsound sound/etpro/hit.wav'
+--     'rcon rconpass playsound_env sound/etpro/hit.wav'
 --
 -- copypasted 99% of the code from ReyalP's wolfwiki page
 -- thx r0f`deej for testing...  May your sprees be remembered!
@@ -21,7 +21,7 @@ addSlashCommand("console", "playsound_env", {"function", "playsoundEnvSlashComma
 function playsoundSlashCommand(params)
     if params["nbArg"] ~= 2 then
         et.G_Print("playsound plays a sound that everybody on the server can hear\n")
-        et.G_Print("usage: playsound path_to_sound.wav\n")
+        et.G_Print("usage: playsound [path_to_sound.wav]\n")
     else
         et.G_globalSound(params["arg1"])
     end
@@ -34,9 +34,9 @@ end
 function playsoundEnvSlashCommand(params)
     if params["nbArg"] ~= 2 then
         et.G_Print("playsound_env plays a sound that you can hear in the proximity of the player with slot -playerslot-\n")
-        et.G_Print("usage: playsound_env playerslot path_to_sound.wav\n")
+        et.G_Print("usage: playsound_env [playerslot] [path_to_sound.wav]\n")
     else
-        et.G_Sound(params["arg1"] , et.G_SoundIndex(params["arg2"]))
+        et.G_Sound(params["arg1"], et.G_SoundIndex(params["arg2"]))
     end
 
     return 1

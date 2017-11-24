@@ -80,6 +80,10 @@ function execute_command(params)
         if stenwar == 1 then
             if gameMode["current"] ~= 'stenwar' then
                 if not gameModeIsActive("stenwar", params) then
+                    if autoPanzerDisable == 1 then
+                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame" )
+                    end
+
                     saveServerClassSetting()
                     printCmdMsg(params, "Stenwar has been Enabled\n")
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics 0 ; team_maxcovertops -1 ; team_maxfieldops 0 ; team_maxengineers 0 ; team_maxSoldiers 0 ; team_maxflamers 0 ; team_maxmortars 0 ; team_maxmg42s 0 ; team_maxpanzers 0\n")
@@ -119,6 +123,10 @@ function execute_command(params)
                         et.gentity_set(p, "sess.latchPlayerType", client[p]['originalClass'])
                         et.gentity_set(p, "sess.latchPlayerWeapon", client[p]['originalWeapon'])
                     end
+                end
+
+                if autoPanzerDisable == 1 then
+                    addCallbackFunction({ ["RunFrame"] = "autoPanzerDisableRunFrame" })
                 end
             else
                 printCmdMsg(params, "Stenwar has already been disabled\n")

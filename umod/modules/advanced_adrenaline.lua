@@ -3,8 +3,8 @@
 -- Global var
 
 advancedAdrenaline = {
-    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_adrensound")),
-    ["sound"]        = et.trap_Cvar_Get("u_adrensoundfile")
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_aa_enable_sound")),
+    ["sound"]        = et.trap_Cvar_Get("u_aa_sound")
 }
 
 -- Set default client data.

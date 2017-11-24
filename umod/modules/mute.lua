@@ -159,7 +159,7 @@ function checkMuteRunFrame(vars)
                 if time["frame"] > client[i]["muteEnd"] then
                     if muted == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3CurseFilter: ^7" .. client[i]["name"] .." ^7has been auto unmuted.  Please watch your language!\n")
+                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been auto unmuted.  Please watch your language!\n")
                     end
 
                     client[i]["muteEnd"] = 0
@@ -193,11 +193,11 @@ function checkMuteClientBegin(vars)
     if mute["duration"][ip] ~= nil and ref == 0 then
         if mute["duration"][ip] > 0 then
             client[vars["clientNum"]]["muteEnd"] = time["frame"] + (mute["duration"][ip] * 1000)
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[clientNum][vars["clientNum"]]["lastName"] .. "^7 has not yet finished his mute sentance.  (^1" .. mute["duration"][ip] .. "^7) seconds.\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[clientNum][vars["clientNum"]]["lastName"] .. "^7 has not yet finished his mute sentance.  (^1" .. mute["duration"][ip] .. "^7) seconds.\n")
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
         elseif mute["duration"][ip] == -1 then
             client[vars["clientNum"]]["muteEnd"] = -1
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Curse Filter:  ^7" .. client[vars["clientNum"]]["lastName"] .. "^7 has been permanently muted\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[vars["clientNum"]]["lastName"] .. "^7 has been permanently muted\n")
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
         end
     end

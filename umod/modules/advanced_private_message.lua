@@ -1,4 +1,4 @@
--- Private message admins
+-- Advanced private message
 
 -- Global var
 
@@ -25,7 +25,7 @@ function privateMessageSlashCommand(params)
 
         if targetNum ~= nil then
             if logChatModule == 1 then
-                logPrivateMessage(targetNum, pmContent, nil, client[targetNum]["name"])
+                logPrivateMessage(params.clientNum, pmContent, targetNum, client[targetNum]["name"])
             end
 
             et.trap_SendServerCommand(params.clientNum, "b 8 \"^dPrivate message sent to " .. client[targetNum]["name"] .. "^d --> ^3" .. pmContent .. "^7")
@@ -53,10 +53,25 @@ function privateMessage2SlashCommand(params)
             et.G_ClientSound(targetNum, pmSound)
 
             if logChatModule == 1 then
-                logPrivateMessage(1022, message, nil, client[targetNum]["name"])
+                logPrivateMessage(1022, message, targetNum, client[targetNum]["name"])
             end
         end
     end
 
     return 1
 end
+
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function advancedPmInitGame(vars)
+    if advancedPm == 1 then
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 0\n")
+    else
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 2\n")
+    end
+end
+
+-- Add callback Advanced private message function.
+addCallbackFunction({
+    ["InitGame"] = "advancedPmInitGame"
+})

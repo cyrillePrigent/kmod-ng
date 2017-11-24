@@ -2,7 +2,7 @@
 
 --  PURPOSE:
 --  This script prevents clients with a pbguid never before seen by the server from joining a team until they have served
---  a wait-time (defined by "k_wait_time" below).  It is intended to prevent clients who have been kicked/banned from
+--  a wait-time (defined by "u_wait_time" below).  It is intended to prevent clients who have been kicked/banned from
 --  the server from being able to reconnect and play again immediately if they have simply obtained a new pbguid.  
 
 --  DESCRIPTION:
@@ -29,10 +29,10 @@
 knownGuids = {
     ["list"]      = {},
     ["waitTime"]  = {
-        ["mins"]    = tonumber(et.trap_Cvar_Get("k_wait_time")),
+        ["mins"]    = tonumber(et.trap_Cvar_Get("u_kg_wait_time")),
         ["ms"]      = 0
     },
-    ["forceWait"] = tonumber(et.trap_Cvar_Get("k_force_wait"))
+    ["forceWait"] = tonumber(et.trap_Cvar_Get("u_kg_force_wait"))
 }
 
 knownGuids["waitTime"]["ms"] = knownGuids["waitTime"]["mins"] * 60 * 1000

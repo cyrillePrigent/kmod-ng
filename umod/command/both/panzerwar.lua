@@ -89,6 +89,10 @@ function execute_command(params)
         if panzerwar == 1 then
             if gameMode["current"] ~= 'panzerwar' then
                 if not gameModeIsActive("panzerwar", params) then
+                    if autoPanzerDisable == 1 then
+                        removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame" )
+                    end
+
                     saveServerClassSetting()
                     local speed = originalSettings['g_speed'] * 2
                     printCmdMsg(params, "Panzerwar has been Enabled\n")
@@ -133,6 +137,10 @@ function execute_command(params)
                         et.gentity_set(p, "sess.latchPlayerType", client[p]['originalClass'])
                         et.gentity_set(p, "sess.latchPlayerWeapon", client[p]['originalWeapon'])
                     end
+                end
+
+                if autoPanzerDisable == 1 then
+                    addCallbackFunction({ ["RunFrame"] = "autoPanzerDisableRunFrame" })
                 end
             else
                 printCmdMsg(params, "Panzerwar has already been disabled\n")

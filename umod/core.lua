@@ -78,7 +78,6 @@ cmdList = {
         ["!makereferee"]       = "/command/client/makereferee.lua",
         ["!removereferee"]     = "/command/client/removereferee.lua",
         ["!gravity"]           = "/command/client/gravity.lua",
-        ["!knifeonly"]         = "/command/client/knifeonly.lua",
         ["!speed"]             = "/command/client/speed.lua",
         ["!knockback"]         = "/command/client/knockback.lua",
         ["!cheats"]            = "/command/both/cheats.lua",
@@ -269,16 +268,17 @@ pause = {
 
 -- Load Uber Mod cvar
 color                 = et.trap_Cvar_Get("u_color")
+autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
 panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-noiseReduction        = tonumber(et.trap_Cvar_Get("u_noisereduction"))
-advancedPms           = tonumber(et.trap_Cvar_Get("u_advancedpms"))
-pmSound               = et.trap_Cvar_Get("u_pmsound")
+advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
+pmSound               = et.trap_Cvar_Get("u_pm_sound")
 selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
 dateFormat            = et.trap_Cvar_Get("u_date_format")
+spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity"))
 mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
-logChatModule         = tonumber(et.trap_Cvar_Get("u_logchat"))
+logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
 
 
 -- Store a settings function list in main callback function list.
@@ -659,11 +659,13 @@ if modUrl == "http://etpro.anime.net/" then
     dofile(umod_path .. "/mods/etpro.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_crazygravity_module")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_crazygravity")) == 1 then
     dofile(umod_path .. "/modules/crazygravity.lua")
 end
 
-dofile(umod_path .. '/modules/game_mode.lua')
+if tonumber(et.trap_Cvar_Get("u_game_mode")) == 1 then
+    dofile(umod_path .. '/modules/game_mode.lua')
+end
 
 if muteModule == 1 then
     dofile(umod_path .. "/modules/mute.lua")
@@ -673,20 +675,20 @@ if curseMode > 0 then
     dofile(umod_path .. "/modules/curse_filter.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_disablevotes")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_disable_votes")) == 1 then
     dofile(umod_path .. "/modules/disable_vote.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_advancedadrenaline")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_advanced_adrenaline")) == 1 then
     dofile(umod_path .. "/modules/advanced_adrenaline.lua")
 end
 
 -- g_inactivity is required or this will not work
-if tonumber(et.trap_Cvar_Get("u_advancedspawn")) == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
+if tonumber(et.trap_Cvar_Get("u_advanced_spawn")) == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
     dofile(umod_path .. "/modules/advanced_spawn.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_autopanzerdisable")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_auto_panzer_disable")) == 1 then
     dofile(umod_path .. "/modules/auto_panzer_disable.lua")
 end
 
@@ -702,51 +704,51 @@ if logChatModule == 1 then
     dofile(umod_path .. "/modules/log.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_sprees")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_killing_spree")) == 1 then
     dofile(umod_path .. "/modules/killing_spree.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_spreerecord")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_spree_record")) == 1 then
     dofile(umod_path .. "/modules/spree_record.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_multikills")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_multikill")) == 1 then
     dofile(umod_path .. "/modules/multikill.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_flakmonkey")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_flak_monkey")) == 1 then
     dofile(umod_path .. "/modules/flak_monkey.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_deathsprees")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_u_death_spree")) == 1 then
     dofile(umod_path .. "/modules/death_spree.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_teamkillrestriction")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_teamkill_restriction")) == 1 then
     dofile(umod_path .. "/modules/teamkill_restriction.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_firstblood")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_first_blood")) == 1 then
     dofile(umod_path .. "/modules/first_blood.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_lastblood")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_last_blood")) == 1 then
     dofile(umod_path .. "/modules/last_blood.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_killerhpdisplay")) == 1 then
-    dofile(umod_path .. "/modules/display_killer_hp.lua")
+if tonumber(et.trap_Cvar_Get("u_killer_hp_display")) == 1 then
+    dofile(umod_path .. "/modules/killer_hp_display.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_endroundshuffle")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_end_round_shuffle")) == 1 then
     dofile(umod_path .. "/modules/end_round_shuffle.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_antiunmute")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_anti_unmute")) == 1 then
     dofile(umod_path .. "/modules/anti_unmute.lua")
 end
 
-if advancedPms == 1 then
+if advancedPm == 1 then
     dofile(umod_path .. "/modules/advanced_private_message.lua")
 end
 
@@ -778,11 +780,27 @@ if tonumber(et.trap_Cvar_Get("u_dynamite_timer")) == 1 then
     dofile(umod_path .. "/modules/dynamite_timer.lua")
 end
 
+if tonumber(et.trap_Cvar_Get("u_disarm")) == 1 then
+    dofile(umod_path .. "/modules/disarm.lua")
+end
+
+if tonumber(et.trap_Cvar_Get("u_gib_protector")) == 1 then
+    dofile(umod_path .. "/modules/gib_protector.lua")
+end
+
+if tonumber(et.trap_Cvar_Get("u_know_guids")) == 1 then
+    dofile(umod_path .. "/modules/know_guids.lua")
+end
+
+if tonumber(et.trap_Cvar_Get("u_own")) == 1 then
+    dofile(umod_path .. "/modules/own.lua")
+end
+
 dofile(umod_path .. "/modules/commands.lua")
 dofile(umod_path .. "/modules/admins.lua")
 dofile(umod_path .. "/modules/private_message_admin.lua")
 
-if tonumber(et.trap_Cvar_Get("u_advplayers")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_advanced_players")) == 1 then
     addSlashCommand("client", "players", {"file", "/command/client/players.lua"})
     addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
 end
@@ -823,14 +841,7 @@ function et_InitGame(levelTime, randomSeed, restart)
     executeCallbackFunction("InitGame", {["levelTime"] = levelTime, ["restart"] = restart})
     executeCallbackFunction("ReadConfig")
 
-    if advancedPms == 1 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 0\n")
-    else
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "b_privatemessages 2\n")
-    end
-
     et.G_Print("uMod version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
-    --et.G_Print("lua version : " .. _VERSION)
 end
 
 -- Called when qagame shuts down.
@@ -935,14 +946,11 @@ function et_RunFrame(levelTime)
         end
     end
 
-    if tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) > 0 then
+    if spectatorInactivity > 0 then
         for i = 0, clientsLimit, 1 do
-            if getAdminLevel(i) >= 1 then
-                --if client[i]["team"] >= 3 or client[i]["team"] < 1 then
-                if client[i]["team"] == 3 then
-                    et.gentity_set(i, "client.inactivityTime", time["frame"])
-                    et.gentity_set(i, "client.inactivityWarning", 1)
-                end
+            if client[i]["team"] == 3 and getAdminLevel(i) >= 1 then
+                et.gentity_set(i, "client.inactivityTime", time["frame"])
+                et.gentity_set(i, "client.inactivityWarning", 1)
             end
         end
     end
@@ -1022,7 +1030,7 @@ function et_ClientSpawn(clientNum, revived)
 
     -- TODO : Check if spawn in spectator is possible (lol)
     if client[clientNum]["team"] == 1 or client[clientNum]["team"] == 2 then
-        --gameModeClientSpawn(clientNum)
+        checkGameModeClientSpawn({["clientNum"] = clientNum, ["revived"] = revived})
 
         if revived == 0 then
             client[clientNum]["respawn"] = 1 
@@ -1050,7 +1058,7 @@ function et_ClientCommand(clientNum, command)
         if clientCmdData[params.cmd] ~= nil then
             local sayContent = et.ConcatArgs(1)
             
-            if logChatModuleModule == 1 then
+            if logChatModule == 1 then
                 logChat(clientNum, clientCmdData[params.cmd]["mode"], sayContent)
             end
 

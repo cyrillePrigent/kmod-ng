@@ -12,7 +12,7 @@ function execute_command(params)
                 et.trap_SendConsoleCommand( et.EXEC_APPEND, "ref mute " .. clientNum .. "\n")
                 client[clientNum]['muteEnd'] = -1
                 setMute(clientNum, -1)
-                printCmdMsg(params, client[clientNum]["name"] .. " ^7has been muted\n")
+                printCmdMsg(params, client[clientNum]["name"] .. " ^7has been muted permanently\n")
             else
                 printCmdMsg(params, "Cannot mute a higher admin\n")
             end
