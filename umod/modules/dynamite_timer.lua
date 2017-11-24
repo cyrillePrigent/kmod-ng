@@ -32,7 +32,8 @@ dynamiteTimer = {
     ["steps"]          = {}
     ["announcePlant"]  = tonumber(et.trap_Cvar_Get("u_dt_announce_plant")),
     ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_dt_msg_default")), -- local cl_default = false
-    ["msgPosition"]    = et.trap_Cvar_Get("u_dt_msg_position") -- local announce_pos   = "b 8"
+    ["msgPosition"]    = et.trap_Cvar_Get("u_dt_msg_position"), -- local announce_pos   = "b 8"
+    ["count"]          = 0
 }
 
 local ST_NEXT = 1
@@ -105,6 +106,12 @@ function checkDynamiteTimerPrint(vars)
                 end
 
                 addDynamiteTimer(location)
+
+                if dynamiteTimer["count"] == 0 then
+                    addCallbackFunction({ ["RunFrame"] = "checkDynamiteTimerRunFrame" })
+                end
+
+                dynamiteTimer["count"] = dynamiteTimer["count"] + 1
             end
 
             if action == "defused" then
@@ -115,6 +122,11 @@ function checkDynamiteTimerPrint(vars)
                 )
 
                 removeDynamiteTimer(location)
+                dynamiteTimer["count"] = dynamiteTimer["count"] - 1
+
+                if dynamiteTimer["count"] == 0 then
+                    removeCallbackFunction("RunFrame", "checkDynamiteTimerRunFrame")
+                end
             end
         end
     end
@@ -227,7 +239,6 @@ end
 -- Add callback dynamite timer function.
 addCallbackFunction({
     ["InitGame"]              = "dynamiteTimerInitGame",
-    ["RunFrame"]              = "checkDynamiteTimerRunFrame",
     ["Print"]                 = "checkDynamiteTimerPrint",
     ["ClientBegin"]           = "dynamiteTimerUpdateClientUserinfo",
     ["ClientUserinfoChanged"] = "dynamiteTimerUpdateClientUserinfo",
