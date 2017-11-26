@@ -1,4 +1,5 @@
 -- Enable / disabled crazygravity.
+-- From kmod.lua
 -- Require : crazygravity module
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new crazygravity value
@@ -10,20 +11,21 @@ function execute_command(params)
 
         if cgValue == 1 then
             if crazyGravity['active'] == false then
-                printCmdMsg(params, "Crazygravity has been Enabled\n")
                 crazyGravity['active'] = true
-                crazyGravity['change'] = true
+                crazyGravity["time"]   = time["frame"] + crazyGravity["intervalChange"]
+
                 addCallbackFunction({ ["RunFrame"] = "checkCrazyGravityRunFrame" })
+                printCmdMsg(params, "Crazygravity has been enabled\n")
             else
                 printCmdMsg(params, "Crazygravity is already active\n")
             end
         elseif cgValue == 0 then
             if crazyGravity['active'] == true then
-                printCmdMsg(params, "Crazygravity has been Disabled.  Resetting gravity\n")
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
                 crazyGravity['active'] = false
-                crazyGravity['change'] = false
+
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
                 removeCallbackFunction("RunFrame", "checkCrazyGravityRunFrame")
+                printCmdMsg(params, "Crazygravity has been disabled. Resetting gravity\n")
             else
                 printCmdMsg(params, "Crazygravity has already been disabled\n")
             end

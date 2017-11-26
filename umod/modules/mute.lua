@@ -21,8 +21,7 @@ mute = {
 }
 
 -- Set default client data.
-clientDefaultData["muteEnd"]         = 0
-clientDefaultData["muteMultipliers"] = 0
+clientDefaultData["muteEnd"] = 0
 
 -- Function
 
@@ -152,10 +151,10 @@ end
 --  vars is the local vars passed from et_RunFrame function.
 function checkMuteRunFrame(vars)
     for i = 0, clientsLimit, 1 do
-        local muted = et.gentity_get(i, "sess.muted")
-
-        if client[i]["muteEnd"] ~= nil then
+        --if client[i]["muteEnd"] ~= nil then
             if client[i]["muteEnd"] > 0 then
+                local muted = et.gentity_get(i, "sess.muted")
+
                 if time["frame"] > client[i]["muteEnd"] then
                     if muted == 1 then
                         et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
@@ -172,11 +171,11 @@ function checkMuteRunFrame(vars)
                     client[i]["muteEnd"] = 0
                 end
             elseif client[i]["muteEnd"] == -1 then
-                if muted == 0 then
+                if et.gentity_get(i, "sess.muted") == 0 then
                     client[i]["muteEnd"] = 0
                 end
             end
-        end
+        --end
     end
 end
 

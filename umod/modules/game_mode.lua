@@ -22,7 +22,10 @@ originalSettings = {
     ["team_maxfieldops"]    = "",
     ["team_maxcovertops"]   = "",
     ["g_soldierchargetime"] = "",
-    ["g_speed"]             = ""
+    ["g_speed"]             = "",
+    
+    ["team_maxriflegrenades"] = "",
+    ["b_riflegrenades"]       = ""
 }
 
 -- Set default client data.
@@ -50,6 +53,18 @@ cmdList["console"]["!knifewar"]    = "/command/both/knifewar.lua"
 -- Callback function when qagame shuts down.
 function checkGameModeShutdownGame()
     if gameMode["current"] ~= false then
+        --[[
+        team_maxmedics
+        team_maxcovertops
+        team_maxfieldops
+        team_maxengineers
+        team_maxflamers
+        team_maxmortars
+        team_maxmg42s
+        team_maxpanzers
+        g_soldierchargetime
+        --]]
+        
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings["team_maxmedics"] .. " ; team_maxcovertops " .. originalSettings["team_maxcovertops"] .. " ; team_maxfieldops " .. originalSettings["team_maxfieldops"] .. " ; team_maxengineers " .. originalSettings["team_maxengineers"] .. " ; team_maxflamers " .. originalSettings["team_maxflamers"] .. " ; team_maxmortars " .. originalSettings["team_maxmortars"] .. " ; team_maxmg42s " .. originalSettings["team_maxmg42s"] .. " ; team_maxpanzers " .. originalSettings["team_maxpanzers"] .. " ; forcecvar g_soldierchargetime " .. originalSettings["g_soldierchargetime"] .. "\n")
 
         if gameMode["current"] == "panzerwar" then
@@ -164,6 +179,22 @@ function saveServerClassSetting()
     originalSettings["team_maxcovertops"]   = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
     originalSettings["g_soldierchargetime"] = tonumber(et.trap_Cvar_Get("g_soldierchargetime"))
     originalSettings["g_speed"]             = tonumber(et.trap_Cvar_Get("g_speed"))
+    
+    originalSettings["team_maxriflegrenades"] = tonumber(et.trap_Cvar_Get("team_maxriflegrenades"))
+
+    if modUrl == "http://etpro.anime.net/" then
+        originalSettings["b_riflegrenades"] = tonumber(et.trap_Cvar_Get("b_riflegrenades"))
+    end
+    
+    --for cvar, value in pair(originalSettings) do
+    --    originalSettings[cvar] = tonumber(et.trap_Cvar_Get(cvar))
+    --end
+end
+
+function restoreGameServerSetting()
+    for cvar, value in pair(originalSettings) do
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, cvar .. " " .. value)
+    end
 end
 
 -- Add callback game mode function.

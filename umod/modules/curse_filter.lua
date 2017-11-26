@@ -4,6 +4,9 @@
 
 badWordList = {}
 
+-- Set default client data.
+clientDefaultData["muteMultipliers"] = 0
+
 -- Function
 
 -- Load unauthorized word stored in badwords.list file.

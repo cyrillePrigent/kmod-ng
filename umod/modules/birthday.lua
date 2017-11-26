@@ -16,8 +16,6 @@ cmdList["client"]["!removebirthday"]  = "/command/both/removebirthday.lua"
 cmdList["console"]["!addbirthday"]    = "/command/both/addbirthday.lua"
 cmdList["console"]["!removebirthday"] = "/command/both/removebirthday.lua"
 
-
-
 -- Function
 
 -- Initializes birthday data.
@@ -128,8 +126,3 @@ function checkBirthdayRunFrame(vars)
         birthday["time"] = vars["levelTime"]
     end
 end
-
--- Add callback birthday function.
-addCallbackFunction({
-    ["RunFrame"] = "checkBirthdayRunFrame"
-})

@@ -8,7 +8,8 @@ function checkNameStealingProtectionClientUserinfoChanged(vars)
 
     --if name ~= client[vars["clientNum"]]["name"] and name ~= "ETPlayer" and name ~= "UnnamedPlayer" then
     if name ~= client[vars["clientNum"]]["name"] then
-        local testName = et.Q_CleanStr(string.gsub(name, "^%s*(.-)%s*$", "%1"))
+        --local testName = et.Q_CleanStr(string.gsub(name, "^%s*(.-)%s*$", "%1"))
+        local testName = et.Q_CleanStr(string.gsub(name, "^%s*(.-)%s*$"))
 
         if testName ~= "" then
             for i = 0, clientsLimit, 1 do

@@ -15,6 +15,24 @@ clientDefaultData["adrenalineCounter"]    = 0
 
 -- Function
 
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function advancedAdrenalineInitGame(vars)
+    local cvar
+
+    if modUrl == "http://etpro.anime.net/" then
+        cvar = "b_levels_medic"
+    elseif modUrl == "www.etlegacy.com" then
+        cvar = "skill_medic"
+    end
+
+    if string.find(et.trap_Cvar_Get(cvar), "%s+%-1%s*$") == nil then
+        et.G_LogPrint("Adrenaline is disabled! Please enable it with " .. cvar .. " cvar.\n")
+    else
+        addCallbackFunction({["RunFrame"] = "checkAdvancedAdrenalineRunFrame"})
+    end
+end
+
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkAdvancedAdrenalineRunFrame(vars)
@@ -60,5 +78,5 @@ end
 
 -- Add callback advanced adrenaline function.
 addCallbackFunction({
-    ["RunFrame"] = "checkAdvancedAdrenalineRunFrame"
+    ["InitGame"] = "advancedAdrenalineInitGame"
 })

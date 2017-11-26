@@ -33,8 +33,7 @@ function checkTeamkillRestrictionObituaryTeamKill(vars)
                 
                 et.G_ClientSound(vars["killer"], "sound/misc/referee.wav")
             elseif client[vars["killer"]]["tkIndex"] <= tkRestriction["limitLow"] then
-                local pbkiller = vars["killer"] + 1
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbkiller .. " 10 Too many teamkills\n")
+                kick(vars["killer"], "Too many teamkills", 10)
             end
         end
     end

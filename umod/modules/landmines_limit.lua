@@ -11,16 +11,32 @@
 -- Global var
 
 landminesLimit = {
-    ["time"]        = 0,
-    ["maxMines"]    = 0,
-    ["msgPosition"] = et.trap_Cvar_Get("u_landmines_limit_msg_position")
+    ["time"]             = 0,
+    ["maxMines"]         = 0,
+    ["msgPosition"]      = et.trap_Cvar_Get("u_landmines_limit_msg_position")
 }
 
 -- Function
 
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function landminesLimitInitGame(vars)
+    if modUrl == "http://etpro.anime.net/" then
+        landminesLimit["maxLandminesCvar"] = "team_maxmines"
+    elseif modUrl == "www.etlegacy.com" then
+        landminesLimit["maxLandminesCvar"] = "team_maxLandmines"
+    end
+
+    if et.trap_Cvar_Get(landminesLimit["maxLandminesCvar"]) == 0 then
+        et.G_LogPrint("Landmines is disabled! Please enable it with " .. landminesLimit["maxLandminesCvar"] .. " cvar.\n")
+    else
+        addCallbackFunction({["RunFrame"] = "checkLandminesLimitRunFrame"})
+    end
+end
+
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
-function checkMaxMinesRunFrame(vars)
+function checkLandminesLimitRunFrame(vars)
     if vars["levelTime"] - landminesLimit["time"] > 3 then
         local maxMines
 
@@ -35,7 +51,7 @@ function checkMaxMinesRunFrame(vars)
         end
 
         if landminesLimit["maxMines"] ~= maxMines then
-            et.trap_Cvar_Set("team_maxmines", maxMines)
+            et.trap_Cvar_Set(landminesLimit["maxLandminesCvar"], maxMines)
             sayClients(landminesLimit["msgPosition"], string.format("Max. %d mines allowed.", maxMines))
             landminesLimit["maxMines"] = maxMines
         end
@@ -46,5 +62,5 @@ end
 
 -- Add callback landmines limit function.
 addCallbackFunction({
-    ["RunFrame"] = "checkMaxMinesRunFrame"
+    ["InitGame"] = "landminesLimitInitGame"
 })

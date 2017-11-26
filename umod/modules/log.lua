@@ -134,7 +134,7 @@ function logAdminsPrivateMessage(clientNum, msg)
     if clientNum ~= 1022 then
         local clientInfo = et.trap_GetUserinfo(clientNum)
         ip   = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
-        guid = string.upper(client[clientNum]["guid"] )
+        guid = string.upper(client[clientNum]["guid"])
         from = client[clientNum]["name"]
     else
         ip   = "127.0.0.1"

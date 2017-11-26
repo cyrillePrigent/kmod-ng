@@ -5,22 +5,22 @@
 -- Set default client data.
 clientDefaultData["teamGib"] = 0
 
-gibWeapon = (
-   17 => true,    -- PANZERFAUST
-   18 => true,    -- GRENADE LAUNCHER
-   19 => true,    -- FLAMETHROWER
-   25 => true,    -- GRENADE_LAUNCHER
-   26 => true,    -- DYNAMITE
-   27 => true,    -- AIRSTRIKE
-   30 => true,    -- ARTY
-   43 => true,    -- GPG40 (Grenade Launcher)
-   44 => true,    -- M7 (Grenade Launcher)
-   45 => true,    -- LANDMINE
-   46 => true,    -- SATCHEL
-   49 => true,    -- MOBILE_MG42
-   52 => true,    -- CONSTRUCTION
-   57 => true     -- MORTAR
- );
+gibWeapon = {
+   [17] = true,    -- PANZERFAUST
+   [18] = true,    -- GRENADE LAUNCHER
+   [19] = true,    -- FLAMETHROWER
+   [25] = true,    -- GRENADE_LAUNCHER
+   [26] = true,    -- DYNAMITE
+   [27] = true,    -- AIRSTRIKE
+   [30] = true,    -- ARTY
+   [43] = true,    -- GPG40 (Grenade Launcher)
+   [44] = true,    -- M7 (Grenade Launcher)
+   [45] = true,    -- LANDMINE
+   [46] = true,    -- SATCHEL
+   [49] = true,    -- MOBILE_MG42
+   [52] = true,    -- CONSTRUCTION
+   [57] = true     -- MORTAR
+}
 
 -- Function
 
@@ -56,7 +56,7 @@ function checkGibProtectorPrint(vars)
                         "b 8 ^7" .. client[killerId]["name"] .. " is gibbing teammates (to collect binoculars) ... 5 minute temp ban!\n"
                     )
 
-                    kick(killerId, "You too many team gibs!")
+                    kick(killerId, "You too many team gibs!", 5)
                 end
             end
         end

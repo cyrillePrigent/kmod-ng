@@ -269,12 +269,12 @@ pause = {
 -- Load Uber Mod cvar
 color                 = et.trap_Cvar_Get("u_color")
 autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
-panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
+panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
 advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
 pmSound               = et.trap_Cvar_Get("u_pm_sound")
 selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
 dateFormat            = et.trap_Cvar_Get("u_date_format")
-spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity"))
+spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
 mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
@@ -631,25 +631,31 @@ et.G_Printf = function(...)
     et.G_Print(string.format(unpack(arg)))
 end
 
--- printf wrapper
+-- log printf wrapper
 et.G_LogPrintf = function(...)
     et.G_LogPrint(string.format(unpack(arg)))
 end
 
+-- Kick a player. Use punkbuster if enabled.
+--  clientNum is the client slot id.
+--  reason is the displayed reason of kick.
+--  timeout the the time in minutes to kick the client from the server.
 function kick(clientNum, reason, timeout)
     timeout = timeout or 0
 
-    -- if punkbuster then
+    if tonumber(et.trap_Cvar_Get("sv_punkbuster")) == 1 then
         local pbClient = clientNum + 1
         et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbClient .. " " .. timeout .. " " .. reason .. "\n")
-    -- else
-        --&say( $tmphash{$client_id}{'name'} . "^7 kicked. Reason: ^3" . $reason . "^7." ) if ($public_output);
-        --&cmd("clientkick $client_id $timeout");
-    -- end
-    
-    --if logChatModule == 1 then
-    --    writeLog("Teamgib: Private Notice... (Info)")
-    --end
+    else
+        et.trap_DropClient(clientNum, reason, timeout * 60)
+    end
+
+    if logChatModule == 1 then
+        local time = os.date("%x %I:%M:%S%p")
+        local ip   = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
+        local guid = string.upper(client[clientNum]["guid"])
+        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") KICK for : " .. reason .. "\n")
+    end
 end
 
 -- Load modules
@@ -955,11 +961,6 @@ function et_RunFrame(levelTime)
         end
     end
 
-    if game["state"] == 3 then
-        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
-        game["endRoundTrigger"] = true
-    end
-
 --     if floodprotect == 1 then
 --         fpPtime = (time["frame"] - fpProt) / 1000
 -- 
@@ -968,7 +969,16 @@ function et_RunFrame(levelTime)
 --         end
 --     end
 
-    executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
+    if game["state"] == 0 then
+        executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
+
+        --for i = 0, clientsLimit, 1 do
+        --    executeCallbackFunction("RunFramePlayerLoop", {["levelTime"] = tonumber(levelTime), ["clientNum"] = i})
+        --end
+    elseif game["state"] == 3 then
+        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
+        game["endRoundTrigger"] = true
+    end
 end
 
 -- Client management
@@ -1030,7 +1040,7 @@ function et_ClientSpawn(clientNum, revived)
 
     -- TODO : Check if spawn in spectator is possible (lol)
     if client[clientNum]["team"] == 1 or client[clientNum]["team"] == 2 then
-        checkGameModeClientSpawn({["clientNum"] = clientNum, ["revived"] = revived})
+        --checkGameModeClientSpawn({["clientNum"] = clientNum, ["revived"] = revived})
 
         if revived == 0 then
             client[clientNum]["respawn"] = 1 
