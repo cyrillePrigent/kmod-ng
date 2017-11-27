@@ -19,7 +19,7 @@ function privateMessageSlashCommand(params)
     if params.nbArg < 2 then
         et.trap_SendServerCommand(params.clientNum, "print \"Useage: /m \[pname/ID\] \[message\]\n")
     else
-        params.pm = true
+        params.privateMessage = true
         local pmContent = et.ConcatArgs(2)
         local targetNum = client2id(et.trap_Argv(1), params)
 
@@ -43,7 +43,7 @@ function privateMessage2SlashCommand(params)
     if params.nbArg < 2 then 
         et.G_Print("Useage: /m2 \[pname/ID\] \[message\]\n")
     else
-        params.pm = true
+        params.privateMessage = true
         local message   = et.ConcatArgs(2)
         local targetNum = client2id(et.trap_Argv(1), params)
 

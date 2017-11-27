@@ -15,6 +15,8 @@ function execute_command(params)
                 crazyGravity["time"]   = time["frame"] + crazyGravity["intervalChange"]
 
                 addCallbackFunction({ ["RunFrame"] = "checkCrazyGravityRunFrame" })
+
+                params.broadcast2allClients = true
                 printCmdMsg(params, "Crazygravity has been enabled\n")
             else
                 printCmdMsg(params, "Crazygravity is already active\n")
@@ -25,6 +27,8 @@ function execute_command(params)
 
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
                 removeCallbackFunction("RunFrame", "checkCrazyGravityRunFrame")
+
+                params.broadcast2allClients = true
                 printCmdMsg(params, "Crazygravity has been disabled. Resetting gravity\n")
             else
                 printCmdMsg(params, "Crazygravity has already been disabled\n")

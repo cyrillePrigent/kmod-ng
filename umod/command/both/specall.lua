@@ -1,6 +1,8 @@
--- Put all afk player in allies and axis team to spectator.
+-- Put all player in allies and axis team to spectator.
+-- From kmod.lua
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
+    params.say = msgCmd["chatArea"]
     local matches = 0
 
     for i = 0, clientsLimit, 1 do
@@ -10,7 +12,12 @@ function execute_command(params)
         end
     end
 
-    printCmdMsg(params, "Moving ^1" .. matches .. " ^7players to spectator\n")
+    if matches > 0 then
+        params.broadcast2allClients = true
+        printCmdMsg(params, "Moving ^1" .. matches .. " ^7players to spectator\n")
+    else
+        printCmdMsg(params, "No players moved to spectator\n")
+    end
 
     return 1
 end

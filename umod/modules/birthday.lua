@@ -83,7 +83,7 @@ function removeBirthday(name)
     elseif lenOut == -1 then
         et.G_LogPrint("WARNING: birthday.tmp.cfg file no found / not readable!\n")
     elseif lenIn == 0 then
-        et.G_Print("There is birthday to remove\n")
+        et.G_Print("There is none birthday to remove\n")
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
 

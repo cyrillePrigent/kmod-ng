@@ -63,6 +63,7 @@ cmdList = {
         ["!time"]              = "/command/client/time.lua",
         ["!date"]              = "/command/client/date.lua",
         ["!spec999"]           = "/command/both/spec999.lua",
+        ["!specall"]           = "/command/both/specall.lua",
         ["!tk_index"]          = "/command/client/tk_index.lua",
         ["!listcmds"]          = "/command/client/listcmds.lua",
         ["!gib"]               = "/command/both/gib.lua",
@@ -102,6 +103,7 @@ cmdList = {
         ["!showadmins"]    = "/command/console/showadmins.lua",
         ["!readconfig"]    = "/command/console/readconfig.lua",
         ["!spec999"]       = "/command/both/spec999.lua",
+        ["!specall"]       = "/command/both/specall.lua",
         ["!gib"]           = "/command/both/gib.lua",
         ["!slap"]          = "/command/both/slap.lua",
         ["!burn"]          = "/command/both/burn.lua"
@@ -367,7 +369,7 @@ function client2id(client, params)
 
                 return nil
             else
-                clientNum = getPlayernameToId(client)
+                clientNum = getPlayernameToId(client, params)
             end
         end
 
@@ -397,15 +399,31 @@ function splitWord(inputString)
     return t
 end
 
+-- Strip whitespace (or other characters) from the beginning and end of a string.
+-- From minipb by Hadro
+--  str is the string to trim.
+function trim(str)
+    return string.gsub(str, "^%s*(.-)%s*$", "%1")
+end
+
 -- Check if a certain player is connected and return his slot id.
 --  name is partial / complete player name (two character minimum) to search.
-function getPlayernameToId(name)
+--  params is parameters passed to the function executed in command file.
+function getPlayernameToId(name, params)
     local slot       = nil
     local matchCount = 0
-    local cleanName  = string.lower(et.Q_CleanStr(name))
+    local cleanName  = string.lower(trim(et.Q_CleanStr(name)))
 
     for i = 0, clientsLimit, 1 do
-        s, e = string.find(string.lower(et.Q_CleanStr(client[i]["name"])), cleanName)
+        local searchCleanName = string.lower(trim(et.Q_CleanStr(client[i]["name"])))
+        
+        if cleanName == searchCleanName then
+            matchCount = 0
+            slot       = i
+            break
+        end
+
+        s, e = string.find(searchCleanName, cleanName)
 
         if s and e then
             matchCount = matchCount + 1
@@ -414,12 +432,15 @@ function getPlayernameToId(name)
     end
 
     if matchCount >= 2 then
--- set level
---         if params.cmdMode == "client" then
---             et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Gib: ^7There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---         elseif params.cmdMode == "console" then
---             et.G_Print("There are currently ^1" .. matchcount .. "^7 client\[s\] that match \"" .. name .. "\"\n")
---         end
+        if params ~= nil then
+            printCmdMsg(
+                params,
+                string.format(
+                    "There are currently ^1%d^7 client\[s\] that match \"%s\"\n",
+                    matchCount, name
+                )
+            )
+        end
 
         return nil
     else
@@ -432,18 +453,32 @@ end
 --  msg is the message content.
 function printCmdMsg(params, msg)
     if params.cmdMode == "console" then
-        if not params.pm then
+        if not params.privateMessage then
             msg = "^7" .. msg
         end
 
         et.G_Print(msg)
     elseif params.cmdMode == "client" then
-        if params.pm then
+        if params.privateMessage then
             et.trap_SendServerCommand(params.clientNum, "print \"" .. msg .. "\"")
         else
-            local cmd = params.bangCmd or params.cmd
-            cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3" .. cmd .. ": ^7" .. msg)
+            local clientNum = -1
+            local cmd       = ""
+
+            if params.noDisplayCmd then
+                cmd = params.bangCmd or params.cmd
+                cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
+                cmd = "^3" .. cmd .. ": "
+            end
+
+            if not params.broadcast2allClients then
+                 clientNum = params.clientNum
+            end
+
+            et.trap_SendServerCommand(
+                clientNum,
+                params.say .. "\"" .. cmd .. "^7" .. msg .. "\""
+            )
         end
     end
 end
@@ -660,9 +695,18 @@ end
 
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
+local etMod
+msgCmd = {}
+
 
 if modUrl == "http://etpro.anime.net/" then
+    etMod              = "etpro"
+    msgCmd["chatArea"] = "b 8"
+
     dofile(umod_path .. "/mods/etpro.lua")
+elseif modUrl == "www.etlegacy.com" then
+    etMod              = "etlegacy"
+    msgCmd["chatArea"] = "chat"
 end
 
 if tonumber(et.trap_Cvar_Get("u_crazygravity")) == 1 then
@@ -1097,6 +1141,9 @@ function et_ClientCommand(clientNum, command)
                 if curseMode > 0 then
                     checkBadWord(params, sayContent)
                 end
+
+                params.broadcast2allClients = false
+                params.noDisplayCmd         = false
 
                 if checkClientCommand(params, string.lower(params.bangCmd)) then
                     return 1

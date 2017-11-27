@@ -20,9 +20,9 @@ clientDefaultData["adrenalineCounter"]    = 0
 function advancedAdrenalineInitGame(vars)
     local cvar
 
-    if modUrl == "http://etpro.anime.net/" then
+    if etMod == "etpro" then
         cvar = "b_levels_medic"
-    elseif modUrl == "www.etlegacy.com" then
+    elseif etMod == "etlegacy" then
         cvar = "skill_medic"
     end
 

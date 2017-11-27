@@ -1,8 +1,11 @@
-
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+-- Display current date.
+-- From kmod.lua
+--  params is parameters passed from et_ClientCommand  function.
 function execute_command(params)
-    local date = os.date("%x %I:%M:%S%p")
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " The server date is " .. date .. "\n")
+    params.noDisplayCmd = true
+    params.say          = msgCmd["chatArea"]
+
+    printCmdMsg(params, os.date("The server date is %x %I:%M:%S%p\n"))
 
     return 1
 end

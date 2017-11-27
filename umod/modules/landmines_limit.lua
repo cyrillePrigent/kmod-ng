@@ -21,9 +21,9 @@ landminesLimit = {
 -- Called when qagame initializes.
 --  vars is the local vars of et_InitGame function.
 function landminesLimitInitGame(vars)
-    if modUrl == "http://etpro.anime.net/" then
+    if etMod == "etpro" then
         landminesLimit["maxLandminesCvar"] = "team_maxmines"
-    elseif modUrl == "www.etlegacy.com" then
+    elseif etMod == "etlegacy" then
         landminesLimit["maxLandminesCvar"] = "team_maxLandmines"
     end
 
