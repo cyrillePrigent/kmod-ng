@@ -1,4 +1,5 @@
 -- Birthday
+--  From etadmin
 
 -- Global var
 
@@ -11,9 +12,9 @@ birthday = {
 }
 
 -- Set module command.
-cmdList["client"]["!addbirthday"]     = "/command/both/addbirthday.lua"
+cmdList["client"]["!setbirthday"]     = "/command/both/setbirthday.lua"
 cmdList["client"]["!removebirthday"]  = "/command/both/removebirthday.lua"
-cmdList["console"]["!addbirthday"]    = "/command/both/addbirthday.lua"
+cmdList["console"]["!setbirthday"]    = "/command/both/setbirthday.lua"
 cmdList["console"]["!removebirthday"] = "/command/both/removebirthday.lua"
 
 -- Function
@@ -31,52 +32,91 @@ function loadBirthday()
         local fileStr = et.trap_FS_Read(fd, len)
         local month, day = os.date("%m"), os.date("%d")
 
-        for bDay, bMonth, bYear, name, guid in string.gfind(fileStr, "(%d+)%-(%d+)%-(%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+        for bDay, bMonth, bYear, name, guid
+          in string.gfind(fileStr, "(%d+)%-(%d+)%-(%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
             if bDay == day and bMonth == month then
                 birthday["nameList"][name] = os.date("%Y") - tonumber(bYear)
-                birthday["guidList"][guid] = name
+                --birthday["guidList"][guid] = name
             end
+        end
+
+        formatBirthdayGlobalMsg()
+
+        if birthday["msg"] ~= "" then
+            addCallbackFunction({ ["RunFrame"] = "checkBirthdayRunFrame" })
         end
     end
 
     et.trap_FS_FCloseFile(fd)
-    formatBirthdayGlobalMsg()
-
-    if birthday["msg"] ~= "" then
-        addCallbackFunction({ ["RunFrame"] = "checkBirthdayRunFrame" })
-    end
 end
 
--- check if birthday exist
-function addBirthday(name, birthdayDate, guid)
-    local s, e, bDay, bMonth, bYear = string.find(birthdayDate, "(%d+)%-(%d+)%-(%d+)")
+-- Set a birthday entry.
+--  name is the player name of birthday entry.
+--  bDay is the day of birthday date.
+--  bMonth is the month of birthday date.
+--  bYear is the year of birthday date.
+--  guid is the player guid of birthday entry.
+function setBirthday(name, bDay, bMonth, bYear, guid)
+    guid = guid or ""
+    local fdIn, lenIn = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
+    local fdOut, lenOut = et.trap_FS_FOpenFile("birthday.tmp.cfg", et.FS_WRITE)
+    local result
 
-    if s and e then
-        local birthdayLine = birthdayDate .. " - " .. name .. " - " .. guid .. "\n"
-        local fd, len = et.trap_FS_FOpenFile("birthday.cfg", et.FS_APPEND)
+    if lenIn == -1 then
+        et.G_LogPrint("WARNING: birthday.cfg file no found / not readable!\n")
+    elseif lenOut == -1 then
+        et.G_LogPrint("WARNING: birthday.tmp.cfg file no found / not readable!\n")
+    else
+        local fileStr = et.trap_FS_Read(fdIn, lenIn)
+        result = "add"
+        local birthdayLine
 
-        if len == -1 then
-            et.G_LogPrint("WARNING: birthday.cfg file no found / not readable!\n")
-        else
-            et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fd)
-            local year, month, day = os.date("%Y"), os.date("%m"), os.date("%d")
+        for birthdayDate, _name, _guid 
+          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+            if _name == name then
+                birthday["nameList"][name] = nil
+                --birthday["guidList"][guid] = nil
 
-            if bDay == day and bMonth == month then
-                birthday["nameList"][name] = os.date("%Y") - tonumber(bYear)
-                birthday["guidList"][guid] = name
+                local year, month, day = os.date("%Y"), os.date("%m"), os.date("%d")
+
+                if bDay == day and bMonth == month then
+                    birthday["nameList"][name] = os.date("%Y") - tonumber(bYear)
+                    --birthday["guidList"][guid] = name
+                end
+
+                result = "edit"
+            else
+                birthdayLine = birthdayDate .. " - " .. _name .. " - " .. _guid .. "\n"
+                et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
             end
         end
 
-        et.trap_FS_FCloseFile(fd)
-    else
-        et.G_Print("Wrong birthday format. Use dd-mm-yyyy !\n")
+        birthdayLine = string.format(
+            "%d-%d-%d - %s - %s",
+            bDay, bMonth, bYear, name, guid
+        )
+
+        et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
+
+        if table.getn(birthday["nameList"]) == 0 then
+            removeCallbackFunction("RunFrame", "checkBirthdayRunFrame")
+            birthday["msg"] = ""
+        else
+            formatBirthdayGlobalMsg()
+        end
     end
+
+    et.trap_FS_FCloseFile(fdIn)
+    et.trap_FS_FCloseFile(fdOut)
+    et.trap_FS_Rename("birthday.tmp.cfg", "birthday.cfg")
+    return result
 end
 
+-- Remove a birthday entry.
+--  name is the player name of birthday entry.
 function removeBirthday(name)
     local fdIn, lenIn = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
     local fdOut, lenOut = et.trap_FS_FOpenFile("birthday.tmp.cfg", et.FS_WRITE)
-    --local guid = client[clientNum]["guid"]
 
     if lenIn == -1 then
         et.G_LogPrint("WARNING: birthday.cfg file no found / not readable!\n")
@@ -87,14 +127,22 @@ function removeBirthday(name)
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
 
-        for birthdayDate, _name, guid in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+        for birthdayDate, _name, guid 
+          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
             if _name == name then
                 birthday["nameList"][name] = nil
-                birthday["guidList"][guid] = nil
+                --birthday["guidList"][guid] = nil
             else
                 local birthdayLine = birthdayDate .. " - " .. name .. " - " .. guid .. "\n"
                 et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
             end
+        end
+
+        if table.getn(birthday["nameList"]) == 0 then
+            removeCallbackFunction("RunFrame", "checkBirthdayRunFrame")
+            birthday["msg"] = ""
+        else
+            formatBirthdayGlobalMsg()
         end
     end
 
@@ -103,11 +151,12 @@ function removeBirthday(name)
     et.trap_FS_Rename("birthday.tmp.cfg", "birthday.cfg")
 end
 
+-- Format birthday annoucement.
 function formatBirthdayGlobalMsg()
     local str = ""
     local nb  = 0
 
-    for name, age in pairs(birthday["list"]) do
+    for name, age in pairs(birthday["nameList"]) do
         if nb > 1 then
             str = "," .. str
         end
@@ -115,7 +164,9 @@ function formatBirthdayGlobalMsg()
         str = str .. name .. " (" .. age .. ")"
     end
 
-    birthday["msg"] = "^3Todays birthdays:^7 " .. str .. ".\n"
+    if str ~= "" then
+        birthday["msg"] = "^3Todays birthdays:^7 " .. str .. ".\n"
+    end
 end
 
 -- Callback function when qagame runs a server frame.
@@ -126,3 +177,8 @@ function checkBirthdayRunFrame(vars)
         birthday["time"] = vars["levelTime"]
     end
 end
+
+-- Add callback birthday function.
+addCallbackFunction({
+    ["ReadConfig"] = "loadBirthday"
+})
