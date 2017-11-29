@@ -4,6 +4,8 @@
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new crazygravity value
 function execute_command(params)
+    params.say = msgCmd["chatArea"]
+
     if params.nbArg < 2 then
         printCmdMsg(params, "Useage: crazygravity \[0-1\]\n")
     else
