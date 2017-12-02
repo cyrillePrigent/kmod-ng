@@ -1,7 +1,10 @@
 -- Gib a player.
+-- From kmod
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
+    params.say = msgCmd["chatArea"]
+
     if params.nbArg < 2 then
         printCmdMsg(params, "Useage: gib \[partname/id#\]\n")
     else
@@ -14,9 +17,18 @@ function execute_command(params)
                 if et.gentity_get(clientNum, "health") <= 0 then
                     printCmdMsg(params, "Client is currently dead\n")
                 else
-                    et.G_Damage(clientNum, clientNum, 1022, 400, 24, 0)
+                    if et.gentity_get(clientNum, "ps.powerups", 1) > 0 then
+                        et.gentity_set(clientNum, "ps.powerups", 1, 0)
+                    end
+
+                    et.G_Damage(clientNum, clientNum, 1022, 400, 16, 0)
                     et.G_ClientSound(clientNum, "sound/misc/goat.wav")
-                    et.trap_SendServerCommand(-1, "b 16 \"^7" .. client[clientNum]["name"] .. " ^7was Gibbed^7")
+
+                    params.broadcast2allClients = true
+                    params.noDisplayCmd         = true
+                    params.say                  = "cpm"
+
+                    printCmdMsg(params, client[clientNum]["name"] .. " ^7was Gibbed\n")
                 end
             end
         end

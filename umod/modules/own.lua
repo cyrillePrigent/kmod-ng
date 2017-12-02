@@ -1,7 +1,7 @@
---  Own from gw_ref lua script
+--  Own
+--  From gw_ref lua script
 --  By GhosT:McSteve, 3.12.06, www.ghostworks.co.uk
---  	Thanks to Fusion for his patience during the debugging.
-
+--      Thanks to Fusion for his patience during the debugging.
 
 -- Global var
 
@@ -21,17 +21,25 @@ cmdList["console"]["!own_reset"] = "/command/both/own_reset.lua"
 -- Callback function of et_Obituary function.
 --  vars is the local vars of et_Obituary function.
 function checkOwnObituary(vars)
-    -- if the killer is flagged for ownage, then own the bastard
     if client[vars["killer"]]["own"] == 1 then
-        -- explanation -  et.G_Damage( target, inflictor, attacker, damage, dflags, mod ), mod 0 = unknown
+        if et.gentity_get(vars["killer"], "ps.powerups", 1) > 0 then
+            et.gentity_set(vars["killer"], "ps.powerups", 1, 0)
+        end
+
         et.G_Damage(vars["killer"], 80, vars["victim"], 1000, 8, vars["meansOfDeath"])
 
-        -- bring the victim back to life here
-        -- note: this doesn't work very well; victim seems to be "dead" hence another kill doesnt register
-        -- et.gentity_set(vars["victim"], "health", 100)
+        -- Bring the victim back to life here
+        -- NOTE: this doesn't work very well
+        --       victim seems to be "dead" hence another kill doesnt register
+        --et.gentity_set(vars["victim"], "health", 100)
 
-        -- sends message via qsay, method taken from hadro's anti-sk bot
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, string.format("qsay %s ^7just got owned!\n", vars["killerName"]))
+        et.trap_SendServerCommand(
+            -1,
+            string.format(
+                "%s %s ^7just got owned!\n",
+                msgCmd["chatArea"], vars["killerName"]
+            )
+        )
     end
 end
 

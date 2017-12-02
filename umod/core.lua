@@ -465,7 +465,7 @@ function printCmdMsg(params, msg)
             local clientNum = -1
             local cmd       = ""
 
-            if params.noDisplayCmd then
+            if not params.noDisplayCmd then
                 cmd = params.bangCmd or params.cmd
                 cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
                 cmd = "^3" .. cmd .. ": "
