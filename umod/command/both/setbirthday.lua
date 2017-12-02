@@ -1,5 +1,5 @@
 -- Add a birthday to database.
--- From etadmin
+-- From etadmin script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => name
 --   * params["arg2"] => birthday

@@ -1,5 +1,5 @@
 -- Enable / disabled crazygravity.
--- From kmod.lua
+-- From kmod lua script.
 -- Require : crazygravity module
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new crazygravity value

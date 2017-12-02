@@ -1,5 +1,5 @@
 -- Gib a player.
--- From kmod
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)

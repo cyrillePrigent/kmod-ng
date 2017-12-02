@@ -1,5 +1,5 @@
 -- Birthday
---  From etadmin
+-- From etadmin script.
 
 -- Global var
 

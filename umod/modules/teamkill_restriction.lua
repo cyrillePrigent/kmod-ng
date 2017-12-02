@@ -1,5 +1,5 @@
 -- Teamkill restriction
---  From etadmin & kmod
+--  From etadmin script & kmod lua script.
 
 -- Global var
 

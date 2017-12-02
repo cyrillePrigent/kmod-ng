@@ -1,5 +1,5 @@
 -- Display current time.
--- From kmod.lua
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand  function.
 function execute_command(params)
     params.noDisplayCmd = true

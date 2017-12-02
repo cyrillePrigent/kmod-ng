@@ -1,5 +1,5 @@
 -- Remove a birthday from database.
--- From etadmin
+-- From etadmin script.
 -- Require : birthday module
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => name

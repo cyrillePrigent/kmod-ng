@@ -1,5 +1,5 @@
 -- Put all player in allies and axis team to spectator.
--- From kmod.lua
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     params.say = msgCmd["chatArea"]

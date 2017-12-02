@@ -1,5 +1,4 @@
 -- Display "about" message of umod.
--- From kmod.lua
 --  params is parameters passed from et_ClientCommand  function.
 function execute_command(params)
     et.trap_SendServerCommand(

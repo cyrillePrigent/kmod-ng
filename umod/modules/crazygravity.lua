@@ -1,6 +1,5 @@
 -- Crazy gravity
-
--- From kmod.lua
+-- From kmod lua script.
 
 -- Global var
 

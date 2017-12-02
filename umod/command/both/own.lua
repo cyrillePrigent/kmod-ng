@@ -1,5 +1,5 @@
 -- Own a player.
---  From gw_ref lua script
+--  From gw_ref lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)

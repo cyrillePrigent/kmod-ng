@@ -1,5 +1,5 @@
 -- Display player guid.
--- From kmod.lua
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)

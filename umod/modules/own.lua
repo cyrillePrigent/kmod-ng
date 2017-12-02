@@ -1,5 +1,5 @@
 --  Own
---  From gw_ref lua script
+--  From gw_ref lua script.
 --  By GhosT:McSteve, 3.12.06, www.ghostworks.co.uk
 --      Thanks to Fusion for his patience during the debugging.
 

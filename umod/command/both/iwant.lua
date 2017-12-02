@@ -1,5 +1,5 @@
 -- Move directly another player to your player.
--- From kmod.lua
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => player ID
 --   * params["arg2"] => target

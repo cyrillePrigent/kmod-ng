@@ -23,8 +23,11 @@
    - McSteve
 --]]
 
-
 -- Global var
+
+-- Set module command.
+cmdList["client"]["!makeshoutcaster"]   = "/command/client/makeshoutcaster.lua"
+cmdList["client"]["!removeshoutcaster"] = "/command/client/removeshoutcaster.lua"
 
 DEF_IP_MAX_CLIENTS = 3
 
