@@ -1,6 +1,6 @@
 -- Display current date.
 -- From kmod lua script.
---  params is parameters passed from et_ClientCommand  function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     params.noDisplayCmd = true
     params.say          = msgCmd["chatArea"]

@@ -1,5 +1,5 @@
 
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     adminStatus(params)
 

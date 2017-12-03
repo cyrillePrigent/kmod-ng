@@ -1,8 +1,11 @@
-
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+-- Warn a player.
+-- From kmod lua script.
+--  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => reason
 function execute_command(params)
+    params.say = msgCmd["chatArea"]
+
     if params.nbArg < 3 then
         printCmdMsg(params, "Useage: warn \[partname/id#\] \[reason\]\n")
     else
@@ -10,8 +13,14 @@ function execute_command(params)
 
         if clientNum ~= nil then
             if getAdminLevel(params.clientNum) > getAdminLevel(clientNum) then
-                local name = string.lower(et.Q_CleanStr(client[clientNum]["name"]))
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref warn \"" .. name .. "\" \"" .. params["arg2"] .. "\"\n")
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    string.format(
+                        "ref warn \"%s\" \"%s\"\n",
+                        string.lower(et.Q_CleanStr(client[clientNum]["name"])),
+                        params["arg2"]
+                    )
+                )
             else
                 printCmdMsg(params, "Cannot warn a higher admin\n")
             end

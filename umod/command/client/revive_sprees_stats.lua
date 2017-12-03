@@ -1,5 +1,5 @@
 
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
     local guid = string.lower(client[params.clientNum]["guid"])

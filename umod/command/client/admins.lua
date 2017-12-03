@@ -1,5 +1,5 @@
 
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     if getAdminLevel(params.clientNum) >= 2 then
         et.trap_SendServerCommand(params.clientNum, "print \"^3 ID ^1:^3 Player                   ^1: ^3 Level ^1 : ^3 AdminName\n")

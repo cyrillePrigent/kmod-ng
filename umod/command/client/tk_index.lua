@@ -1,6 +1,6 @@
 -- Display your teamkill index.
 --  From kmod lua script.
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     params.say = msgCmd["chatArea"]
     local status

@@ -1,5 +1,5 @@
 
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     et.trap_SendServerCommand(params.clientNum, "print \"^3 ID ^1: ^3Player                     Rate  Snaps\n")
     et.trap_SendServerCommand(params.clientNum, "print \"^1--------------------------------------------\n")

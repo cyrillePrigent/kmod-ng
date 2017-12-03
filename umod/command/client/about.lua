@@ -1,5 +1,5 @@
 -- Display "about" message of umod.
---  params is parameters passed from et_ClientCommand  function.
+--  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     et.trap_SendServerCommand(
         params.clientNum,

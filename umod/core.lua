@@ -72,6 +72,7 @@ cmdList = {
         ["!setlevel"]          = "/command/both/setlevel.lua",
         ["!readconfig"]        = "/command/both/readconfig.lua",
         ["!ban"]               = "/command/client/ban.lua",
+        ["!unban"]             = "/command/client/unban.lua",
         ["!getip"]             = "/command/client/getip.lua",
         ["!getguid"]           = "/command/client/getguid.lua",
         ["!makereferee"]       = "/command/client/makereferee.lua",
@@ -79,8 +80,8 @@ cmdList = {
         ["!gravity"]           = "/command/client/gravity.lua",
         ["!speed"]             = "/command/client/speed.lua",
         ["!knockback"]         = "/command/client/knockback.lua",
-        ["!cheats"]            = "/command/both/cheats.lua",
-        ["!laser"]             = "/command/both/laser.lua",
+        ["!cheats"]            = "/command/client/cheats.lua",
+        ["!laser"]             = "/command/client/laser.lua",
         ["!kick"]              = "/command/client/kick.lua",
         ["!warn"]              = "/command/client/warn.lua",
         ["!mute"]              = "/command/client/mute.lua",
@@ -92,7 +93,7 @@ cmdList = {
         ["!unmute"]            = "/command/client/unmute.lua",
         ["!finger"]            = "/command/client/finger.lua",
         ["!goto"]              = "/command/both/goto.lua",
-        ["!iwant"]             = "/command/both/iwant.lua",
+        ["!iwant"]             = "/command/both/iwant.lua"
     },
     ["console"] = {
         ["!setlevel"]      = "/command/both/setlevel.lua",
@@ -234,6 +235,9 @@ pause = {
     ["startTrigger"] = false,
     ["endTrigger"]   = false
 }
+
+-- Punkbuster status before disable it.
+pbState=false
 
 --floodprotect = 0
 
@@ -674,13 +678,29 @@ end
 --  reason is the displayed reason of kick.
 --  timeout the the time in minutes to kick the client from the server.
 function kick(clientNum, reason, timeout)
-    timeout = timeout or 0
+    timeout = tonumber(timeout)
+
+    if not timeout then
+        timeout = 0
+    end
+
+    if reason == "" then
+        reason = "Come back in, if you want"
+    end
 
     if tonumber(et.trap_Cvar_Get("sv_punkbuster")) == 1 then
         local pbClient = clientNum + 1
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_kick " .. pbClient .. " " .. timeout .. " " .. reason .. "\n")
+
+        et.trap_SendConsoleCommand(
+            et.EXEC_APPEND,
+            "pb_sv_kick " .. pbClient .. " " .. timeout .. " " .. reason .. "\n"
+        )
     else
-        et.trap_DropClient(clientNum, reason, timeout * 60)
+        et.trap_DropClient(
+            clientNum,
+            "Kick reason : " .. reason,
+            timeout * 60
+        )
     end
 
     if logChatModule == 1 then
@@ -1118,7 +1138,10 @@ function et_ClientCommand(clientNum, command)
                 params.say   = clientCmdData[params.cmd]["sayCmd"]
                 params.nbArg = 0
 
-                local _, _, first, second, third = string.find(sayContent, "^%s*([^%s]+)%s*([^%s]*)%s*([^%s]*)")
+                local _, _, first, second, third, fourth = string.find(
+                    sayContent,
+                    "^%s*([^%s]+)%s*([^%s]*)%s*([^%s]*)%s*([^%s]*)"
+                )
 
                 if first ~= "" then
                     params.nbArg = 1
@@ -1128,6 +1151,10 @@ function et_ClientCommand(clientNum, command)
 
                         if third ~= "" then
                             params.nbArg = 3
+
+                            if fourth ~= "" then
+                                params.nbArg = 4
+                            end
                         end
                     end
                 end
@@ -1135,6 +1162,7 @@ function et_ClientCommand(clientNum, command)
                 params.bangCmd = first
                 params["arg1"] = second
                 params["arg2"] = third
+                params["arg3"] = fourth
 
                 if curseMode > 0 then
                     checkBadWord(params, sayContent)

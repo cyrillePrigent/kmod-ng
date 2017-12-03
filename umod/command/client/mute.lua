@@ -1,5 +1,5 @@
 
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 -- TODO : Add mute duration
 function execute_command(params)

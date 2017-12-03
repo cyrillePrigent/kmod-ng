@@ -1,9 +1,12 @@
-
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+-- Kick temporary a player from the server.
+-- From kmod lua script.
+--  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => reason
 function execute_command(params)
-    if params.nbArg < 3 then
+    params.say = msgCmd["chatArea"]
+
+    if params.nbArg < 2 then
         printCmdMsg(params, "Useage: kick \[partname/id#\] \[reason\] \[time\]\n")
     else
         clientNum = client2id(params["arg1"], params)

@@ -1,6 +1,6 @@
 -- Put player to allies team.
 -- From kmod lua script.
---  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+--  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
     params.say = msgCmd["chatArea"]
