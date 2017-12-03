@@ -18,7 +18,7 @@ function execute_command(params)
                     printCmdMsg(params, "Client is currently dead\n")
                 else
                     et.G_Damage(clientNum, clientNum, 1022, 5, 8, 19)
-                    et.G_Sound(clientNum, et.G_SoundIndex("sound/player/hurt_barbwire.wav"))
+                    et.G_ClientSound(clientNum, "sound/player/hurt_barbwire.wav")
 
                     params.broadcast2allClients = true
                     params.noDisplayCmd         = true

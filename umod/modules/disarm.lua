@@ -1,14 +1,15 @@
---  Disarm from gw_ref lua script
---  By GhosT:McSteve, 3.12.06, www.ghostworks.co.uk
---      Thanks to Fusion for his patience during the debugging.
---      Credit to im2good4u for his noweapons script.
+-- Disarm
+-- From gw_ref lua script.
+-- By GhosT:McSteve, 3.12.06, www.ghostworks.co.uk
+--     Thanks to Fusion for his patience during the debugging.
+--     Credit to im2good4u for his noweapons script.
 
 
 -- Global var
 
 disarm = {
-    ["samplerate"] = 2000,
-    ["weapons"]    = {
+    ["time"]    = 0,
+    ["weapons"] = {
         nil,    --  1
         false,  --  2 WP_LUGER
         false,  --  3 WP_MP40
@@ -58,7 +59,7 @@ disarm = {
         false,  -- 47 WP_AKIMBO_SILENCEDCOLT
         false   -- 48 WP_AKIMBO_SILENCEDLUGER
     },
-    ["count"] = 0
+    ["count"]   = 0
 }
 
 -- Set default client data.
@@ -77,19 +78,19 @@ cmdList["console"]["!disarm_reset"] = "/command/both/disarm_reset.lua"
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkDisarmRunFrame(vars)
-    if math.mod(vars["levelTime"], disarm["samplerate"]) ~= 0 then
-        return
-    end
-
-    for i = 0, clientsLimit do
-        if client[i]["disarm"] == 1 then
-            -- Note : et.MAX_WEAPONS = 50
-            for w = 1, 49, 1 do
-                if not disarm["weapons"][w] then
-                    et.gentity_set(i, "ps.ammoclip", w, 0)
-                    et.gentity_set(i, "ps.ammo", w, 0)
+    if vars["levelTime"] - disarm["time"] > 2000 then
+        for i = 0, clientsLimit do
+            if client[i]["disarm"] == 1 then
+                -- NOTE : et.MAX_WEAPONS = 50
+                for w = 1, 49, 1 do
+                    if not disarm["weapons"][w] then
+                        et.gentity_set(i, "ps.ammoclip", w, 0)
+                        et.gentity_set(i, "ps.ammo", w, 0)
+                    end
                 end
             end
         end
+
+        disarm["time"] = vars["levelTime"] -- Next checking in 2 seconds.
     end
 end
