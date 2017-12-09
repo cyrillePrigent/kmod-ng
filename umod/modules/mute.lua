@@ -2,38 +2,31 @@
 
 -- Global var
 
---[[
-   Mute table :
-     duration :
-       key   => ip address
-       value => duration in seconds, -1 for permanent mute
-
-   Client data :
-     client["muteEnd"] :
-       key   => client ID
-       value => mute end (in miliseconds)
-     client["multipliers"] :
-       key   => client ID
-       value => mute duration multipliers
---]]
 mute = {
+    -- key   => ip address
+    -- value => duration in seconds, -1 for permanent mute
     ["duration"] = {}
 }
 
 -- Set default client data.
+--  mute end (in miliseconds)
 clientDefaultData["muteEnd"] = 0
 
+-- Set module command.
+cmdList["client"]["!pmute"] = "/command/client/pmute.lua"
+        
 -- Function
 
 -- Initializes mutes data.
 -- Load mutes entry of mutes.cfg file.
 function loadMutes()
-    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+    local funcStart = et.trap_Milliseconds()
+    local fd, len   = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
 
     if len == -1 then
-        et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: mutes.cfg file no found / not readable!\n")
     elseif len == 0 then
-        et.G_Print("WARNING: No Mutes Defined!\n")
+        et.G_Print("uMod: No mutes defined\n")
     else
         local fileStr = et.trap_FS_Read(fd, len)
 
@@ -43,59 +36,63 @@ function loadMutes()
     end
 
     et.trap_FS_FCloseFile(fd)
+    et.G_LogPrintf("uMod: Loading mutes in %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
--- Open mutes.cfg file and append mute entry.
+-- Add / edit a mute entry.
 --  clientNum is the client slot id.
---  ip is the client address ip.
 --  muteTime is the mute duration in seconds, -1 is permanently mute.
-function writeMute(clientNum, ip, muteTime)
-    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
+function setMute(clientNum, muteTime)
+    local ip = getClientIp(clientNum)
 
-    if len == -1 then
-        et.G_LogPrint("ERROR: mutes.cfg file not writable!\n")
+    -- If mute entry exist, edit mute file...
+    if mute["duration"][ip] ~= nil then
+        local fdIn, lenIn = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
+        local fdOut, lenOut = et.trap_FS_FOpenFile("mutes.tmp.cfg", et.FS_WRITE)
+
+        if lenIn == -1 then
+            et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
+        elseif lenOut == -1 then
+            et.G_LogPrint("WARNING: mutes.tmp.cfg file no found / not readable!\n")
+        elseif lenIn == 0 then
+            et.G_Print("There is no Mutes to edit \n")
+        else
+            local fileStr = et.trap_FS_Read(fdIn, lenIn)
+
+            for _time, _ip, _name in string.gfind(fileStr, "(%-*%d+)%s%-%s(%d+%.%d+%.%d+%.%d+)%s%-%s*([^%\n]*)") do
+                if _ip ~= ip then
+                    local muteLine = _time .. " - " .. _ip .. " - " .. _name .. "\n"
+                    et.trap_FS_Write(muteLine, string.len(muteLine), fdOut)
+                else
+                    local time = math.ceil(muteTime)
+                    local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name"))
+                    local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
+                    et.trap_FS_Write(muteLine, string.len(muteLine), fdOut)
+                end
+            end
+        end
+
+        et.trap_FS_FCloseFile(fdIn)
+        et.trap_FS_FCloseFile(fdOut)
+        et.trap_FS_Rename("mutes.tmp.cfg", "mutes.cfg")
+
+    -- ...Or append it to mute file.
     else
-        if client[clientNum]["muteEnd"] ~= 0 then
+        local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
+
+        if len == -1 then
+            et.G_LogPrint("ERROR: mutes.cfg file not writable!\n")
+        else
             local time = math.ceil(muteTime)
             local name = et.Q_CleanStr(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name"))
             local muteLine = time .. " - " .. ip .. " - " .. name .. "\n"
             et.trap_FS_Write(muteLine, string.len(muteLine), fd)
         end
+
+        et.trap_FS_FCloseFile(fd)
     end
 
-    et.trap_FS_FCloseFile(fd)
-end
-
--- Set a mute.
---  clientNum is the client slot id.
---  muteTime is the mute duration in seconds, -1 is permanently mute.
-function setMute(clientNum, muteTime)
-    local edit = false
-    local fd, len = et.trap_FS_FOpenFile("mutes.cfg", et.FS_APPEND)
-    local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
-    local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
-
-    et.trap_FS_FCloseFile(fd)
-
-    if len == -1 then
-        et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
-    elseif len == 0 then
-        edit = true
-    else
-        if mute["duration"][ip] ~= nil then
-            removeMute(clientNum)
-            edit = true
-        end
-
-        if client[clientNum]["muteEnd"] > 0 or client[clientNum]["muteEnd"] == -1 then
-            edit = true
-        end
-    end
-
-    if edit then
-        writeMute(clientNum, ip, muteTime)
-        mute["duration"][ip] = muteTime
-    end
+    mute["duration"][ip] = muteTime
 end
 
 -- Remove a mute.
@@ -103,8 +100,7 @@ end
 function removeMute(clientNum)
     local fdIn, lenIn = et.trap_FS_FOpenFile("mutes.cfg", et.FS_READ)
     local fdOut, lenOut = et.trap_FS_FOpenFile("mutes.tmp.cfg", et.FS_WRITE)
-    local ip = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
-    local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+    local ip = getClientIp(clientNum)
 
     if lenIn == -1 then
         et.G_LogPrint("WARNING: mutes.cfg file no found / not readable!\n")
@@ -129,75 +125,159 @@ function removeMute(clientNum)
     mute["duration"][ip] = nil
 end
 
--- Callback function when qagame shuts down.
-function checkMuteShutdownGame()
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            if client[i]["muteEnd"] > 0 then
-                setMute(i, (client[i]["muteEnd"] - time["frame"]) / 1000)
-            elseif client[i]["muteEnd"] == 0 then
-                local ip = et.Info_ValueForKey(et.trap_GetUserinfo(i), "ip")
-                local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+-- Update client mute data when client disconnect & qagame shuts down.
+--  clientNum is the client slot id.
+function updateClientMutedata(clientNum)
+    -- If player has not yet finished his mute sentance,
+    -- edit it in mutes file.
+    if client[clientNum]["muteEnd"] > 0 then
+        setMute(clientNum, (client[clientNum]["muteEnd"] - time["frame"]) / 1000)
 
-                if mute["duration"][ip] ~= 0 then
-                    setMute(i, 0)
-                end
-            end
+    -- If player has finished his mute sentance,
+    -- remove it from mutes file.
+    elseif client[clientNum]["muteEnd"] == 0 then
+        local ip = getClientIp(clientNum)
+
+        if mute["duration"][ip] ~= nil then
+            removeMute(clientNum)
         end
     end
 end
 
--- Callback function when qagame runs a server frame.
---  vars is the local vars passed from et_RunFrame function.
-function checkMuteRunFrame(vars)
+-- Convert mute duration (in seconds) to readable string with hours, minutes & seconds.
+--  duration is the mute duration in seconds to convert.
+function convertMuteDuration(duration)
+    local str = ""
+    local hours = math.floor(duration / 3600)
+    local mins  = math.floor(duration / 60 - hours * 60)
+    local secs  = math.floor(duration - hours * 3600 - mins *60)
+
+    if hours > 0 then
+        str = hours .. " hours "
+    end
+
+    if mins > 0 then
+        str = str .. mins .. " mins "
+    end
+
+    if secs > 0 then
+        return str .. secs .. " secs"
+    else
+        return trim(str)
+    end
+end
+
+-- Callback function when qagame shuts down.
+function checkMuteShutdownGame()
     for i = 0, clientsLimit, 1 do
-        --if client[i]["muteEnd"] ~= nil then
-            if client[i]["muteEnd"] > 0 then
-                local muted = et.gentity_get(i, "sess.muted")
+        if et.gentity_get(0, "inuse") then
+            updateClientMutedata(i)
+        end
+    end
+end
 
-                if time["frame"] > client[i]["muteEnd"] then
-                    if muted == 1 then
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref unmute \"" .. i .. "\"\n")
-                        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been auto unmuted.  Please watch your language!\n")
-                    end
+-- Callback function when qagame runs a server frame (warmup, round & end of round).
+--  vars is the local vars passed from et_RunFrame function.
+function checkMuteRunFrameGlobal(vars)
+    for i = 0, clientsLimit, 1 do
+        -- If client is muted for a certain duration...
+        if client[i]["muteEnd"] > 0 then
+            -- If client has finished his mute sentance...
+            if time["frame"] > client[i]["muteEnd"] then
+                if et.gentity_get(i, "sess.muted") == 1 then
+                    et.trap_SendConsoleCommand(
+                        et.EXEC_APPEND,
+                        "ref unmute \"" .. i .. "\"\n"
+                    )
 
-                    client[i]["muteEnd"] = 0
-                elseif time["frame"] < client[i]["muteEnd"] then
-                    if muted == 0 then
-                        client[i]["muteEnd"] = 0
-                        setMute(i, 0)
-                    end
-                elseif muted == 0 then
-                    client[i]["muteEnd"] = 0
+                    et.trap_SendConsoleCommand(
+                        et.EXEC_APPEND,
+                        "qsay ^3Mute: ^7" .. client[i]["name"] .. " ^7has been auto unmuted.  Please watch your language!\n"
+                    )
                 end
-            elseif client[i]["muteEnd"] == -1 then
+
+                client[i]["muteEnd"] = 0
+                removeMute(i)
+
+            -- If client has not yet finished his mute sentance...
+            elseif time["frame"] < client[i]["muteEnd"] then
                 if et.gentity_get(i, "sess.muted") == 0 then
                     client[i]["muteEnd"] = 0
+                    removeMute(i)
+
+                    et.trap_SendConsoleCommand(
+                        et.EXEC_APPEND,
+                        "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                    )
                 end
+
+            -- If client is unmuted...
+            elseif et.gentity_get(i, "sess.muted") == 0 then
+                client[i]["muteEnd"] = 0
+                removeMute(i)
+
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                )
             end
-        --end
+        -- If client is muted permanently...
+        elseif client[i]["muteEnd"] == -1 then
+            if et.gentity_get(i, "sess.muted") == 0 then
+                client[i]["muteEnd"] = 0
+                removeMute(i)
+
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                )
+            end
+        end
     end
 end
 
 -- Callback function when client begin.
 --  vars is the local vars passed from et_ClientBegin function.
 function checkMuteClientBegin(vars)
-    local ip = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "ip")
-    local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+    local ip = getClientIp(vars["clientNum"])
 
-    client[vars["clientNum"]]["muteEnd"] = 0
-
-    local ref = tonumber(et.gentity_get(vars["clientNum"], "sess.referee"))
-
-    if mute["duration"][ip] ~= nil and ref == 0 then
-        if mute["duration"][ip] > 0 then
+    -- If client isn't referee and his ip address is muted, check it...
+    if mute["duration"][ip] ~= nil
+      and tonumber(et.gentity_get(vars["clientNum"], "sess.referee")) == 0 then
+          -- If client is muted for a certain duration...
+          if mute["duration"][ip] > 0 then
             client[vars["clientNum"]]["muteEnd"] = time["frame"] + (mute["duration"][ip] * 1000)
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[clientNum][vars["clientNum"]]["lastName"] .. "^7 has not yet finished his mute sentance.  (^1" .. mute["duration"][ip] .. "^7) seconds.\n")
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                string.format(
+                    "qsay ^3Mute: ^7%s ^7has not yet finished his mute sentance.  (%s)\n",
+                    client[vars["clientNum"]]["lastName"],
+                    convertMuteDuration(mute["duration"][ip])
+                )
+            )
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "ref mute " .. vars["clientNum"] .. "\n"
+            )
+
+        -- If client is muted permanently...
         elseif mute["duration"][ip] == -1 then
             client[vars["clientNum"]]["muteEnd"] = -1
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay ^3Mute: ^7" .. client[vars["clientNum"]]["lastName"] .. "^7 has been permanently muted\n")
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref mute " .. vars["clientNum"] .. "\n")
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                string.format(
+                    "qsay ^3Mute: ^7%s ^7has been permanently muted\n",
+                    client[vars["clientNum"]]["lastName"]
+                )
+            )
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "ref mute " .. vars["clientNum"] .. "\n"
+            )
         end
     end
 end
@@ -205,20 +285,14 @@ end
 -- Callback function when client disconnect.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function checkMuteClientDisconnect(vars)
-    if client[vars["clientNum"]]["muteEnd"] > 0 then
-        setMute(vars["clientNum"], (client[vars["clientNum"]]["muteEnd"] - time["frame"]) / 1000)
-        client[vars["clientNum"]]["muteEnd"] = 0
-    elseif client[vars["clientNum"]]["muteEnd"] == 0 then
-        setMute(vars["clientNum"], 0)
-        client[vars["clientNum"]]["muteEnd"] = 0
-    end
+    updateClientMutedata(vars["clientNum"])
 end
 
 -- Add callback mute function.
 addCallbackFunction({
     ["InitGame"]         = "loadMutes",
     ["ShutdownGame"]     = "checkMuteShutdownGame",
-    ["RunFrame"]         = "checkMuteRunFrame",
+    ["RunFrameGlobal"]   = "checkMuteRunFrameGlobal",
     ["ClientDisconnect"] = "checkMuteClientDisconnect",
     ["ClientBegin"]      = "checkMuteClientBegin"
 })

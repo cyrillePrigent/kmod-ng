@@ -1,4 +1,5 @@
-
+-- Display list.
+-- From kmod lua script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     for i = 0, maxAdminLevel, 1 do
@@ -11,11 +12,16 @@ function execute_command(params)
                 end
             end
 
-            local nbCmds = table.getn(listCmds)
+            if table.getn(listCmds) > 0 then
+                et.trap_SendServerCommand(
+                    params.clientNum,
+                    "print \"Level " .. i .. " Commands\n"
+                )
 
-            if nbCmds > 0 then
-                et.trap_SendServerCommand(params.clientNum, "print \"Level " .. i .. " Commands\n")
-                et.trap_SendServerCommand(params.clientNum, "print \"^1-------------------------------------------------------------------\n")
+                et.trap_SendServerCommand(
+                    params.clientNum,
+                    "print \"^1-------------------------------------------------------------------\n"
+                )
 
                 for q = 1, table.getn(listCmds), 3 do
                     local cmd1 = " "
@@ -38,10 +44,19 @@ function execute_command(params)
                         cmd3 = listCmds[e]
                     end
 
-                    et.trap_SendServerCommand(params.clientNum, string.format('print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"', cmd1, cmd2, cmd3))
+                    et.trap_SendServerCommand(
+                        params.clientNum,
+                        string.format(
+                            'print \"%21s^1|^7 %21s^1|^7 %21s^1|^7\n"',
+                            cmd1, cmd2, cmd3
+                        )
+                    )
                 end
 
-                et.trap_SendServerCommand(params.clientNum, "print \"^1-------------------------------------------------------------------\n\n")
+                et.trap_SendServerCommand(
+                    params.clientNum,
+                    "print \"^1-------------------------------------------------------------------\n\n"
+                )
             end
         end
     end

@@ -13,6 +13,7 @@ callbackList = {
     ["ShutdownGame"]          = {},
     ["RunFrame"]              = {},
     ["RunFrameEndRound"]      = {},
+    ["RunFrameGlobal"]        = {},
     ["ClientConnect"]         = {},
     ["ClientDisconnect"]      = {},
     ["ClientBegin"]           = {},
@@ -64,7 +65,6 @@ cmdList = {
         ["!date"]              = "/command/client/date.lua",
         ["!spec999"]           = "/command/both/spec999.lua",
         ["!specall"]           = "/command/both/specall.lua",
-        ["!tk_index"]          = "/command/client/tk_index.lua",
         ["!listcmds"]          = "/command/client/listcmds.lua",
         ["!gib"]               = "/command/both/gib.lua",
         ["!slap"]              = "/command/both/slap.lua",
@@ -84,16 +84,15 @@ cmdList = {
         ["!laser"]             = "/command/client/laser.lua",
         ["!kick"]              = "/command/client/kick.lua",
         ["!warn"]              = "/command/client/warn.lua",
-        ["!mute"]              = "/command/client/mute.lua",
-        ["!pmute"]             = "/command/client/pmute.lua",
         ["!putspec"]           = "/command/client/putspec.lua",
         ["!putallies"]         = "/command/client/putallies.lua",
         ["!putaxis"]           = "/command/client/putaxis.lua",
         ["!timelimit"]         = "/command/client/timelimit.lua",
-        ["!unmute"]            = "/command/client/unmute.lua",
         ["!finger"]            = "/command/client/finger.lua",
         ["!goto"]              = "/command/both/goto.lua",
-        ["!iwant"]             = "/command/both/iwant.lua"
+        ["!iwant"]             = "/command/both/iwant.lua",
+        ["!unmute"]            = "/command/client/unmute.lua",
+        ["!mute"]              = "/command/client/mute.lua"
     },
     ["console"] = {
         ["!setlevel"]      = "/command/both/setlevel.lua",
@@ -711,11 +710,19 @@ function kick(clientNum, reason, timeout)
     end
 end
 
+-- Return player ip.
+--  clientNum is the client slot id.
+function getClientIp(clientNum)
+    local ip = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip")
+    local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+
+    return ip
+end
+
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
 local etMod
 msgCmd = {}
-
 
 if modUrl == "http://etpro.anime.net/" then
     etMod              = "etpro"
@@ -1041,6 +1048,8 @@ function et_RunFrame(levelTime)
         executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
         game["endRoundTrigger"] = true
     end
+
+    executeCallbackFunction("RunFrameGlobal", {["levelTime"] = tonumber(levelTime)})
 end
 
 -- Client management

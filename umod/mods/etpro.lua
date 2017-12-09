@@ -141,7 +141,7 @@ end
 
 ---------------------------------------------------------------------------------------------------------
 
-function getClientIp(userinfo)
+function _getClientIp(userinfo)
     -- TODO listen servers may be 'localhost'
     if userinfo == "" then
         return ""
@@ -172,7 +172,7 @@ function etProFixClientConnect(vars)
     end
 
     -- note IP validity should be enforced by userinfocheck stuff
-    local ip    = getClientIp(userinfo)
+    local ip    = _getClientIp(userinfo)
     local count = 1 -- we count as the first one
 
     -- it's probably safe to only do this on firsttime, but checking
@@ -193,7 +193,7 @@ function etProFixClientConnect(vars)
         if i ~= vars["clientNum"] and et.gentity_get(i, "pers.connected") > 0 then
             local _userinfo = et.trap_GetUserinfo(i)
 
-            if ip == getClientIp(_userinfo) then
+            if ip == _getClientIp(_userinfo) then
                 count = count + 1
 
                 if count > ipMaxPerClients then

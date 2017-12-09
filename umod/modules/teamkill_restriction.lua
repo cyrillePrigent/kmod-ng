@@ -31,6 +31,9 @@ tkRestriction = {
     ["protect"]   = tonumber(et.trap_Cvar_Get("u_tk_protect"))
 }
 
+-- Set module command.
+cmdList["client"]["!tk_index"] = "/command/client/tk_index.lua"
+
 -- Function
 
 -- Callback function when victim is killed by mate (teamkill).

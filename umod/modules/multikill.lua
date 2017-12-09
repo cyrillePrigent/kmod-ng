@@ -144,5 +144,5 @@ addCallbackFunction({
     ["ObituaryEnemyKill"]     = "checkMultikillObituaryEnemyKill",
     ["ObituaryTeamKill"]      = "multikillReset",
     ["ObituarySelfKill"]      = "multikillReset",
-    ["ObituaryWorldKill"]     = "multikillReset"
+    --["ObituaryWorldKill"]     = "multikillReset" => Reset vars["victim"] values !
 })

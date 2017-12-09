@@ -1,4 +1,5 @@
 -- Display your teamkill index.
+-- Require : teamkill restriction module
 --  From kmod lua script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
