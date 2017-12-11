@@ -1,40 +1,61 @@
--- Admins
+-- Admin management.
+-- From kmod lua script.
 
 -- Global var
 
---[[
-   Admin table :
-     name :
-       key   => admin guid
-       value => admin name
-     level :
-       key   => admin level (0 to maxAdminLevel cvar value)
-       value => table with : key = guid and value = true / false
---]]
 admin = {
-    ["name"]  = {},
-    ["level"] = {}
+    -- Admin list
+    --  key   => admin guid
+    --  value => admin name
+    ["name"] = {},
+    -- Admin levels
+    --  key   => admin level (0 to maxAdminLevel cvar value)
+    --  value => table with : key = guid and value = true / false
+    ["level"] = {},
+    -- Client cvar name used to set password (with setu)
+    ["pwdCvar"] = et.trap_Cvar_Get("u_password_client_cvar"),
+    -- Admin password
+    ["pwd"] = et.trap_Cvar_Get("u_admin_password")
 }
+
+addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
 
 -- Function
 
 -- Initializes admin data.
 -- Load admin entry of admin.cfg file.
 function loadAdmins()
+    local funcStart = et.trap_Milliseconds()
+
     for i = 0, maxAdminLevel, 1 do
         admin["level"][i] = {}
     end
 
-    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+    if admin["pwd"] == "my_admin_password" then
+        et.G_LogPrint(
+            "uMod ERROR: <u_admin_password> cvar is the default value!\nPlease edit your config file!\n"
+        )
+        return
+    end
+
+    if admin["pwdCvar"] == "my_server_password" then
+        et.G_LogPrint(
+            "uMod ERROR: <u_password_client_cvar> cvar is the default value!\nPlease edit your config file!\n"
+        )
+        return
+    end
+
+    local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_READ)
 
     if len == -1 then
-        et.G_LogPrint("WARNING: shrubbot.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
     elseif len == 0 then
-        et.G_Print("WARNING: No Admins's Defined!\n")
+        et.G_Print("uMod: No admins's defined\n")
     else
         local fileStr = et.trap_FS_Read(fd, len)
 
-        for level, guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\r%\n]*)") do
+        for level, guid, name
+          in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\r%\n]*)") do
             level = tonumber(level)
 
             if level <= maxAdminLevel then
@@ -48,14 +69,14 @@ function loadAdmins()
     end
 
     et.trap_FS_FCloseFile(fd)
+    et.G_LogPrintf("uMod: Loading admins in %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
 -- Remove admin if exist and return result.
---  clientNum is the client slot id.
 --  guid is the client guid.
-function removeAdminIfExist(clientNum, guid)
+function removeAdminIfExist(guid)
     if admin["name"][guid] ~= nil then
-        removeAdmin(clientNum)
+        removeAdmin(guid)
         return true
     end
 
@@ -66,28 +87,29 @@ end
 --  params is parameters passed to the function executed in command file.
 --  clientNum is the client slot id.
 function setRegularUser(params, clientNum)
-    local userInfo = et.trap_GetUserinfo(clientNum)
-    local name     = et.Q_CleanStr(et.Info_ValueForKey(userInfo, "name"))
+    local name = et.Q_CleanStr(client[clientNum]["name"])
 
-    if removeAdminIfExist(clientNum, client[clientNum]["guid"]) then
+    if removeAdminIfExist(client[clientNum]["guid"]) then
+        params.broadcast2allClients = true
+        params.say                  = "cpm"
         printCmdMsg(params, name .. " is now a regular user!\n")
     else
         printCmdMsg(params, name .. " is already a regular user!\n")
     end
 end
 
--- Open shrubbot.cfg file and append admin entry.
+-- Open admins.cfg file and append admin entry.
 --  level is the admin level.
 --  guid is the admin guid
 --  name is the admin name.
 function writeAdmin(level, guid, name)
-    local shrubbotLine = level .. " - " .. guid .. " - " .. name .. "\n"
-    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_APPEND)
+    local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_APPEND)
 
     if len == -1 then
-        et.G_LogPrint("WARNING: shrubbot.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
     else
-        et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fd)
+        local adminsLine = level .. " - " .. guid .. " - " .. name .. "\n"
+        et.trap_FS_Write(adminsLine, string.len(adminsLine), fd)
     end
 
     et.trap_FS_FCloseFile(fd)
@@ -98,12 +120,10 @@ end
 --  clientNum is the client slot id.
 --  level is the admin level.
 function setAdmin(params, clientNum, level)
-    local userInfo = et.trap_GetUserinfo(clientNum)
-    local name     = et.Q_CleanStr(et.Info_ValueForKey(userInfo, "name"))
-    local ip       = et.Info_ValueForKey(userinfo, "ip")
-    local guid     = client[clientNum]["guid"]
+    local name = et.Q_CleanStr(client[clientNum]["name"])
+    local guid = client[clientNum]["guid"]
 
-    removeAdminIfExist(clientNum, guid)
+    removeAdminIfExist(guid)
 
     if level <= maxAdminLevel then
         for i = 0, level, 1 do
@@ -115,26 +135,32 @@ function setAdmin(params, clientNum, level)
         writeAdmin(level, guid, name)
     end
 
-    printCmdMsg(params, name .. " is now a level ^1" .. level .. " ^7user!\n")
+    if params.cmdMode == "client" then
+        level = "^1" .. level .. "^7"
+    end
+
+    params.broadcast2allClients = true
+    params.say                  = "cpm"
+    printCmdMsg(params, name .. " is now a level " .. level .. " user!\n")
 end
 
 -- Remove a admin.
---  clientNum is the client slot id.
-function removeAdmin(clientNum)
-    local fdIn, lenIn = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
-    local fdOut, lenOut = et.trap_FS_FOpenFile("shrubbot.tmp.cfg", et.FS_WRITE)
+--  guid is the client guid.
+function removeAdmin(guid)
+    local fdIn, lenIn   = et.trap_FS_FOpenFile("admins.cfg", et.FS_READ)
+    local fdOut, lenOut = et.trap_FS_FOpenFile("admins.tmp.cfg", et.FS_WRITE)
 
     if lenIn == -1 then
-        et.G_LogPrint("WARNING: shrubbot.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
     elseif lenOut == -1 then
-        et.G_LogPrint("WARNING: shrubbot.tmp.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: admins.tmp.cfg file no found / not readable!\n")
     elseif lenIn == 0 then
-        et.G_Print("There is no Power User IP to remove\n")
+        et.G_Print("uMod : There is no admin to remove\n")
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
-        local guid    = client[clientNum]["guid"]
 
-        for lvl, _guid, name in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
+        for lvl, _guid, name
+          in string.gfind(fileStr, "(%d+)%s%-%s(%x+)%s%-%s*([^%\n]*)") do
             if _guid == guid then
                 for i = 0, maxAdminLevel, 1 do
                     admin["level"][i][guid] = false
@@ -142,56 +168,28 @@ function removeAdmin(clientNum)
 
                 admin["name"][guid] = nil
             else
-                local shrubbotLine = lvl .. " - " .. _guid .. " - " .. name .. "\n"
-                et.trap_FS_Write(shrubbotLine, string.len(shrubbotLine), fdOut)
+                local adminsLine = lvl .. " - " .. _guid .. " - " .. name .. "\n"
+                et.trap_FS_Write(adminsLine, string.len(adminsLine), fdOut)
             end
         end
     end
 
     et.trap_FS_FCloseFile(fdIn)
     et.trap_FS_FCloseFile(fdOut)
-    et.trap_FS_Rename("shrubbot.tmp.cfg", "shrubbot.cfg")
-end
-
--- Test admin level and return result.
--- Used for finger & admintest command.
---  params is parameters passed to the function executed in command file.
-function adminStatus(params)
-    local userInfo = et.trap_GetUserinfo(params.clientNum)
-    local guid     = client[params.clientNum]["guid"]
-    local name     = client[params.clientNum]["name"]
-    local cmd      = params.bangCmd or params.cmd
-
-    for i = maxAdminLevel, 0, -1 do
-        if params.bangCmd == cmdPrefix .. "finger" then
-            if admin["level"][i][guid] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is an admin \[lvl " .. i .. "\]\n")
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Finger: ^7" .. name .. " ^7is a guest \[lvl 0\]\n")
-                break
-            end
-        elseif params.bangCmd == cmdPrefix .. "admintest" then
-            if admin["level"][i][guid] and i ~= 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are an admin \[lvl " .. i .. "\]\n")
-                break
-            elseif i == 0 then
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " ^3Admintest: ^7You are a guest \[lvl 0\]\n")
-                break
-            end
-        end
-    end
+    et.trap_FS_Rename("admins.tmp.cfg", "admins.cfg")
 end
 
 -- Return admin level of client.
 --  clientNum is the client slot id.
 function getAdminLevel(clientNum)
-    if clientNum ~= -1 then
-        local guid = client[clientNum]["guid"]
+    local guid = client[clientNum]["guid"]
 
-        for i = maxAdminLevel, 1, -1 do
-            if admin["level"][i][guid] then
+    for i = maxAdminLevel, 1, -1 do
+        if admin["level"][i][guid] then
+            if admin["pwd"] == et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), admin["pwdCvar"]) then
                 return i
+            else
+                break
             end
         end
     end

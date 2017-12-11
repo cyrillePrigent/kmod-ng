@@ -1,16 +1,18 @@
 -- Display all admins name and level in server console.
+-- Require : admins module
+-- From kmod lua script.
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
-    local fd, len = et.trap_FS_FOpenFile("shrubbot.cfg", et.FS_READ)
+    local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_READ)
 
     if len == -1 then
-        et.G_LogPrint("WARNING: shrubbot.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
     elseif len == 0 then
-        et.G_Print("WARNING: No Admins's Defined!\n")
+        et.G_Print("uMod : No admins's defined\n")
     else
-        local filestr = et.trap_FS_Read(fd, len)
+        local fileStr = et.trap_FS_Read(fd, len)
 
-        for level, name in string.gfind(filestr, "(%d)%s%-%s%x+%s%-%s*([^%\n]*)") do
+        for level, name in string.gfind(fileStr, "(%d)%s%-%s%x+%s%-%s*([^%\n]*)") do
             et.G_Print("Name  = " .. name .. "\nLevel = " .. level .. "\n\n")
         end
     end

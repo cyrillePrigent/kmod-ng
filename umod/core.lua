@@ -454,13 +454,9 @@ end
 --  msg is the message content.
 function printCmdMsg(params, msg)
     if params.cmdMode == "console" then
-        if not params.privateMessage then
-            msg = "^7" .. msg
-        end
-
         et.G_Print(msg)
     elseif params.cmdMode == "client" then
-        if params.privateMessage then
+        if params.displayInConsole then
             et.trap_SendServerCommand(params.clientNum, "print \"" .. msg .. "\"")
         else
             local clientNum = -1
@@ -877,7 +873,6 @@ dofile(umod_path .. "/modules/private_message_admin.lua")
 
 if tonumber(et.trap_Cvar_Get("u_advanced_players")) == 1 then
     addSlashCommand("client", "players", {"file", "/command/client/players.lua"})
-    addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
 end
 
 addSlashCommand("client", {"ref", "pause"}, {"function", "pauseSlashCommand"})
