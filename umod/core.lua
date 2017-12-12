@@ -235,6 +235,18 @@ pause = {
     ["endTrigger"]   = false
 }
 
+-- Color
+
+-- Color of general text
+color1 = "^7"
+
+-- Color of command word
+color2 = "^3"
+
+-- Color of special text (command status, date, etc)
+color3 = "^8"
+
+
 -- Punkbuster status before disable it.
 pbState=false
 
@@ -465,7 +477,7 @@ function printCmdMsg(params, msg)
             if not params.noDisplayCmd then
                 cmd = params.bangCmd or params.cmd
                 cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
-                cmd = "^3" .. cmd .. ": "
+                cmd = color2 .. cmd .. ": "
             end
 
             if not params.broadcast2allClients then
@@ -474,7 +486,7 @@ function printCmdMsg(params, msg)
 
             et.trap_SendServerCommand(
                 clientNum,
-                params.say .. "\"" .. cmd .. "^7" .. msg .. "\""
+                params.say .. "\"" .. cmd .. color1 .. msg .. "\""
             )
         end
     end
@@ -718,16 +730,18 @@ end
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
 local etMod
-msgCmd = {}
+msgCmd = {
+    ["chatArea"] = "chat"
+}
 
 if modUrl == "http://etpro.anime.net/" then
     etMod              = "etpro"
-    msgCmd["chatArea"] = "b 8"
+    --msgCmd["chatArea"] = "b 8"
 
     dofile(umod_path .. "/mods/etpro.lua")
 elseif modUrl == "www.etlegacy.com" then
     etMod              = "etlegacy"
-    msgCmd["chatArea"] = "chat"
+    --msgCmd["chatArea"] = "chat"
 end
 
 if tonumber(et.trap_Cvar_Get("u_crazygravity")) == 1 then
@@ -807,8 +821,8 @@ if tonumber(et.trap_Cvar_Get("u_last_blood")) == 1 then
     dofile(umod_path .. "/modules/last_blood.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_killer_hp_display")) == 1 then
-    dofile(umod_path .. "/modules/killer_hp_display.lua")
+if tonumber(et.trap_Cvar_Get("u_display_killer_hp")) == 1 then
+    dofile(umod_path .. "/modules/display_killer_hp.lua")
 end
 
 if tonumber(et.trap_Cvar_Get("u_end_round_shuffle")) == 1 then

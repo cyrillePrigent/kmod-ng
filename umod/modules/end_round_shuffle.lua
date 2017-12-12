@@ -1,4 +1,5 @@
 -- End round shuffle
+-- From kmod lua script.
 
 -- Function
 

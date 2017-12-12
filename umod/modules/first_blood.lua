@@ -1,4 +1,5 @@
 -- First blood
+-- From kmod lua script.
 
 -- Global var
 
@@ -9,7 +10,7 @@ firstBlood = {
     ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_fb_msg_default")),
     ["msgPosition"]    = et.trap_Cvar_Get("u_fb_msg_position"),
     ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_fb_noise_reduction")),
-    ["apply"]          = false
+    ["trigger"]        = false
 }
 
 -- Set default client data.
@@ -24,27 +25,46 @@ addSlashCommand("client", "fblood", {"function", "firstBloodSlashCommand"})
 --  value is the boolen value if first blood message & sound is enabled or not..
 function setFirstBloodMsg(clientNum, value)
     client[clientNum]["firstBloodMsg"] = value
-    et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fblood", value))
+
+    et.trap_SetUserinfo(
+        clientNum,
+        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fblood", value)
+    )
 end
 
--- Function executed when slash command is called in et_ClientCommand function
+-- Function executed when slash command is called in et_ClientCommand function.
 -- `fblood` command here.
 --  params is parameters passed to the function executed in command file.
 function firstBloodSlashCommand(params)
+    --params.noDisplayCmd = true
+    params.say = msgCmd["chatArea"]
+    params.cmd = "/" .. params.cmd
+
     if params["arg1"] == "" then
-        local status = "^8on^7"
+        local status = "on"
 
         if client[params.clientNum]["firstBloodMsg"] == 0 then
-            status = "^8off^7"
+            status = "off"
         end
 
-        et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(fblood):^7 Messages are %s\"", status))
+        printCmdMsg(
+            params,
+            "Messages are " .. color3 .. status
+        )
     elseif tonumber(params["arg1"]) == 0 then
         setFirstBloodMsg(params.clientNum, 0)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fblood):^7 Messages are now ^8off^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "off"
+        )
     else
         setFirstBloodMsg(params.clientNum, 1)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(fblood):^7 Messages are now ^8on^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "on"
+        )
     end
 
     return 1
@@ -53,11 +73,11 @@ end
 -- Callback function when a client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function firstBloodUpdateClientUserinfo(vars)
-    local ds = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_fblood")
+    local fb = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_fblood")
 
-    if ds == "" then
+    if fb == "" then
         setFirstBloodMsg(vars["clientNum"], firstBlood["msgDefault"])
-    elseif tonumber(ds) == 0 then
+    elseif tonumber(fb) == 0 then
         client[vars["clientNum"]]["firstBloodMsg"] = 0
     else
         client[vars["clientNum"]]["firstBloodMsg"] = 1
@@ -67,8 +87,8 @@ end
 -- Callback function when a player kill a enemy.
 --  vars is the local vars of et_Obituary function.
 function checkFirstBloodRunObituaryEnemyKill(vars)
-    if not firstBlood["apply"] then
-        firstBlood["apply"] = true
+    if not firstBlood["trigger"] then
+        firstBlood["trigger"] = true
 
         local msg = string.gsub(firstBlood["message"], "#killer#", vars["killerName"])
         sayClients(firstBlood["msgPosition"], msg, "firstBloodMsg")

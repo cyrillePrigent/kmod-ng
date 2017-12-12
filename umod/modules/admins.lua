@@ -83,46 +83,12 @@ function removeAdminIfExist(guid)
     return false
 end
 
--- Set a regular user (level 0).
---  params is parameters passed to the function executed in command file.
---  clientNum is the client slot id.
-function setRegularUser(params, clientNum)
-    local name = et.Q_CleanStr(client[clientNum]["name"])
-
-    if removeAdminIfExist(client[clientNum]["guid"]) then
-        params.broadcast2allClients = true
-        params.say                  = "cpm"
-        printCmdMsg(params, name .. " is now a regular user!\n")
-    else
-        printCmdMsg(params, name .. " is already a regular user!\n")
-    end
-end
-
--- Open admins.cfg file and append admin entry.
---  level is the admin level.
---  guid is the admin guid
---  name is the admin name.
-function writeAdmin(level, guid, name)
-    local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_APPEND)
-
-    if len == -1 then
-        et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
-    else
-        local adminsLine = level .. " - " .. guid .. " - " .. name .. "\n"
-        et.trap_FS_Write(adminsLine, string.len(adminsLine), fd)
-    end
-
-    et.trap_FS_FCloseFile(fd)
-end
-
 -- Set a admin.
 --  params is parameters passed to the function executed in command file.
---  clientNum is the client slot id.
+--  name is the admin name cleaned.
+--  guid is the admin guid.
 --  level is the admin level.
-function setAdmin(params, clientNum, level)
-    local name = et.Q_CleanStr(client[clientNum]["name"])
-    local guid = client[clientNum]["guid"]
-
+function setAdmin(name, guid, level)
     removeAdminIfExist(guid)
 
     if level <= maxAdminLevel then
@@ -132,16 +98,17 @@ function setAdmin(params, clientNum, level)
 
         admin["name"][guid] = name
 
-        writeAdmin(level, guid, name)
-    end
+        local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_APPEND)
 
-    if params.cmdMode == "client" then
-        level = "^1" .. level .. "^7"
-    end
+        if len == -1 then
+            et.G_LogPrint("uMod WARNING: admins.cfg file no found / not readable!\n")
+        else
+            local adminsLine = level .. " - " .. guid .. " - " .. name .. "\n"
+            et.trap_FS_Write(adminsLine, string.len(adminsLine), fd)
+        end
 
-    params.broadcast2allClients = true
-    params.say                  = "cpm"
-    printCmdMsg(params, name .. " is now a level " .. level .. " user!\n")
+        et.trap_FS_FCloseFile(fd)
+    end
 end
 
 -- Remove a admin.

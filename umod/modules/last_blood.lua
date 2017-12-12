@@ -1,4 +1,5 @@
 -- Last blood
+-- From kmod lua script.
 
 -- Global var
 
@@ -19,8 +20,8 @@ end
 --  vars is the local vars passed from et_RunFrame function.
 function checkLastBloodRunFrameEndRound(vars)
     if not game["endRoundTrigger"] and lastBlood["killerName"] ~= "" then
-        local str = string.gsub(lastBlood["message"], "#killer#", lastBlood["killerName"])
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay " .. str .. "\n")
+        local msg = string.gsub(lastBlood["message"], "#killer#", lastBlood["killerName"])
+        et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay " .. msg .. "\n")
     end
 end
 

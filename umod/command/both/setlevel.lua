@@ -24,10 +24,24 @@ function execute_command(params)
                     "Admin level does not exist! \[0-" .. maxAdminLevel .. "\]\n"
                 )
             else
+                local name = et.Q_CleanStr(client[clientNum]["name"])
+
                 if level == 0 then
-                    setRegularUser(params, clientNum)
+                    if removeAdminIfExist(client[clientNum]["guid"]) then
+                        printCmdMsg(params, name .. " is now a regular user!\n")
+                    else
+                        printCmdMsg(params, name .. " is already a regular user!\n")
+                    end
                 else
-                    setAdmin(params, clientNum, level)
+                    local guid = client[clientNum]["guid"]
+
+                    setAdmin(clientNum, level)
+
+                    if params.cmdMode == "client" then
+                        level = "^1" .. level .. "^7"
+                    end
+
+                    printCmdMsg(params, name .. " is now a level " .. level .. " user!\n")
                 end
             end
         end
