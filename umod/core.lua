@@ -729,7 +729,7 @@ end
 
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
-local etMod
+
 msgCmd = {
     ["chatArea"] = "chat"
 }
@@ -768,8 +768,7 @@ if tonumber(et.trap_Cvar_Get("u_advanced_adrenaline")) == 1 then
     dofile(umod_path .. "/modules/advanced_adrenaline.lua")
 end
 
--- g_inactivity is required or this will not work
-if tonumber(et.trap_Cvar_Get("u_advanced_spawn")) == 1 and tonumber(et.trap_Cvar_Get("g_inactivity")) > 0 then 
+if tonumber(et.trap_Cvar_Get("u_advanced_spawn")) == 1 then 
     dofile(umod_path .. "/modules/advanced_spawn.lua")
 end
 
@@ -838,7 +837,8 @@ if advancedPm == 1 then
 end
 
 if tonumber(et.trap_Cvar_Get("u_playsound")) == 1 then
-    dofile(umod_path .. "/modules/playsound.lua")
+    addSlashCommand("console", "playsound", {"file", "/command/console/playsound.lua"})
+    addSlashCommand("console", "playsound_env", {"file", "/command/console/playsound_env.lua"})
 end
 
 if tonumber(et.trap_Cvar_Get("u_revive_spree")) == 1 then

@@ -1,4 +1,5 @@
 -- Advanced spawn
+-- From kmod lua script.
 
 -- Global var
 
@@ -7,6 +8,18 @@ clientDefaultData["invincibleDummy"] = 0
 clientDefaultData["invincibleStart"] = 0
 
 -- Function
+
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function advancedSpawnInitGame(vars)
+    local g_inactivity = tonumber(et.trap_Cvar_Get("g_inactivity"))
+
+    if g_inactivity ~= nil and g_inactivity > 0 then
+        addCallbackFunction({["RunFrame"] = "checkAdvancedSpawnRunFrame"})
+    else
+        et.G_LogPrint("uMod: Advanced spawn is disabled! <g_inactivity> cvar must be > 0.\n")
+    end
+end
 
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
@@ -41,5 +54,5 @@ end
 
 -- Add callback advanced spawn function.
 addCallbackFunction({
-    ["RunFrame"] = "checkAdvancedSpawnRunFrame"
+    ["InitGame"] = "advancedSpawnInitGame"
 })
