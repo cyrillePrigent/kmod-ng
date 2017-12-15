@@ -883,7 +883,14 @@ end
 
 dofile(umod_path .. "/modules/commands.lua")
 dofile(umod_path .. "/modules/admins.lua")
-dofile(umod_path .. "/modules/private_message_admin.lua")
+
+addSlashCommand("client", "ma", {"file", "/command/client/private_message_admin.lua"})
+addSlashCommand("client", "pma", {"file", "/command/client/private_message_admin.lua"})
+addSlashCommand("client", "msga", {"file", "/command/client/private_message_admin.lua"})
+
+addSlashCommand("console", "ma", {"file", "/command/console/private_message_admin.lua"})
+addSlashCommand("console", "pma", {"file", "/command/console/private_message_admin.lua"})
+addSlashCommand("console", "msga", {"file", "/command/console/private_message_admin.lua"})
 
 if tonumber(et.trap_Cvar_Get("u_advanced_players")) == 1 then
     addSlashCommand("client", "players", {"file", "/command/client/players.lua"})
@@ -1237,8 +1244,6 @@ function et_ConsoleCommand()
         ["arg2"]      = et.trap_Argv(2)
     }
 
-    --debug("DEBUG params", params)
-
     if runCommandFile(params.cmd, params) == 1 then
         return 1
     end
@@ -1318,7 +1323,6 @@ function et_Obituary(victim, killer, meansOfDeath)
     end
 end
 
--- TODO : Remove it later...
 -- Plays a global sound soundfile for a certain client only.
 --  clientNum is the client slot id.
 --  soundfile is the sound file to play.

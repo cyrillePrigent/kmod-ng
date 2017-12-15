@@ -33,9 +33,7 @@ function execute_command(params)
                         printCmdMsg(params, name .. " is already a regular user!\n")
                     end
                 else
-                    local guid = client[clientNum]["guid"]
-
-                    setAdmin(clientNum, level)
+                    setAdmin(name, client[clientNum]["guid"], level)
 
                     if params.cmdMode == "client" then
                         level = "^1" .. level .. "^7"
