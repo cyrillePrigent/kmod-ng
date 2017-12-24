@@ -1,36 +1,13 @@
--- Game mode (frenzy, grenadewar, panzerwar, sniperwar, stenwar, lugerwar & knifewar)
+-- Game mode (frenzy, grenadewar, knifewar, lugerwar, panzerwar, sniperwar & stenwar)
+-- From kmod lua script.
 
 -- Global var
 
 gameMode = {
-    ["current"] = false,
-    ["refresh"] = {
-        ["time"]    = 0,
-        ["trigger"] = false
-    },
-    ["clientSettingsModified"] = false
+    ["current"]     = "",
+    ["time"]        = 0,
+    ["weaponsList"] = {}
 }
-
-originalSettings = {
-    ["team_maxSoldiers"]    = "",
-    ["team_maxmortars"]     = "",
-    ["team_maxpanzers"]     = "",
-    ["team_maxflamers"]     = "",
-    ["team_maxmg42s"]       = "",
-    ["team_maxmedics"]      = "",
-    ["team_maxengineers"]   = "",
-    ["team_maxfieldops"]    = "",
-    ["team_maxcovertops"]   = "",
-    ["g_soldierchargetime"] = "",
-    ["g_speed"]             = "",
-    
-    ["team_maxriflegrenades"] = "",
-    ["b_riflegrenades"]       = ""
-}
-
--- Set default client data.
-clientDefaultData["originalClass"]  = ""
-clientDefaultData["originalWeapon"] = ""
 
 -- Set module command.
 cmdList["client"]["!panzerwar"]   = "/command/both/panzerwar.lua"
@@ -40,64 +17,286 @@ cmdList["client"]["!sniperwar"]   = "/command/both/sniperwar.lua"
 cmdList["client"]["!stenwar"]     = "/command/both/stenwar.lua"
 cmdList["client"]["!lugerwar"]    = "/command/both/lugerwar.lua"
 cmdList["client"]["!knifewar"]    = "/command/both/knifewar.lua"
+
 cmdList["console"]["!panzerwar"]  = "/command/both/panzerwar.lua"
 cmdList["console"]["!frenzy"]     = "/command/both/frenzy.lua"
 cmdList["console"]["!grenadewar"] = "/command/both/grenadewar.lua"
 cmdList["console"]["!sniperwar"]  = "/command/both/sniperwar.lua"
 cmdList["console"]["!stenwar"]    = "/command/both/stenwar.lua"
 cmdList["console"]["!lugerwar"]   = "/command/both/lugerwar.lua"
-cmdList["console"]["!knifewar"]    = "/command/both/knifewar.lua"
+cmdList["console"]["!knifewar"]   = "/command/both/knifewar.lua"
 
 -- Function
 
--- Callback function when qagame shuts down.
-function checkGameModeShutdownGame()
-    if gameMode["current"] ~= false then
-        --[[
-        team_maxmedics
-        team_maxcovertops
-        team_maxfieldops
-        team_maxengineers
-        team_maxflamers
-        team_maxmortars
-        team_maxmg42s
-        team_maxpanzers
-        g_soldierchargetime
-        --]]
-        
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxmedics " .. originalSettings["team_maxmedics"] .. " ; team_maxcovertops " .. originalSettings["team_maxcovertops"] .. " ; team_maxfieldops " .. originalSettings["team_maxfieldops"] .. " ; team_maxengineers " .. originalSettings["team_maxengineers"] .. " ; team_maxflamers " .. originalSettings["team_maxflamers"] .. " ; team_maxmortars " .. originalSettings["team_maxmortars"] .. " ; team_maxmg42s " .. originalSettings["team_maxmg42s"] .. " ; team_maxpanzers " .. originalSettings["team_maxpanzers"] .. " ; forcecvar g_soldierchargetime " .. originalSettings["g_soldierchargetime"] .. "\n")
+-- landmines_limit
 
-        if gameMode["current"] == "panzerwar" then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_speed " .. originalSettings["g_speed"] .. "\n")
+-- Start game mode.
+--  * Disable other modules if needed (auto panzer disable & landmines limit)
+--  * Backup server settings
+--  * Set common game mode data
+--  * Backup client class & weapon
+--  * Kill players to apply new server settings
+--  gameModeName is the game mode name to enabled.
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+function enabledGameMode(gameModeName, params)
+    if autoPanzerDisable == 1 then
+        if autoPanzerDisable["enabled"] then
+            removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame")
         end
     end
 
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. panzersPerTeam .. "\n")
+    if landminesLimit == 1 then
+        if landminesLimit["enabled"] then
+            removeCallbackFunction("RunFrame", "checkLandminesLimitRunFrame")
+        end
+    end
+    
+    local umod_gameMode = et.trap_Cvar_Get("umod_gameMode")
 
-    -- checkGameModeRunFrameEndRound do this
-    --[[
-    if gameMode["current"] == "panzerwar" then
-        for i = 0, clientsLimit, 1 do
-            if client[i]["team"] == 1 or client[i]["team"] == 2 then
-                et.gentity_set(i, "sess.latchPlayerType", client[i]["originalClass"])
-                et.gentity_set(i, "sess.latchPlayerWeapon", client[i]["originalWeapon"])
+    if umod_gameMode == "" and params.gameModeSettings then
+        -- Backup server settings
+        local fd, len = et.trap_FS_FOpenFile(
+            "game_mode/server_settings.cfg", et.FS_WRITE
+        )
+
+        if len == -1 then
+            et.G_LogPrint(
+                "uMod WARNING: game_mode/server_settings.cfg file no found / not readable!\n"
+            )
+        else
+            for cvar, value in pairs(params.gameModeSettings) do
+                local backupLine = "forcecvar " .. cvar .. " \""
+                    .. tonumber(et.trap_Cvar_Get(cvar)) .. "\"\n"
+
+                et.trap_FS_Write(backupLine, string.len(backupLine), fd)
+
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "forcecvar " .. cvar .. " \"" .. value .. "\"\n"
+                )
+            end
+        end
+
+        et.trap_FS_FCloseFile(fd)
+    end
+
+    -- Set common game mode data
+    gameMode["current"] = gameModeName
+    gameMode["time"]    = time["frame"]
+
+    et.trap_SendConsoleCommand(
+        et.EXEC_APPEND,
+        "seta umod_gameMode \"" .. gameModeName .. "\"\n"
+    )
+
+    if not params.noBackupClient then
+        -- Backup client class & weapon
+        local fd, len = et.trap_FS_FOpenFile(
+            "game_mode/client_settings.cfg", et.FS_WRITE
+        )
+
+        if len == -1 then
+            et.G_LogPrint(
+                "uMod WARNING: game_mode/client_settings.cfg file no found / not readable!\n"
+            )
+        else
+            for p = 0, clientsLimit, 1 do
+                if client[p]["team"] == 1 or client[p]["team"] == 2 then
+                    local clientClass = tonumber(
+                        et.gentity_get(p, "sess.latchPlayerType")
+                    )
+
+                    local clientWeapon = tonumber(
+                        et.gentity_get(p, "sess.latchPlayerWeapon")
+                    )
+
+                    local backupLine = client[p]["guid"] .. " - "
+                        .. clientClass .. " - " .. clientWeapon .. "\n"
+
+                    et.trap_FS_Write(backupLine, string.len(backupLine), fd)
+                end
+            end
+        end
+
+        et.trap_FS_FCloseFile(fd)
+    end
+
+    -- Kill players to apply new server settings
+    local clientSettingsCallbackFunction
+
+    if type(params.clientSettingsCallbackFunction) == "function" then
+        clientSettingsCallbackFunction = params.clientSettingsCallbackFunction
+    end
+
+    for p = 0, clientsLimit, 1 do
+        if client[p]["team"] == 1 or client[p]["team"] == 2 then
+            if clientSettingsCallbackFunction ~= nil then
+                clientSettingsCallbackFunction(p)
+            end
+
+            if et.gentity_get(p, "health") > 0 then
+                if et.gentity_get(p, "ps.powerups", 1) > 0 then
+                    et.gentity_set(p, "ps.powerups", 1, 0)
+                end
+
+                et.G_Damage(p, p, 1022, 400, 24, 0)
             end
         end
     end
-    --]]
+end
+
+-- Stop game mode.
+--  * Reset common game mode data
+--  * Restore server settings
+--  * Restore client class & weapon
+--  * Clean backup file of client class & weapon
+--  * Kill players to apply new server settings
+--  * Enable other modules if needed (auto panzer disable & landmines limit)
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+function disabledGameMode(params)
+    -- Reset common game mode data
+    gameMode["current"]          = ""
+    gameMode["weaponsList"]      = nil
+    gameMode["gameModeRunFrame"] = defaultGameModeRunFrame
+
+    et.trap_SendConsoleCommand(
+        et.EXEC_APPEND,
+        "seta umod_gameMode \"\"\n"
+    )
+
+    if not params.noGameModeBackup then
+        -- Restore server settings
+        et.trap_SendConsoleCommand(
+            et.EXEC_APPEND,
+            "exec game_mode/server_settings.cfg\n"
+        )
+    end
+
+    -- Restore client class & weapon
+    local fd, len = et.trap_FS_FOpenFile(
+        "game_mode/client_settings.cfg", et.FS_READ
+    )
+
+    if len == -1 then
+        et.G_LogPrint(
+            "uMod WARNING: game_mode/client_settings.cfg file no found / not readable!\n"
+        )
+    elseif len == 0 then
+        -- Do nothing ...
+    else
+        local fileStr = et.trap_FS_Read(fd, len)
+        local backup = {}
+
+        for clientGuid, clientClass, clientWeapon
+          in string.gfind(fileStr, "(%x+)%s%-%s(%d+)%s%-%s(%d+)\n") do
+            backup[clientGuid] = {
+                ["clientClass"]  = clientClass,
+                ["clientWeapon"] = clientWeapon
+            }
+        end
+
+        for p = 0, clientsLimit, 1 do
+            if client[p]["team"] == 1 or client[p]["team"] == 2 then
+                if backup[client[p]["guid"]] then
+                    et.gentity_set(
+                        p,
+                        "sess.latchPlayerType",
+                        backup[client[p]["guid"]]["clientClass"]
+                    )
+
+                    et.gentity_set(
+                        p,
+                        "sess.latchPlayerWeapon",
+                        backup[client[p]["guid"]]["clientWeapon"]
+                    )
+                end
+            end
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
+
+    -- Clean backup file of client class & weapon
+    local fd, len = et.trap_FS_FOpenFile(
+        "game_mode/client_settings.cfg", et.FS_WRITE
+    )
+
+    if len == -1 then
+        et.G_LogPrint(
+            "uMod WARNING: game_mode/client_settings.cfg file no found / not readable!\n"
+        )
+    else
+        et.trap_FS_Write("", string.len(""), fd)
+    end
+
+    et.trap_FS_FCloseFile(fd)
+
+    -- Kill players to apply new server settings
+    for p = 0, clientsLimit, 1 do
+        if client[p]["team"] == 1 or client[p]["team"] == 2 then
+            if et.gentity_get(p, "health") > 0 then
+                if et.gentity_get(p, "ps.powerups", 1) > 0 then
+                    et.gentity_set(p, "ps.powerups", 1, 0)
+                end
+
+                et.G_Damage(p, p, 1022, 400, 24, 0)
+            end
+        end
+    end
+
+    if autoPanzerDisable == 1 then
+        if autoPanzerDisable["enabled"] then
+            addCallbackFunction({ ["RunFrame"] = "autoPanzerDisableRunFrame" })
+        end
+    end
+
+    if landminesLimit == 1 then
+        if landminesLimit["enabled"] then
+            addCallbackFunction({ ["RunFrame"] = "checkLandminesLimitRunFrame" })
+        end
+    end
+end
+
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function gameModeInitGame(vars)
+    local currentGameMode = et.trap_Cvar_Get("umod_gameMode")
+
+    local gameModeList = {
+        ["panzerwar"]  = true,
+        ["grenadewar"] = true,
+        ["sniperwar"]  = true,
+        ["stenwar"]    = true,
+        ["frenzy"]     = true,
+        ["lugerwar"]   = true,
+        ["knifewar"]   = true
+    }
+
+    if gameModeList[currentGameMode] then
+        local params = {
+            ["cmdMode"]              = "console",
+            ["clientNum"]            = 1022,
+            ["nbArg"]                = 2,
+            ["cmd"]                  = cmdPrefix .. currentGameMode,
+            ["arg1"]                 = 1,
+            ["broadcast2allClients"] = true,
+            ["noBackupClient"]       = true
+        }
+
+        runCommandFile(params.cmd, params)
+    end
 end
 
 -- Set ammo for each weapon.
---  weaponList is the configuration for set ammo or not for each weapon.
 --  clientNum is the client slot id.
-function setWeaponAmmo(weaponList, clientNum)
-    -- et.MAX_WEAPONS = 50
-    for i = 1, 49, 1 do
-        if not weaponList[i] then
-            et.gentity_set(clientNum, "ps.ammoclip", i, 0)
-            et.gentity_set(clientNum, "ps.ammo", i, 0)
-        else
-            et.gentity_set(clientNum, "ps.ammo", i, 999)
+function setWeaponAmmo(clientNum)
+    for weaponNum, weaponAmmo in pairs(gameMode["weaponsList"]) do
+        if weaponAmmo[1] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammoclip", weaponNum, weaponAmmo[1])
+        end
+
+        if weaponAmmo[2] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammo", weaponNum, weaponAmmo[2])
         end
     end
 end
@@ -105,101 +304,65 @@ end
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkGameModeRunFrame(vars)
-    if not gameMode["refresh"]["trigger"] then
-        gameMode["refresh"]["time"]    = vars["levelTime"]
-        gameMode["refresh"]["trigger"] = true
-    end
-
-    -- reset ammo and stuff every 0.25 of a second rather than 0.05 of a second (which caused lag)
-    if vars["levelTime"] - gameMode["refresh"]["time"] >= 250 then
-        gameMode["refresh"]["trigger"] = false
-
-        for i = 0, clientsLimit, 1 do
-            setWeaponAmmo(weaponsList, i)
-            gameModeRunFramePlayerCallback(i)
-        end
+    -- Reset ammo and stuff every 0.25 of a second rather
+    -- than 0.05 of a second (which caused lag)
+    if vars["levelTime"] - gameMode["time"] >= 250 then
+        gameMode["gameModeRunFrame"]()
+        gameMode["time"] = vars["levelTime"]
     end
 end
 
--- Callback function when qagame runs a server frame. (pending end round)
---  vars is the local vars passed from et_RunFrame function.
-function checkGameModeRunFrameEndRound(vars)
-    if not game["endRoundTrigger"] then
-        if gameMode["clientSettingsModified"] then
-            for i = 0, clientsLimit, 1 do
-                if client[i]["team"] == 1 or client[i]["team"] == 2 then
-                    et.gentity_set(i, "sess.latchPlayerType", client[i]["originalClass"])
-                    et.gentity_set(i, "sess.latchPlayerWeapon", client[i]["originalWeapon"])
-                end
+-- Default game mode RunFrame
+-- Add / remove ammo with weapon list.
+function defaultGameModeRunFrame()
+    for p = 0, clientsLimit, 1 do
+        setWeaponAmmo(p)
+    end
+end
+
+-- Set default game mode RunFrame
+gameMode["gameModeRunFrame"] = defaultGameModeRunFrame
+
+-- Check game mode for enabled / disabled it.
+--  gameModeName is the game mode to check.
+--  action is the action to check game mode (enabled / disabled).
+--  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
+function checkGameMode(gameModeName, action, params)
+    if action == "enabled" then
+        if gameMode["current"] ~= "" then
+            local currentGM = string.gsub(gameMode["current"], "^%l", string.upper)
+
+            if gameMode["current"] == gameModeName then
+                printCmdMsg(
+                    params,
+                    currentGM .. " is already active"
+                )
+            else
+                printCmdMsg(
+                    params,
+                    currentGM .. " must be disabled first"
+                )
             end
+
+            return false
+        end
+    elseif action == "disabled" then
+        if gameMode["current"] ~= gameModeName then
+            gameModeName = string.gsub(gameModeName, "^%l", string.upper)
+
+            printCmdMsg(
+                params,
+                gameModeName .. " has already been disabled"
+            )
+
+            return false
         end
     end
-end
 
--- Callback function when a client is spawned.
---  vars is the local vars passed from et_ClientSpawn function.
-function checkGameModeClientSpawn(vars)
-    if gameMode["current"] == "panzerwar" then
-        local doubleHealth = tonumber(et.gentity_get(vars["clientNum"], "health")) * 2
-        et.gentity_set(vars["clientNum"], "health", doubleHealth)
-    end
-end
-
-function gameModeIsActive(newGameMode, params)
-    if newGameMode ~= "panzerwar" and gameMode["current"] == "panzerwar" then
-        printCmdMsg(params, "Panzerwar must be disabled first\n")
-    elseif newGameMode ~= "grenadewar" and gameMode["current"] == "grenadewar" then
-        printCmdMsg(params, "Grenadewar must be disabled first\n")
-    elseif newGameMode ~= "sniperwar" and gameMode["current"] == "sniperwar" then
-        printCmdMsg(params, "Sniperwar must be disabled first\n")
-    elseif newGameMode ~= "stenwar" and gameMode["current"] == "stenwar" then
-        printCmdMsg(params, "Stenwar must be disabled first\n")
-    elseif newGameMode ~= "frenzy" and gameMode["current"] == "frenzy" then
-        printCmdMsg(params, "Frenzy must be disabled first\n")
-    elseif newGameMode ~= "lugerwar" and gameMode["current"] == "lugerwar" then
-        printCmdMsg(params, "Lugerwar must be disabled first\n")
-    elseif newGameMode ~= "knifewar" and gameMode["current"] == "knifewar" then
-        printCmdMsg(params, "Knifewar must be disabled first\n")
-    else
-        return false
-    end
-    
     return true
-end
-
-function saveServerClassSetting()
-    originalSettings["team_maxSoldiers"]    = tonumber(et.trap_Cvar_Get("team_maxSoldiers"))
-    originalSettings["team_maxmortars"]     = tonumber(et.trap_Cvar_Get("team_maxmortars"))
-    originalSettings["team_maxpanzers"]     = tonumber(et.trap_Cvar_Get("team_maxpanzers"))
-    originalSettings["team_maxflamers"]     = tonumber(et.trap_Cvar_Get("team_maxflamers"))
-    originalSettings["team_maxmg42s"]       = tonumber(et.trap_Cvar_Get("team_maxmg42s"))
-    originalSettings["team_maxmedics"]      = tonumber(et.trap_Cvar_Get("team_maxmedics"))
-    originalSettings["team_maxengineers"]   = tonumber(et.trap_Cvar_Get("team_maxengineers"))
-    originalSettings["team_maxfieldops"]    = tonumber(et.trap_Cvar_Get("team_maxfieldops"))
-    originalSettings["team_maxcovertops"]   = tonumber(et.trap_Cvar_Get("team_maxcovertops"))
-    originalSettings["g_soldierchargetime"] = tonumber(et.trap_Cvar_Get("g_soldierchargetime"))
-    originalSettings["g_speed"]             = tonumber(et.trap_Cvar_Get("g_speed"))
-    
-    originalSettings["team_maxriflegrenades"] = tonumber(et.trap_Cvar_Get("team_maxriflegrenades"))
-
-    if modUrl == "http://etpro.anime.net/" then
-        originalSettings["b_riflegrenades"] = tonumber(et.trap_Cvar_Get("b_riflegrenades"))
-    end
-    
-    --for cvar, value in pair(originalSettings) do
-    --    originalSettings[cvar] = tonumber(et.trap_Cvar_Get(cvar))
-    --end
-end
-
-function restoreGameServerSetting()
-    for cvar, value in pair(originalSettings) do
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, cvar .. " " .. value)
-    end
 end
 
 -- Add callback game mode function.
 addCallbackFunction({
-    ["ShutdownGame"]     = "checkGameModeShutdownGame",
-    ["RunFrameEndRound"] = "checkGameModeRunFrameEndRound",
-    --["ClientSpawn"]    = "checkGameModeClientSpawn"
+    ["InitGame"] = "gameModeInitGame"
 })

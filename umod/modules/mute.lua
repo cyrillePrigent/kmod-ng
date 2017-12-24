@@ -178,7 +178,7 @@ end
 
 -- Callback function when qagame runs a server frame (warmup, round & end of round).
 --  vars is the local vars passed from et_RunFrame function.
-function checkMuteRunFrameGlobal(vars)
+function checkMuteRunFrame(vars)
     for i = 0, clientsLimit, 1 do
         -- If client is muted for a certain duration...
         if client[i]["muteEnd"] > 0 then
@@ -292,7 +292,8 @@ end
 addCallbackFunction({
     ["InitGame"]         = "loadMutes",
     ["ShutdownGame"]     = "checkMuteShutdownGame",
-    ["RunFrameGlobal"]   = "checkMuteRunFrameGlobal",
+    ["RunFrame"]         = "checkMuteRunFrame",
+    ["RunFrameEndRound"] = "checkMuteRunFrame",
     ["ClientDisconnect"] = "checkMuteClientDisconnect",
     ["ClientBegin"]      = "checkMuteClientBegin"
 })

@@ -13,7 +13,6 @@ callbackList = {
     ["ShutdownGame"]          = {},
     ["RunFrame"]              = {},
     ["RunFrameEndRound"]      = {},
-    ["RunFrameGlobal"]        = {},
     ["ClientConnect"]         = {},
     ["ClientDisconnect"]      = {},
     ["ClientBegin"]           = {},
@@ -294,7 +293,7 @@ mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
 logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
-
+landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -317,9 +316,9 @@ end
 --  removeName is the function / file name to remove.
 function removeCallbackFunction(callbackType, removeFunctionName)
     if callbackList[callbackType] ~= nil then
-        for key, functionName in ipairs(callbackList[callbackType]) do
-            if functionName ~= removeFunctionName then
-                table.remove(callbackList[callbackType], key)
+        for key, functionName in pairs(callbackList[callbackType]) do
+            if functionName == removeFunctionName then
+                callbackList[callbackType][key] = nil
                 break
             end
         end
@@ -335,7 +334,7 @@ function executeCallbackFunction(callbackType, vars)
     local result
     
     if callbackList[callbackType] ~= nil then
-        for _, functionName in ipairs(callbackList[callbackType]) do
+        for _, functionName in pairs(callbackList[callbackType]) do
             result = _G[functionName](vars)
 
             if result then
@@ -467,6 +466,21 @@ end
 function printCmdMsg(params, msg)
     if params.cmdMode == "console" then
         et.G_Print(msg)
+        
+        if params.broadcast2allClients then
+            local cmd = ""
+
+            if not params.noDisplayCmd then
+                cmd = params.cmd
+                cmd = string.gsub(cmd, "^" .. cmdPrefix .. "%l", string.upper)
+                cmd = color2 .. cmd .. ": "
+            end
+
+            et.trap_SendServerCommand(
+                -1,
+                params.say .. " \"" .. cmd .. color1 .. msg .. "\""
+            )
+        end
     elseif params.cmdMode == "client" then
         if params.displayInConsole then
             et.trap_SendServerCommand(params.clientNum, "print \"" .. msg .. "\"")
@@ -486,7 +500,7 @@ function printCmdMsg(params, msg)
 
             et.trap_SendServerCommand(
                 clientNum,
-                params.say .. "\"" .. cmd .. color1 .. msg .. "\""
+                params.say .. " \"" .. cmd .. color1 .. msg .. "\""
             )
         end
     end
@@ -563,24 +577,24 @@ function removeSlashCommand(cmdType, cmdArg, removeName)
 
             if t then
                 for key, functionName in ipairs(slashCommandClient["single"]) do
-                    if functionName ~= removeName then
-                        table.remove(t, key)
+                    if functionName == removeName then
+                        t[key] = nil
                         break
                     end
                 end
             end
         elseif cmdArgType == "string" then
             for key, functionName in ipairs(slashCommandClient["single"]) do
-                if functionName ~= removeName then
-                    table.remove(slashCommandClient["single"], key)
+                if functionName == removeName then
+                    slashCommandClient["single"][key] = nil
                     break
                 end
             end
         end
     elseif cmdType == "console" then
         for key, functionName in ipairs(slashCommandConsole) do
-            if functionName ~= removeName then
-                table.remove(slashCommandConsole, key)
+            if functionName == removeName then
+                slashCommandConsole[key] = nil
                 break
             end
         end
@@ -857,7 +871,7 @@ if tonumber(et.trap_Cvar_Get("u_birthday")) == 1 then
     dofile(umod_path .. "/modules/birthday.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_landmines_limit")) == 1 then
+if landminesLimit == 1 then
     dofile(umod_path .. "/modules/landmines_limit.lua")
 end
 
@@ -1054,18 +1068,16 @@ function et_RunFrame(levelTime)
 --         end
 --     end
 
-    if game["state"] == 0 then
+        if game["state"] == 3 then
+        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
+        game["endRoundTrigger"] = true
+    else
         executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
 
         --for i = 0, clientsLimit, 1 do
         --    executeCallbackFunction("RunFramePlayerLoop", {["levelTime"] = tonumber(levelTime), ["clientNum"] = i})
         --end
-    elseif game["state"] == 3 then
-        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
-        game["endRoundTrigger"] = true
     end
-
-    executeCallbackFunction("RunFrameGlobal", {["levelTime"] = tonumber(levelTime)})
 end
 
 -- Client management
@@ -1117,7 +1129,6 @@ function et_ClientUserinfoChanged(clientNum)
     executeCallbackFunction("ClientUserinfoChanged", {["clientNum"] = clientNum})
 end
 
-
 -- Called when a client is spawned.
 --  clientNum is the client slot id.
 --  revived is 1 if the client was spawned by being revived.
@@ -1127,8 +1138,6 @@ function et_ClientSpawn(clientNum, revived)
 
     -- TODO : Check if spawn in spectator is possible (lol)
     if client[clientNum]["team"] == 1 or client[clientNum]["team"] == 2 then
-        --checkGameModeClientSpawn({["clientNum"] = clientNum, ["revived"] = revived})
-
         if revived == 0 then
             client[clientNum]["respawn"] = 1 
         end
@@ -1327,7 +1336,7 @@ end
 --  clientNum is the client slot id.
 --  soundfile is the sound file to play.
 function et.G_ClientSound(clientNum, soundFile)
-    -- EV_GLOBAL_CLIENT_SOUND = 54
+    -- NOTE : EV_GLOBAL_CLIENT_SOUND = 54
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
@@ -1337,7 +1346,7 @@ end
 --  clientNum is the client slot id.
 --  soundIndex is the sound index to set.
 function setClientSoundIndex(clientNum, soundIndex)
-    -- EV_GLOBAL_CLIENT_SOUND = 54
+    -- NOTE : EV_GLOBAL_CLIENT_SOUND = 54
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", soundIndex)

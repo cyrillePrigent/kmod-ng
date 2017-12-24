@@ -3,6 +3,7 @@
 -- Global var
 
 autoPanzerDisable = {
+    ["enabled"]     = true,
     ["disabledMsg"] = false,
     ["enabledMsg"]  = false,
     ["warning"]     = 0,
@@ -11,6 +12,8 @@ autoPanzerDisable = {
 }
 
 -- Function
+
+-- TODO : Check if panzer is enabled (team_maxSoldiers ~= 0 & team_maxpanzers ~= 0)
 
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.

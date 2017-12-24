@@ -11,9 +11,10 @@
 -- Global var
 
 landminesLimit = {
-    ["time"]             = 0,
-    ["maxMines"]         = 0,
-    ["msgPosition"]      = et.trap_Cvar_Get("u_landmines_limit_msg_position")
+    ["enabled"]     = false,
+    ["time"]        = 0,
+    ["maxMines"]    = 0,
+    ["msgPosition"] = et.trap_Cvar_Get("u_landmines_limit_msg_position")
 }
 
 -- Function
@@ -30,6 +31,7 @@ function landminesLimitInitGame(vars)
     if et.trap_Cvar_Get(landminesLimit["maxLandminesCvar"]) == 0 then
         et.G_LogPrint("Landmines is disabled! Please enable it with " .. landminesLimit["maxLandminesCvar"] .. " cvar.\n")
     else
+        landminesLimit["enabled"] = true
         addCallbackFunction({["RunFrame"] = "checkLandminesLimitRunFrame"})
     end
 end
@@ -37,7 +39,7 @@ end
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkLandminesLimitRunFrame(vars)
-    if vars["levelTime"] - landminesLimit["time"] > 3 then
+    if vars["levelTime"] - landminesLimit["time"] > 3000 then
         local maxMines
 
         if players["active"] > 8 then
