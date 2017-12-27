@@ -1,8 +1,20 @@
-
+-- Display current spree record.
+-- Require : killing spree module
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " " .. spree["msg"]["oldLong"] .. "\n")
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, params.say .. " " .. mapSpree["msg"]["oldLong"] .. "\n")
+    debug("spree", spree)
+    debug("mapSpree", mapSpree)
+    
+    
+    et.trap_SendServerCommand(
+        params.clientNum,
+        msgCmd["chatArea"] .. " \"" .. spree["msg"]["oldLong"] .. "\""
+    )
+
+    et.trap_SendServerCommand(
+        params.clientNum,
+        msgCmd["chatArea"] .. " \"" .. mapSpree["msg"]["oldLong"] .. "\""
+    )
 
     return 1
 end

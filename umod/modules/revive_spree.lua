@@ -90,7 +90,7 @@ clientDefaultData["reviveSpreeMsg"] = 0
 
 -- Set module command.
 if rspree_cmd_enabled then
-    cmdList["client"]["!spree_record"] = "/command/client/revive_sprees_record.lua"
+    cmdList["client"]["!rspree_record"] = "/command/client/revive_sprees_record.lua"
 end
 
 if reviveSpree["srvRecord"] == 1 then

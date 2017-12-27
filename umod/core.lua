@@ -294,6 +294,9 @@ muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
 logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
 landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
+killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
+spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
+
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -802,12 +805,8 @@ if logChatModule == 1 then
     dofile(umod_path .. "/modules/log.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_killing_spree")) == 1 then
+if killingSpreeModule == 1 or spreeRecordModule == 1 then
     dofile(umod_path .. "/modules/killing_spree.lua")
-end
-
-if tonumber(et.trap_Cvar_Get("u_spree_record")) == 1 then
-    dofile(umod_path .. "/modules/spree_record.lua")
 end
 
 if tonumber(et.trap_Cvar_Get("u_multikill")) == 1 then
@@ -915,6 +914,8 @@ addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"
 addSlashCommand("client", "team", {"function", "teamSlashCommand"})
 addSlashCommand("console", "pause", {"function", "pauseSlashCommand"})
 addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
+
+addSlashCommand("client", "test", {"file", "/command/client/test.lua"})
 
 -- Enemy Territory callbacks
 

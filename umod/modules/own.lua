@@ -21,7 +21,7 @@ cmdList["console"]["!own_reset"] = "/command/both/own_reset.lua"
 -- Callback function of et_Obituary function.
 --  vars is the local vars of et_Obituary function.
 function checkOwnObituary(vars)
-    if client[vars["killer"]]["own"] == 1 then
+    if vars["killer"] ~= 1022 and client[vars["killer"]]["own"] == 1 then
         if et.gentity_get(vars["killer"], "ps.powerups", 1) > 0 then
             et.gentity_set(vars["killer"], "ps.powerups", 1, 0)
         end
