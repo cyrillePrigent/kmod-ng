@@ -3,22 +3,9 @@
 -- Global var
 
 multikill = {
-    ["maxElapsedTime"] = tonumber(et.trap_Cvar_Get("u_mk_time")),
+    ["list"]           = {},
+    ["maxElapsedTime"] = tonumber(et.trap_Cvar_Get("u_mk_time")) * 1000,
     ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_mk_enable_sound")),
-    ["message1"]       = et.trap_Cvar_Get("u_mk_message1"),
-    ["message2"]       = et.trap_Cvar_Get("u_mk_message2"),
-    ["message3"]       = et.trap_Cvar_Get("u_mk_message3"),
-    ["message4"]       = et.trap_Cvar_Get("u_mk_message4"),
-    ["message5"]       = et.trap_Cvar_Get("u_mk_message5"),
-    ["message6"]       = et.trap_Cvar_Get("u_mk_message6"),
-    ["message7"]       = et.trap_Cvar_Get("u_mk_message7"),
-    ["sound1"]         = et.trap_Cvar_Get("u_mk_sound1"),
-    ["sound2"]         = et.trap_Cvar_Get("u_mk_sound2"),
-    ["sound3"]         = et.trap_Cvar_Get("u_mk_sound3"),
-    ["sound4"]         = et.trap_Cvar_Get("u_mk_sound4"),
-    ["sound5"]         = et.trap_Cvar_Get("u_mk_sound5"),
-    ["sound6"]         = et.trap_Cvar_Get("u_mk_sound6"),
-    ["sound7"]         = et.trap_Cvar_Get("u_mk_sound7"),
     ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_mk_msg_default")),
     ["msgPosition"]    = et.trap_Cvar_Get("u_mk_msg_position"),
     ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_mk_noise_reduction"))
@@ -38,13 +25,20 @@ addSlashCommand("client", "mkill", {"function", "multikillSlashCommand"})
 --  value is the boolen value if multikill message & sound is enabled or not..
 function setMultikillMsg(clientNum, value)
     client[clientNum]["multikillMsg"] = value
-    et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_mkill", value))
+
+    et.trap_SetUserinfo(
+        clientNum,
+        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_mkill", value)
+    )
 end
 
 -- Function executed when slash command is called in et_ClientCommand function
 -- `mkill` command here.
 --  params is parameters passed to the function executed in command file.
 function multikillSlashCommand(params)
+    params.say = msgCmd["chatArea"]
+    params.cmd = "/" .. params.cmd
+
     if params["arg1"] == "" then
         local status = "^8on^7"
 
@@ -52,13 +46,24 @@ function multikillSlashCommand(params)
             status = "^8off^7"
         end
 
-        et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(mkill):^7 Messages are %s\"", status))
+            printCmdMsg(
+                params,
+                "Messages are " .. color3 .. status
+            )
     elseif tonumber(params["arg1"]) == 0 then
         setMultikillMsg(params.clientNum, 0)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(mkill):^7 Messages are now ^8off^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "off"
+        )
     else
         setMultikillMsg(params.clientNum, 1)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(mkill):^7 Messages are now ^8on^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "on"
+        )
     end
 
     return 1
@@ -78,31 +83,25 @@ function multikillUpdateClientUserinfo(vars)
     end
 end
 
--- Display multikill message and play multikill sound (if enabled).
---  vars is the local vars of et_Obituary function.
---  msg is the multikill message to display.
---  sndFile is the multikill sound to play.
---  reset is if multikill client counter must be reset.
-function multikillProcess(vars, msg, sndFile, reset)
-    if (time["frame"] - client[vars["killer"]]["lastKillTime"]) <= (multikill["maxElapsedTime"] * 1000) then
-        client[vars["killer"]]["lastKillTime"] = time["frame"]
-        sayClients(multikill["msgPosition"], string.gsub(msg, "#killer#", vars["killerName"]), "multikillMsg")
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function multikillInitGame(vars)
+    local n = 1
 
-        if multikill["enabledSound"] == 1 then
-            if multikill["noiseReduction"] == 1 then
-                playSound(sndFile, "multikillMsg", vars["killer"])
-            else
-                playSound(sndFile, "multikillMsg")
-            end
-        end
+    while true do
+        local sound = et.trap_Cvar_Get("u_mk_sound" .. n)
+        local msg   = et.trap_Cvar_Get("u_mk_message" .. n)
 
-        if reset then
-            client[vars["killer"]]["multikill"]    = 0
-            client[vars["killer"]]["lastKillTime"] = 0
+        if sound ~= "" and msg ~= "" then
+            multikill["list"][n + 1] = {
+                ["sound"]   = sound,
+                ["message"] = msg
+            }
+        else
+            break
         end
-    else
-        client[vars["killer"]]["multikill"]    = 1
-        client[vars["killer"]]["lastKillTime"] = time["frame"]
+        
+        n = n + 1
     end
 end
 
@@ -111,38 +110,76 @@ end
 function checkMultikillObituaryEnemyKill(vars)
     client[vars["killer"]]["multikill"] = client[vars["killer"]]["multikill"] + 1
 
-    if client[vars["killer"]]["multikill"] == 1 then
+    local mk = client[vars["killer"]]["multikill"]
+    
+    if mk == 1 then
         client[vars["killer"]]["lastKillTime"] = time["frame"]
-    elseif client[vars["killer"]]["multikill"] == 2 then
-        multikillProcess(vars, multikill["message1"], multikill["sound1"])
-    elseif client[vars["killer"]]["multikill"] == 3 then
-        multikillProcess(vars, multikill["message2"], multikill["sound2"])
-    elseif client[vars["killer"]]["multikill"] == 4 then
-        multikillProcess(vars, multikill["message3"], multikill["sound3"])
-    elseif client[vars["killer"]]["multikill"] == 5 then
-        multikillProcess(vars, multikill["message4"], multikill["sound4"])
-    elseif client[vars["killer"]]["multikill"] == 6 then
-        multikillProcess(vars, multikill["message5"], multikill["sound5"])
-    elseif client[vars["killer"]]["multikill"] == 7 then
-        multikillProcess(vars, multikill["message6"], multikill["sound6"])
-    elseif client[vars["killer"]]["multikill"] == 8 then
-        multikillProcess(vars, multikill["message7"], multikill["sound7"], true)
+    elseif multikill["list"][mk] then
+        if (time["frame"] - client[vars["killer"]]["lastKillTime"]) <= multikill["maxElapsedTime"] then
+            client[vars["killer"]]["lastKillTime"] = time["frame"]
+
+            sayClients(
+                multikill["msgPosition"],
+                string.gsub(
+                    multikill["list"][mk]["message"],
+                    "#killer#",
+                    vars["killerName"]
+                ),
+                "multikillMsg"
+            )
+
+            if multikill["enabledSound"] == 1 then
+                if multikill["noiseReduction"] == 1 then
+                    playSound(
+                        multikill["list"][mk]["sound"],
+                        "multikillMsg",
+                        vars["killer"]
+                    )
+                else
+                    playSound(
+                        multikill["list"][mk]["sound"],
+                        "multikillMsg"
+                    )
+                end
+            end
+        else
+            client[vars["killer"]]["multikill"]    = 1
+            client[vars["killer"]]["lastKillTime"] = time["frame"]
+        end
     end
 end
 
--- Callback function when a player is killed by the world, a team mate or himself.
+-- Callback function when world kill a player.
 --  vars is the local vars of et_Obituary function.
-function multikillReset(vars)
+function checkMultikillObituaryWorldKill(vars)
+    client[vars["victim"]]["multikill"]    = 0
+    client[vars["victim"]]["lastKillTime"] = 0
+end
+
+-- Callback function when victim is killed by mate (team kill).
+--  vars is the local vars of et_Obituary function.
+function checkMultikillObituaryTeamKill(vars)
+    client[vars["killer"]]["multikill"]    = 0
+    client[vars["killer"]]["lastKillTime"] = 0
+    client[vars["victim"]]["multikill"]    = 0
+    client[vars["victim"]]["lastKillTime"] = 0
+end
+
+-- Callback function when victim is killed himself (self kill).
+--  vars is the local vars of et_Obituary function.
+function checkMultikillObituarySelfKill(vars)
     client[vars["killer"]]["multikill"]    = 0
     client[vars["killer"]]["lastKillTime"] = 0
 end
 
 -- Add callback multikill function.
 addCallbackFunction({
+    ["InitGame"]              = "multikillInitGame",
     ["ClientBegin"]           = "multikillUpdateClientUserinfo",
     ["ClientUserinfoChanged"] = "multikillUpdateClientUserinfo",
     ["ObituaryEnemyKill"]     = "checkMultikillObituaryEnemyKill",
-    ["ObituaryTeamKill"]      = "multikillReset",
-    ["ObituarySelfKill"]      = "multikillReset",
-    --["ObituaryWorldKill"]     = "multikillReset" => Reset vars["victim"] values !
+    ["ObituaryWorldKill"]     = "checkMultikillObituaryWorldKill",
+    ["ObituaryTeamKill"]      = "checkMultikillObituaryTeamKill",
+    ["ObituarySelfKill"]      = "checkMultikillObituarySelfKill"
+    
 })
