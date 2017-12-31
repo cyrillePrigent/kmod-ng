@@ -1,32 +1,34 @@
 -- Name stealing protection
-
+-- From etadmin perl script.
+        
 -- Function
 
 function checkNameStealingProtectionClientUserinfoChanged(vars)
     local name = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "name")
-    local guid = client[vars["clientNum"]]["guid"]
 
-    --if name ~= client[vars["clientNum"]]["name"] and name ~= "ETPlayer" and name ~= "UnnamedPlayer" then
-    if name ~= client[vars["clientNum"]]["name"] then
-        --local testName = et.Q_CleanStr(string.gsub(name, "^%s*(.-)%s*$", "%1"))
-        local testName = et.Q_CleanStr(string.gsub(name, "^%s*(.-)%s*$"))
+    -- Check if name is modified (Exclude default name)
+    -- TODO : Check default player name of ET-Legacy
+    if name ~= client[vars["clientNum"]]["name"] and name ~= "ETPlayer" then
+        local testName  = et.Q_CleanStr(trim(name))
 
         if testName ~= "" then
-            for i = 0, clientsLimit, 1 do
-                if i ~= vars["clientNum"] and client[i]["name"] ~= "" then
-                    if guid ~= client[i]["guid"] and testName == et.Q_CleanStr(string.gsub(client[i]["name"], "^%s*(.-)%s*$", "%1")) then
-                        -- $GUID is a name faker
+            local guid = client[vars["clientNum"]]["guid"]
+
+            for p = 0, clientsLimit, 1 do
+                if p ~= vars["clientNum"] and client[p]["name"] ~= "" then
+                    if guid ~= client[p]["guid"] and testName == et.Q_CleanStr(trim(client[p]["name"])) then
+                        -- Name faker detected
                         if logChatModule == 1 then
                             writeLog(string.format(
                                 "%s (%s) is a name faker. Stole name of %s (%s)",
-                                guid,
                                 name,
-                                client[i]["name"],
-                                client[i]["guid"]
+                                guid,
+                                client[p]["name"],
+                                client[p]["guid"]
                             ))
                         end
 
-                        kick(i, "Name stealing / faking")
+                        kick(vars["clientNum"], "Name stealing / faking")
                         break
                     end
                 end

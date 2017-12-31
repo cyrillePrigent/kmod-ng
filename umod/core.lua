@@ -420,7 +420,9 @@ end
 -- From minipb by Hadro
 --  str is the string to trim.
 function trim(str)
-    return string.gsub(str, "^%s*(.-)%s*$", "%1")
+    local result, _ = string.gsub(str, "^%s*(.-)%s*$", "%1")
+
+    return result
 end
 
 -- Check if a certain player is connected and return his slot id.
