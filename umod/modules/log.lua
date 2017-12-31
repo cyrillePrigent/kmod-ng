@@ -163,6 +163,7 @@ function logClientDisconnect(vars)
 end
 
 -- Callback function when qagame shuts down.
+--  vars is the local vars passed from et_ShutdownGame function.
 function logShutdownGame(vars)
     writeLog("\n***SERVER RESTART OR MAP CHANGE***\n\n")
 end

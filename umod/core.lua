@@ -28,10 +28,12 @@ callbackList = {
 
 -- Client
 clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
+--_clientsLimit = 0
 
 client = {}
 
 clientDefaultData = {
+    --["slotUsed"]       = 0,
     ["useAdrenaline"]  = 0,
     ["respawn"]        = 0,
     ["switchTeam"]     = 0,
@@ -744,6 +746,29 @@ function getClientIp(clientNum)
     return ip
 end
 
+-- Convert time value (in seconds) to readable string with hours, minutes & seconds.
+--  value is the time in seconds to convert.
+function second2readeableTime(value)
+    local str = ""
+    local hours = math.floor(value / 3600)
+    local mins  = math.floor(value / 60 - hours * 60)
+    local secs  = math.floor(value - hours * 3600 - mins * 60)
+
+    if hours > 0 then
+        str = hours .. " hours "
+    end
+
+    if mins > 0 then
+        str = str .. mins .. " mins "
+    end
+
+    if secs > 0 then
+        return str .. secs .. " secs"
+    else
+        return trim(str)
+    end
+end
+
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
 
@@ -915,7 +940,6 @@ addSlashCommand("client", "team", {"function", "teamSlashCommand"})
 addSlashCommand("console", "pause", {"function", "pauseSlashCommand"})
 addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
 
-addSlashCommand("client", "test", {"file", "/command/client/test.lua"})
 
 -- Enemy Territory callbacks
 
@@ -1088,15 +1112,23 @@ end
 --  firstTime indicates if this is a new connection (1) or a reconnection (0).
 --  isBot indicates if the client is a bot (1) or not (0).
 function et_ClientConnect(clientNum, firstTime, isBot)
-    local result
-
     client[clientNum]["guid"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "cl_guid")
 
-    result = executeCallbackFunction("ClientConnect", {["clientNum"] = clientNum, ["firstTime"] = firstTime, ["isBot"] = isBot})
+    local result = executeCallbackFunction("ClientConnect", {
+        ["clientNum"] = clientNum,
+        ["firstTime"] = firstTime,
+        ["isBot"]     = isBot
+    })
 
     if result then
         return result
     end
+
+--     client[clientNum]["slotUsed"] = 1
+--
+--     if clientNum > _clientsLimit then
+--         _clientsLimit = clientNum
+--     end
 end
 
 -- Called when a client disconnects.
@@ -1109,6 +1141,16 @@ function et_ClientDisconnect(clientNum)
     for key, value in pairs(clientDefaultData) do
         client[clientNum][key] = value
     end
+
+--     if clientNum == _clientsLimit then
+--         for i = clientNum - 1, 0, -1 do
+--             if client[i]["slotUsed"] == 1 then
+--             --if et.gentity_get(i, "pers.connected") == 2 then
+--                 _clientsLimit = i
+--                 break
+--             end
+--         end
+--     end
 end
 
 -- Called when a client begins (becomes active, and enters the gameworld).

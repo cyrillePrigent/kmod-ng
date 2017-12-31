@@ -144,31 +144,9 @@ function updateClientMutedata(clientNum)
     end
 end
 
--- Convert mute duration (in seconds) to readable string with hours, minutes & seconds.
---  duration is the mute duration in seconds to convert.
-function convertMuteDuration(duration)
-    local str = ""
-    local hours = math.floor(duration / 3600)
-    local mins  = math.floor(duration / 60 - hours * 60)
-    local secs  = math.floor(duration - hours * 3600 - mins *60)
-
-    if hours > 0 then
-        str = hours .. " hours "
-    end
-
-    if mins > 0 then
-        str = str .. mins .. " mins "
-    end
-
-    if secs > 0 then
-        return str .. secs .. " secs"
-    else
-        return trim(str)
-    end
-end
-
 -- Callback function when qagame shuts down.
-function checkMuteShutdownGame()
+--  vars is the local vars passed from et_ShutdownGame function.
+function checkMuteShutdownGame(vars)
     for i = 0, clientsLimit, 1 do
         if et.gentity_get(0, "inuse") then
             updateClientMutedata(i)
@@ -253,7 +231,7 @@ function checkMuteClientBegin(vars)
                 string.format(
                     "qsay ^3Mute: ^7%s ^7has not yet finished his mute sentance.  (%s)\n",
                     client[vars["clientNum"]]["lastName"],
-                    convertMuteDuration(mute["duration"][ip])
+                    second2readeableTime(mute["duration"][ip])
                 )
             )
 
