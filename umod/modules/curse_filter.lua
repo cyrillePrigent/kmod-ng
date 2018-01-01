@@ -1,4 +1,5 @@
 -- Curse filter
+-- From kmod lua script.
 
 -- Global var
 

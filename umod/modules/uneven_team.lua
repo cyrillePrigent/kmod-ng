@@ -1,4 +1,5 @@
 -- Uneven team
+-- From kmod lua script.
 
 -- Global var
 
@@ -22,10 +23,9 @@ unevenTeam = {
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkUnevenTeamRunFrame(vars)
-    if vars["levelTime"] - unevenTeam["time"]["check"] > 3000 then
+    if vars["levelTime"] - unevenTeam["time"]["check"] >= 3000 then
         local diff = math.abs(players["axis"] - players["allies"])
 
-        --if diff >= unevenTeam["playersDifference"] or diff <= -1 * unevenTeam["playersDifference"] then
         if diff >= unevenTeam["playersDifference"] then
             -- Teams are uneven
             if unevenTeam["time"]["notify"] == 0 then
@@ -40,20 +40,32 @@ function checkUnevenTeamRunFrame(vars)
         unevenTeam["time"]["check"] = vars["levelTime"] -- Next checking in 3 seconds.
     end
     
-    if unevenTeam["time"]["notify"] and vars["levelTime"] - unevenTeam["time"]["notify"] > 30000 then
+    if unevenTeam["time"]["notify"] > 0 and vars["levelTime"] - unevenTeam["time"]["notify"] > 30000 then
         if unevenTeam["notify"] == 0 then
-            et.trap_SendServerCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message1"] .. "\n")
+            et.trap_SendServerCommand(
+                -1,
+                unevenTeam["msgPosition"] .. " \"" .. unevenTeam["message1"] .. "\"\n"
+            )
+
             unevenTeam["notify"] = 1
         elseif unevenTeam["notify"] == 1 then
-            et.trap_SendServerCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message2"] .. "\n")
+            et.trap_SendServerCommand(
+                -1,
+                unevenTeam["msgPosition"] .. " \"" .. unevenTeam["message2"] .. "\"\n"
+            )
+
             unevenTeam["notify"] = 2
         elseif unevenTeam["notify"] == 2 then
-            if unevenTeam["escalationCmd"] then
+            if unevenTeam["escalationCmd"] ~= "" then
                 -- Small workaround for shuffles.
                 if string.find(unevenTeam["escalationCmd"], "shuffleteamsxp_norestart") == nil then
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, unevenTeam["escalationCmd"])
                 else
-                    et.trap_SendConsoleCommand(et.EXEC_APPEND, "set umod \"" .. unevenTeam["escalationCmd"] .. "\"")
+                    et.trap_SendConsoleCommand(
+                        et.EXEC_APPEND,
+                        "set umod \"" .. unevenTeam["escalationCmd"] .. "\""
+                    )
+
                     et.trap_SendConsoleCommand(et.EXEC_APPEND, "vstr umod")
                 end
 
@@ -63,10 +75,17 @@ function checkUnevenTeamRunFrame(vars)
                 end
             end
 
-            et.trap_SendServerCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message3"] .. "\n")
+            et.trap_SendServerCommand(
+                -1,
+                unevenTeam["msgPosition"] .. " \"" .. unevenTeam["message3"] .. "\"\n"
+            )
+
             unevenTeam["notify"] = 3
         elseif unevenTeam["notify"] == 3 then
-            et.trap_SendServerCommand(et.EXEC_APPEND, unevenTeam["msgPosition"] .. " " .. unevenTeam["message4"] .. "\n")
+            et.trap_SendServerCommand(
+                -1,
+                unevenTeam["msgPosition"] .. " \"" .. unevenTeam["message4"] .. "\"\n"
+            )
         end
 
         unevenTeam["time"]["notify"] = vars["levelTime"] -- Next notification in 30 seconds.

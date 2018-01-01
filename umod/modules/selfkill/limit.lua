@@ -1,4 +1,5 @@
 -- Self kill limit
+-- From kmod lua script.
 
 -- Global var
 
