@@ -1,11 +1,23 @@
 -- Disabled vote
+-- From kmod lua script.
+
+-- NOTE : We can't disable RESTART MAP button in vote menu ! :<
+
+-- TODO : Check if custom vote menu is possible.
 
 -- Global var
 
 voteDisabled = {
-    ["active"]   = false,
-    ["mode"]     = tonumber(et.trap_Cvar_Get("u_dv_mode")),
-    ["modeTime"] = tonumber(et.trap_Cvar_Get("u_dv_time"))
+    ["active"]     = false,
+    ["mode"]       = tonumber(et.trap_Cvar_Get("u_dv_mode")),
+    ["modeTime"]   = tonumber(et.trap_Cvar_Get("u_dv_time")),
+    ["cvarBackup"] = {
+        ["vote_allow_shuffleteamsxp"] = 0,
+        ["vote_allow_nextmap"]        = 0,
+        ["vote_allow_swapteams"]      = 0,
+        ["vote_allow_matchreset"]     = 0,
+        ["vote_allow_map"]            = 0
+    }
 }
 
 
@@ -19,6 +31,27 @@ function disableVote()
     addSlashCommand("client", {"callvote", "matchreset"}, {"function", "disableVoteSlashCommand"})
     addSlashCommand("client", {"callvote", "maprestart"}, {"function", "disableVoteSlashCommand"})
     addSlashCommand("client", {"callvote", "map"}, {"function", "disableVoteSlashCommand"})
+
+    local fd, len = et.trap_FS_FOpenFile(
+        "disable_vote_settings.cfg", et.FS_WRITE
+    )
+
+    if len == -1 then
+        et.G_LogPrint(
+            "uMod WARNING: disable_vote_settings.cfg file no found / not readable!\n"
+        )
+    else
+        for cvar, _ in pairs(voteDisabled["cvarBackup"]) do
+            local backupLine = cvar .. " \""
+                .. tonumber(et.trap_Cvar_Get(cvar)) .. "\"\n"
+
+            et.trap_FS_Write(backupLine, string.len(backupLine), fd)
+
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, cvar .. " \"0\"\n")
+        end
+    end
+
+    et.trap_FS_FCloseFile(fd)
 end
 
 function enableVote()
@@ -29,6 +62,11 @@ function enableVote()
     removeSlashCommand("client", {"callvote", "matchreset"}, "disableVoteSlashCommand")
     removeSlashCommand("client", {"callvote", "maprestart"}, "disableVoteSlashCommand")
     removeSlashCommand("client", {"callvote", "map"}, "disableVoteSlashCommand")
+
+    et.trap_SendConsoleCommand(
+        et.EXEC_APPEND,
+        "exec disable_vote_settings.cfg\n"
+    )
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
@@ -40,6 +78,15 @@ function disableVoteSlashCommand(params)
     end
 
     return 0
+end
+
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function disableVoteInitGame(vars)
+    et.trap_SendConsoleCommand(
+        et.EXEC_APPEND,
+        "exec disable_vote_settings.cfg\n"
+    )
 end
 
 -- Callback function when qagame runs a server frame.
@@ -73,5 +120,6 @@ end
 
 -- Add callback disabled vote function.
 addCallbackFunction({
+    ["InitGame"] = "disableVoteInitGame",
     ["RunFrame"] = "disableVoteRunFrame"
 })
