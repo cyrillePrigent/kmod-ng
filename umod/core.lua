@@ -844,7 +844,7 @@ if tonumber(et.trap_Cvar_Get("u_flak_monkey")) == 1 then
     dofile(umod_path .. "/modules/flak_monkey.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_u_death_spree")) == 1 then
+if tonumber(et.trap_Cvar_Get("u_death_spree")) == 1 then
     dofile(umod_path .. "/modules/death_spree.lua")
 end
 
@@ -941,7 +941,6 @@ addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"
 addSlashCommand("client", "team", {"function", "teamSlashCommand"})
 addSlashCommand("console", "pause", {"function", "pauseSlashCommand"})
 addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
-
 
 -- Enemy Territory callbacks
 

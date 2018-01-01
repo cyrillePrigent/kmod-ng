@@ -1,18 +1,11 @@
 -- Death spree
+-- From kmod lua script.
 
 -- Global var
 
 deathSpree = {
+    ["list"]           = {},
     ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_ds_enable_sound")),
-    ["amount1"]        = tonumber(et.trap_Cvar_Get("u_ds_amount1")),
-    ["amount2"]        = tonumber(et.trap_Cvar_Get("u_ds_amount2")),
-    ["amount3"]        = tonumber(et.trap_Cvar_Get("u_ds_amount3")),
-    ["sound1"]         = et.trap_Cvar_Get("u_ds_sound1"),
-    ["sound2"]         = et.trap_Cvar_Get("u_ds_sound2"),
-    ["sound3"]         = et.trap_Cvar_Get("u_ds_sound3"),
-    ["message1"]       = et.trap_Cvar_Get("u_ds_message1"),
-    ["message2"]       = et.trap_Cvar_Get("u_ds_message2"),
-    ["message3"]       = et.trap_Cvar_Get("u_ds_message3"),
     ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_ds_msg_default")),
     ["msgPosition"]    = et.trap_Cvar_Get("u_ds_msg_position"),
     ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_ds_noise_reduction"))
@@ -22,22 +15,52 @@ deathSpree = {
 clientDefaultData["deathSpree"]    = 0
 clientDefaultData["deathSpreeMsg"] = 0
 
-addSlashCommand("client", "dskill", {"function", "deathSpreeSlashCommand"})
+addSlashCommand("client", "dspree", {"function", "deathSpreeSlashCommand"})
 
 -- Function
+
+-- Called when qagame initializes.
+--  vars is the local vars of et_InitGame function.
+function deathSpreeInitGame(vars)
+    local n = 1
+
+    while true do
+        local amount = tonumber(et.trap_Cvar_Get("u_ds_amount" .. n))
+        local sound  = et.trap_Cvar_Get("u_ds_sound" .. n)
+        local msg    = et.trap_Cvar_Get("u_ds_message" .. n)
+
+        if amount ~= nil and sound ~= "" and msg ~= "" then
+            deathSpree["list"][amount] = {
+                ["sound"]   = sound,
+                ["message"] = msg
+            }
+        else
+            break
+        end
+        
+        n = n + 1
+    end
+end
 
 -- Set client data & client user info if death spree message & sound is enabled or not.
 --  clientNum is the client slot id.
 --  value is the boolen value if death spree message & sound is enabled or not..
 function setDeathSpreeMsg(clientNum, value)
     client[clientNum]["deathSpreeMsg"] = value
-    et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dspree", value))
+
+    et.trap_SetUserinfo(
+        clientNum,
+        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dspree", value)
+    )
 end
 
 -- Function executed when slash command is called in et_ClientCommand function
 -- `dspree` command here.
 --  params is parameters passed to the function executed in command file.
 function deathSpreeSlashCommand(params)
+    params.say = msgCmd["chatArea"]
+    params.cmd = "/" .. params.cmd
+
     if params["arg1"] == "" then
         local status = "^8on^7"
 
@@ -45,13 +68,24 @@ function deathSpreeSlashCommand(params)
             status = "^8off^7"
         end
 
-        et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(dspree):^7 Messages are %s\"", status))
+        printCmdMsg(
+            params,
+            "Messages are " .. color3 .. status
+        )
     elseif tonumber(params["arg1"]) == 0 then
         setDeathSpreeMsg(params.clientNum, 0)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dspree):^7 Messages are now ^8off^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "off"
+        )
     else
         setDeathSpreeMsg(params.clientNum, 1)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dspree):^7 Messages are now ^8on^7\"")
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "on"
+        )
     end
 
     return 1
@@ -83,9 +117,9 @@ function deathSpreeProcess(vars, msg, sndFile)
 
     if deathSpree["enabledSound"] == 1 then
         if deathSpree["noiseReduction"] == 1 then
-            playSound(sndFile, "multikillMsg", vars["victim"])
+            playSound(sndFile, "deathSpreeMsg", vars["victim"])
         else
-            playSound(sndFile, "multikillMsg")
+            playSound(sndFile, "deathSpreeMsg")
         end
     end
 end
@@ -95,26 +129,29 @@ end
 function checkDeathSpreeObituary(vars)
     client[vars["victim"]]["deathSpree"] = client[vars["victim"]]["deathSpree"] + 1
 
-    if client[vars["victim"]]["deathSpree"] == deathSpree["amount1"] then
-        deathSpreeProcess(vars, deathSpree["message1"], deathSpree["sound1"])
-    elseif client[vars["victim"]]["deathSpree"] == deathSpree["amount2"] then
-        deathSpreeProcess(vars, deathSpree["message2"], deathSpree["sound2"])
-    elseif client[vars["victim"]]["deathSpree"] == deathSpree["amount3"] then
-        deathSpreeProcess(vars, deathSpree["message3"], deathSpree["sound3"])
+    local ds = client[vars["victim"]]["deathSpree"]
+
+    if deathSpree["list"][ds] then
+        deathSpreeProcess(
+            vars,
+            deathSpree["list"][ds]["message"],
+            deathSpree["list"][ds]["sound"]
+        )
     end
 end
 
--- Callback function when victim is killed by enemy or team.
+-- Reset death spree when victim is killed by enemy or team.
 --  vars is the local vars of et_Obituary function.
-function checkDeathSpreeObituaryEnemyAndTeamKill(vars)
+function resetDeathSpree(vars)
     client[vars["killer"]]["deathSpree"] = 0
 end
 
 -- Add callback death spree function.
 addCallbackFunction({
+    ["InitGame"]              = "deathSpreeInitGame",
     ["ClientBegin"]           = "deathSpreeUpdateClientUserinfo",
     ["ClientUserinfoChanged"] = "deathSpreeUpdateClientUserinfo",
     ["Obituary"]              = "checkDeathSpreeObituary",
-    ["ObituaryEnemyKill"]     = "checkDeathSpreeObituaryEnemyAndTeamKill",
-    ["ObituaryTeamKill"]      = "checkDeathSpreeObituaryEnemyAndTeamKill"
+    ["ObituaryEnemyKill"]     = "resetDeathSpree",
+    ["ObituaryTeamKill"]      = "resetDeathSpree"
 })
