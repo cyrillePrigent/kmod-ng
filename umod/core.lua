@@ -910,10 +910,6 @@ if tonumber(et.trap_Cvar_Get("u_disarm")) == 1 then
     dofile(umod_path .. "/modules/disarm.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_gib_protector")) == 1 then
-    dofile(umod_path .. "/modules/gib_protector.lua")
-end
-
 if tonumber(et.trap_Cvar_Get("u_know_guids")) == 1 then
     dofile(umod_path .. "/modules/know_guids.lua")
 end
