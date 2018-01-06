@@ -2,19 +2,10 @@
 -- Require : killing spree module
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    debug("spree", spree)
-    debug("mapSpree", mapSpree)
-    
-    
-    et.trap_SendServerCommand(
-        params.clientNum,
-        msgCmd["chatArea"] .. " \"" .. spree["msg"]["oldLong"] .. "\""
-    )
+    params.say = msgCmd["chatArea"]
 
-    et.trap_SendServerCommand(
-        params.clientNum,
-        msgCmd["chatArea"] .. " \"" .. mapSpree["msg"]["oldLong"] .. "\""
-    )
+    printCmdMsg(params, spree["msg"]["oldLong"])
+    printCmdMsg(params, mapSpree["msg"]["oldLong"])
 
-    return 1
+    return 0
 end

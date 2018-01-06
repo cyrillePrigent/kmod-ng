@@ -1,35 +1,45 @@
-
+-- Display revive spree, multi revive & monster revive record
+-- from current map revive spree record & revive spree player stats.
+-- From rspree lua.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    local map_msg = ""
-    local map_max = findMaxSpree()
+    params.say = msgCmd["chatArea"]
 
-    if table.getn(map_max) ~= 3 then
-        map_max = { 0, 0, nil }
+    local mapMsg = ""
+    local mapMax = findMaxReviveSpree()
+
+    if table.getn(mapMax) ~= 3 then
+        mapMax = { 0, 0, nil }
     end
 
-    if map_max[3] ~= nil then
-        map_msg = string.format("^1map: ^7%s^1: ^7%s^1 (^7%d^1) @ %s", mapName, map_max[3], map_max[1], os.date(date_fmt, map_max[2]))
+    if mapMax[3] ~= nil then
+        mapMsg = string.format(
+            "^1map: ^7%s^1: ^7%s^1 (^7%d^1) @ %s",
+            mapName, mapMax[3], mapMax[1], os.date(dateFormat, mapMax[2])
+        )
     else
-        map_msg = string.format("^1map: ^7%s^1: ^7no record", mapName)
+        mapMsg = string.format(
+            "^1map: ^7%s^1: ^7no record", mapName
+        )
     end
 
-    local all_msg = ""
-    local all_max = { 0, 0, nil }
+    local allMsg = ""
+    local allMax = { 0, 0, nil }
 
     for map, arr in pairs(reviveSpree["stats"]) do
-        if arr[1] > all_max[1] then
-            all_max = arr
+        if arr[1] > allMax[1] then
+            allMax = arr
         end
     end
 
-    if all_max[3] ~= nil then
-        all_msg = string.format(" ^1[^7overall: %s^1 (^7%d^1) @ %s^1]", all_max[3], all_max[1], os.date(date_fmt, all_max[2]))
+    if allMax[3] ~= nil then
+        allMsg = string.format(
+            " ^1[^7overall: %s^1 (^7%d^1) @ %s^1]",
+            allMax[3], allMax[1], os.date(dateFormat, allMax[2])
+        )
     end
 
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \"^1rspree_record: " .. map_msg .. all_msg .. "^7\"\n")
-    -- sayClients(reviveSpree["reviveSpreePosition"], msg) 
-    -- no! with sayClients() it would be printed b4 the !spree_record :)
+    printCmdMsg(params, mapMsg .. allMsg)
 
     return 0
 end

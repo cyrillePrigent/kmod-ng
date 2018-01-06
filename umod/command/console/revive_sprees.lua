@@ -1,21 +1,32 @@
--- Display all admins name and level in server console.
+-- Display reviving spree of current players in server console.
+-- From rspree lua.
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
-    et.G_Printf("rsprees: --------------------\n")
+    local teamList = { "Axis" , "Allies" , "Spectator" }
 
-    for i = 0, sv_maxclients do
-        if client[i]["reviveSpree"] ~= nil and client[i]["reviveSpree"] ~= 0 then
-            et.G_Printf("^7rsprees: %d %s^7 (%s)^7\n", 
-                        client[i]["reviveSpree"],
-                        client[i]["name"],
-                        teamName(tonumber(et.gentity_get(i, "sess.sessionTeam"))))
+    et.G_Print("--------------------------\n")
+    et.G_Print("- Current reviving spree -\n")
+    et.G_Print("--------------------------\n")
+
+    for p = 0, clientsLimit, 1 do
+        if client[p]["reviveSpree"] ~= 0 then
+            et.G_Printf(
+                "%s (%s) with %d revive\n", 
+                et.Q_CleanStr(client[p]["name"]),
+                teamList[client[p]["team"]],
+                client[p]["reviveSpree"]
+            )
         end
     end
 
-    et.G_Printf("^7rsprees: --------------------\n")
+    et.G_Print("--------------------------\n")
 
     if reviveSpree["maxId"] ~= nil then
-        et.G_Printf("^7Max: %s^7 with %d\n", client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"])
+        et.G_Printf(
+            "Max: %s with %d revive\n",
+            et.Q_CleanStr(client[reviveSpree["maxId"]]["name"]),
+            reviveSpree["maxSpree"]
+        )
     end
 
     return 1

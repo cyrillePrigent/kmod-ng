@@ -249,7 +249,9 @@ color3 = "^8"
 
 
 -- Punkbuster status before disable it.
-pbState=false
+pbState = false
+
+dateFormat = "%Y-%m-%d, %H:%M:%S" -- for map record dates, see strftime(3) ;->
 
 --floodprotect = 0
 
@@ -289,7 +291,7 @@ panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-lega
 advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
 pmSound               = et.trap_Cvar_Get("u_pm_sound")
 selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
-dateFormat            = et.trap_Cvar_Get("u_date_format")
+--dateFormat            = et.trap_Cvar_Get("u_date_format")
 spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
 mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
@@ -298,7 +300,6 @@ logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
 landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
 killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
 spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
-
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -676,6 +677,8 @@ end
 function getFormatedDate(dateValue, displayTime)
     local str
 
+    -- dateFormat
+
     if displayTime then
         str = dateFormat .. ", %H:%M:%S"
     else
@@ -881,9 +884,7 @@ if tonumber(et.trap_Cvar_Get("u_playsound")) == 1 then
     addSlashCommand("console", "playsound_env", {"file", "/command/console/playsound_env.lua"})
 end
 
-if tonumber(et.trap_Cvar_Get("u_revive_spree")) == 1 then
-    dofile(umod_path .. "/modules/revive_spree.lua")
-end
+dofile(umod_path .. "/modules/revive/core.lua")
 
 if tonumber(et.trap_Cvar_Get("u_uneven_team")) == 1 then
     dofile(umod_path .. "/modules/uneven_team.lua")
@@ -1094,7 +1095,7 @@ function et_RunFrame(levelTime)
 --         end
 --     end
 
-        if game["state"] == 3 then
+    if game["state"] == 3 then
         executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
         game["endRoundTrigger"] = true
     else
@@ -1242,15 +1243,15 @@ function et_ClientCommand(clientNum, command)
                 params["arg2"] = third
                 params["arg3"] = fourth
 
-                if curseMode > 0 then
-                    checkBadWord(params, sayContent)
-                end
-
                 params.broadcast2allClients = false
                 params.noDisplayCmd         = false
 
                 if checkClientCommand(params, string.lower(params.bangCmd)) then
                     return 1
+                end
+
+                if curseMode > 0 then
+                    checkBadWord(params, sayContent)
                 end
             end
         end
@@ -1332,7 +1333,11 @@ function et_Print(text)
         end
     end
 
-    --local junk1,junk2,medic,zombie = string.find(text, "^Medic_Revive:%s+(%d+)%s+(%d+)")
+--     if vars["text"] == "Exit: Timelimit hit.\n" or vars["text"] == "Exit: Wolf EndRound.\n" then
+--         reviveSpree["endOfMap"] = true
+-- 
+--         return nil
+--     end
 end
 
 -- Called whenever a player is killed.

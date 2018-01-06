@@ -1,13 +1,20 @@
--- Display all admins name and level in server console.
+-- Display all time reviving spree in server console.
+-- From rspree lua.
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
-    et.G_Printf("^7Alltime reviving sprees:\n")
+    et.G_Print("---------------------------\n")
+    et.G_Print("- All time reviving spree -\n")
+    et.G_Print("---------------------------\n")
 
-    for map, arr in pairs(reviveSpree["stats"]) do
-        et.G_Printf("rspreesall: %s: %s^7 with %d revives @%s\n", map, arr[3], arr[1], os.date(date_fmt, arr[2]))
+    for map, reviveStats in pairs(reviveSpree["stats"]) do
+        et.G_Printf(
+            "%s: %s with %d revive @ %s\n",
+            map,
+            et.Q_CleanStr(reviveStats[3]),
+            reviveStats[1],
+            os.date(dateFormat, reviveStats[2])
+        )
     end
-
-    et.G_Printf("^7Alltime reviving sprees END\n")
 
     return 1
 end

@@ -1,4 +1,5 @@
 -- Killing spree & spree record
+-- From kmod lua script.
 
 -- Global var
 
@@ -436,7 +437,7 @@ function checkKillingSpreeObituaryEnemyKill(vars)
     end
 
     if killingSpreeModule == 1 then
-        local ks = client[ vars["killer"] ]["killingSpree"]
+        local ks = client[vars["killer"]]["killingSpree"]
 
         if killingSpree["list"][ks] then
             killingSpreeProcess(
