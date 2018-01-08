@@ -27,7 +27,9 @@ function execute_command(params)
                 local name = et.Q_CleanStr(client[clientNum]["name"])
 
                 if level == 0 then
-                    if removeAdminIfExist(client[clientNum]["guid"]) then
+                    if admin["name"][client[clientNum]["guid"]] ~= nil then
+                        removeAdmin(client[clientNum]["guid"])
+
                         printCmdMsg(params, name .. " is now a regular user!\n")
                     else
                         printCmdMsg(params, name .. " is already a regular user!\n")

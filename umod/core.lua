@@ -7,6 +7,24 @@ cmdPrefix = "!"
 version       = "0.1"
 releaseStatus = "alpha"
 
+-- Load Uber Mod cvar
+color                 = et.trap_Cvar_Get("u_color")
+autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
+panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
+advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
+pmSound               = et.trap_Cvar_Get("u_pm_sound")
+selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
+--dateFormat            = et.trap_Cvar_Get("u_date_format")
+spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
+mapName               = et.trap_Cvar_Get("mapname")
+muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
+curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
+logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
+landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
+killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
+spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
+svMaxClients          = tonumber(et.trap_Cvar_Get("sv_maxclients"))
+
 callbackList = {
     ["ReadConfig"]            = {},
     ["InitGame"]              = {},
@@ -27,7 +45,7 @@ callbackList = {
 }
 
 -- Client
-clientsLimit = tonumber(et.trap_Cvar_Get("sv_maxclients")) - 1
+clientsLimit = svMaxClients - 1
 --_clientsLimit = 0
 
 client = {}
@@ -91,14 +109,14 @@ cmdList = {
         ["!timelimit"]         = "/command/client/timelimit.lua",
         ["!finger"]            = "/command/client/finger.lua",
         ["!goto"]              = "/command/both/goto.lua",
-        ["!iwant"]             = "/command/both/iwant.lua",
+        ["!want"]              = "/command/both/want.lua",
         ["!unmute"]            = "/command/client/unmute.lua",
         ["!mute"]              = "/command/client/mute.lua"
     },
     ["console"] = {
         ["!setlevel"]      = "/command/both/setlevel.lua",
         ["!goto"]          = "/command/both/goto.lua",
-        ["!iwant"]         = "/command/both/iwant.lua",
+        ["!want"]          = "/command/both/want.lua",
         ["!showadmins"]    = "/command/console/showadmins.lua",
         ["!readconfig"]    = "/command/console/readconfig.lua",
         ["!spec999"]       = "/command/both/spec999.lua",
@@ -283,23 +301,6 @@ dateFormat = "%Y-%m-%d, %H:%M:%S" -- for map record dates, see strftime(3) ;->
 --  lua version 5.3
 
 -- **********************************************
-
--- Load Uber Mod cvar
-color                 = et.trap_Cvar_Get("u_color")
-autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
-panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
-advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
-pmSound               = et.trap_Cvar_Get("u_pm_sound")
-selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
---dateFormat            = et.trap_Cvar_Get("u_date_format")
-spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
-mapName               = et.trap_Cvar_Get("mapname")
-muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
-curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
-logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
-landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
-killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
-spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
 
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
@@ -778,17 +779,17 @@ end
 local modUrl = et.trap_Cvar_Get("mod_url")
 
 msgCmd = {
-    ["chatArea"] = "chat"
+    ["chatArea"]   = "chat",
+    ["popupArea"]  = "cpm",
+    ["centerArea"] = "cp"
 }
 
 if modUrl == "http://etpro.anime.net/" then
-    etMod              = "etpro"
-    --msgCmd["chatArea"] = "b 8"
+    etMod = "etpro"
 
     dofile(umod_path .. "/mods/etpro.lua")
 elseif modUrl == "www.etlegacy.com" then
-    etMod              = "etlegacy"
-    --msgCmd["chatArea"] = "chat"
+    etMod = "etlegacy"
 end
 
 if tonumber(et.trap_Cvar_Get("u_crazygravity")) == 1 then
@@ -1156,7 +1157,10 @@ end
 function et_ClientBegin(clientNum)
     et.trap_SendServerCommand(clientNum, "cpm \"This server is running UberMod v" .. version .. " " .. releaseStatus .. "\n\"")
 
-    client[clientNum]["lastName"] = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
+    local name = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
+
+    client[clientNum]["name"]     = name
+    client[clientNum]["lastName"] = name
     client[clientNum]["team"]     = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
     executeCallbackFunction("ClientBegin", {["clientNum"] = clientNum})

@@ -31,7 +31,7 @@ function execute_command(params)
 
             et.G_ClientSound(targetNum, pmSound)
 
-            if logChatModule == 1 then
+            if logChatModule == 1 and logPrivateMsg == 1 then
                 logPrivateMessage(
                     params.clientNum,
                     pmContent,

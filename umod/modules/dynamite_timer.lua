@@ -1,47 +1,38 @@
 -- Dynamite timer
 
+-- From : 
+
 --------------------------------------------------------------------------
--- dynamite.lua version 1.4 - a server side dynamite timer script
+-- Vetinari's dynamite.lua version 1.4 - a server side dynamite timer script
 --------------------------------------------------------------------------
 --
 -- $Date: 2007-02-18 20:00:45 +0100 (Sun, 18 Feb 2007) $
 -- $Revision: 93 $
 
-
-
-
---[[ for 20, 10, 5, 3, 2, 1, NOW use:
-local steps = { -- [step] = { next step, diff to next step }
-                   [20]   =  { 10,        10 }, 
-                   [10]   =  {  5,         5 }, 
-                    [5]   =  {  3,         2 }, 
-                    [3]   =  {  2,         1 }, 
-                    [2]   =  {  1,         1 }, 
-                    [1]   =  {  0,         1 },
-                    [0]   =  {  0,         0 } -- delete if diff to next == 0
-              }
---]]
-
-
 -- Global var
 
 dynamiteTimer = {
-    ["list"]           = {},
-    ["svFps"]          = tonumber(et.trap_Cvar_Get("sv_fps"))
-    ["firstStep"]      = 0,
-    ["steps"]          = {}
-    ["announcePlant"]  = tonumber(et.trap_Cvar_Get("u_dt_announce_plant")),
-    ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_dt_msg_default")), -- local cl_default = false
-    ["msgPosition"]    = et.trap_Cvar_Get("u_dt_msg_position"), -- local announce_pos   = "b 8"
-    ["count"]          = 0
+    -- Effectively frequency of server calculating states.
+    ["svFps"] = tonumber(et.trap_Cvar_Get("sv_fps")),
+    -- Dynamite plant message status.
+    ["announcePlant"] = tonumber(et.trap_Cvar_Get("u_dt_announce_plant")),
+    -- Dynamite timer message position.
+    ["msgPosition"] = et.trap_Cvar_Get("u_dt_msg_position"),
+    -- Print dynamite timer messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_dt_msg_default")),
+    -- List of current dynamite.
+    ["list"] = {},
+    -- First step of dynamite timer.
+    ["firstStep"] = 0,
+    -- List of dynamite timer steps.
+    ["steps"] = {},
+    -- Number Of current dynamite planted.
+    ["count"] = 0,
+    -- Entity list of current dynamite planted.
+    ["alreadyKnown"] = {},
+    -- Time (in ms) of last existing dynamite check.
+    ["time"] = 0
 }
-
-local ST_NEXT = 1
-local ST_DIFF = 2
-
-local T_TIME     = 1
-local T_STEP     = 2
-local T_LOCATION = 3
 
 -- Set default client data.
 clientDefaultData["dynamiteTimerMsg"] = 0
@@ -55,29 +46,37 @@ addSlashCommand("client", "dynatimer", {"function", "dynamiteTimerSlashCommand"}
 function dynamiteTimerInitGame(vars)      
     local list = {}
 
-    for i in string.gmatch(et.trap_Cvar_Get("u_dt_time_list"), ",") do
+    for i in string.gfind(et.trap_Cvar_Get("u_dt_time_list"), "(%d+)") do
         i = tonumber(i)
 
         if i ~= nil then
             list[i] = {}
         end
-    end
 
-    local lastTime
-
-    for t, _ in ipairs(list) do
-        if t == 0 then
-            dynamiteTimer["steps"] = { 0, 0 }
-        else
-            dynamiteTimer["steps"] = { lastTime, t - lastTime }
-        end
-
-        lastTime = t
-    end
-    
-    for i, _ in ipairs(dynamiteTimer["steps"]) do
         if i > dynamiteTimer["firstStep"] then
             dynamiteTimer["firstStep"] = i
+        end
+    end
+
+    local lastTime = 0
+    local nextStep, diffStep
+
+    for t = 0, dynamiteTimer["firstStep"], 1 do
+        if list[t] then
+            if t == 0 then
+                nextStep = 0
+                diffStep = 0
+            else
+                nextStep = lastTime
+                diffStep = (t - lastTime) * 1000
+            end
+
+            dynamiteTimer["steps"][t] = {
+                ["next"] = nextStep, -- in second
+                ["diff"] = diffStep  -- in millisecond
+            }
+
+            lastTime = t
         end
     end
 end
@@ -87,13 +86,14 @@ end
 function checkDynamiteTimerPrint(vars)
     -- etpro popup: allies planted "the Old City Wall"
     -- etpro popup: axis defused "the Old City Wall"
-    if vars["arg"][1] == "etpro" and vars["arg"][1] == "popup:" then
-        local team     = vars["arg"][3]
-        local action   = vars["arg"][4]
-        local location = string.gsub(vars["arg"][5], "^\"(.-)\"$", "%1")
+    if vars["arg"][1] == "etpro" and vars["arg"][2] == "popup:" then
+        local team   = vars["arg"][3]
+        local action = vars["arg"][4]
 
-        --local pattern = "^etpro%s+popup:%s+(%w+)%s+(%w+)%s+\"(.+)\""
-        --local junk1, junk2, team, action, location = string.find(vars["text"], pattern)
+        local _, _, location = string.find(
+            vars["text"],
+            "^etpro%s+popup:%s+%w+%s+%w+%s+\"(.+)\""
+        )
 
         if team ~= nil and action ~= nil and location ~= nil then
             if action == "planted" then
@@ -105,7 +105,19 @@ function checkDynamiteTimerPrint(vars)
                     )
                 end
 
-                addDynamiteTimer(location)
+                local dynamiteEntity
+
+                for e = svMaxClients + 1, 1021, 1 do
+                    if et.gentity_get(e, "classname") == "dynamite" then
+                        if dynamiteTimer["alreadyKnown"][e] == nil then
+                            dynamiteTimer["alreadyKnown"][e] = true
+                            dynamiteEntity = e
+                            break
+                        end
+                    end
+                end
+
+                addDynamiteTimer(location, dynamiteEntity)
 
                 if dynamiteTimer["count"] == 0 then
                     addCallbackFunction({ ["RunFrame"] = "checkDynamiteTimerRunFrame" })
@@ -121,7 +133,17 @@ function checkDynamiteTimerPrint(vars)
                     "dynamiteTimerMsg"
                 )
 
-                removeDynamiteTimer(location)
+                local dynamiteEntity
+
+                for e, _ in pairs(dynamiteTimer["alreadyKnown"]) do
+                    if et.gentity_get(e, "classname") ~= "dynamite" then
+                        dynamiteTimer["alreadyKnown"][e] = nil
+                        dynamiteEntity = e
+                        break
+                    end
+                end
+                
+                removeDynamiteTimer(location, dynamiteEntity)
                 dynamiteTimer["count"] = dynamiteTimer["count"] - 1
 
                 if dynamiteTimer["count"] == 0 then
@@ -130,54 +152,50 @@ function checkDynamiteTimerPrint(vars)
             end
         end
     end
-
-    if vars["text"] == "Exit: Timelimit hit.\n" or vars["text"] == "Exit: Wolf EndRound.\n" then
-        -- stop countdowns on intermission
-        dynamiteTimer["list"] = {}
-    end
 end
 
 -- Callback function when qagame runs a server frame.
 --  vars is the local vars passed from et_RunFrame function.
 function checkDynamiteTimerRunFrame(vars)
-    for _, timer in ipairs(dynamiteTimer["list"]) do -- usually this is empty, so nothing is done
-        if timer[T_TIME] <= vars["levelTime"] then 
-            printDynamiteTimer(timer[T_STEP], timer[T_LOCATION])
-            local step = dynamiteTimer["steps"][timer[T_STEP]]
+    if vars["levelTime"] - dynamiteTimer["time"] >= 250 then
+        for i, timer in pairs(dynamiteTimer["list"]) do
+            if et.gentity_get(timer["entity"], "classname") ~= "dynamite" then
+                dynamiteTimer["list"][i]                       = nil
+                dynamiteTimer["alreadyKnown"][timer["entity"]] = nil
+            end
+        end
 
-            if step[ST_DIFF] == 0 then
-                removeDynamiteTimer(timer[T_LOCATION])
+        dynamiteTimer["time"] = vars["levelTime"]
+    end
+
+    -- Usually this is empty, so nothing is done.
+    for _, timer in pairs(dynamiteTimer["list"]) do
+        if timer["time"] <= vars["levelTime"] then 
+            printDynamiteTimer(timer["step"], timer["location"])
+
+            local step = dynamiteTimer["steps"][timer["step"]]
+
+            if step["diff"] == 0 then
+                removeDynamiteTimer(timer["location"], timer["entity"])
             else
-                timer[T_STEP] = step[ST_NEXT]
-                timer[T_TIME] = vars["levelTime"] + (step[ST_DIFF] * 1000)
+                timer["step"] = step["next"]
+                timer["time"] = vars["levelTime"] + step["diff"]
             end
         end
     end
 end
 
--- Function executed when slash command is called in et_ClientCommand function
--- `dynatimer` command here.
---  params is parameters passed to the function executed in command file.
-function dynamiteTimerSlashCommand(params)
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["dynamiteTimerMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        et.trap_SendServerCommand(params.clientNum, string.format("b 8 \"^#(dynatimer):^7 Messages are %s\"", status))
-    elseif tonumber(params["arg1"]) == 0 then
-        setDynamiteTimerMsg(params.clientNum, 0)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dynatimer):^7 Messages are now ^8off^7\"")
-    else
-        setDynamiteTimerMsg(params.clientNum, 1)
-        et.trap_SendServerCommand(params.clientNum, "b 8 \"^#(dynatimer):^7 Messages are now ^8on^7\"")
-    end
-
-    return 1
+-- Stop countdowns on intermission.
+-- Callback function when qagame runs a server frame. (pending end round)
+--  vars is the local vars passed from et_RunFrame function.
+function dynamiteTimerReset(vars)
+    dynamiteTimer["list"]         = {}
+    dynamiteTimer["alreadyKnown"] = {}
 end
 
+-- Print dynamite timer message.
+--  seconds is the remaing time before dynamite explosion.
+--  location is the dynamite location.
 function printDynamiteTimer(seconds, location) 
     local when
 
@@ -196,22 +214,73 @@ function printDynamiteTimer(seconds, location)
     )
 end
 
-function addDynamiteTimer(location) 
-    -- local diff = (30 - dynamiteTimer["firstStep"]) * 1000
-    -- move one server frame earlier
-    local diff = ((30 - dynamiteTimer["firstStep"]) * 1000) - math.floor(1000 / dynamiteTimer["svFps"])
-    table.insert(dynamiteTimer["list"], { time["frame"] + diff, dynamiteTimer["firstStep"], location })
+-- Add a dynamite timer.
+--  location is the dynamite location.
+--  entity is entity number of the dynamite.
+function addDynamiteTimer(location, entity) 
+    -- Move one server frame earlier.
+    local diff = ((30 - dynamiteTimer["firstStep"]) * 1000)
+                    - math.floor(1000 / dynamiteTimer["svFps"])
+
+    table.insert(
+        dynamiteTimer["list"],
+        {
+            ["time"]     = time["frame"] + diff,
+            ["step"]     = dynamiteTimer["firstStep"],
+            ["location"] = location,
+            ["entity"]   = entity
+        }
+    )
 end
 
-function removeDynamiteTimer(location) 
-    for i, timer in ipairs(dynamiteTimer["list"]) do
-        -- problem with 2 or more planted dynas at one location
-        -- ... remove the one which was planted first
-        if timer[T_LOCATION] == location then
-            table.remove(dynamiteTimer["list"], i)
+-- Remove a dynamite timer.
+--  location is the dynamite location.
+--  entity is entity number of the dynamite.
+function removeDynamiteTimer(location, entity) 
+    for i, timer in pairs(dynamiteTimer["list"]) do
+        if timer["location"] == location and timer["entity"] == entity then
+            dynamiteTimer["list"][i]              = nil
+            dynamiteTimer["alreadyKnown"][entity] = nil
             break
         end
     end
+end
+
+-- Function executed when slash command is called in et_ClientCommand function
+-- `dynatimer` command here.
+--  params is parameters passed to the function executed in command file.
+function dynamiteTimerSlashCommand(params)
+    params.say = msgCmd["chatArea"]
+    params.cmd = "/" .. params.cmd
+
+    if params["arg1"] == "" then
+        local status = "^8on^7"
+
+        if client[params.clientNum]["dynamiteTimerMsg"] == 0 then
+            status = "^8off^7"
+        end
+
+        printCmdMsg(
+            params,
+            "Messages are " .. color3 .. status
+        )
+    elseif tonumber(params["arg1"]) == 0 then
+        setDynamiteTimerMsg(params.clientNum, 0)
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "off"
+        )
+    else
+        setDynamiteTimerMsg(params.clientNum, 1)
+
+        printCmdMsg(
+            params,
+            "Messages are now " .. color3 .. "on"
+        )
+    end
+
+    return 1
 end
 
 -- Set client data & client user info if dynamite timer message is enabled or not.
@@ -219,7 +288,11 @@ end
 --  value is the boolen value if dynamite timer message is enabled or not..
 function setDynamiteTimerMsg(clientNum, value) 
     client[clientNum]["dynamiteTimerMsg"] = value
-    et.trap_SetUserinfo(clientNum, et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dynatimer", value))
+
+    et.trap_SetUserinfo(
+        clientNum,
+        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dynatimer", value)
+    )
 end
 
 -- Callback function when a client’s Userinfo string has changed.
@@ -242,5 +315,5 @@ addCallbackFunction({
     ["Print"]                 = "checkDynamiteTimerPrint",
     ["ClientBegin"]           = "dynamiteTimerUpdateClientUserinfo",
     ["ClientUserinfoChanged"] = "dynamiteTimerUpdateClientUserinfo",
-
+    ["RunFrameEndRound"]      = "dynamiteTimerReset",
 })

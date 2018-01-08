@@ -72,24 +72,15 @@ function loadAdmins()
     et.G_LogPrintf("uMod: Loading admins in %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
--- Remove admin if exist and return result.
---  guid is the client guid.
-function removeAdminIfExist(guid)
-    if admin["name"][guid] ~= nil then
-        removeAdmin(guid)
-        return true
-    end
-
-    return false
-end
-
 -- Set a admin.
 --  params is parameters passed to the function executed in command file.
 --  name is the admin name cleaned.
 --  guid is the admin guid.
 --  level is the admin level.
 function setAdmin(name, guid, level)
-    removeAdminIfExist(guid)
+    if admin["name"][guid] ~= nil then
+        removeAdmin(guid)
+    end
 
     if level <= maxAdminLevel then
         for i = 0, level, 1 do

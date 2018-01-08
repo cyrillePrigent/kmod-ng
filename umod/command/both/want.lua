@@ -7,7 +7,7 @@ function execute_command(params)
     params.say = msgCmd["chatArea"]
 
     if params.nbArg < 3 then
-        printCmdMsg(params, "Useage: iwant \[name/PID - Destination\] \[name/PID\]\n")
+        printCmdMsg(params, "Useage: want \[name/PID - Destination\] \[name/PID\]\n")
     else
         targetNum = client2id(params["arg1"], params)
 
