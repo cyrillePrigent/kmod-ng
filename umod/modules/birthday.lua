@@ -4,14 +4,16 @@
 -- Global var
 
 birthday = {
-    -- Time (in ms) of last birthday announce check.
-    ["time"] = 0,
     -- List of current birthday.
     --  key   => player name
     --  value => player age 
     ["nameList"] = {},
     -- Current birthday announce content.
-    ["msg"] = ""
+    ["msg"] = "",
+    -- Time (in ms) of last birthday announce check.
+    ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 300000 -- 5mins
 }
 
 -- Set module command.
@@ -174,7 +176,7 @@ end
 -- Every 5mins, display birthday message if needed.
 --  vars is the local vars passed from et_RunFrame function.
 function checkBirthdayRunFrame(vars)
-    if birthday["time"] + 300000 < vars["levelTime"] then
+    if birthday["time"] + birthday["frameCheck"] < vars["levelTime"] then
         et.trap_SendServerCommand(-1, "cpm \"" .. birthday["msg"] .. "\"")
         birthday["time"] = vars["levelTime"]
     end

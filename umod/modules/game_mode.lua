@@ -6,10 +6,12 @@
 gameMode = {
     -- Current game mode.
     ["current"] = "",
+    -- Current game mode weapons list.
+    ["weaponsList"] = {},
     -- Time (in ms) of last game mode check.
     ["time"] = 0,
-    -- Current game mode weapons list.
-    ["weaponsList"] = {}
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 250
 }
 
 -- Set module command.
@@ -311,9 +313,7 @@ end
 -- Or a custom function (see game mode command file).
 --  vars is the local vars passed from et_RunFrame function.
 function checkGameModeRunFrame(vars)
-    -- Reset ammo and stuff every 0.25 of a second rather
-    -- than 0.05 of a second (which caused lag)
-    if vars["levelTime"] - gameMode["time"] >= 250 then
+    if vars["levelTime"] - gameMode["time"] >= gameMode["frameCheck"] then
         gameMode["gameModeRunFrame"]()
         gameMode["time"] = vars["levelTime"]
     end

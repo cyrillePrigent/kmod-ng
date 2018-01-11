@@ -31,7 +31,9 @@ dynamiteTimer = {
     -- Entity list of current dynamite planted.
     ["alreadyKnown"] = {},
     -- Time (in ms) of last existing dynamite check.
-    ["time"] = 0
+    ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 250
 }
 
 -- Set default client data.
@@ -166,7 +168,7 @@ end
 -- Remove dynamite timer after exploding.
 --  vars is the local vars passed from et_RunFrame function.
 function checkDynamiteTimerRunFrame(vars)
-    if vars["levelTime"] - dynamiteTimer["time"] >= 250 then
+    if vars["levelTime"] - dynamiteTimer["time"] >= dynamiteTimer["frameCheck"] then
         for i, timer in pairs(dynamiteTimer["list"]) do
             if et.gentity_get(timer["entity"], "classname") ~= "dynamite" then
                 dynamiteTimer["list"][i]                       = nil

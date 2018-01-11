@@ -4,12 +4,6 @@
 -- Global var
 
 unevenTeam = {
-    ["time"] = {
-        -- Time (in ms) of last uneven team check.
-        ["check"] = 0,
-        -- Time (in ms) of last uneven team notification.
-        ["notify"] = 0,
-    },
     -- Uneven team notification value.
     ["notify"] = 0,
     -- Players difference to activate uneven team message.
@@ -25,7 +19,15 @@ unevenTeam = {
     -- Uneven team 4th message content.
     ["message4"] = et.trap_Cvar_Get("u_ut_message4"),
     -- Uneven team message position.
-    ["msgPosition"] = et.trap_Cvar_Get("u_ut_msg_position")
+    ["msgPosition"] = et.trap_Cvar_Get("u_ut_msg_position"),
+    ["time"] = {
+        -- Time (in ms) of last uneven team check.
+        ["check"] = 0,
+        -- Time (in ms) of last uneven team notification.
+        ["notify"] = 0,
+    },
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 3000 --3secs
 }
 
 -- Function
@@ -38,7 +40,7 @@ unevenTeam = {
 -- After 30secs and team is always uneven, 4th uneven team message is display.
 --  vars is the local vars passed from et_RunFrame function.
 function checkUnevenTeamRunFrame(vars)
-    if vars["levelTime"] - unevenTeam["time"]["check"] >= 3000 then
+    if vars["levelTime"] - unevenTeam["time"]["check"] >= unevenTeam["frameCheck"] then
         local diff = math.abs(players["axis"] - players["allies"])
 
         if diff >= unevenTeam["playersDifference"] then
@@ -52,10 +54,11 @@ function checkUnevenTeamRunFrame(vars)
             unevenTeam["notify"]         = 0
         end
 
-        unevenTeam["time"]["check"] = vars["levelTime"] -- Next checking in 3 seconds.
+        unevenTeam["time"]["check"] = vars["levelTime"]
     end
     
-    if unevenTeam["time"]["notify"] > 0 and vars["levelTime"] - unevenTeam["time"]["notify"] > 30000 then
+    if unevenTeam["time"]["notify"] > 0
+      and vars["levelTime"] - unevenTeam["time"]["notify"] > 30000 then
         if unevenTeam["notify"] == 0 then
             et.trap_SendServerCommand(
                 -1,

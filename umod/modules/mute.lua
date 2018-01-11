@@ -7,7 +7,11 @@ mute = {
     -- Mute duration list.
     --  key   => ip address
     --  value => duration in seconds, -1 for permanent mute
-    ["duration"] = {}
+    ["duration"] = {},
+    -- Time (in ms) of last mute check.
+    ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 1000 -- 1sec
 }
 
 -- Set default client data.
@@ -164,28 +168,51 @@ end
 -- Check muted player if he will be unmuted.
 --  vars is the local vars passed from et_RunFrame function.
 function checkMuteRunFrame(vars)
-    for i = 0, clientsLimit, 1 do
-        -- If client is muted for a certain duration...
-        if client[i]["muteEnd"] > 0 then
-            -- If client has finished his mute sentance...
-            if time["frame"] > client[i]["muteEnd"] then
-                if et.gentity_get(i, "sess.muted") == 1 then
-                    et.trap_SendConsoleCommand(
-                        et.EXEC_APPEND,
-                        "ref unmute \"" .. i .. "\"\n"
-                    )
+    if vars["levelTime"] - mute["time"] >= mute["frameCheck"] then
+        for i = 0, clientsLimit, 1 do
+            -- If client is muted for a certain duration...
+            if client[i]["muteEnd"] > 0 then
+                -- If client has finished his mute sentance...
+                if time["frame"] > client[i]["muteEnd"] then
+                    if et.gentity_get(i, "sess.muted") == 1 then
+                        et.trap_SendConsoleCommand(
+                            et.EXEC_APPEND,
+                            "ref unmute \"" .. i .. "\"\n"
+                        )
+
+                        et.trap_SendConsoleCommand(
+                            et.EXEC_APPEND,
+                            "qsay ^3Mute: ^7" .. client[i]["name"] .. " ^7has been auto unmuted.  Please watch your language!\n"
+                        )
+                    end
+
+                    client[i]["muteEnd"] = 0
+                    removeMute(i)
+
+                -- If client has not yet finished his mute sentance...
+                elseif time["frame"] < client[i]["muteEnd"] then
+                    if et.gentity_get(i, "sess.muted") == 0 then
+                        client[i]["muteEnd"] = 0
+                        removeMute(i)
+
+                        et.trap_SendConsoleCommand(
+                            et.EXEC_APPEND,
+                            "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                        )
+                    end
+
+                -- If client is unmuted...
+                elseif et.gentity_get(i, "sess.muted") == 0 then
+                    client[i]["muteEnd"] = 0
+                    removeMute(i)
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay ^3Mute: ^7" .. client[i]["name"] .. " ^7has been auto unmuted.  Please watch your language!\n"
+                        "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
                     )
                 end
-
-                client[i]["muteEnd"] = 0
-                removeMute(i)
-
-            -- If client has not yet finished his mute sentance...
-            elseif time["frame"] < client[i]["muteEnd"] then
+            -- If client is muted permanently...
+            elseif client[i]["muteEnd"] == -1 then
                 if et.gentity_get(i, "sess.muted") == 0 then
                     client[i]["muteEnd"] = 0
                     removeMute(i)
@@ -195,29 +222,10 @@ function checkMuteRunFrame(vars)
                         "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
                     )
                 end
-
-            -- If client is unmuted...
-            elseif et.gentity_get(i, "sess.muted") == 0 then
-                client[i]["muteEnd"] = 0
-                removeMute(i)
-
-                et.trap_SendConsoleCommand(
-                    et.EXEC_APPEND,
-                    "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
-                )
-            end
-        -- If client is muted permanently...
-        elseif client[i]["muteEnd"] == -1 then
-            if et.gentity_get(i, "sess.muted") == 0 then
-                client[i]["muteEnd"] = 0
-                removeMute(i)
-
-                et.trap_SendConsoleCommand(
-                    et.EXEC_APPEND,
-                    "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
-                )
             end
         end
+
+        dynamiteTimer["time"] = vars["levelTime"]
     end
 end
 

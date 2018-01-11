@@ -21,8 +21,6 @@
 -- Global var
 
 selfkillInFight = {
-    -- Time (in ms) of last selfkill in fight check.
-    ["time"] = 0,
     -- Punishment level.
     ["punishment"] = tonumber(et.trap_Cvar_Get("u_selfkill_punishment")),
     -- Time to wait (in seconds) before selfkill
@@ -32,7 +30,11 @@ selfkillInFight = {
     -- Percentage before warning.
     ["warnPercentage"] = et.trap_Cvar_Get("u_selfkill_warn_percentage"),
     -- Selfkill in fight message position.
-    ["msgPosition"] = et.trap_Cvar_Get("u_selfkill_msg_position")
+    ["msgPosition"] = et.trap_Cvar_Get("u_selfkill_msg_position"),
+    -- Time (in ms) of last selfkill in fight check.
+    ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 100
 }
 
 -- Set default client data.
@@ -61,7 +63,7 @@ addSlashCommand("client", "kill", {"function", "selfkillInFightSlashCommand"})
 -- Check periodically players is hit.
 --  vars is the local vars passed from et_RunFrame function.
 function checkSelfkillInFightRunFrame(vars)
-    if vars["levelTime"] - selfkillInFight["time"] >= 100 then
+    if vars["levelTime"] - selfkillInFight["time"] >= selfkillInFight["frameCheck"] then
         -- For all clients, check the client's damage received
         for p = 0, clientsLimit, 1 do
             if client[p]["team"] == 1 or client[p]["team"] == 2 then

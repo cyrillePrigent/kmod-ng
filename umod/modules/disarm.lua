@@ -8,8 +8,6 @@
 -- Global var
 
 disarm = {
-    -- Time (in ms) of last disarm check.
-    ["time"]    = 0,
     -- Weapons list to disarm player.
     ["weapons"] = {
                 [2]  = false,  -- Luger
@@ -42,7 +40,11 @@ disarm = {
                 [48] = false   -- Akimbo silenced Luger
     },
     -- Number of disarmed players.
-    ["count"]   = 0
+    ["count"]   = 0,
+    -- Time (in ms) of last disarm check.
+    ["time"]    = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 2000 -- 2secs
 }
 
 -- Set default client data.
@@ -62,7 +64,7 @@ cmdList["console"]["!disarm_reset"] = "/command/both/disarm_reset.lua"
 -- Check all playes and disarm it if needed.
 --  vars is the local vars passed from et_RunFrame function.
 function checkDisarmRunFrame(vars)
-    if vars["levelTime"] - disarm["time"] >= 2000 then
+    if vars["levelTime"] - disarm["time"] >= disarm["frameCheck"] then
         for i = 0, clientsLimit do
             if client[i]["disarm"] == 1 then
                 -- NOTE : et.MAX_WEAPONS = 50

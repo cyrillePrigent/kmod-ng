@@ -130,7 +130,7 @@ function checkAdvancedAdrenalineRunFrame(vars)
     for i = 0, clientsLimit, 1 do
         -- TODO : Check if slot is used
         local psPowerups = tonumber(et.gentity_get(i, "ps.powerups", 12))
-        
+
         if not pause["startTrigger"] or (pause["startTrigger"] and psPowerups == 0) then
             if psPowerups > 0 then
                 client[i]["useAdrenaline"] = 1
@@ -139,7 +139,7 @@ function checkAdvancedAdrenalineRunFrame(vars)
                     client[i]["adrenalineMsgTrigger"] = 1
                     client[i]["adrenalineMsgTime"]    = vars["levelTime"]
                     client[i]["adrenalineCounter"]    = client[i]["adrenalineCounter"] + 1
-                    
+
                     if client[i]["adrenalineMsg"] == 1 then
                         if advancedAdrenaline["enabledSound"] == 1 then
                             et.G_ClientSound(

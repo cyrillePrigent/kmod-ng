@@ -24,6 +24,8 @@ voteDisabled = {
     },
     -- Time (in ms) of last vote disabled check.
     ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 250
 }
 
 
@@ -107,7 +109,7 @@ end
 -- Check round time and disable votes after a specified length of time.
 --  vars is the local vars passed from et_RunFrame function.
 function disableVoteRunFrame(vars)
-    if vars["levelTime"] - voteDisabled["time"] >= 250 then
+    if vars["levelTime"] - voteDisabled["time"] >= voteDisabled["frameCheck"] then
         local cancelTime
 
         if voteDisabled["mode"] == 1 then

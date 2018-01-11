@@ -15,12 +15,14 @@
 landminesLimit = {
     -- Landmines limit status.
     ["enabled"] = false,
-    -- Time (in ms) of last landmines limit check.
-    ["time"] = 0,
     -- Current maximum landmines value.
     ["maxMines"] = 0,
     -- Landmines limit message position.
-    ["msgPosition"] = et.trap_Cvar_Get("u_landmines_limit_msg_position")
+    ["msgPosition"] = et.trap_Cvar_Get("u_landmines_limit_msg_position"),
+    -- Time (in ms) of last landmines limit check.
+    ["time"] = 0,
+    -- Interval (in ms) between 2 frame check.
+    ["frameCheck"] = 3000 -- 3secs
 }
 
 -- Function
@@ -47,7 +49,7 @@ end
 -- Check number of players and set the number of mines according.
 --  vars is the local vars passed from et_RunFrame function.
 function checkLandminesLimitRunFrame(vars)
-    if vars["levelTime"] - landminesLimit["time"] > 3000 then
+    if vars["levelTime"] - landminesLimit["time"] > landminesLimit["frameCheck"] then
         local maxMines
 
         if players["active"] > 8 then
@@ -66,7 +68,7 @@ function checkLandminesLimitRunFrame(vars)
             landminesLimit["maxMines"] = maxMines
         end
 
-        landminesLimit["time"] = vars["levelTime"] -- Next checking in 3 seconds.
+        landminesLimit["time"] = vars["levelTime"]
     end
 end
 
