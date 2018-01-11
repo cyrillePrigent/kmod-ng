@@ -26,8 +26,6 @@ reviveSpree = {
     ["endMsgByTeamkill"] = et.trap_Cvar_Get("u_rs_end_by_teamkill"),
     -- Revive spree message position.
     ["position"] = et.trap_Cvar_Get("u_rs_position"),
-    -- Print revive spree messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_rs_msg_default")),
     -- Current highest revive spree.
     ["maxSpree"] = 0,
     -- Player ID of current highest revive spree.
@@ -63,75 +61,19 @@ cmdList["console"]["!rsprees"]       = "/command/console/revive_sprees.lua"
 cmdList["console"]["!rspreesall"]    = "/command/console/revive_sprees_all.lua"
 cmdList["console"]["!rspreerecords"] = "/command/both/revive_sprees_record.lua"
 
--- Set slash command of revive spree message status.
-addSlashCommand("client", "rsprees", {"function", "reviveSpreeSlashCommand"})
-
+-- Set revive spree module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of revive spree module message key in client data.
+    ["clientDataKey"] = "reviveSpreeMsg",
+    -- Name of revive spree module message key in userinfo data.
+    ["userinfoKey"] = "u_rspree",
+    -- Name of revive spree module message slash command.
+    ["slashCommand"] = "rsprees",
+    -- Print revive spree messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_rs_msg_default"))
+})
 
 -- Function
-
--- Set client data & client user info if revive spree message is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if revive spree message is enabled or not.
-function setReviveSpreeMsg(clientNum, value)
-    client[clientNum]["reviveSpreeMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_rspree", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function.
--- Manage revive spree message status when rspree slash command is used.
---  params is parameters passed to the function executed in command file.
-function reviveSpreeSlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-    
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["reviveSpreeMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setReviveSpreeMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setReviveSpreeMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage revive spree message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function reviveSpreeUpdateClientUserinfo(vars)
-    local rs = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_rspree")
-
-    if rs == "" then
-        setReviveSpreeMsg(vars["clientNum"], reviveSpree["msgDefault"])
-    elseif tonumber(rs) == 0 then
-        client[vars["clientNum"]]["reviveSpreeMsg"] = 0
-    else
-        client[vars["clientNum"]]["reviveSpreeMsg"] = 1
-    end
-end
 
 -- Load all map revive spree record.
 -- Exemple in revivingspree.txt file :
@@ -503,10 +445,8 @@ end
 
 -- Add callback revive spree function.
 addCallbackFunction({
-    ["InitGame"]              = "reviveSpreeInitGame",
-    ["RunFrameEndRound"]      = "checkReviveSpreeRunFrameEndRound",
-    ["ClientBegin"]           = "reviveSpreeUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "reviveSpreeUpdateClientUserinfo",
-    ["ClientDisconnect"]      = "reviveSpreeClientDisconnect",
-    ["Obituary"]              = "reviveSpreeObituary"
+    ["InitGame"]         = "reviveSpreeInitGame",
+    ["RunFrameEndRound"] = "checkReviveSpreeRunFrameEndRound",
+    ["ClientDisconnect"] = "reviveSpreeClientDisconnect",
+    ["Obituary"]         = "reviveSpreeObituary"
 })

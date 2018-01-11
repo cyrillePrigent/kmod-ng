@@ -18,8 +18,6 @@ dynamiteTimer = {
     ["announcePlant"] = tonumber(et.trap_Cvar_Get("u_dt_announce_plant")),
     -- Dynamite timer message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_dt_msg_position"),
-    -- Print dynamite timer messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_dt_msg_default")),
     -- List of current dynamite.
     ["list"] = {},
     -- First step of dynamite timer.
@@ -41,8 +39,17 @@ dynamiteTimer = {
 -- Print dynamite timer status.
 clientDefaultData["dynamiteTimerMsg"] = 0
 
--- Set slash command of dynamite timer message status.
-addSlashCommand("client", "dynatimer", {"function", "dynamiteTimerSlashCommand"})
+-- Set dynamite timer module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of dynamite timer module message key in client data.
+    ["clientDataKey"] = "dynamiteTimerMsg",
+    -- Name of dynamite timer module message key in userinfo data.
+    ["userinfoKey"] = "u_dynatimer",
+    -- Name of dynamite timer module message slash command.
+    ["slashCommand"] = "dynatimer",
+    -- Print dynamite timer messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_dt_msg_default"))
+})
 
 -- Function
 
@@ -261,75 +268,9 @@ function removeDynamiteTimer(location, entity)
     end
 end
 
--- Function executed when slash command is called in et_ClientCommand function
--- Manage dynamite timer message status when dynatimer slash command is used.
---  params is parameters passed to the function executed in command file.
-function dynamiteTimerSlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["dynamiteTimerMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setDynamiteTimerMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setDynamiteTimerMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Set client data & client user info if dynamite timer message is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if dynamite timer message is enabled or not..
-function setDynamiteTimerMsg(clientNum, value) 
-    client[clientNum]["dynamiteTimerMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dynatimer", value)
-    )
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage dynamite timer message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function dynamiteTimerUpdateClientUserinfo(vars) 
-    local timer = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_dynatimer")
-
-    if timer == "" then
-        setDynamiteTimerMsg(vars["clientNum"], dynamiteTimer["msgDefault"])
-    elseif tonumber(timer) == 0 then
-        client[vars["clientNum"]]["dynamiteTimerMsg"] = 0
-    else
-        client[vars["clientNum"]]["dynamiteTimerMsg"] = 1 
-    end
-end
-
 -- Add callback dynamite timer function.
 addCallbackFunction({
-    ["InitGame"]              = "dynamiteTimerInitGame",
-    ["Print"]                 = "checkDynamiteTimerPrint",
-    ["ClientBegin"]           = "dynamiteTimerUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "dynamiteTimerUpdateClientUserinfo",
-    ["RunFrameEndRound"]      = "dynamiteTimerReset",
+    ["InitGame"]         = "dynamiteTimerInitGame",
+    ["Print"]            = "checkDynamiteTimerPrint",
+    ["RunFrameEndRound"] = "dynamiteTimerReset",
 })

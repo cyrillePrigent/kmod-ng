@@ -4,8 +4,6 @@
 -- Global var
 
 advancedAdrenaline = {
-    -- Print advanced adrenaline messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_aa_msg_default")),
     -- Advanced adrenaline sound status.
     ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_aa_enable_sound")),
     -- Advanced adrenaline sound file.
@@ -23,75 +21,19 @@ clientDefaultData["adrenalineCounter"] = 0
 -- Print adrenaline counter status.
 clientDefaultData["adrenalineMsg"] = 0
 
--- Set slash command of advanced adrenaline message status.
-addSlashCommand("client", "advadre", {"function", "advancedAdrenalineSlashCommand"})
+-- Set advanced adrenaline module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of advanced adrenaline module message key in client data.
+    ["clientDataKey"] = "adrenalineMsg",
+    -- Name of advanced adrenaline module message key in userinfo data.
+    ["userinfoKey"] = "u_advadre",
+    -- Name of advanced adrenaline module message slash command.
+    ["slashCommand"] = "advadre",
+    -- Print advanced adrenaline messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_aa_msg_default"))
+})
 
 -- Function
-
--- Set client data & client user info if adrenaline message & sound is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if adrenaline message & sound is enabled or not.
-function setAdrenalineMsg(clientNum, value)
-    client[clientNum]["adrenalineMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_advadre", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function.
--- Manage advanced adrenaline message status when advadre slash command is used.
---  params is parameters passed to the function executed in command file.
-function advancedAdrenalineSlashCommand(params)
-    --params.noDisplayCmd = true
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-
-    if params["arg1"] == "" then
-        local status = "on"
-
-        if client[params.clientNum]["adrenalineMsg"] == 0 then
-            status = "off"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setAdrenalineMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setAdrenalineMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage advanced adrenaline message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function advancedAdrenalineUpdateClientUserinfo(vars)
-    local aa = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_advadre")
-
-    if aa == "" then
-        setAdrenalineMsg(vars["clientNum"], advancedAdrenaline["msgDefault"])
-    elseif tonumber(aa) == 0 then
-        client[vars["clientNum"]]["adrenalineMsg"] = 0
-    else
-        client[vars["clientNum"]]["adrenalineMsg"] = 1
-    end
-end
 
 -- Called when qagame initializes.
 -- Check if adrenaline is enabled and add advanced adrenaline run frame if needed.
@@ -170,7 +112,5 @@ end
 
 -- Add callback advanced adrenaline function.
 addCallbackFunction({
-    ["InitGame"]              = "advancedAdrenalineInitGame",
-    ["ClientBegin"]           = "advancedAdrenalineUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "advancedAdrenalineUpdateClientUserinfo",
+    ["InitGame"] = "advancedAdrenalineInitGame"
 })

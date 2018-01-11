@@ -10,8 +10,6 @@ flakMonkey = {
     ["sound"] = et.trap_Cvar_Get("u_fm_sound"),
     -- Flak monkey message content.
     ["message"] = et.trap_Cvar_Get("u_fm_message"),
-    -- Print flak monkey messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_fm_msg_default")),
     -- Flak monkey message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_fm_msg_position"),
     -- Noise reduction of flak monkey sound.
@@ -32,74 +30,19 @@ clientDefaultData["flakMonkey"] = 0
 -- Print flak monkey status.
 clientDefaultData["flakMonkeyMsg"] = 0
 
--- Set slash command of flak monkey message status.
-addSlashCommand("client", "fmonkey", {"function", "flakMonkeySlashCommand"})
+-- Set flak monkey module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of flak monkey module message key in client data.
+    ["clientDataKey"] = "flakMonkeyMsg",
+    -- Name of flak monkey module message key in userinfo data.
+    ["userinfoKey"] = "u_fmonkey",
+    -- Name of flak monkey module message slash command.
+    ["slashCommand"] = "fmonkey",
+    -- Print flak monkey messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_fm_msg_default"))
+})
 
 -- Function
-
--- Set client data & client user info if flak monkey message & sound is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if flak monkey message & sound is enabled or not.
-function setFlakMonkeyMsg(clientNum, value)
-    client[clientNum]["flakMonkeyMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_fmonkey", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function.
--- Manage flak monkey message status when fmonkey slash command is used.
---  params is parameters passed to the function executed in command file.
-function flakMonkeySlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["flakMonkeyMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setFlakMonkeyMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setFlakMonkeyMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage flak monkey message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function flakMonkeyUpdateClientUserinfo(vars)
-    local fm = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_fmonkey")
-
-    if fm == "" then
-        setFlakMonkeyMsg(vars["clientNum"], flakMonkey["msgDefault"])
-    elseif tonumber(fm) == 0 then
-        client[vars["clientNum"]]["flakMonkeyMsg"] = 0
-    else
-        client[vars["clientNum"]]["flakMonkeyMsg"] = 1
-    end
-end
 
 -- Callback function of et_Obituary function.
 -- Reset victim flak monkey counter for all death type.
@@ -147,9 +90,7 @@ end
 
 -- Add callback flak monkey function.
 addCallbackFunction({
-    ["ClientBegin"]           = "flakMonkeyUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "flakMonkeyUpdateClientUserinfo",
-    ["Obituary"]              = "checkFlakMonkeyObituary",
-    ["ObituaryEnemyKill"]     = "checkFlakMonkeyObituaryEnemyKill",
-    ["ObituaryTeamKill"]      = "checkFlakMonkeyObituaryTeamKill",
+    ["Obituary"]          = "checkFlakMonkeyObituary",
+    ["ObituaryEnemyKill"] = "checkFlakMonkeyObituaryEnemyKill",
+    ["ObituaryTeamKill"]  = "checkFlakMonkeyObituaryTeamKill",
 })

@@ -160,7 +160,8 @@ slashCommandClient = {
     ["single"] = {}
 }
 
-slashCommandConsole = {}
+slashCommandConsole   = {}
+slashCommandModuleMsg = {}
 
 meansOfDeathList = {
     [0] = "UNKNOWN",                      -- 0
@@ -1157,13 +1158,37 @@ end
 function et_ClientBegin(clientNum)
     et.trap_SendServerCommand(clientNum, "cpm \"This server is running UberMod v" .. version .. " " .. releaseStatus .. "\n\"")
 
-    local name = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "name")
+    local userinfo = et.trap_GetUserinfo(clientNum)
+    local name     = et.Info_ValueForKey(userinfo, "name")
 
     client[clientNum]["name"]     = name
     client[clientNum]["lastName"] = name
     client[clientNum]["team"]     = tonumber(et.gentity_get(clientNum, "sess.sessionTeam"))
 
     executeCallbackFunction("ClientBegin", {["clientNum"] = clientNum})
+
+    for _, data in ipairs(slashCommandModuleMsg) do
+        local value = et.Info_ValueForKey(
+            userinfo,
+            data["userinfoKey"]
+        )
+
+        if value == "" then
+            client[clientNum][data["clientDataKey"]] = data["msgDefault"]
+
+            userinfo = et.Info_SetValueForKey(
+                userinfo,
+                data["userinfoKey"],
+                data["msgDefault"]
+            )
+            
+            et.trap_SetUserinfo(clientNum, userinfo)
+        elseif tonumber(value) == 1 then
+            client[clientNum][data["clientDataKey"]] = 1
+        else
+            client[clientNum][data["clientDataKey"]] = 0
+        end
+    end
 end
 
 -- Called when a client’s Userinfo string has changed.
@@ -1172,6 +1197,31 @@ end
 -- rather than every time the userinfo changes. This only happens for a subset of userinfo fields.
 function et_ClientUserinfoChanged(clientNum)
     executeCallbackFunction("ClientUserinfoChanged", {["clientNum"] = clientNum})
+
+    local userinfo = et.trap_GetUserinfo(clientNum)
+
+    for _, data in ipairs(slashCommandModuleMsg) do
+        local value = et.Info_ValueForKey(
+            userinfo,
+            data["userinfoKey"]
+        )
+
+        if value == "" then
+            client[clientNum][data["clientDataKey"]] = data["msgDefault"]
+
+            userinfo = et.Info_SetValueForKey(
+                userinfo,
+                data["userinfoKey"],
+                data["msgDefault"]
+            )
+            
+            et.trap_SetUserinfo(clientNum, userinfo)
+        elseif tonumber(value) == 1 then
+            client[clientNum][data["clientDataKey"]] = 1
+        else
+            client[clientNum][data["clientDataKey"]] = 0
+        end
+    end
 end
 
 -- Called when a client is spawned.
@@ -1260,6 +1310,61 @@ function et_ClientCommand(clientNum, command)
     params.nbArg = et.trap_Argc()
     params["arg1"] = et.trap_Argv(1)
     params["arg2"] = et.trap_Argv(2)
+
+    for _, data in ipairs(slashCommandModuleMsg) do
+        if data["slashCommand"] == params.cmd then
+            --params.noDisplayCmd = true
+            params.say = msgCmd["chatArea"]
+            params.cmd = "/" .. params.cmd
+
+            if params["arg1"] == "" then
+                local status = "on"
+
+                if client[clientNum][data["clientDataKey"]] == 0 then
+                    status = "off"
+                end
+
+                printCmdMsg(
+                    params,
+                    "Messages are " .. color3 .. status
+                )
+            elseif tonumber(params["arg1"]) == 1 then
+                client[clientNum][data["clientDataKey"]] = 1
+
+                et.trap_SetUserinfo(
+                    clientNum,
+                    et.Info_SetValueForKey(
+                        et.trap_GetUserinfo(clientNum),
+                        data["userinfoKey"],
+                        1
+                    )
+                )
+
+                printCmdMsg(
+                    params,
+                    "Messages are now " .. color3 .. "on"
+                )
+            else
+                client[clientNum][data["clientDataKey"]] = 0
+
+                et.trap_SetUserinfo(
+                    clientNum,
+                    et.Info_SetValueForKey(
+                        et.trap_GetUserinfo(clientNum),
+                        data["userinfoKey"],
+                        0
+                    )
+                )
+
+                printCmdMsg(
+                    params,
+                    "Messages are now " .. color3 .. "off"
+                )
+            end
+
+            return 1
+        end
+    end
 
     if slashCommandClient["single"][params.cmd] ~= nil then
         for _, cmdData in ipairs(slashCommandClient["single"][params.cmd]) do

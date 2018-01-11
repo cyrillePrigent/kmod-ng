@@ -21,8 +21,6 @@ if killingSpreeModule == 1 then
         ["endMessage3"] = et.trap_Cvar_Get("u_ks_end_message3"),
         -- Killing spree ended by teamkill.
         ["endMessage4"] = et.trap_Cvar_Get("u_ks_end_message4"),
-        -- Print killing spree message by default.
-        ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ks_msg_default")),
         -- Killing spree message position.
         ["msgPosition"] = et.trap_Cvar_Get("u_ks_msg_position"),
         -- Noise reduction of killing spree sound.
@@ -34,9 +32,18 @@ if killingSpreeModule == 1 then
     -- Print killing spree status.
     clientDefaultData["killingSpreeMsg"] = 0
 
-    -- Set slash command of killing spree message status.
-    addSlashCommand("client", "kspree", {"function", "killingSpreeSlashCommand"})
-
+    -- Set killing spree module message.
+    table.insert(slashCommandModuleMsg, {
+        -- Name of killing spree module message key in client data.
+        ["clientDataKey"] = "killingSpreeMsg",
+        -- Name of killing spree module message key in userinfo data.
+        ["userinfoKey"] = "u_kspree",
+        -- Name of killing spree module message slash command.
+        ["slashCommand"] = "kspree",
+        -- Print killing spree messages by default.
+        ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ks_msg_default"))
+    })
+    
     -- Function
 
     -- Called when qagame initializes.
@@ -63,70 +70,6 @@ if killingSpreeModule == 1 then
         end
     end
 
-    -- Set client data & client user info if killing spree message & sound is enabled or not.
-    --  clientNum is the client slot id.
-    --  value is the boolen value if killing spree message & sound is enabled or not.
-    function setKillingSpreeMsg(clientNum, value)
-        client[clientNum]["killingSpreeMsg"] = value
-
-        et.trap_SetUserinfo(
-            clientNum,
-            et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_kspree", value)
-        )
-    end
-
-    -- Function executed when slash command is called in et_ClientCommand function.
-    -- Manage killing spree message status when kspree slash command is used.
-    --  params is parameters passed to the function executed in command file.
-    function killingSpreeSlashCommand(params)
-        params.say = msgCmd["chatArea"]
-        params.cmd = "/" .. params.cmd
-        
-        if params["arg1"] == "" then
-            local status = "^8on^7"
-
-            if client[params.clientNum]["killingSpreeMsg"] == 0 then
-                status = "^8off^7"
-            end
-
-            printCmdMsg(
-                params,
-                "Messages are " .. color3 .. status
-            )
-        elseif tonumber(params["arg1"]) == 0 then
-            setKillingSpreeMsg(params.clientNum, 0)
-
-            printCmdMsg(
-                params,
-                "Messages are now " .. color3 .. "off"
-            )
-        else
-            setKillingSpreeMsg(params.clientNum, 1)
-
-            printCmdMsg(
-                params,
-                "Messages are now " .. color3 .. "on"
-            )
-        end
-
-        return 1
-    end
-
-    -- Callback function when a client’s Userinfo string has changed.
-    -- Manage killing spree message status when client’s Userinfo string has changed.
-    --  vars is the local vars of et_ClientUserinfoChanged function.
-    function killingSpreeUpdateClientUserinfo(vars)
-        local ks = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_kspree")
-
-        if ks == "" then
-            setKillingSpreeMsg(vars["clientNum"], killingSpree["msgDefault"])
-        elseif tonumber(ks) == 0 then
-            client[vars["clientNum"]]["killingSpreeMsg"] = 0
-        else
-            client[vars["clientNum"]]["killingSpreeMsg"] = 1
-        end
-    end
-
     -- Display killing spree end message.
     --  vars is the local vars of et_Obituary function.
     --  msg is the death spree message to display.
@@ -140,9 +83,7 @@ if killingSpreeModule == 1 then
 
     -- Add callback killing spree function.
     addCallbackFunction({
-        ["InitGame"]              = "killingSpreeInitGame",
-        ["ClientBegin"]           = "killingSpreeUpdateClientUserinfo",
-        ["ClientUserinfoChanged"] = "killingSpreeUpdateClientUserinfo"
+        ["InitGame"] = "killingSpreeInitGame"
     })
 end
 
@@ -269,6 +210,8 @@ if spreeRecordModule == 1 then
     -- and in the !readconfig client command.
     -- Load and set spree record and map spree record.
     function loadSpreeRecord()
+        local funcStart = et.trap_Milliseconds()
+
         -- Load spree record.
         local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_READ)
 
@@ -310,6 +253,11 @@ if spreeRecordModule == 1 then
         end
 
         et.trap_FS_FCloseFile(fd)
+
+        et.G_LogPrintf(
+            "uMod: Loading spree & map spree records in %d ms\n",
+            et.trap_Milliseconds() - funcStart
+        )
     end
 
     -- Check if victim have new spree / map pree record.

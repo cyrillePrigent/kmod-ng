@@ -29,7 +29,8 @@ cmdList["console"]["!removebirthday"] = "/command/both/removebirthday.lua"
 -- Initializes birthday data.
 -- Load birthday entry of birthday.cfg file.
 function loadBirthday()
-    local fd, len = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
+    local funcStart = et.trap_Milliseconds()
+    local fd, len   = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
 
     if len == -1 then
         et.G_LogPrint("uMod WARNING: birthday.cfg file no found / not readable!\n")
@@ -54,6 +55,7 @@ function loadBirthday()
     end
 
     et.trap_FS_FCloseFile(fd)
+    et.G_LogPrintf("uMod: Loading birthday in %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
 -- Set a birthday entry.

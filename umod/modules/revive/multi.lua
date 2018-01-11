@@ -39,9 +39,7 @@ multiRevive = {
     -- Multi & monster revive sound status.
     ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_mr_multi_revive_enable_sound")),
     -- Noise reduction of multi & monster revive sound.
-    ["multiNoiseReduction"] = tonumber(et.trap_Cvar_Get("u_mr_multi_revive_noise_reduction")),
-    -- Print revive spree messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_mr_msg_default")),
+    ["multiNoiseReduction"] = tonumber(et.trap_Cvar_Get("u_mr_multi_revive_noise_reduction"))
 }
 
 -- Set default client data.
@@ -50,77 +48,22 @@ multiRevive = {
 clientDefaultData["multiRevive"] = 0
 -- Time of Last revive (in ms).
 clientDefaultData["lastReviveTime"] = 0
--- Print death spree status.
+-- Print multi revive status.
 clientDefaultData["multiReviveMsg"] = 0
 
--- Set slash command of multi revive message status.
-addSlashCommand("client", "mrevive", {"function", "multiReviveSlashCommand"})
+-- Set multi revive module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of multi revive module message key in client data.
+    ["clientDataKey"] = "multiReviveMsg",
+    -- Name of multi revive module message key in userinfo data.
+    ["userinfoKey"] = "u_mrevive",
+    -- Name of multi revive module message slash command.
+    ["slashCommand"] = "mrevive",
+    -- Print multi revive messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_mr_msg_default"))
+})
 
 -- Function
-
--- Set client data & client user info if multi revive message is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if multi revive message is enabled or not.
-function setMultiReviveMsg(clientNum, value)
-    client[clientNum]["multiReviveMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_mrevive", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function.
--- Manage multi revive message status when mrevive slash command is used.
---  params is parameters passed to the function executed in command file.
-function multiReviveSlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-    
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["multiReviveMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setMultiReviveMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setMultiReviveMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage multi revive message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function multiReviveUpdateClientUserinfo(vars)
-    local mr = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_mrevive")
-
-    if mr == "" then
-        setMultiReviveMsg(vars["clientNum"], reviveSpree["msgDefault"])
-    elseif tonumber(mr) == 0 then
-        client[vars["clientNum"]]["multiReviveMsg"] = 0
-    else
-        client[vars["clientNum"]]["multiReviveMsg"] = 1
-    end
-end
 
 -- Check multi revive.
 --  medic is the medic client slot id.
@@ -207,8 +150,3 @@ if tonumber(et.trap_Cvar_Get("u_mr_multi_revive_without_death")) == 1 then
         ["Obituary"] = "resetMultiRevive"
     })
 end
-
-addCallbackFunction({
-    ["ClientBegin"]           = "multiReviveUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "multiReviveUpdateClientUserinfo"
-})

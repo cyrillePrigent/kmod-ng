@@ -10,8 +10,6 @@ deathSpree = {
     ["list"] = {},
     -- Death spree sound status.
     ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ds_enable_sound")),
-    -- Print death spree messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ds_msg_default")),
     -- Death spree message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_ds_msg_position"),
     -- Noise reduction of death spree sound.
@@ -25,8 +23,17 @@ clientDefaultData["deathSpree"] = 0
 -- Print death spree status.
 clientDefaultData["deathSpreeMsg"] = 0
 
--- Set slash command of death spree message status.
-addSlashCommand("client", "dspree", {"function", "deathSpreeSlashCommand"})
+-- Set death spree module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of death spree module message key in client data.
+    ["clientDataKey"] = "deathSpreeMsg",
+    -- Name of death spree module message key in userinfo data.
+    ["userinfoKey"] = "u_dspree",
+    -- Name of death spree module message slash command.
+    ["slashCommand"] = "dspree",
+    -- Print death spree messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ds_msg_default"))
+})
 
 -- Function
 
@@ -51,70 +58,6 @@ function deathSpreeInitGame(vars)
         end
         
         n = n + 1
-    end
-end
-
--- Set client data & client user info if death spree message & sound is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if death spree message & sound is enabled or not..
-function setDeathSpreeMsg(clientNum, value)
-    client[clientNum]["deathSpreeMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_dspree", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function
--- Manage death spree message status when dspree slash command is used.
---  params is parameters passed to the function executed in command file.
-function deathSpreeSlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-
-    if params["arg1"] == "" then
-        local status = "^8on^7"
-
-        if client[params.clientNum]["deathSpreeMsg"] == 0 then
-            status = "^8off^7"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setDeathSpreeMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setDeathSpreeMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage death spree message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function deathSpreeUpdateClientUserinfo(vars)
-    local ds = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_dspree")
-
-    if ds == "" then
-        setDeathSpreeMsg(vars["clientNum"], deathSpree["msgDefault"])
-    elseif tonumber(ds) == 0 then
-        client[vars["clientNum"]]["deathSpreeMsg"] = 0
-    else
-        client[vars["clientNum"]]["deathSpreeMsg"] = 1
     end
 end
 
@@ -159,8 +102,6 @@ end
 -- Add callback death spree function.
 addCallbackFunction({
     ["InitGame"]              = "deathSpreeInitGame",
-    ["ClientBegin"]           = "deathSpreeUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "deathSpreeUpdateClientUserinfo",
     ["Obituary"]              = "checkDeathSpreeObituary",
     ["ObituaryEnemyKill"]     = "resetDeathSpree",
     ["ObituaryTeamKill"]      = "resetDeathSpree"

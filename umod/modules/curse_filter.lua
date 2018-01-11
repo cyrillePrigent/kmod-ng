@@ -19,7 +19,8 @@ clientDefaultData["muteMultipliers"] = 0
 -- and in the !readconfig client command.
 -- Load unauthorized word stored in badwords.list file.
 function loadBadWord()
-    local fd, len = et.trap_FS_FOpenFile("badwords.list", et.FS_READ)
+    local funcStart = et.trap_Milliseconds()
+    local fd, len   = et.trap_FS_FOpenFile("badwords.list", et.FS_READ)
 
     if len == -1 then
         et.G_LogPrint("uMod WARNING: badwords.list file no found / not readable!\n")
@@ -36,6 +37,7 @@ function loadBadWord()
     end
 
     et.trap_FS_FCloseFile(fd)
+    et.G_LogPrintf("uMod: Loading bad word in %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
 -- Check bad word in client chat entry.

@@ -4,8 +4,6 @@
 -- Global var
 
 killerHp = {
-    -- Print killer HP messages by default.
-    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_khp_msg_default")),
     -- Killer HP message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_khp_msg_position")
 }
@@ -26,74 +24,19 @@ explosiveInheritanceWeapon = {
 -- Print killer HP status.
 clientDefaultData["killerHpMsg"] = 0
 
--- Set slash command of killer HP message status.
-addSlashCommand("client", "killerhp", {"function", "killerHpSlashCommand"})
+-- Set display killer HP module message.
+table.insert(slashCommandModuleMsg, {
+    -- Name of display killer HP module message key in client data.
+    ["clientDataKey"] = "killerHpMsg",
+    -- Name of display killer HP module message key in userinfo data.
+    ["userinfoKey"] = "u_killerhp",
+    -- Name of display killer HP module message slash command.
+    ["slashCommand"] = "killerhp",
+    -- Print display killer HP messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_khp_msg_default"))
+})
 
 -- Function
-
--- Set client data & client user info if killer hp message is enabled or not.
---  clientNum is the client slot id.
---  value is the boolen value if killer hp message is enabled or not..
-function setKillerHpMsg(clientNum, value)
-    client[clientNum]["killerHpMsg"] = value
-
-    et.trap_SetUserinfo(
-        clientNum,
-        et.Info_SetValueForKey(et.trap_GetUserinfo(clientNum), "u_killerhp", value)
-    )
-end
-
--- Function executed when slash command is called in et_ClientCommand function.
--- Manage killer HP message status when killerhp slash command is used.
---  params is parameters passed to the function executed in command file.
-function killerHpSlashCommand(params)
-    params.say = msgCmd["chatArea"]
-    params.cmd = "/" .. params.cmd
-
-    if params["arg1"] == "" then
-        local status = "on"
-
-        if client[params.clientNum]["killerHpMsg"] == 0 then
-            status = "off"
-        end
-
-        printCmdMsg(
-            params,
-            "Messages are " .. color3 .. status
-        )
-    elseif tonumber(params["arg1"]) == 0 then
-        setKillerHpMsg(params.clientNum, 0)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "off"
-        )
-    else
-        setKillerHpMsg(params.clientNum, 1)
-
-        printCmdMsg(
-            params,
-            "Messages are now " .. color3 .. "on"
-        )
-    end
-
-    return 1
-end
-
--- Callback function when a client’s Userinfo string has changed.
--- Manage killer HP message status when client’s Userinfo string has changed.
---  vars is the local vars of et_ClientUserinfoChanged function.
-function killerHpUpdateClientUserinfo(vars)
-    local khp = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_killerhp")
-
-    if khp == "" then
-        setKillerHpMsg(vars["clientNum"], killerHp["msgDefault"])
-    elseif tonumber(khp) == 0 then
-        client[vars["clientNum"]]["killerHpMsg"] = 0
-    else
-        client[vars["clientNum"]]["killerHpMsg"] = 1
-    end
-end
 
 -- Callback function when a player kill a enemy.
 -- Display killer HP when a player is killed and the killer is alive.
@@ -135,7 +78,5 @@ end
 
 -- Add callback display killer HP function.
 addCallbackFunction({
-    ["ClientBegin"]           = "killerHpUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "killerHpUpdateClientUserinfo",
-    ["ObituaryEnemyKill"]     = "displayKillerHpObituaryEnemyKill"
+    ["ObituaryEnemyKill"] = "displayKillerHpObituaryEnemyKill"
 })
