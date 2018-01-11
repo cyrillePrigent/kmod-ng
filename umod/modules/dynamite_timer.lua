@@ -35,13 +35,17 @@ dynamiteTimer = {
 }
 
 -- Set default client data.
+--
+-- Print dynamite timer status.
 clientDefaultData["dynamiteTimerMsg"] = 0
 
+-- Set slash command of dynamite timer message status.
 addSlashCommand("client", "dynatimer", {"function", "dynamiteTimerSlashCommand"})
 
 -- Function
 
 -- Called when qagame initializes.
+-- Prepare dynamite timer steps and store first step.
 --  vars is the local vars of et_InitGame function.
 function dynamiteTimerInitGame(vars)      
     local list = {}
@@ -82,6 +86,9 @@ function dynamiteTimerInitGame(vars)
 end
 
 -- Callback function whenever the server or qagame prints a string to the console.
+-- Check if a dynamite is planted and add his dynamite timer.
+-- Display notification if enabled.
+-- Check if a dynamite is defused and remove his dynamite timer.
 --  vars is the local vars of et_Print function.
 function checkDynamiteTimerPrint(vars)
     -- etpro popup: allies planted "the Old City Wall"
@@ -155,6 +162,8 @@ function checkDynamiteTimerPrint(vars)
 end
 
 -- Callback function when qagame runs a server frame.
+-- Display step of dynamite timer if needed.
+-- Remove dynamite timer after exploding.
 --  vars is the local vars passed from et_RunFrame function.
 function checkDynamiteTimerRunFrame(vars)
     if vars["levelTime"] - dynamiteTimer["time"] >= 250 then
@@ -185,12 +194,16 @@ function checkDynamiteTimerRunFrame(vars)
     end
 end
 
--- Stop countdowns on intermission.
 -- Callback function when qagame runs a server frame. (pending end round)
+-- Stop countdowns on intermission.
 --  vars is the local vars passed from et_RunFrame function.
 function dynamiteTimerReset(vars)
-    dynamiteTimer["list"]         = {}
-    dynamiteTimer["alreadyKnown"] = {}
+    if not game["endRoundTrigger"] then
+        dynamiteTimer["list"]         = {}
+        dynamiteTimer["alreadyKnown"] = {}
+
+        removeCallbackFunction("RunFrameEndRound", "dynamiteTimerReset")
+    end
 end
 
 -- Print dynamite timer message.
@@ -247,7 +260,7 @@ function removeDynamiteTimer(location, entity)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function
--- `dynatimer` command here.
+-- Manage dynamite timer message status when dynatimer slash command is used.
 --  params is parameters passed to the function executed in command file.
 function dynamiteTimerSlashCommand(params)
     params.say = msgCmd["chatArea"]
@@ -296,6 +309,7 @@ function setDynamiteTimerMsg(clientNum, value)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage dynamite timer message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function dynamiteTimerUpdateClientUserinfo(vars) 
     local timer = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_dynatimer")

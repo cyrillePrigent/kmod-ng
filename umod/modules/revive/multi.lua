@@ -1,14 +1,12 @@
 -- Multi revive
 
--- From :
-
--- Vetinari's rspree.lua 
+-- From Vetinari's rspree script.
 --
 -- $Date: 2007-03-02 13:35:49 +0100 (Fri, 02 Mar 2007) $ 
 -- $Id: rspree.lua 181 2007-03-02 12:35:49Z vetinari $
 -- $Revision: 181 $
 --
--- version = "1.2.3"
+-- version 1.2.3
 --
 
 -- Global var
@@ -47,10 +45,15 @@ multiRevive = {
 }
 
 -- Set default client data.
+--
+-- Multi revive value.
+clientDefaultData["multiRevive"] = 0
+-- Time of Last revive (in ms).
 clientDefaultData["lastReviveTime"] = 0
-clientDefaultData["multiRevive"]    = 0
+-- Print death spree status.
 clientDefaultData["multiReviveMsg"] = 0
 
+-- Set slash command of multi revive message status.
 addSlashCommand("client", "mrevive", {"function", "multiReviveSlashCommand"})
 
 -- Function
@@ -67,8 +70,8 @@ function setMultiReviveMsg(clientNum, value)
     )
 end
 
--- Function executed when slash command is called in et_ClientCommand function
--- `mrevive` command here.
+-- Function executed when slash command is called in et_ClientCommand function.
+-- Manage multi revive message status when mrevive slash command is used.
 --  params is parameters passed to the function executed in command file.
 function multiReviveSlashCommand(params)
     params.say = msgCmd["chatArea"]
@@ -105,6 +108,7 @@ function multiReviveSlashCommand(params)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage multi revive message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function multiReviveUpdateClientUserinfo(vars)
     local mr = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_mrevive")
@@ -118,9 +122,11 @@ function multiReviveUpdateClientUserinfo(vars)
     end
 end
 
--- Callback function whenever the server or qagame prints a string to the console.
---  vars is the local vars of et_Print function.
-function checkMultiRevivePrint(medic, zombie, tk)
+-- Check multi revive.
+--  medic is the medic client slot id.
+--  zombie is the revived client slot id.
+--  tk is kill type of the revived client.
+function checkMultiRevive(medic, zombie, tk)
     -- tk & revive
     if tk then
         if multiRevive["allowTkRevive"] == 1 and client[medic]["multiRevive"] > 0 then
@@ -182,6 +188,9 @@ function checkMultiRevivePrint(medic, zombie, tk)
     end
 end
 
+-- Callback function of et_Obituary function.
+-- Rest multi revive data of victim.
+--  vars is the local vars of et_Obituary function.
 function resetMultiRevive(vars) 
     client[vars["victim"]]["multiRevive"]    = 0
     client[vars["victim"]]["lastReviveTime"] = 0

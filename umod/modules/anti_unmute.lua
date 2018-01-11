@@ -1,13 +1,15 @@
 -- Anti unmute
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
+-- Override callvote unmute slash command.
 addSlashCommand("client", {"callvote", "unmute"}, {"function", "antiUnmuteSlashCommand"})
 
 -- Function
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Disable unmute vote when callvote unmute slash command is used.
 --  params is parameters passed to the function executed in command file.
 function antiUnmuteSlashCommand(params)
     local clientNum = client2id(params["arg2"])

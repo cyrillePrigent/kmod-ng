@@ -1,5 +1,5 @@
 -- Disabled vote
--- From kmod lua script.
+-- From kmod script.
 
 -- NOTE : We can't disable RESTART MAP button in vote menu ! :<
 
@@ -8,21 +8,28 @@
 -- Global var
 
 voteDisabled = {
-    ["active"]     = false,
-    ["mode"]       = tonumber(et.trap_Cvar_Get("u_dv_mode")),
-    ["modeTime"]   = tonumber(et.trap_Cvar_Get("u_dv_time")),
+    -- Vote disabled status.
+    ["active"] = false,
+    -- Vote disabled mode.
+    ["mode"] = tonumber(et.trap_Cvar_Get("u_dv_mode")),
+    -- Vote disabled mode time. (see config file)
+    ["modeTime"] = tonumber(et.trap_Cvar_Get("u_dv_time")),
+    -- Server cvar backup.
     ["cvarBackup"] = {
         ["vote_allow_shuffleteamsxp"] = 0,
         ["vote_allow_nextmap"]        = 0,
         ["vote_allow_swapteams"]      = 0,
         ["vote_allow_matchreset"]     = 0,
         ["vote_allow_map"]            = 0
-    }
+    },
+    -- Time (in ms) of last vote disabled check.
+    ["time"] = 0,
 }
 
 
 -- Function
 
+-- Disable vote (slash command & user menu)
 function disableVote()
     addSlashCommand("client", {"callvote", "shuffleteamsxp"}, {"function", "disableVoteSlashCommand"})
     addSlashCommand("client", {"callvote", "shuffleteamsxp_norestart"}, {"function", "disableVoteSlashCommand"})
@@ -54,6 +61,7 @@ function disableVote()
     et.trap_FS_FCloseFile(fd)
 end
 
+-- Enable vote (slash command & user menu)
 function enableVote()
     removeSlashCommand("client", {"callvote", "shuffleteamsxp"}, "disableVoteSlashCommand")
     removeSlashCommand("client", {"callvote", "shuffleteamsxp_norestart"}, "disableVoteSlashCommand")
@@ -70,10 +78,15 @@ function enableVote()
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Disable vote when callvote slash command is used.
 --  params is parameters passed to the function executed in command file.
 function disableVoteSlashCommand(params)
     if getAdminLevel(params.clientNum) < 3 then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Voting has been disabled!\n")
+        et.trap_SendConsoleCommand(
+            et.EXEC_APPEND,
+            "cancelvote ; qsay " .. color1 .. "Voting has been disabled!\n"
+        )
+
         return 1
     end
 
@@ -81,6 +94,7 @@ function disableVoteSlashCommand(params)
 end
 
 -- Called when qagame initializes.
+-- Restore vote settings.
 --  vars is the local vars of et_InitGame function.
 function disableVoteInitGame(vars)
     et.trap_SendConsoleCommand(
@@ -90,31 +104,42 @@ function disableVoteInitGame(vars)
 end
 
 -- Callback function when qagame runs a server frame.
+-- Check round time and disable votes after a specified length of time.
 --  vars is the local vars passed from et_RunFrame function.
 function disableVoteRunFrame(vars)
-    local cancelTime
+    if vars["levelTime"] - voteDisabled["time"] >= 250 then
+        local cancelTime
 
-    if voteDisabled["mode"] == 1 then
-        cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) - voteDisabled["modeTime"]) * 60
-    elseif voteDisabled["mode"] == 3 then
-        cancelTime = voteDisabled["modeTime"] * 60
-    else
-        cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) * (voteDisabled["modeTime"] / 100)) * 60
-    end
-
-    if time["counter"] >= cancelTime then
-        if not voteDisabled["active"] then
-            voteDisabled["active"] = true
-            disableVote()
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings are now DISABLED\n")
-        end
-    else
-        if voteDisabled["active"] then
-            enableVote()
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay XP-Shuffle / Map Restart / Swap Teams  / Match Reset and New Campaign votings have been reenabled due to timelimit change\n")
+        if voteDisabled["mode"] == 1 then
+            cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) - voteDisabled["modeTime"]) * 60
+        elseif voteDisabled["mode"] == 3 then
+            cancelTime = voteDisabled["modeTime"] * 60
+        else
+            cancelTime = (tonumber(et.trap_Cvar_Get("timelimit")) * (voteDisabled["modeTime"] / 100)) * 60
         end
 
-        voteDisabled["active"] = false
+        if time["counter"] >= cancelTime then
+            if not voteDisabled["active"] then
+                voteDisabled["active"] = true
+                disableVote()
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay XP-Shuffle / Map Restart / Swap Teams / Match Reset and New Campaign votings are now DISABLED\n"
+                )
+            end
+        else
+            if voteDisabled["active"] then
+                enableVote()
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay XP-Shuffle / Map Restart / Swap Teams / Match Reset and New Campaign votings have been reenabled due to timelimit change\n"
+                )
+            end
+
+            voteDisabled["active"] = false
+        end
+
+        voteDisabled["time"] = vars["levelTime"]
     end
 end
 

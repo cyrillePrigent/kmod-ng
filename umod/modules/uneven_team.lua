@@ -1,26 +1,41 @@
 -- Uneven team
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 unevenTeam = {
-    ["time"]              = {
-        ["check"]             = 0,
-        ["notify"]            = 0,
+    ["time"] = {
+        -- Time (in ms) of last uneven team check.
+        ["check"] = 0,
+        -- Time (in ms) of last uneven team notification.
+        ["notify"] = 0,
     },
-    ["notify"]            = 0,
+    -- Uneven team notification value.
+    ["notify"] = 0,
+    -- Players difference to activate uneven team message.
     ["playersDifference"] = tonumber(et.trap_Cvar_Get("u_ut_teams_difference")),
-    ["escalationCmd"]     = et.trap_Cvar_Get("u_ut_escalation_cmd"),
-    ["message1"]          = et.trap_Cvar_Get("u_ut_message1"),
-    ["message2"]          = et.trap_Cvar_Get("u_ut_message2"),
-    ["message3"]          = et.trap_Cvar_Get("u_ut_message3"),
-    ["message4"]          = et.trap_Cvar_Get("u_ut_message4"),
-    ["msgPosition"]       = et.trap_Cvar_Get("u_ut_msg_position")
+    -- Command executed when Uneven team 3rd message is display. 
+    ["escalationCmd"] = et.trap_Cvar_Get("u_ut_escalation_cmd"),
+    -- Uneven team 1st message content.
+    ["message1"] = et.trap_Cvar_Get("u_ut_message1"),
+    -- Uneven team 2nd message content.
+    ["message2"] = et.trap_Cvar_Get("u_ut_message2"),
+    -- Uneven team 3rd message content.
+    ["message3"] = et.trap_Cvar_Get("u_ut_message3"),
+    -- Uneven team 4th message content.
+    ["message4"] = et.trap_Cvar_Get("u_ut_message4"),
+    -- Uneven team message position.
+    ["msgPosition"] = et.trap_Cvar_Get("u_ut_msg_position")
 }
 
 -- Function
 
 -- Callback function when qagame runs a server frame.
+-- When team is uneven, 1st uneven team message is display.
+-- After 30secs and team is always uneven, 2nd uneven team message is display.
+-- After 30secs and team is always uneven, a command (if existing) is executed and
+-- 3rd uneven team message is display.
+-- After 30secs and team is always uneven, 4th uneven team message is display.
 --  vars is the local vars passed from et_RunFrame function.
 function checkUnevenTeamRunFrame(vars)
     if vars["levelTime"] - unevenTeam["time"]["check"] >= 3000 then

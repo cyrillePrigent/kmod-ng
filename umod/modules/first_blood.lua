@@ -1,21 +1,31 @@
 -- First blood
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 firstBlood = {
-    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_fb_enable_sound")),
-    ["sound"]          = et.trap_Cvar_Get("u_fb_sound"),
-    ["message"]        = et.trap_Cvar_Get("u_fb_message"),
-    ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_fb_msg_default")),
-    ["msgPosition"]    = et.trap_Cvar_Get("u_fb_msg_position"),
+    -- First blood sound status.
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_fb_enable_sound")),
+    -- First blood sound file.
+    ["sound"] = et.trap_Cvar_Get("u_fb_sound"),
+    -- First blood message content.
+    ["message"] = et.trap_Cvar_Get("u_fb_message"),
+    -- Print first blood message by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_fb_msg_default")),
+    -- First blood message position.
+    ["msgPosition"] = et.trap_Cvar_Get("u_fb_msg_position"),
+    -- Noise reduction of first blood sound.
     ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_fb_noise_reduction")),
-    ["trigger"]        = false
+    
+    ["trigger"] = false
 }
 
 -- Set default client data.
+--
+-- Print first blood status.
 clientDefaultData["firstBloodMsg"] = 0
 
+-- Set slash command of first blood message status.
 addSlashCommand("client", "fblood", {"function", "firstBloodSlashCommand"})
 
 -- Function
@@ -33,7 +43,7 @@ function setFirstBloodMsg(clientNum, value)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
--- `fblood` command here.
+-- Manage first blood message status when fblood slash command is used.
 --  params is parameters passed to the function executed in command file.
 function firstBloodSlashCommand(params)
     --params.noDisplayCmd = true
@@ -71,6 +81,7 @@ function firstBloodSlashCommand(params)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage first blood message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function firstBloodUpdateClientUserinfo(vars)
     local fb = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_fblood")
@@ -85,6 +96,8 @@ function firstBloodUpdateClientUserinfo(vars)
 end
 
 -- Callback function when a player kill a enemy.
+-- At first enemy killed, display first blood message and play
+-- first sound blood.
 --  vars is the local vars of et_Obituary function.
 function checkFirstBloodRunObituaryEnemyKill(vars)
     if not firstBlood["trigger"] then
@@ -100,6 +113,8 @@ function checkFirstBloodRunObituaryEnemyKill(vars)
                 playSound(firstBlood["sound"], "firstBloodMsg")
             end
         end
+
+        removeCallbackFunction("ObituaryEnemyKill", "checkFirstBloodRunObituaryEnemyKill")
     end
 end
 

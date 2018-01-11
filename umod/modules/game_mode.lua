@@ -1,11 +1,14 @@
 -- Game mode (frenzy, grenadewar, knifewar, lugerwar, panzerwar, sniperwar & stenwar)
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 gameMode = {
-    ["current"]     = "",
-    ["time"]        = 0,
+    -- Current game mode.
+    ["current"] = "",
+    -- Time (in ms) of last game mode check.
+    ["time"] = 0,
+    -- Current game mode weapons list.
     ["weaponsList"] = {}
 }
 
@@ -258,6 +261,7 @@ function disabledGameMode(params)
 end
 
 -- Called when qagame initializes.
+-- Check if a game mode is select and run it again.
 --  vars is the local vars of et_InitGame function.
 function gameModeInitGame(vars)
     local currentGameMode = et.trap_Cvar_Get("umod_gameMode")
@@ -302,6 +306,9 @@ function setWeaponAmmo(clientNum)
 end
 
 -- Callback function when qagame runs a server frame.
+-- Run game mode run frame function periodically.
+-- Game mode run frame function can be defaultGameModeRunFrame function
+-- Or a custom function (see game mode command file).
 --  vars is the local vars passed from et_RunFrame function.
 function checkGameModeRunFrame(vars)
     -- Reset ammo and stuff every 0.25 of a second rather

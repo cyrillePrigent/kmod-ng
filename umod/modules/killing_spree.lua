@@ -1,29 +1,46 @@
 -- Killing spree & spree record
--- From kmod lua script.
+-- From kmod script.
+
+-- TODO : Rewrite u_ks_end_message cvar name
 
 -- Global var
 
 if killingSpreeModule == 1 then
     killingSpree = {
-        ["list"]           = {},
-        ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_ks_enable_sound")),
-        ["endMessage1"]    = et.trap_Cvar_Get("u_ks_end_message1"),
-        ["endMessage2"]    = et.trap_Cvar_Get("u_ks_end_message2"),
-        ["endMessage3"]    = et.trap_Cvar_Get("u_ks_end_message3"),
-        ["endMessage4"]    = et.trap_Cvar_Get("u_ks_end_message4"),
-        ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_ks_msg_default")),
-        ["msgPosition"]    = et.trap_Cvar_Get("u_ks_msg_position"),
+        -- Killing spree list.
+        --  key   => killing spree amount
+        --  value => list of killing spree data (message & sound)
+        ["list"] = {},
+        -- Killing spree sound status.
+        ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ks_enable_sound")),
+        -- Killing spree ended by enemy.
+        ["endMessage1"] = et.trap_Cvar_Get("u_ks_end_message1"),
+        -- Killing spree ended by selfkill.
+        ["endMessage2"] = et.trap_Cvar_Get("u_ks_end_message2"),
+        -- Killing spree ended by world.
+        ["endMessage3"] = et.trap_Cvar_Get("u_ks_end_message3"),
+        -- Killing spree ended by teamkill.
+        ["endMessage4"] = et.trap_Cvar_Get("u_ks_end_message4"),
+        -- Print killing spree message by default.
+        ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ks_msg_default")),
+        -- Killing spree message position.
+        ["msgPosition"] = et.trap_Cvar_Get("u_ks_msg_position"),
+        -- Noise reduction of killing spree sound.
         ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_ks_noise_reduction"))
     }
     
     -- Set killing spree default client data.
+    --
+    -- Print killing spree status.
     clientDefaultData["killingSpreeMsg"] = 0
-    
+
+    -- Set slash command of killing spree message status.
     addSlashCommand("client", "kspree", {"function", "killingSpreeSlashCommand"})
 
     -- Function
 
     -- Called when qagame initializes.
+    -- Prepare killing spree list.
     --  vars is the local vars of et_InitGame function.
     function killingSpreeInitGame(vars)
         local n = 1
@@ -48,7 +65,7 @@ if killingSpreeModule == 1 then
 
     -- Set client data & client user info if killing spree message & sound is enabled or not.
     --  clientNum is the client slot id.
-    --  value is the boolen value if killing spree message & sound is enabled or not..
+    --  value is the boolen value if killing spree message & sound is enabled or not.
     function setKillingSpreeMsg(clientNum, value)
         client[clientNum]["killingSpreeMsg"] = value
 
@@ -58,8 +75,8 @@ if killingSpreeModule == 1 then
         )
     end
 
-    -- Function executed when slash command is called in et_ClientCommand function
-    -- `kspree` command here.
+    -- Function executed when slash command is called in et_ClientCommand function.
+    -- Manage killing spree message status when kspree slash command is used.
     --  params is parameters passed to the function executed in command file.
     function killingSpreeSlashCommand(params)
         params.say = msgCmd["chatArea"]
@@ -96,6 +113,7 @@ if killingSpreeModule == 1 then
     end
 
     -- Callback function when a client’s Userinfo string has changed.
+    -- Manage killing spree message status when client’s Userinfo string has changed.
     --  vars is the local vars of et_ClientUserinfoChanged function.
     function killingSpreeUpdateClientUserinfo(vars)
         local ks = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_kspree")
@@ -106,24 +124,6 @@ if killingSpreeModule == 1 then
             client[vars["clientNum"]]["killingSpreeMsg"] = 0
         else
             client[vars["clientNum"]]["killingSpreeMsg"] = 1
-        end
-    end
-
-    -- Display killing spree message and play killing spree sound (if enabled).
-    --  vars is the local vars of et_Obituary function.
-    --  msg is the death spree message to display.
-    --  sndFile is the death spree sound to play.
-    function killingSpreeProcess(vars, msg, sndFile)
-        msg = string.gsub(msg, "#killer#", vars["killerName"])
-        msg = string.gsub(msg, "#kills#", client[vars["killer"]]["killingSpree"])
-        sayClients(killingSpree["msgPosition"], msg, "killingSpreeMsg")
-
-        if killingSpree["enabledSound"] == 1 then
-            if killingSpree["noiseReduction"] == 1 then
-                playSound(sndFile, "killingSpreeMsg", vars["killer"])
-            else
-                playSound(sndFile, "killingSpreeMsg")
-            end
         end
     end
 
@@ -148,8 +148,10 @@ end
 
 if spreeRecordModule == 1 then
     spree = {
+        -- Current spree record.
         ["killsRecord"] = 0,
-        ["msg"]         = {
+        -- Current spree message.
+        ["msg"] = {
             ["oldShort"] = "^3[Old: ^7N/A^3]",
             ["oldLong"]  = "^3Spree Record: ^7There is no current spree record",
             ["current"]  = "Current spree record: ^7N/A"
@@ -157,8 +159,10 @@ if spreeRecordModule == 1 then
     }
 
     mapSpree = {
+        -- Current map spree record.
         ["killsRecord"] = 0,
-        ["msg"]         = {
+        -- Current map spree message.
+        ["msg"] = {
             ["oldShort"] = "^3[Old: ^7N/A^3]",
             ["oldLong"]  = "^3Map Spree Record: ^7There is no current spree record",
             ["current"]  = "Current Map spree record: ^7N/A"
@@ -261,6 +265,8 @@ if spreeRecordModule == 1 then
             .. " ^7with ^3" .. kills .. " ^7kills at " .. date
     end
 
+    -- Callback function when ReadConfig is called in et_InitGame function
+    -- and in the !readconfig client command.
     -- Load and set spree record and map spree record.
     function loadSpreeRecord()
         -- Load spree record.
@@ -306,9 +312,9 @@ if spreeRecordModule == 1 then
         et.trap_FS_FCloseFile(fd)
     end
 
-    -- Callback function of et_Obituary function.
+    -- Check if victim have new spree / map pree record.
     --  vars is the local vars of et_Obituary function.
-    function checkSpreeRecordObituary(vars)
+    function checkSpreeRecord(vars)
         if client[vars["victim"]]["killingSpree"] > spree["killsRecord"] then
             writeSpreeRecord(vars["victim"], client[vars["victim"]]["killingSpree"])
         end
@@ -316,8 +322,6 @@ if spreeRecordModule == 1 then
         if client[vars["victim"]]["killingSpree"] > mapSpree["killsRecord"] then
             writeMapSpreeRecord(vars["victim"], client[vars["victim"]]["killingSpree"])
         end
-
-        --client[vars["victim"]]["killingSpree"] = 0
     end
 
     -- Add callback spree record function.
@@ -327,6 +331,8 @@ if spreeRecordModule == 1 then
 end
 
 -- Set common default client data.
+--
+-- Killing spree value.
 clientDefaultData["killingSpree"] = 0
 
 -- Set module command.
@@ -335,6 +341,8 @@ cmdList["client"]["!spree"] = "/command/client/spree.lua"
 -- Function
 
 -- Callback function when qagame runs a server frame. (pending end round)
+-- At end of round, heck players and display killing spree end message if needed.
+-- Check and display spree and map spree records if needed.
 --  vars is the local vars passed from et_RunFrame function.
 function checkKillingSpreeRunFrameEndRound(vars)
     if not game["endRoundTrigger"] then
@@ -424,44 +432,63 @@ function checkKillingSpreeRunFrameEndRound(vars)
                 "qsay ^" .. color .. mapSpree["msg"]["current"] .. "\n"
             )
         end
+
+        removeCallbackFunction("RunFrameEndRound", "checkKillingSpreeRunFrameEndRound")
     end
 end
 
 -- Callback function when a player kill a enemy.
+-- If player kill a enemy, increment his killing spree counter.
+-- Check if victim have new spree / map pree record.
+-- If player is on killing spree, display his killing spree message and
+-- play killing spree sound. If victim is on killing spree, display his
+-- killing spree end message. Reset killing spree counter of victim.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryEnemyKill(vars)
     client[vars["killer"]]["killingSpree"] = client[vars["killer"]]["killingSpree"] + 1
 
     if spreeRecordModule == 1 then
-        checkSpreeRecordObituary(vars)
+        checkSpreeRecord(vars)
     end
 
     if killingSpreeModule == 1 then
         local ks = client[vars["killer"]]["killingSpree"]
 
         if killingSpree["list"][ks] then
-            killingSpreeProcess(
-                vars,
-                killingSpree["list"][ks]["message"],
-                killingSpree["list"][ks]["sound"]
-            )
+            local msg = killingSpree["list"][ks]["message"]
+            msg = string.gsub(msg, "#killer#", vars["killerName"])
+            msg = string.gsub(msg, "#kills#", client[vars["killer"]]["killingSpree"])
+            sayClients(killingSpree["msgPosition"], msg, "killingSpreeMsg")
+
+            if killingSpree["enabledSound"] == 1 then
+                if killingSpree["noiseReduction"] == 1 then
+                    playSound(
+                        killingSpree["list"][ks]["sound"],
+                        "killingSpreeMsg",
+                        vars["killer"]
+                    )
+                else
+                    playSound(
+                        killingSpree["list"][ks]["sound"],
+                        "killingSpreeMsg"
+                    )
+                end
+            end
         end
 
         if client[vars["victim"]]["killingSpree"] >= 5 then
             killingSpreeEndProcess(vars, killingSpree["endMessage1"], vars["victim"])
         end
     end
-    
+
     client[vars["victim"]]["killingSpree"] = 0
 end
 
 -- Callback function when world kill a player.
+-- If killer is killed by the world and is on killing spree, display his killing spree end
+-- message and reset killing spree counter of victim.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryWorldKill(vars)
-    if spreeRecordModule == 1 then
-        checkSpreeRecordObituary(vars)
-    end
-
     if killingSpreeModule == 1 and client[vars["victim"]]["killingSpree"] >= 5 then
         killingSpreeEndProcess(vars, killingSpree["endMessage3"], vars["victim"]) 
     end
@@ -470,12 +497,10 @@ function checkKillingSpreeObituaryWorldKill(vars)
 end
 
 -- Callback function when victim is killed by mate (team kill).
+-- If killer is team killed and is on killing spree, display his killing spree end message
+-- and reset killing spree counter of killer and victim.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryTeamKill(vars)
-    if spreeRecordModule == 1 then
-        checkSpreeRecordObituary(vars)
-    end
-
     if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
         killingSpreeEndProcess(vars, killingSpree["endMessage4"], vars["killer"])
     end
@@ -485,12 +510,10 @@ function checkKillingSpreeObituaryTeamKill(vars)
 end
 
 -- Callback function when victim is killed himself (self kill).
+-- If killer make selfkill and is on killing spree, display his killing spree end message
+-- and reset his killing spree counter.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituarySelfKill(vars)
-    if spreeRecordModule == 1 then
-        checkSpreeRecordObituary(vars)
-    end
-
     if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
         killingSpreeEndProcess(vars, killingSpree["endMessage2"], vars["victim"])
     end
@@ -505,10 +528,17 @@ if tonumber(et.trap_Cvar_Get("u_ks_teamkill_allowed")) == 0 then
     })
 end
 
+if spreeRecordModule == 1 then
+    addCallbackFunction({
+        ["ObituaryTeamKill"]  = "checkSpreeRecord",
+        ["ObituaryWorldKill"] = "checkSpreeRecord",
+        ["ObituarySelfKill"]  = "checkSpreeRecord"
+    })
+end
+
 addCallbackFunction({
     ["RunFrameEndRound"]  = "checkKillingSpreeRunFrameEndRound",
     ["ObituaryEnemyKill"] = "checkKillingSpreeObituaryEnemyKill",
     ["ObituaryWorldKill"] = "checkKillingSpreeObituaryWorldKill",
     ["ObituarySelfKill"]  = "checkKillingSpreeObituarySelfKill"
 })
-

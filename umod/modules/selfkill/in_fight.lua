@@ -1,62 +1,73 @@
 -- Selfkill in fight
 
--- nofightsk.lua
---
+-- From nofightsk script.
+
 -- GhosT:McSteve
 -- www.ghostworks.co.uk
 -- #ghostworks, #pbbans @quakenet
 -- Version 1, 25/1/07
 
--- skcount.lua
---
+-- From skcount script.
+
 -- Selfkill penalty script
 -- many thanks to GhosT:Rabid for his help in building the class/weapon table
 -- version:  v1.1
 -- by GhosT:McSteve, 25/11/06
 
--- ???.lua
---
+-- From ???
+
 -- Disabled selfkill in fight for x seconds
 
 -- Global var
 
 selfkillInFight = {
-    ["sampleRate"]     = 100,
-    ["time"]           = 0,
-    ["punishment"]     = tonumber(et.trap_Cvar_Get("u_selfkill_punishment")),
-    ["hitWait"]        = tonumber(et.trap_Cvar_Get("u_selfkill_hit_wait")),
-    ["limit"]          = tonumber(et.trap_Cvar_Get("u_selfkill_limit")),
+    -- Time (in ms) of last selfkill in fight check.
+    ["time"] = 0,
+    -- Punishment level.
+    ["punishment"] = tonumber(et.trap_Cvar_Get("u_selfkill_punishment")),
+    -- Time to wait (in seconds) before selfkill
+    ["hitWait"] = tonumber(et.trap_Cvar_Get("u_selfkill_hit_wait")),
+    -- Limit of allowed selkill.
+    ["limit"] = tonumber(et.trap_Cvar_Get("u_selfkill_limit")),
+    -- Percentage before warning.
     ["warnPercentage"] = et.trap_Cvar_Get("u_selfkill_warn_percentage"),
-    ["msgPosition"]    = et.trap_Cvar_Get("u_selfkill_msg_position")
+    -- Selfkill in fight message position.
+    ["msgPosition"] = et.trap_Cvar_Get("u_selfkill_msg_position")
 }
 
 -- Set default client data.
-clientDefaultData["damageReceived"]       = 0
+--
+-- Last damage received value.
+clientDefaultData["damageReceived"] = 0
+-- Time to end damage received check.
 clientDefaultData["damageReceivedEnding"] = 0
 
 if selfkillInFight["punishment"] > 0 and selfkillInFight["punishment"] < 4 then
+    -- Number of selkill value.
     clientDefaultData["selfkills"] = 0
 end
 
 if selfkillInFight["punishment"] == 2 then
+    -- Punishment level.
     clientDefaultData["selfkillPunishment"] = 0
 end
 
+-- Override kill slash command.
 addSlashCommand("client", "kill", {"function", "selfkillInFightSlashCommand"})
 
 -- Function
 
 -- Callback function when qagame runs a server frame.
+-- Check periodically players is hit.
 --  vars is the local vars passed from et_RunFrame function.
 function checkSelfkillInFightRunFrame(vars)
-    if vars["levelTime"] - selfkillInFight["time"] >= selfkillInFight["sampleRate"] then
-        -- for all clients, check the client's damage received
+    if vars["levelTime"] - selfkillInFight["time"] >= 100 then
+        -- For all clients, check the client's damage received
         for p = 0, clientsLimit, 1 do
             if client[p]["team"] == 1 or client[p]["team"] == 2 then
-                --compare damage to the last value (check if ~= 0)
+                -- Compare damage to the last value (check if ~= 0)
                 local damageReceived = et.gentity_get(p, "sess.damage_received")
 
-                --current value = et.gentity_get(p, "sess.damage_received")
                 if damageReceived > client[p]["damageReceived"] then
                     -- Damage has been taken in the last <sampleRate> milliseconds -> set switch to 10
                     client[p]["damageReceivedEnding"] = vars["levelTime"] + (selfkillInFight["hitWait"] * 1000)
@@ -78,6 +89,9 @@ function checkSelfkillInFightRunFrame(vars)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- If kill slash command is used and if it'a a selfkill in fight, apply
+-- punishment : warning, limit selkill, incur a penalty at next respawn,
+-- move to spectator or kick.
 --  params is parameters passed to the function executed in command file.
 function selfkillInFightSlashCommand(params)
     if client[params.clientNum]["team"] ~= 3 and et.gentity_get(params.clientNum, "health") > 0 then
@@ -86,8 +100,6 @@ function selfkillInFightSlashCommand(params)
             params.say          = selfkillInFight["msgPosition"]
             params.noDisplayCmd = true
 
-            debug("selfkillInFight", selfkillInFight)
-            
             if selfkillInFight["punishment"] == 0 then
                 params.broadcast2allClients = true
 
@@ -189,60 +201,61 @@ function selfkillInFightSlashCommand(params)
     return 0
 end
 
--- Callback function when a client is spawned.
---  vars is the local vars passed from et_ClientSpawn function.
-function selfkillInFightClientSpawn(vars)
-    if vars["revived"] ~= 0 then
-        return
+if selfkillInFight["punishment"] == 2 then
+    -- Callback function when a client is spawned.
+    -- Apply player punishment. 
+    --  vars is the local vars passed from et_ClientSpawn function.
+    function selfkillInFightClientSpawn(vars)
+        if vars["revived"] ~= 0 then
+            return
+        end
+
+        -- selfkillPunishment = 1, warning only
+        if client[vars["clientNum"]]["selfkillPunishment"] < 2 then
+            return
+        end
+
+        -- Check the player's weapon
+        local weapon = et.gentity_get(vars["clientNum"], "s.weapon")
+
+        -- Check the player's ammo
+        local ammo     = et.gentity_get(vars["clientNum"], "ps.ammo", weapon)
+        local ammoClip = et.gentity_get(vars["clientNum"], "ps.ammoclip", weapon)
+
+        -- selfkillPunishment = 2, -1/2 clip of ammo
+        if client[vars["clientNum"]]["selfkillPunishment"] == 2  then
+            et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, ammoClip - (ammoClip / 2))
+
+        -- selfkillPunishment = 3, -1 clip of ammo
+        elseif client[vars["clientNum"]]["selfkillPunishment"] == 3  then
+            et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
+
+        -- selfkillPunishment = 4, -1 1/2 clips of ammo
+        elseif client[vars["clientNum"]]["selfkillPunishment"] == 4  then
+            et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
+            et.gentity_set(vars["clientNum"], "ps.ammo", weapon, ammo - (ammo / 2))
+
+        -- selfkillPunishment = 5, -1 2/3 clips of ammo + set health to 70 HP
+        elseif client[vars["clientNum"]]["selfkillPunishment"] == 5  then
+            et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
+            et.gentity_set(vars["clientNum"], "ps.ammo", weapon, ammo - (2 * ammo / 3))
+            et.gentity_set(vars["clientNum"], "health", 70)
+
+        -- selfkillPunishment = 6, - all ammo + set health to 10 HP
+        elseif client[vars["clientNum"]]["selfkillPunishment"] >= 6  then
+            et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
+            et.gentity_set(vars["clientNum"], "ps.ammo", weapon, 0)
+            et.gentity_set(vars["clientNum"], "health", 10)
+        end
     end
 
-    -- selfkillPunishment = 1, warning only
-    if client[vars["clientNum"]]["selfkillPunishment"] < 2 then
-        return
-    end
-
-    -- check the player's weapon
-    local weapon = et.gentity_get(vars["clientNum"], "s.weapon")
-
-    --check the player's ammo
-    local ammo     = et.gentity_get(vars["clientNum"], "ps.ammo", weapon)
-    local ammoClip = et.gentity_get(vars["clientNum"], "ps.ammoclip", weapon)
-
-    -- selfkillPunishment = 2, -1/2 clip of ammo
-    if client[vars["clientNum"]]["selfkillPunishment"] == 2  then
-        et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, ammoClip - (ammoClip / 2))
-
-    -- selfkillPunishment = 3, -1 clip of ammo
-    elseif client[vars["clientNum"]]["selfkillPunishment"] == 3  then
-        et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
-
-    -- selfkillPunishment = 4, -1 1/2 clips of ammo
-    elseif client[vars["clientNum"]]["selfkillPunishment"] == 4  then
-        et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
-        et.gentity_set(vars["clientNum"], "ps.ammo", weapon, ammo - (ammo / 2))
-
-    -- selfkillPunishment = 5, -1 2/3 clips of ammo + set health to 70 HP
-    elseif client[vars["clientNum"]]["selfkillPunishment"] == 5  then
-        et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
-        et.gentity_set(vars["clientNum"], "ps.ammo", weapon, ammo - (2 * ammo / 3))
-        et.gentity_set(vars["clientNum"], "health", 70)
-
-    -- selfkillPunishment = 6, - all ammo + set health to 10 HP
-    elseif client[vars["clientNum"]]["selfkillPunishment"] >= 6  then
-        et.gentity_set(vars["clientNum"], "ps.ammoclip", weapon, 0)
-        et.gentity_set(vars["clientNum"], "ps.ammo", weapon, 0)
-        et.gentity_set(vars["clientNum"], "health", 10)
-    end
+    -- Add callback selfkill in fight function.
+    addCallbackFunction({
+        ["ClientSpawn"] = "selfkillInFightClientSpawn"
+    })
 end
 
 -- Add callback selfkill in fight function.
-if selfkillInFight["punishment"] == 2 then
-    addCallbackFunction({
-        ["RunFrame"]    = "checkSelfkillInFightRunFrame",
-        ["ClientSpawn"] = "selfkillInFightClientSpawn"
-    })
-else
-    addCallbackFunction({
-        ["RunFrame"] = "checkSelfkillInFightRunFrame"
-    })
-end
+addCallbackFunction({
+    ["RunFrame"] = "checkSelfkillInFightRunFrame"
+})

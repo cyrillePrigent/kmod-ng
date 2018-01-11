@@ -1,5 +1,5 @@
 -- Commands
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
@@ -14,10 +14,13 @@ commands = {
     ["level"] = {}
 }
 
+-- Highest admin level
 maxAdminLevel = 0
 
 -- Function
 
+-- Callback function when ReadConfig is called in et_InitGame function
+-- and in the !readconfig client command.
 -- Read command file and store command data.
 function loadCommands()
     local funcStart = et.trap_Milliseconds()

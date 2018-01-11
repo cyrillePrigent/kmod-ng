@@ -1,9 +1,13 @@
 -- Name stealing protection
--- From etadmin perl script.
+-- From etadmin script.
         
 -- Function
 
-function checkNameStealingProtectionClientUserinfoChanged(vars)
+-- Callback function when a client’s Userinfo string has changed.
+-- When client’s Userinfo string has change, check his name is
+-- already used and kick him if needed.
+--  vars is the local vars of et_ClientUserinfoChanged function.
+function checkNameStealingProtectionClientUserinfo(vars)
     local name = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "name")
 
     -- Check if name is modified (Exclude default name)
@@ -39,5 +43,5 @@ end
 
 -- Add callback name stealing protection function.
 addCallbackFunction({
-    ["ClientUserinfoChanged"] = "checkNameStealingProtectionClientUserinfoChanged"
+    ["ClientUserinfoChanged"] = "checkNameStealingProtectionClientUserinfo"
 })

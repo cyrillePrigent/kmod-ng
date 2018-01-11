@@ -1,15 +1,18 @@
 -- Mutes
+-- From kmod script.
 
 -- Global var
 
 mute = {
-    -- key   => ip address
-    -- value => duration in seconds, -1 for permanent mute
+    -- Mute duration list.
+    --  key   => ip address
+    --  value => duration in seconds, -1 for permanent mute
     ["duration"] = {}
 }
 
 -- Set default client data.
---  mute end (in miliseconds)
+--
+-- Mute end (in ms)
 clientDefaultData["muteEnd"] = 0
 
 -- Set module command.
@@ -17,6 +20,8 @@ cmdList["client"]["!pmute"] = "/command/client/pmute.lua"
         
 -- Function
 
+-- Callback function when ReadConfig is called in et_InitGame function
+-- and in the !readconfig client command.
 -- Initializes mutes data.
 -- Load mutes entry of mutes.cfg file.
 function loadMutes()
@@ -125,15 +130,15 @@ function removeMute(clientNum)
     mute["duration"][ip] = nil
 end
 
--- Update client mute data when client disconnect & qagame shuts down.
+-- Check client mute.
 --  clientNum is the client slot id.
-function updateClientMutedata(clientNum)
+function checkClientMute(clientNum)
     -- If player has not yet finished his mute sentance,
     -- edit it in mutes file.
     if client[clientNum]["muteEnd"] > 0 then
         setMute(clientNum, (client[clientNum]["muteEnd"] - time["frame"]) / 1000)
 
-    -- If player has finished his mute sentance,
+    -- Or if player has finished his mute sentance,
     -- remove it from mutes file.
     elseif client[clientNum]["muteEnd"] == 0 then
         local ip = getClientIp(clientNum)
@@ -145,16 +150,18 @@ function updateClientMutedata(clientNum)
 end
 
 -- Callback function when qagame shuts down.
+-- Check client mute before next map or server restart.
 --  vars is the local vars passed from et_ShutdownGame function.
 function checkMuteShutdownGame(vars)
     for i = 0, clientsLimit, 1 do
         if et.gentity_get(0, "inuse") then
-            updateClientMutedata(i)
+            checkClientMute(i)
         end
     end
 end
 
 -- Callback function when qagame runs a server frame (warmup, round & end of round).
+-- Check muted player if he will be unmuted.
 --  vars is the local vars passed from et_RunFrame function.
 function checkMuteRunFrame(vars)
     for i = 0, clientsLimit, 1 do
@@ -215,6 +222,7 @@ function checkMuteRunFrame(vars)
 end
 
 -- Callback function when client begin.
+-- Check if client is muted and display his mute status.
 --  vars is the local vars passed from et_ClientBegin function.
 function checkMuteClientBegin(vars)
     local ip = getClientIp(vars["clientNum"])
@@ -261,9 +269,10 @@ function checkMuteClientBegin(vars)
 end
 
 -- Callback function when client disconnect.
+-- Check client mute before client disconnect.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function checkMuteClientDisconnect(vars)
-    updateClientMutedata(vars["clientNum"])
+    checkClientMute(vars["clientNum"])
 end
 
 -- Add callback mute function.

@@ -1,15 +1,22 @@
 -- Curse filter
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
+-- Bad word list.
+--  key   => numeric index
+--  value => bad word
 badWordList = {}
 
 -- Set default client data.
+--
+-- Number of auto-mute apply.
 clientDefaultData["muteMultipliers"] = 0
 
 -- Function
 
+-- Callback function when ReadConfig is called in et_InitGame function
+-- and in the !readconfig client command.
 -- Load unauthorized word stored in badwords.list file.
 function loadBadWord()
     local fd, len = et.trap_FS_FOpenFile("badwords.list", et.FS_READ)

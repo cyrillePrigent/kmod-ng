@@ -1,16 +1,20 @@
 -- Log
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
+-- Log private message status.
 logPrivateMsg = tonumber(et.trap_Cvar_Get("u_log_private_message"))
 
 -- Function
 
 if logPrivateMsg == 1 then
+    -- Override team private message slash command.
     addSlashCommand("client", "mt", {"function", "teamPrivateMessageSlashCommand"})
 
+    -- TODO : Check /mt command.
     -- Function executed when slash command is called in et_ClientCommand function.
+    -- Override team private message slash command for log team private message.
     --  params is parameters passed to the function executed in command file.
     function teamPrivateMessageSlashCommand(params)
         local time       = os.date("%x %I:%M:%S%p")
@@ -99,13 +103,16 @@ if logPrivateMsg == 1 then
     end
 
     if advancedPm == 0 then
+        -- Override private message slash command.
         addSlashCommand("client", "m", {"function", "logPrivateMessageSlashCommand"})
         addSlashCommand("client", "pm", {"function", "logPrivateMessageSlashCommand"})
         addSlashCommand("client", "msg", {"function", "logPrivateMessageSlashCommand"})
 
+        -- Add private message slash command for server console.
         addSlashCommand("console", "m2", {"function", "logPrivateMessageSlashCommand"})
 
         -- Function executed when slash command is called in et_ClientCommand function.
+        -- Override private message slash command for log private message.
         --  params is parameters passed to the function executed in command file.
         function logPrivateMessageSlashCommand(params)
             params.displayInConsole = true
@@ -118,10 +125,11 @@ if logPrivateMsg == 1 then
                 targetNum,
                 client[targetNum]["name"]
             )
+
+            return 0
         end
     end
 end
-
 
 -- Write a text in log file.
 --  text is the text to write in log file.
@@ -191,6 +199,7 @@ function logChat(clientNum, mode, msg)
 end
 
 -- Callback function when client begin.
+-- Log when player enter the game.
 --  vars is the local vars passed from et_ClientBegin function.
 function logClientBegin(vars)
     local clientInfo = et.trap_GetUserinfo(vars["clientNum"])
@@ -205,6 +214,7 @@ function logClientBegin(vars)
 end
 
 -- Callback function when client disconnect.
+-- Log when player disconnect.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function logClientDisconnect(vars)
     local name = et.Q_CleanStr(client[vars["clientNum"]]["name"])
@@ -213,9 +223,14 @@ function logClientDisconnect(vars)
 end
 
 -- Callback function when qagame shuts down.
+-- Log when server restart or map change.
 --  vars is the local vars passed from et_ShutdownGame function.
 function logShutdownGame(vars)
-    writeLog("\n***SERVER RESTART OR MAP CHANGE***\n\n")
+    if vars["restart"] == 0 then
+        writeLog("\n***SERVER MAP CHANGE***\n\n")
+    else
+        writeLog("\n***SERVER RESTART***\n\n")
+    end
 end
 
 -- Add callback log function.

@@ -1,13 +1,16 @@
 -- Display killer HP
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 killerHp = {
-    ["msgDefault"]  = tonumber(et.trap_Cvar_Get("u_khp_msg_default")),
+    -- Print killer HP messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_khp_msg_default")),
+    -- Killer HP message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_khp_msg_position")
 }
 
+-- Explosive inheritance weapon list.
 explosiveInheritanceWeapon = {
     [4]  = true, -- GRENADE
     [18] = true, -- GRENADE_LAUNCHER
@@ -19,9 +22,11 @@ explosiveInheritanceWeapon = {
 }
 
 -- Set default client data.
--- clientDefaultData["killerHp"] = 0
+--
+-- Print killer HP status.
 clientDefaultData["killerHpMsg"] = 0
 
+-- Set slash command of killer HP message status.
 addSlashCommand("client", "killerhp", {"function", "killerHpSlashCommand"})
 
 -- Function
@@ -39,10 +44,9 @@ function setKillerHpMsg(clientNum, value)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
--- `killerhp` command here.
+-- Manage killer HP message status when killerhp slash command is used.
 --  params is parameters passed to the function executed in command file.
 function killerHpSlashCommand(params)
-    --params.noDisplayCmd = true
     params.say = msgCmd["chatArea"]
     params.cmd = "/" .. params.cmd
 
@@ -77,6 +81,7 @@ function killerHpSlashCommand(params)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage killer HP message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function killerHpUpdateClientUserinfo(vars)
     local khp = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_killerhp")
@@ -91,34 +96,33 @@ function killerHpUpdateClientUserinfo(vars)
 end
 
 -- Callback function when a player kill a enemy.
+-- Display killer HP when a player is killed and the killer is alive.
+-- Add a notification if killer use adrenaline.
+-- If killer is death, check his weapon and display notification for
+-- explosive inheritance.
 --  vars is the local vars of et_Obituary function.
 function displayKillerHpObituaryEnemyKill(vars)
     if client[vars["victim"]]["killerHpMsg"] == 0 then
         return
     end
 
-    --client[vars["killer"]]["killerHp"] = (time["frame"] + 5000)
     local hp = et.gentity_get(vars["killer"], "health")
 
-    --if client[vars["victim"]]["killerHp"] < time["frame"] then
-        if hp > 0 then
+    if hp > 0 then
+        et.trap_SendServerCommand(
+            vars["victim"],
+            killerHp["msgPosition"] .. " \""  .. color1 .. vars["killerName"]
+            .. color1 .. "'s hp (" .. color3 .. hp .. color1 .. ")\""
+        )
+
+        if client[vars["killer"]]["useAdrenaline"] == 1 then
             et.trap_SendServerCommand(
                 vars["victim"],
-                killerHp["msgPosition"] .. " \""  .. color1 .. vars["killerName"]
-                .. color1 .. "'s hp (" .. color3 .. hp .. color1 .. ")\""
+                killerHp["msgPosition"] .. " \"" .. color1 .. vars["killerName"]
+                .. color1 .. " is an adrenaline junkie!\""
             )
-
-            if client[vars["killer"]]["useAdrenaline"] == 1 then
-                et.trap_SendServerCommand(
-                    vars["victim"],
-                    killerHp["msgPosition"] .. " \"" .. color1 .. vars["killerName"]
-                    .. color1 .. " is an adrenaline junkie!\""
-                )
-            end
         end
-    --end
-
-    if hp <= 0 then
+    else
         if explosiveInheritanceWeapon[vars["meansOfDeath"]] then
             et.trap_SendServerCommand(
                 vars["victim"],

@@ -1,5 +1,5 @@
 -- Admin management.
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
@@ -18,10 +18,13 @@ admin = {
     ["pwd"] = et.trap_Cvar_Get("u_admin_password")
 }
 
+-- Set slash command of admins list display.
 addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
 
 -- Function
 
+-- Callback function when ReadConfig is called in et_InitGame function
+-- and in the !readconfig client command.
 -- Initializes admin data.
 -- Load admin entry of admin.cfg file.
 function loadAdmins()

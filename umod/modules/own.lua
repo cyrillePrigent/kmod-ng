@@ -1,11 +1,14 @@
 --  Own
---  From gw_ref lua script.
+--  From gw_ref script.
+
 --  By GhosT:McSteve, 3.12.06, www.ghostworks.co.uk
 --      Thanks to Fusion for his patience during the debugging.
 
 -- Global var
 
 -- Set default client data.
+--
+-- Own status.
 clientDefaultData["own"] = 0
 
 -- Set module command.
@@ -19,6 +22,8 @@ cmdList["console"]["!own_reset"] = "/command/both/own_reset.lua"
 -- Function
 
 -- Callback function of et_Obituary function.
+-- When a player is owned and kill a another player, kill him
+-- and display own message.
 --  vars is the local vars of et_Obituary function.
 function checkOwnObituary(vars)
     if vars["killer"] ~= 1022 and client[vars["killer"]]["own"] == 1 then

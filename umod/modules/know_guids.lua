@@ -57,8 +57,8 @@ addSlashCommand("client", "team", {"function", "checkKnownGuidsTeamEntrance"})
 -- Function
 
 if knownGuids["forceWait"] == 1 then
-    -- Load pending player guid and set remaining time before join a team on server.
     -- Called when qagame initializes.
+    -- Load pending player guid and set remaining time before join a team on server.
     --  vars is the local vars of et_InitGame function.
     function knownGuidsInitGame(vars)
         local fd, len = et.trap_FS_FOpenFile(
@@ -90,8 +90,8 @@ if knownGuids["forceWait"] == 1 then
         et.trap_FS_FCloseFile(fd)
     end
 
-    -- Save pending player guid and remaining time before join a team on server.
     -- Callback function when qagame shuts down.
+    -- Save pending player guid and remaining time before join a team on server.
     --  vars is the local vars passed from et_ShutdownGame function.
     function knownGuidsShutdownGame(vars)
         local fd, len = et.trap_FS_FOpenFile(
@@ -117,8 +117,8 @@ if knownGuids["forceWait"] == 1 then
     end
 end
 
--- Check player guid before join server.
 -- Callback function when a client begins (becomes active, and enters the gameworld).
+-- Check player guid before join server.
 --  vars is the local vars passed from et_ClientBegin function.
 function checkKnownGuidsClientBegin(vars)
     -- If client data is set at Init Game, don't check client.
@@ -194,8 +194,8 @@ function addKnownGuid(clientNum)
     et.trap_FS_FCloseFile(fd)
 end
 
--- Check player team entrance.
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Check player team entrance.
 --  params is parameters passed to the function executed in command file.
 function checkKnownGuidsTeamEntrance(params)
     -- Don't check player guid already know.

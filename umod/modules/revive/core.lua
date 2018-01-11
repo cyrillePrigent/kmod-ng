@@ -11,17 +11,19 @@ revive = {
 
 if tonumber(et.trap_Cvar_Get("u_revive_spree")) == 1 then
     dofile(umod_path .. "/modules/revive/spree.lua")
-    table.insert(revive["printCallbackFunction"], "checkReviveSpreePrint")
+    table.insert(revive["printCallbackFunction"], "checkReviveSpree")
 end
 
 if tonumber(et.trap_Cvar_Get("u_multi_revive")) == 1 then
     dofile(umod_path .. "/modules/revive/multi.lua")
-    table.insert(revive["printCallbackFunction"], "checkMultiRevivePrint")
+    table.insert(revive["printCallbackFunction"], "checkMultiRevive")
 end
 
 -- Function
 
 -- Callback function whenever the server or qagame prints a string to the console.
+-- Check medic revive line, display revive announce if enabled.
+-- Check revive spree and multi revive if modules are enabled.
 --  vars is the local vars of et_Print function.
 function checkRevivePrint(vars)
     if vars["arg"][1] == "Medic_Revive:" then

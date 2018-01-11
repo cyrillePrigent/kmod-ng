@@ -4,11 +4,14 @@
 -- Global var
 
 birthday = {
-    ["time"]     = 0,
+    -- Time (in ms) of last birthday announce check.
+    ["time"] = 0,
+    -- List of current birthday.
+    --  key   => player name
+    --  value => player age 
     ["nameList"] = {},
-    ["guidList"] = {},
-    ["msg"]      = "",
-    --["sound"]    = et.trap_Cvar_Get("k_birthdaysoundfile") -- sound/misc/rank_up.wav
+    -- Current birthday announce content.
+    ["msg"] = ""
 }
 
 -- Set module command.
@@ -19,28 +22,29 @@ cmdList["console"]["!removebirthday"] = "/command/both/removebirthday.lua"
 
 -- Function
 
+-- Callback function when ReadConfig is called in et_InitGame function
+-- and in the !readconfig client command.
 -- Initializes birthday data.
 -- Load birthday entry of birthday.cfg file.
 function loadBirthday()
     local fd, len = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
 
     if len == -1 then
-        et.G_LogPrint("WARNING: birthday.cfg file no found / not readable!\n")
+        et.G_LogPrint("uMod WARNING: birthday.cfg file no found / not readable!\n")
     elseif len == 0 then
-        et.G_Print("WARNING: No Birthday's Defined!\n")
+        et.G_Print("uMod: No birthday's defined!\n")
     else
-        local fileStr = et.trap_FS_Read(fd, len)
+        local fileStr    = et.trap_FS_Read(fd, len)
         local month, day = os.date("%m"), os.date("%d")
 
-        for bDay, bMonth, bYear, name, guid
-          in string.gfind(fileStr, "(%d+)%-(%d+)%-(%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+        for bDay, bMonth, bYear, name
+          in string.gfind(fileStr, "(%d+)%-(%d+)%-(%d+)%s%-%s([^%\r%\n]*)") do
             if bDay == day and bMonth == month then
                 birthday["nameList"][name] = os.date("%Y") - tonumber(bYear)
-                --birthday["guidList"][guid] = name
             end
         end
 
-        formatBirthdayGlobalMsg()
+        birthday["msg"] = formatBirthdayGlobalMsg()
 
         if birthday["msg"] ~= "" then
             addCallbackFunction({ ["RunFrame"] = "checkBirthdayRunFrame" })
@@ -55,9 +59,7 @@ end
 --  bDay is the day of birthday date.
 --  bMonth is the month of birthday date.
 --  bYear is the year of birthday date.
---  guid is the player guid of birthday entry.
-function setBirthday(name, bDay, bMonth, bYear, guid)
-    guid = guid or ""
+function setBirthday(name, bDay, bMonth, bYear)
     local fdIn, lenIn = et.trap_FS_FOpenFile("birthday.cfg", et.FS_READ)
     local fdOut, lenOut = et.trap_FS_FOpenFile("birthday.tmp.cfg", et.FS_WRITE)
     local result
@@ -71,29 +73,27 @@ function setBirthday(name, bDay, bMonth, bYear, guid)
         result = "add"
         local birthdayLine
 
-        for birthdayDate, _name, _guid 
-          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+        for birthdayDate, _name 
+          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s([^%\r%\n]*)") do
             if _name == name then
                 birthday["nameList"][name] = nil
-                --birthday["guidList"][guid] = nil
 
                 local year, month, day = os.date("%Y"), os.date("%m"), os.date("%d")
 
                 if bDay == day and bMonth == month then
                     birthday["nameList"][name] = os.date("%Y") - tonumber(bYear)
-                    --birthday["guidList"][guid] = name
                 end
 
                 result = "edit"
             else
-                birthdayLine = birthdayDate .. " - " .. _name .. " - " .. _guid .. "\n"
+                birthdayLine = birthdayDate .. " - " .. _name .. "\n"
                 et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
             end
         end
 
         birthdayLine = string.format(
-            "%d-%d-%d - %s - %s",
-            bDay, bMonth, bYear, name, guid
+            "%d-%d-%d - %s",
+            bDay, bMonth, bYear, name
         )
 
         et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
@@ -102,7 +102,7 @@ function setBirthday(name, bDay, bMonth, bYear, guid)
             removeCallbackFunction("RunFrame", "checkBirthdayRunFrame")
             birthday["msg"] = ""
         else
-            formatBirthdayGlobalMsg()
+            birthday["msg"] = formatBirthdayGlobalMsg()
         end
     end
 
@@ -127,13 +127,12 @@ function removeBirthday(name)
     else
         local fileStr = et.trap_FS_Read(fdIn, lenIn)
 
-        for birthdayDate, _name, guid 
-          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s(%w+)%s%-%s*([^%\r%\n]*)") do
+        for birthdayDate, _name 
+          in string.gfind(fileStr, "(%d+%-%d+%-%d+)%s%-%s([^%\r%\n]*)") do
             if _name == name then
                 birthday["nameList"][name] = nil
-                --birthday["guidList"][guid] = nil
             else
-                local birthdayLine = birthdayDate .. " - " .. name .. " - " .. guid .. "\n"
+                local birthdayLine = birthdayDate .. " - " .. name .. "\n"
                 et.trap_FS_Write(birthdayLine, string.len(birthdayLine), fdOut)
             end
         end
@@ -142,7 +141,7 @@ function removeBirthday(name)
             removeCallbackFunction("RunFrame", "checkBirthdayRunFrame")
             birthday["msg"] = ""
         else
-            formatBirthdayGlobalMsg()
+            birthday["msg"] = formatBirthdayGlobalMsg()
         end
     end
 
@@ -151,7 +150,7 @@ function removeBirthday(name)
     et.trap_FS_Rename("birthday.tmp.cfg", "birthday.cfg")
 end
 
--- Format birthday annoucement.
+-- Return formated birthday annoucement.
 function formatBirthdayGlobalMsg()
     local str = ""
     local nb  = 0
@@ -165,11 +164,14 @@ function formatBirthdayGlobalMsg()
     end
 
     if str ~= "" then
-        birthday["msg"] = "^3Todays birthdays:^7 " .. str .. ".\n"
+        str = "^3Todays birthdays:^7 " .. str .. ".\n"
     end
+
+    return str
 end
 
 -- Callback function when qagame runs a server frame.
+-- Every 5mins, display birthday message if needed.
 --  vars is the local vars passed from et_RunFrame function.
 function checkBirthdayRunFrame(vars)
     if birthday["time"] + 300000 < vars["levelTime"] then

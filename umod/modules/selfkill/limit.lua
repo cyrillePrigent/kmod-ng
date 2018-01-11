@@ -1,21 +1,27 @@
 -- Self kill limit
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 selfkillLimit = {
-    ["limit"]       = tonumber(et.trap_Cvar_Get("u_selfkill_limit")),
+    -- Limit of allowed selkill.
+    ["limit"] = tonumber(et.trap_Cvar_Get("u_selfkill_limit")),
+    -- Selfkill limit message position.
     ["msgPosition"] = et.trap_Cvar_Get("u_selfkill_msg_position")
 }
 
 -- Set default client data.
 clientDefaultData["selfkills"] = 0
 
+-- Override kill slash command.
 addSlashCommand("client", "kill", {"function", "selfkillLimitSlashCommand"})
 
 -- Function
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Limit selfkill when kill slash command is used.
+-- If player make selfkill before last selfkill allowed, a notification is display.
+-- All selfkill following is disabled and a notification is display.
 --  params is parameters passed to the function executed in command file.
 function selfkillLimitSlashCommand(params)
     if client[params.clientNum]["team"] ~= 3 and et.gentity_get(params.clientNum, "health") > 0 then
@@ -30,7 +36,7 @@ function selfkillLimitSlashCommand(params)
                     params,
                     "You have reached your /kill limit !\n You can no longer /kill for the rest of this map."
                 )
-            elseif client[params.clientNum]["selfkills"] == (selfkillLimit["limit"] - 1) then
+            elseif client[params.clientNum]["selfkills"] == selfkillLimit["limit"] - 1 then
                 printCmdMsg(
                     params,
                     "You have ^11" .. color1 .. " /kill left for this map."

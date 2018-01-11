@@ -1,25 +1,37 @@
 -- Death spree
--- From kmod lua script.
+-- From kmod script.
 
 -- Global var
 
 deathSpree = {
-    ["list"]           = {},
-    ["enabledSound"]   = tonumber(et.trap_Cvar_Get("u_ds_enable_sound")),
-    ["msgDefault"]     = tonumber(et.trap_Cvar_Get("u_ds_msg_default")),
-    ["msgPosition"]    = et.trap_Cvar_Get("u_ds_msg_position"),
+    -- List of death spree.
+    --  key   => death spree amount
+    --  value => list of death spree data (message & sound)
+    ["list"] = {},
+    -- Death spree sound status.
+    ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ds_enable_sound")),
+    -- Print death spree messages by default.
+    ["msgDefault"] = tonumber(et.trap_Cvar_Get("u_ds_msg_default")),
+    -- Death spree message position.
+    ["msgPosition"] = et.trap_Cvar_Get("u_ds_msg_position"),
+    -- Noise reduction of death spree sound.
     ["noiseReduction"] = tonumber(et.trap_Cvar_Get("u_ds_noise_reduction"))
 }
 
 -- Set default client data.
-clientDefaultData["deathSpree"]    = 0
+--
+-- Death spree value.
+clientDefaultData["deathSpree"] = 0
+-- Print death spree status.
 clientDefaultData["deathSpreeMsg"] = 0
 
+-- Set slash command of death spree message status.
 addSlashCommand("client", "dspree", {"function", "deathSpreeSlashCommand"})
 
 -- Function
 
 -- Called when qagame initializes.
+-- Prepare death spree list.
 --  vars is the local vars of et_InitGame function.
 function deathSpreeInitGame(vars)
     local n = 1
@@ -55,7 +67,7 @@ function setDeathSpreeMsg(clientNum, value)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function
--- `dspree` command here.
+-- Manage death spree message status when dspree slash command is used.
 --  params is parameters passed to the function executed in command file.
 function deathSpreeSlashCommand(params)
     params.say = msgCmd["chatArea"]
@@ -92,6 +104,7 @@ function deathSpreeSlashCommand(params)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage death spree message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function deathSpreeUpdateClientUserinfo(vars)
     local ds = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_dspree")
@@ -105,26 +118,8 @@ function deathSpreeUpdateClientUserinfo(vars)
     end
 end
 
--- Display death spree message and play death spree sound (if enabled).
---  vars is the local vars of et_Obituary function.
---  msg is the death spree message to display.
---  sndFile is the death spree sound to play.
-function deathSpreeProcess(vars, msg, sndFile)
-    msg = string.gsub(msg, "#victim#", vars["victimName"])
-    msg = string.gsub(msg, "#deaths#", client[vars["victim"]]["deathSpree"])
-
-    sayClients(deathSpree["msgPosition"], msg, "deathSpreeMsg")
-
-    if deathSpree["enabledSound"] == 1 then
-        if deathSpree["noiseReduction"] == 1 then
-            playSound(sndFile, "deathSpreeMsg", vars["victim"])
-        else
-            playSound(sndFile, "deathSpreeMsg")
-        end
-    end
-end
-
 -- Callback function of et_Obituary function.
+-- Increment death spree counter of victim and check if victim have dath spree.
 --  vars is the local vars of et_Obituary function.
 function checkDeathSpreeObituary(vars)
     client[vars["victim"]]["deathSpree"] = client[vars["victim"]]["deathSpree"] + 1
@@ -132,11 +127,26 @@ function checkDeathSpreeObituary(vars)
     local ds = client[vars["victim"]]["deathSpree"]
 
     if deathSpree["list"][ds] then
-        deathSpreeProcess(
-            vars,
-            deathSpree["list"][ds]["message"],
-            deathSpree["list"][ds]["sound"]
-        )
+        local msg = deathSpree["list"][ds]["message"]
+        msg = string.gsub(msg, "#victim#", vars["victimName"])
+        msg = string.gsub(msg, "#deaths#", client[vars["victim"]]["deathSpree"])
+
+        sayClients(deathSpree["msgPosition"], msg, "deathSpreeMsg")
+
+        if deathSpree["enabledSound"] == 1 then
+            if deathSpree["noiseReduction"] == 1 then
+                playSound(
+                    deathSpree["list"][ds]["sound"],
+                    "deathSpreeMsg",
+                    vars["victim"]
+                )
+            else
+                playSound(
+                    deathSpree["list"][ds]["sound"],
+                    "deathSpreeMsg"
+                )
+            end
+        end
     end
 end
 

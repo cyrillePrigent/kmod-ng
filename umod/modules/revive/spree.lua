@@ -1,14 +1,12 @@
 -- Revive spree
 
--- From :
-
--- Vetinari's rspree.lua 
+-- From Vetinari's rspree script. 
 --
 -- $Date: 2007-03-02 13:35:49 +0100 (Fri, 02 Mar 2007) $ 
 -- $Id: rspree.lua 181 2007-03-02 12:35:49Z vetinari $
 -- $Revision: 181 $
 --
--- version = "1.2.3"
+-- version 1.2.3
 --
 
 -- Global var
@@ -47,7 +45,10 @@ reviveSpree = {
 }
 
 -- Set default client data.
-clientDefaultData["reviveSpree"]    = 0
+--
+-- Revive spree value.
+clientDefaultData["reviveSpree"] = 0
+-- Print revive spree status.
 clientDefaultData["reviveSpreeMsg"] = 0
 
 -- Set module command.
@@ -62,6 +63,7 @@ cmdList["console"]["!rsprees"]       = "/command/console/revive_sprees.lua"
 cmdList["console"]["!rspreesall"]    = "/command/console/revive_sprees_all.lua"
 cmdList["console"]["!rspreerecords"] = "/command/both/revive_sprees_record.lua"
 
+-- Set slash command of revive spree message status.
 addSlashCommand("client", "rsprees", {"function", "reviveSpreeSlashCommand"})
 
 
@@ -79,8 +81,8 @@ function setReviveSpreeMsg(clientNum, value)
     )
 end
 
--- Function executed when slash command is called in et_ClientCommand function
--- `rspree` command here.
+-- Function executed when slash command is called in et_ClientCommand function.
+-- Manage revive spree message status when rspree slash command is used.
 --  params is parameters passed to the function executed in command file.
 function reviveSpreeSlashCommand(params)
     params.say = msgCmd["chatArea"]
@@ -117,6 +119,7 @@ function reviveSpreeSlashCommand(params)
 end
 
 -- Callback function when a client’s Userinfo string has changed.
+-- Manage revive spree message status when client’s Userinfo string has changed.
 --  vars is the local vars of et_ClientUserinfoChanged function.
 function reviveSpreeUpdateClientUserinfo(vars)
     local rs = et.Info_ValueForKey(et.trap_GetUserinfo(vars["clientNum"]), "u_rspree")
@@ -212,6 +215,7 @@ function loadReviveSpreeRecords()
 end
 
 -- Called when qagame initializes.
+-- Format revive spree list.
 --  vars is the local vars of et_InitGame function.
 function reviveSpreeInitGame(vars)
     loadReviveSpreeStats()
@@ -237,6 +241,8 @@ function reviveSpreeInitGame(vars)
 end
 
 -- Callback function when qagame runs a server frame. (pending end round)
+-- At end of round, display revive spree end message if needed.
+-- Display revive spree record message if exist.
 --  vars is the local vars passed from et_RunFrame function.
 function checkReviveSpreeRunFrameEndRound(vars)
     if not game["endRoundTrigger"] then
@@ -291,12 +297,16 @@ function checkReviveSpreeRunFrameEndRound(vars)
         if reviveSpree["srvRecord"] == 1 then
             saveReviveSpreeStats("rspree-records.txt", reviveSpree["serverRecords"])
         end
+
+        removeCallbackFunction("RunFrameEndRound", "checkReviveSpreeRunFrameEndRound")
     end
 end
 
--- Callback function whenever the server or qagame prints a string to the console.
---  vars is the local vars of et_Print function.
-function checkReviveSpreePrint(medic, zombie, tk)
+-- Check revive spree.
+--  medic is the medic client slot id.
+--  zombie is the revived client slot id.
+--  tk is kill type of the revived client.
+function checkReviveSpree(medic, zombie, tk)
     -- Display revive announce
     if reviveSpree["reviveAnnounce"] == 1 then
         sayClients(
@@ -359,6 +369,7 @@ function checkReviveSpreePrint(medic, zombie, tk)
 end
 
 -- Callback function when client disconnect.
+-- If victim is on revive spree, display revive spree end message.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function reviveSpreeClientDisconnect(vars)
     if client[vars["clientNum"]]["reviveSpree"] >= 5 then
@@ -479,6 +490,8 @@ function checkReviveSpreeEnd(medic, killer)
 end
 
 -- Callback function of et_Obituary function.
+-- If victim is on revive spree, display revive spree end message.
+-- Reset revive spree counter of victim.
 --  vars is the local vars of et_Obituary function.
 function reviveSpreeObituary(vars)
     if client[vars["victim"]]["reviveSpree"] >= 5 then

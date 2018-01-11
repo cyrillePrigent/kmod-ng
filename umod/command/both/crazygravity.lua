@@ -12,11 +12,15 @@ function execute_command(params)
         local cgValue = tonumber(params["arg1"])
 
         if cgValue == 1 then
-            if crazyGravity['active'] == false then
-                crazyGravity['active'] = true
-                crazyGravity["time"]   = time["frame"] + crazyGravity["intervalChange"]
+            if crazyGravity["active"] == false then
+                crazyGravity["active"] = true
+                crazyGravity["gravityOrigin"] = tonumber(et.trap_Cvar_Get("g_gravity"))
+                crazyGravity["time"] = time["frame"] + crazyGravity["intervalChange"]
 
-                addCallbackFunction({ ["RunFrame"] = "checkCrazyGravityRunFrame" })
+                addCallbackFunction({
+                    ["RunFrame"]         = "checkCrazyGravityRunFrame",
+                    ["RunFrameEndRound"] = "crazyGravityReset"
+                })
 
                 params.broadcast2allClients = true
                 printCmdMsg(params, "Crazygravity has been enabled\n")
@@ -24,11 +28,16 @@ function execute_command(params)
                 printCmdMsg(params, "Crazygravity is already active\n")
             end
         elseif cgValue == 0 then
-            if crazyGravity['active'] == true then
-                crazyGravity['active'] = false
+            if crazyGravity["active"] == true then
+                crazyGravity["active"] = false
 
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_gravity 800\n")
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "g_gravity " .. crazyGravity["gravityOrigin"] .. "\n"
+                )
+
                 removeCallbackFunction("RunFrame", "checkCrazyGravityRunFrame")
+                removeCallbackFunction("RunFrameEndRound", "crazyGravityReset")
 
                 params.broadcast2allClients = true
                 printCmdMsg(params, "Crazygravity has been disabled. Resetting gravity\n")
