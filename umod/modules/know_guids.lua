@@ -218,9 +218,9 @@ function checkKnownGuidsTeamEntrance(params)
         if connectedTime < knownGuids["waitTime"]["ms"] then
             et.trap_SendServerCommand(
                 params.clientNum,
-                "cp \"^3Sorry, you must wait^5 " ..
+                "cp \"" .. color2 .. "Sorry, you must wait " .. color4 ..
                 second2readeableTime(knownGuids["waitTime"]["secs"] - (connectedTime / 1000))
-                ..  " ^3before joining a team.  This is an anti-cheat measure.  Thanks for your patience.\n\""
+                .. color2 .. " before joining a team.  This is an anti-cheat measure.  Thanks for your patience.\n\""
             )
 
             return 1

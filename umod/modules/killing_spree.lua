@@ -1,8 +1,6 @@
 -- Killing spree & spree record
 -- From kmod script.
 
--- TODO : Rewrite u_ks_end_message cvar name
-
 -- Global var
 
 if killingSpreeModule == 1 then
@@ -14,13 +12,13 @@ if killingSpreeModule == 1 then
         -- Killing spree sound status.
         ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ks_enable_sound")),
         -- Killing spree ended by enemy.
-        ["endMessage1"] = et.trap_Cvar_Get("u_ks_end_message1"),
+        ["endMsgByEnemy"] = et.trap_Cvar_Get("u_ks_end_by_enemy"),
         -- Killing spree ended by selfkill.
-        ["endMessage2"] = et.trap_Cvar_Get("u_ks_end_message2"),
+        ["endMsgBySelfkill"] = et.trap_Cvar_Get("u_ks_end_by_selfkill"),
         -- Killing spree ended by world.
-        ["endMessage3"] = et.trap_Cvar_Get("u_ks_end_message3"),
+        ["endMsgByWorld"] = et.trap_Cvar_Get("u_ks_end_end_by_world"),
         -- Killing spree ended by teamkill.
-        ["endMessage4"] = et.trap_Cvar_Get("u_ks_end_message4"),
+        ["endMsgByTeamkill"] = et.trap_Cvar_Get("u_ks_end_by_teamkill"),
         -- Killing spree message position.
         ["msgPosition"] = et.trap_Cvar_Get("u_ks_msg_position"),
         -- Noise reduction of killing spree sound.
@@ -93,9 +91,9 @@ if spreeRecordModule == 1 then
         ["killsRecord"] = 0,
         -- Current spree message.
         ["msg"] = {
-            ["oldShort"] = "^3[Old: ^7N/A^3]",
-            ["oldLong"]  = "^3Spree Record: ^7There is no current spree record",
-            ["current"]  = "Current spree record: ^7N/A"
+            ["oldShort"] = color2 .. "[Old: " .. color1 .. "N/A" .. color2 .. "]",
+            ["oldLong"]  = color2 .. "Spree Record: " .. color1 .. "There is no current spree record",
+            ["current"]  = color2 .. "Current spree record: " .. color1 .. "N/A"
         }
     }
 
@@ -104,9 +102,9 @@ if spreeRecordModule == 1 then
         ["killsRecord"] = 0,
         -- Current map spree message.
         ["msg"] = {
-            ["oldShort"] = "^3[Old: ^7N/A^3]",
-            ["oldLong"]  = "^3Map Spree Record: ^7There is no current spree record",
-            ["current"]  = "Current Map spree record: ^7N/A"
+            ["oldShort"] = color2 .. "[Old: " .. color1 .. "N/A" .. color2 .. "]",
+            ["oldLong"]  = color2 .. "Map Spree Record: " .. color1 .. "There is no current spree record",
+            ["current"]  = color2 .. "Current Map spree record: " .. color1 .. "N/A"
         }
     }
 
@@ -137,8 +135,9 @@ if spreeRecordModule == 1 then
 
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            "qsay ^1New spree record: ^7" .. name .. " ^7with ^3" .. kills
-                .. " ^7kills ^7" .. spree["msg"]["oldShort"] .. "\n"
+            "qsay " .. color4 .. "New spree record: " .. color1 .. name .. color1 ..
+            " with " .. color2 .. kills .. color1 .. " kills " ..
+            spree["msg"]["oldShort"] .. "\n"
         )
 
         setSpreeRecord(name, kills, date)
@@ -151,14 +150,14 @@ if spreeRecordModule == 1 then
     function setSpreeRecord(name, kills, date)
         spree["killsRecord"]= kills
 
-        spree["msg"]["oldShort"] = "^3[Old: ^7" .. name
-            .. " ^3" .. kills .. " ^7@ " .. date .. "^3]"
+        spree["msg"]["oldShort"] = color2 .. "[Old: " .. color1 .. name ..
+            " " .. color2 .. kills .. color1 .. " @ " .. date .. color2 .. "]"
 
-        spree["msg"]["oldLong"] = "^3Spree Record: ^7" .. name
-            .. " ^7with ^3" .. kills .. " ^7kills at " .. date
+        spree["msg"]["oldLong"] = color2 .. "Spree Record: " .. color1 .. name ..
+            color1 .. " with " .. color2 .. kills .. color1 .. " kills at " .. date
 
-        spree["msg"]["current"] = "Current spree record: ^7"
-            .. name .. " ^7with ^3" .. kills .. " ^7kills at " .. date
+        spree["msg"]["current"] = color2 .. "Current spree record: " .. color1 .. name ..
+            color1 .. " with " .. color2 .. kills .. color1 .. " kills at " .. date
     end
 
     -- Write map spree record of player.
@@ -181,8 +180,9 @@ if spreeRecordModule == 1 then
 
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            "qsay ^1New Map spree record: ^7" .. name .. " ^7with^3 " .. kills ..
-                " ^7kills on " .. mapName .." ^7" .. mapSpree["msg"]["oldShort"] .. "\n"
+            "qsay " .. color4 .. "New Map spree record: " .. color1 .. name .. color1 ..
+            " with " .. color2 .. kills .. color1 .. " kills on " .. mapName .. " " ..
+            mapSpree["msg"]["oldShort"] .. "\n"
         )
 
         setMapSpreeRecord(name, kills, date)
@@ -195,15 +195,15 @@ if spreeRecordModule == 1 then
     function setMapSpreeRecord(name, kills, date)
         mapSpree["killsRecord"] = kills
 
-        mapSpree["msg"]["oldShort"] = "^3[Old: ^7" .. name
-            .. " ^3" .. kills .. " ^7@ " .. date .. "^3]"
+        mapSpree["msg"]["oldShort"] = color2 .. "[Old: " .. color1 .. name
+            .. " " .. color2 .. kills .. color1 .. " @ " .. date .. color2 .. "]"
 
-        mapSpree["msg"]["oldLong"] = "^3Map Spree Record: ^7" .. name
-            .. " ^7with ^3" .. kills .. " ^7kills at " .. date
+        mapSpree["msg"]["oldLong"] = color2 .. "Map Spree Record: " .. color1 .. name
+            .. color1 .. " with " .. color2 .. kills .. color1 .. " kills at " .. date
             .. " on the map of " .. mapName
 
-        mapSpree["msg"]["current"] = "Current Map spree record: ^7" .. name
-            .. " ^7with ^3" .. kills .. " ^7kills at " .. date
+        mapSpree["msg"]["current"] = color2 .. "Current Map spree record: " .. color1 .. name
+            .. color1 .. " with " .. color2 .. kills .. color1 .. " kills at " .. date
     end
 
     -- Callback function when ReadConfig is called in et_InitGame function
@@ -311,9 +311,9 @@ function checkKillingSpreeRunFrameEndRound(vars)
             endRoundfunctionList[1] = function (clientNum)
                 if client[clientNum]["killingSpree"] >= 5 then
                     if endKillingSpree ~= "" then
-                        endKillingSpree = endKillingSpree .. "^7, "
+                        endKillingSpree = endKillingSpree .. color1 .. ", "
                     else
-                        endKillingSpree = endKillingSpree .. "^7"
+                        endKillingSpree = endKillingSpree .. color1
                     end
 
                     endKillingSpree = endKillingSpree .. client[clientNum]["name"]
@@ -350,7 +350,7 @@ function checkKillingSpreeRunFrameEndRound(vars)
         if endKillingSpree ~= "" then
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "qsay ^1Killing spree ended due to map's end for : "
+                "qsay " .. color4 .. "Killing spree ended due to map's end for : "
                     .. endKillingSpree .. "\n"
             )
         end
@@ -372,12 +372,12 @@ function checkKillingSpreeRunFrameEndRound(vars)
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "qsay ^" .. color .. spree["msg"]["current"] .. "\n"
+                "qsay " .. spree["msg"]["current"] .. "\n"
             )
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "qsay ^" .. color .. mapSpree["msg"]["current"] .. "\n"
+                "qsay " .. mapSpree["msg"]["current"] .. "\n"
             )
         end
 
@@ -425,7 +425,7 @@ function checkKillingSpreeObituaryEnemyKill(vars)
         end
 
         if client[vars["victim"]]["killingSpree"] >= 5 then
-            killingSpreeEndProcess(vars, killingSpree["endMessage1"], vars["victim"])
+            killingSpreeEndProcess(vars, killingSpree["endMsgByEnemy"], vars["victim"])
         end
     end
 
@@ -438,7 +438,7 @@ end
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryWorldKill(vars)
     if killingSpreeModule == 1 and client[vars["victim"]]["killingSpree"] >= 5 then
-        killingSpreeEndProcess(vars, killingSpree["endMessage3"], vars["victim"]) 
+        killingSpreeEndProcess(vars, killingSpree["endMsgByWorld"], vars["victim"]) 
     end
 
     client[vars["victim"]]["killingSpree"] = 0
@@ -450,7 +450,7 @@ end
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryTeamKill(vars)
     if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
-        killingSpreeEndProcess(vars, killingSpree["endMessage4"], vars["killer"])
+        killingSpreeEndProcess(vars, killingSpree["endMsgByTeamkill"], vars["killer"])
     end
 
     client[vars["killer"]]["killingSpree"] = 0
@@ -463,7 +463,7 @@ end
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituarySelfKill(vars)
     if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
-        killingSpreeEndProcess(vars, killingSpree["endMessage2"], vars["victim"])
+        killingSpreeEndProcess(vars, killingSpree["endMsgBySelfkill"], vars["victim"])
     end
 
     client[vars["killer"]]["killingSpree"] = 0

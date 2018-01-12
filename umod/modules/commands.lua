@@ -172,15 +172,16 @@ function checkClientCommand(params, lowBangCmd)
             if strPart[1] == "forcecvar" then
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    params.say .. " ^3etpro svcmd: ^7forcing client cvar ["
-                    .. strPart[2] .. "] to [" .. params["arg1"] .. "]\n"
+                    params.say .. color2 .. " etpro svcmd: " .. color1 ..
+                    "forcing client cvar [" .. strPart[2] .. "] to [" ..
+                    params["arg1"] .. "]\n"
                 )
             end
         end
     else
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            params.say .. " ^7Insufficient Admin status\n"
+            params.say .. color1 .. " Insufficient Admin status\n"
         )
     end
 

@@ -168,7 +168,7 @@ function formatBirthdayGlobalMsg()
     end
 
     if str ~= "" then
-        str = "^3Todays birthdays:^7 " .. str .. ".\n"
+        str = color2 .. "Todays birthdays: " .. color1 .. str .. ".\n"
     end
 
     return str

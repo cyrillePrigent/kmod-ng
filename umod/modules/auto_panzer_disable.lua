@@ -3,8 +3,6 @@
 
 -- Global var
 
--- TODO :Clean time & time2 in autoPanzerDisable table
-
 autoPanzerDisable = {
     -- Auto panzer disable module status.
     ["enabled"] = false,
@@ -16,7 +14,7 @@ autoPanzerDisable = {
     -- Panzer disable warning level.
     ["warning"] = 0,
     -- Time (in ms) of last panzer disable warning check.
-    ["time2"] = 0,
+    ["warningTime"] = 0,
     -- Minimum active players to activate panzers.
     ["playerLimit"] = tonumber(et.trap_Cvar_Get("u_panzer_player_limit")),
     -- Time (in ms) of last auto panzer disable check.
@@ -40,7 +38,8 @@ function autoPanzerDisableInitGame(vars)
         addCallbackFunction({["RunFrame"] = "autoPanzerDisableRunFrame"})
     else
         et.G_LogPrint(
-            "uMod Auto panzer disable : Panzerfaust is disabled! Please enable it with <team_maxSoldiers> or <team_maxpanzers> cvar.\n"
+            "uMod Auto panzer disable : Panzerfaust is disabled! Please " ..
+            "enable it with <team_maxSoldiers> or <team_maxpanzers> cvar.\n"
         )
     end
 end
@@ -69,18 +68,21 @@ function autoPanzerDisableRunFrame(vars)
 
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3Panzerlimit: ^7Panzers have been disabled.\n"
+                    "qsay " .. color2 .. "Panzerlimit: " .. color1 ..
+                    "Panzers have been disabled.\n"
                 )
             end
 
             if activePanzers then
                 if autoPanzerDisable["warning"] == 0 then
-                    autoPanzerDisable["time2"]   = vars["levelTime"]
-                    autoPanzerDisable["warning"] = 1
+                    autoPanzerDisable["warningTime"] = vars["levelTime"]
+                    autoPanzerDisable["warning"]     = 1
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay ^3Panzerlimit: ^7Please switch to a different weapon or be automatically moved to spec in ^11^3 minute!\n"
+                        "qsay " .. color2 .. "Panzerlimit: " .. color1 ..
+                        "Please switch to a different weapon or be automatically " ..
+                        "moved to spec in " .. color4 .. "1" .. color2 .. " minute!\n"
                     )
 
                     et.trap_SendConsoleCommand(
@@ -89,7 +91,7 @@ function autoPanzerDisableRunFrame(vars)
                     )
                 end
 
-                local remainingTime = vars["levelTime"] - autoPanzerDisable["time2"]
+                local remainingTime = vars["levelTime"] - autoPanzerDisable["warningTime"]
 
                 -- After 30 secs...
                 if remainingTime > 30000 then
@@ -98,7 +100,9 @@ function autoPanzerDisableRunFrame(vars)
 
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "qsay ^3Panzerlimit: ^7Please switch to a different weapon or be automatically moved to spec in ^130^3 Seconds!\n"
+                            "qsay " .. color2 .. "Panzerlimit: " .. color1 ..
+                            "Please switch to a different weapon or be automatically " ..
+                            "moved to spec in " .. color4 .. "30" .. color2 .. " Seconds!\n"
                         )
                     end
                 end
@@ -112,29 +116,38 @@ function autoPanzerDisableRunFrame(vars)
 
                             et.trap_SendServerCommand(
                                 i,
-                                "chat \"^1You have been moved to spectator for having a panzerfaust after being warned twice to switch!\"\n"
+                                "chat \"" .. color4 .. "You have been moved to spectator " ..
+                                "for having a panzerfaust after being warned twice to switch!\"\n"
                             )
                         end
                     end
 
                     autoPanzerDisable["msg"]["disabled"] = false
                     autoPanzerDisable["warning"]         = 0
+                    autoPanzerDisable["warningTime"]     = 0
                 end
             else
-                autoPanzerDisable["warning"] = 0
+                autoPanzerDisable["warning"]     = 0
+                autoPanzerDisable["warningTime"] = 0
             end
         else
             autoPanzerDisable["msg"]["disabled"] = false
             autoPanzerDisable["warning"]         = 0
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "team_maxpanzers " .. panzersPerTeam .. "\n")
+            autoPanzerDisable["warningTime"]     = 0
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "team_maxpanzers " .. panzersPerTeam .. "\n"
+            )
 
             if autoPanzerDisable["msg"]["enabled"] == false then
                 autoPanzerDisable["msg"]["enabled"] = true
 
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3Panzerlimit: ^7Panzers have been auto-enabled. Each team is allowed only ^1"
-                    .. panzersPerTeam .. "^7 panzer(s) per team!\n"
+                    "qsay " .. color2 .. "Panzerlimit: " .. color1 ..
+                    "Panzers have been auto-enabled. Each team is allowed only " ..
+                    color4 .. panzersPerTeam .. color1 .. " panzer(s) per team!\n"
                 )
             end
         end

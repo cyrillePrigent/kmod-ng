@@ -20,7 +20,8 @@ function checkNameStealingProtectionClientUserinfo(vars)
 
             for p = 0, clientsLimit, 1 do
                 if p ~= vars["clientNum"] and client[p]["name"] ~= "" then
-                    if guid ~= client[p]["guid"] and testName == et.Q_CleanStr(trim(client[p]["name"])) then
+                    if guid ~= client[p]["guid"]
+                      and testName == et.Q_CleanStr(trim(client[p]["name"])) then
                         -- Name faker detected
                         if logChatModule == 1 then
                             writeLog(string.format(

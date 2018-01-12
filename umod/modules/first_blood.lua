@@ -62,7 +62,5 @@ end
 
 -- Add callback first blood function.
 addCallbackFunction({
-    ["ClientBegin"]           = "firstBloodUpdateClientUserinfo",
-    ["ClientUserinfoChanged"] = "firstBloodUpdateClientUserinfo",
-    ["ObituaryEnemyKill"]     = "checkFirstBloodRunObituaryEnemyKill"
+    ["ObituaryEnemyKill"] = "checkFirstBloodRunObituaryEnemyKill"
 })

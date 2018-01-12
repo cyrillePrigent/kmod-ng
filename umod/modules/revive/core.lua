@@ -39,11 +39,8 @@ function checkRevivePrint(vars)
         if revive["announce"] == 1 then
 --             et.trap_SendServerCommand(
 --                 -1,
---                 string.format(
---                     "cpm \"%s ^7was revived by %s\"",
---                     client[zombie]["name"],
---                     client[medic]["name"]
---                 )
+--                 "cpm \"" .. client[zombie]["name"] .. color1 .. " was revived by " ..
+--                 client[medic]["name"] .. "\""
 --             )
         else
             return nil

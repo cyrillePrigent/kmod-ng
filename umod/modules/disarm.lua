@@ -40,9 +40,9 @@ disarm = {
                 [48] = false   -- Akimbo silenced Luger
     },
     -- Number of disarmed players.
-    ["count"]   = 0,
+    ["count"] = 0,
     -- Time (in ms) of last disarm check.
-    ["time"]    = 0,
+    ["time"] = 0,
     -- Interval (in ms) between 2 frame check.
     ["frameCheck"] = 2000 -- 2secs
 }
@@ -77,6 +77,6 @@ function checkDisarmRunFrame(vars)
             end
         end
 
-        disarm["time"] = vars["levelTime"] -- Next checking in 2 seconds.
+        disarm["time"] = vars["levelTime"]
     end
 end

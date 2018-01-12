@@ -40,10 +40,8 @@ function checkOwnObituary(vars)
 
         et.trap_SendServerCommand(
             -1,
-            string.format(
-                "%s %s ^7just got owned!\n",
-                msgCmd["chatArea"], vars["killerName"]
-            )
+            msgCmd["chatArea"] .. color1 .. vars["killerName"] ..
+            color1 .. "just got owned!\n"
         )
     end
 end

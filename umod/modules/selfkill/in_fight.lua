@@ -107,20 +107,17 @@ function selfkillInFightSlashCommand(params)
 
                 printCmdMsg(
                     params,
-                    string.format(
-                        "^1WARNING! %s ^3selfkilled infight.\n",
-                        client[params.clientNum]["name"]
-                    )
+                    color4 .. "WARNING! " .. color1 ..
+                    client[params.clientNum]["name"] .. color2 ..
+                    " selfkilled infight.\n"
                 )
             elseif selfkillInFight["punishment"] == 4 then
                 -- Wait 3 seconds before execute self kill
                 -- Work only with self kills in fight restriction
                 printCmdMsg(
                     params,
-                    string.format(
-                        "^3Server detects you have been hit - selfkill disabled for %d seconds^7",
-                        selfkillInFight["hitWait"]
-                    )
+                    color2 .. "Server detects you have been hit - selfkill disabled for " ..
+                    selfkillInFight["hitWait"] .. " seconds"
                 )
 
                 return 1
@@ -133,10 +130,10 @@ function selfkillInFightSlashCommand(params)
 
                         printCmdMsg(
                             params,
-                            string.format(
-                                "^1*ATTENTION*:^7 %s ^7made more selfkills, then allowed -> ^1Moving to spectator...^7",
-                                client[params.clientNum]["name"]
-                            )
+                            color4 .. "*ATTENTION*: " .. color1 ..
+                            client[params.clientNum]["name"] .. color1 ..
+                            " made more selfkills, then allowed -> " .. color4 ..
+                            "Moving to spectator..."
                         )
 
                         et.trap_SendConsoleCommand(
@@ -154,10 +151,9 @@ function selfkillInFightSlashCommand(params)
                         elseif client[params.clientNum]["selfkillPunishment"] > 1 then
                             printCmdMsg(
                                 params,
-                                string.format(
-                                    "^1Selfkills = %d ^1, penalty incurred",
-                                    client[params.clientNum]["selfkillPunishment"]
-                                )
+                                color4 .. "Selfkills = " ..
+                                client[params.clientNum]["selfkillPunishment"] ..
+                                color4 .. " , penalty incurred"
                             )
                         end
                     elseif selfkillInFight["punishment"] == 3 then
@@ -165,10 +161,9 @@ function selfkillInFightSlashCommand(params)
 
                         printCmdMsg(
                             params,
-                            string.format(
-                                "^1*ATTENTION*:^7 %s ^7made more selfkills, then allowed -> ^1kick^7",
-                                client[params.clientNum]["name"]
-                            )
+                            color4 .. "*ATTENTION*: " .. color1 ..
+                            client[params.clientNum]["name"] .. color1 ..
+                            " made more selfkills, then allowed -> " .. color4 .. "kick"
                         )
 
                         kick(params.clientNum, "you made more selfkills then allowed.")
@@ -178,20 +173,22 @@ function selfkillInFightSlashCommand(params)
 
                     if client[params.clientNum]["selfkills"] == selfkillInFight["limit"] then
                         if selfkillInFight["punishment"] == 1 then
-                            nextAction = " ^7Next ^3/kill ^7= ^1Moving to spectator^7."
+                            nextAction = color1 .. " Next " .. color2 ..
+                                "/kill " .. color1 .. "= " .. color4 ..
+                                "Moving to spectator" .. color1 .. "."
                         elseif selfkillInFight["punishment"] == 3 then
-                            nextAction = " ^7Next ^3/kill ^7= ^1Kick^7."
+                            nextAction = color1 .. " Next " .. color2 ..
+                                "/kill " .. color1 .. "= " .. color4 ..
+                                "Kick" .. color1 .. "."
                         end
                     end
 
                     printCmdMsg(
                         params,
-                        string.format(
-                            "^1*WARNING*^7: %s^7, you have ^2%d^7 suicides left!%s",
-                            client[params.clientNum]["name"],
-                            (selfkillInFight["limit"] - client[params.clientNum]["selfkills"]),
-                            nextAction
-                        )
+                        color4 .. "*WARNING*: " .. color1 .. client[params.clientNum]["name"] ..
+                        color1 .. ", you have " .. color4 ..
+                        (selfkillInFight["limit"] - client[params.clientNum]["selfkills"]) ..
+                        color1 .. " suicides left!" .. nextAction
                     )
                 end
             end

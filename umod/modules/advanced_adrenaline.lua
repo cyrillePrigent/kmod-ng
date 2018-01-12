@@ -92,7 +92,8 @@ function checkAdvancedAdrenalineRunFrame(vars)
 
                         et.trap_SendServerCommand(
                             i,
-                            "cp \"^3Adrenaline ^1" .. client[i]["adrenalineCounter"] .. "\n\""
+                            "cp \"" .. color2 .. "Adrenaline " .. color4 ..
+                            client[i]["adrenalineCounter"] .. "\n\""
                         )
                     end
                 end

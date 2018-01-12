@@ -8,7 +8,6 @@ version       = "0.1"
 releaseStatus = "alpha"
 
 -- Load Uber Mod cvar
-color                 = et.trap_Cvar_Get("u_color")
 autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
 panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
 advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
@@ -255,7 +254,7 @@ pause = {
     ["endTrigger"]   = false
 }
 
--- Color
+-- Colorization
 
 -- Color of general text
 color1 = "^7"
@@ -266,6 +265,8 @@ color2 = "^3"
 -- Color of special text (command status, date, etc)
 color3 = "^8"
 
+-- Color of warning text
+color4 = "^1"
 
 -- Punkbuster status before disable it.
 pbState = false
@@ -952,6 +953,9 @@ addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
 function et_InitGame(levelTime, randomSeed, restart)
     time["init"] = levelTime
 
+    -- 1 : warmup, 0 : match
+    game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
+
     local currentVersion = et.trap_Cvar_Get("mod_version")
     et.RegisterModname("uMod v" .. version .. releaseStatus .. " " .. et.FindSelf())
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - uMod " .. version .. "\"\n")
@@ -1036,9 +1040,6 @@ function et_RunFrame(levelTime)
             end
         end
     end
-
-    -- 1 : warmup, 0 : match, 3 : end round
-    game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
 
     players["axis"]   = 0
     players["allies"] = 0
@@ -1438,11 +1439,10 @@ function et_Print(text)
         end
     end
 
---     if vars["text"] == "Exit: Timelimit hit.\n" or vars["text"] == "Exit: Wolf EndRound.\n" then
---         reviveSpree["endOfMap"] = true
--- 
---         return nil
---     end
+    -- Set end of round status when we detect it.
+    if text == "Exit: Timelimit hit.\n" or text == "Exit: Wolf EndRound.\n" then
+        game["state"] = 3
+    end
 end
 
 -- Called whenever a player is killed.

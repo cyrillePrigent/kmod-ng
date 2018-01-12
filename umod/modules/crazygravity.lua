@@ -35,8 +35,9 @@ function checkCrazyGravityRunFrame(vars)
 
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            "qsay " .. color2 .. "Crazygravity: " .. color1 .. "The gravity has been changed to "
-            .. color3 .. crazyGravity["gravity"] .. color1 .. "!\n"
+            "qsay " .. color2 .. "Crazygravity: " .. color1 ..
+            "The gravity has been changed to " .. color3 ..
+            crazyGravity["gravity"] .. color1 .. "!\n"
         )
 
         et.trap_SendConsoleCommand(
@@ -46,8 +47,9 @@ function checkCrazyGravityRunFrame(vars)
     elseif remainingTime == 5000 then
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            "qsay " .. color2 .. "Crazygravity: " .. color1 .. "The gravity will be changed in "
-            .. color3 .. "5 " .. color1 .. "seconds!\n"
+            "qsay " .. color2 .. "Crazygravity: " .. color1 ..
+            "The gravity will be changed in " .. color3 ..
+            "5 " .. color1 .. "seconds!\n"
         )
     end
 end

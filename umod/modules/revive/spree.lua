@@ -193,9 +193,9 @@ function checkReviveSpreeRunFrameEndRound(vars)
         for p = 0, clientsLimit, 1 do
             if client[p]["reviveSpree"] >= 5 then
                 if endReviveSpree ~= "" then
-                    endReviveSpree = endReviveSpree .. "^7, "
+                    endReviveSpree = endReviveSpree .. color1 .. ", "
                 else
-                    endReviveSpree = endReviveSpree .. "^7"
+                    endReviveSpree = endReviveSpree .. color1
                 end
 
                 endReviveSpree = endReviveSpree .. client[p]["name"]
@@ -205,7 +205,7 @@ function checkReviveSpreeRunFrameEndRound(vars)
         if endReviveSpree ~= "" then
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "qsay ^1Revive spree ended due to map's end for : "
+                "qsay " .. color4 .. "Revive spree ended due to map's end for : "
                     .. endReviveSpree .. "\n"
             )
         end
@@ -220,19 +220,16 @@ function checkReviveSpreeRunFrameEndRound(vars)
                     longest = " " .. color1 .. "This is a New map record!"
                     saveReviveSpreeStats("revivingspree.txt", reviveSpree["stats"])
                 else 
-                    longest = string.format(
-                        " ^7[record: %d by %s^7 @%s]",
-                        max[1], max[3], os.date(dateFormat, max[2])
-                    )
+                    longest = color1 .. " [record: " .. max[1] .. " by " .. max[3] .. 
+                        color1 .. " @" .. os.date(dateFormat, max[2]) .. "]"
                 end
             end
 
-            local msg = string.format(
-                "^7Longest reviving spree: %s^7 with %d revives!%s",
-                client[reviveSpree["maxId"]]["name"], reviveSpree["maxSpree"], longest
-            )
+            local msg = color1 .. "Longest reviving spree: " ..
+                client[reviveSpree["maxId"]]["name"] .. color1 .. " with " ..
+                reviveSpree["maxSpree"] .. " revives!" .. longest
 
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \"" .. msg .. "^7\"\n")
+            et.trap_SendConsoleCommand(et.EXEC_APPEND, "qsay \"" .. msg .. "\"\n")
         end
 
         -- Save server records if enabled.
@@ -249,19 +246,6 @@ end
 --  zombie is the revived client slot id.
 --  tk is kill type of the revived client.
 function checkReviveSpree(medic, zombie, tk)
-    -- Display revive announce
-    if reviveSpree["reviveAnnounce"] == 1 then
-        sayClients(
-            "cpm",
-            string.format(
-                "%s ^7was revived by %s",
-                client[zombie]["name"],
-                client[medic]["name"]
-            ),
-            "reviveSpreeMsg"
-        )
-    end
-
     -- not a tk & revive
     if not tk then
         client[medic]["reviveSpree"] = client[medic]["reviveSpree"] + 1
@@ -357,7 +341,7 @@ function saveReviveSpreeStats(file, list)
         et.trap_FS_FCloseFile(fd)
     end
 
-    et.G_Printf("uMod WARNING: saveReviveSpreeStats(): %d ms\n", et.trap_Milliseconds() - funcStart)
+    et.G_Printf("uMod: saveReviveSpreeStats(): %d ms\n", et.trap_Milliseconds() - funcStart)
 end
 
 -- Check & return result if it's a new revive spree map record.
@@ -425,7 +409,7 @@ function checkReviveSpreeEnd(medic, killer)
     if record and killer ~= 1022 then
         sayClients(
             reviveSpree["position"],
-            color1 .. "This is a new map record!^7",
+            color1 .. "This is a new map record!",
             "reviveSpreeMsg"
         )
     end

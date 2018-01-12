@@ -78,8 +78,9 @@ function curseFilter(params)
 
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                    .. " ^7has been auto gibbed for language!\n"
+                    "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                    client[params.clientNum]["name"] .. color1 ..
+                    " has been auto gibbed for language!\n"
                 )
             end
         end
@@ -101,8 +102,9 @@ function curseFilter(params)
 
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                    .. " ^7has been auto killed for language!\n"
+                    "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                    client[params.clientNum]["name"] .. color1 ..
+                    " has been auto killed for language!\n"
                 )
             end
         end
@@ -124,8 +126,9 @@ function curseFilter(params)
                 execute_command(params)
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                    .. " ^7has been auto slapped for language!\n"
+                    "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                    client[params.clientNum]["name"] .. color1 ..
+                    " has been auto slapped for language!\n"
                 )
             end
         end
@@ -150,8 +153,9 @@ function curseFilter(params)
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                .. " ^7has been permanently muted for language!\n"
+                "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                client[params.clientNum]["name"] .. color1 ..
+                " has been permanently muted for language!\n"
             )
         end
     end
@@ -177,15 +181,18 @@ function curseFilter(params)
 
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                    .. " ^7has been auto muted for ^1" .. client[params.clientNum]["muteMultipliers"]
-                    .. "^7 minute(s)!\n"
+                    "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                    client[params.clientNum]["name"] .. color1 ..
+                    " has been auto muted for " .. color4 ..
+                    client[params.clientNum]["muteMultipliers"] ..
+                    color1 .. " minute(s)!\n"
                 )
             else
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"]
-                    .. " ^7has been auto muted!\n"
+                    "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+                    client[params.clientNum]["name"] .. color1 ..
+                    "has been auto muted!\n"
                 )
             end
         end
@@ -199,7 +206,9 @@ function curseFilter(params)
 
         et.trap_SendConsoleCommand(
             et.EXEC_APPEND,
-            "qsay ^3CurseFilter: ^7" .. client[params.clientNum]["name"] .. " ^7has been auto muted!\n"
+            "qsay " .. color2 .. "CurseFilter: " .. color1 ..
+            client[params.clientNum]["name"] .. color1 ..
+            " has been auto muted!\n"
         )
     end
 end

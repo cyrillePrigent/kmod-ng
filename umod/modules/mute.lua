@@ -182,7 +182,8 @@ function checkMuteRunFrame(vars)
 
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "qsay ^3Mute: ^7" .. client[i]["name"] .. " ^7has been auto unmuted.  Please watch your language!\n"
+                            "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                            color1 .. " has been auto unmuted.  Please watch your language!\n"
                         )
                     end
 
@@ -197,7 +198,8 @@ function checkMuteRunFrame(vars)
 
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                            "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                            color1 .. " has been unmuted.\n"
                         )
                     end
 
@@ -208,7 +210,8 @@ function checkMuteRunFrame(vars)
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                        "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                        color1 .. " has been unmuted.\n"
                     )
                 end
             -- If client is muted permanently...
@@ -219,7 +222,8 @@ function checkMuteRunFrame(vars)
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay ^3Mute: ^7" .. client[i]["name"] .." ^7has been unmuted.\n"
+                        "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                        color1 .. " has been unmuted.\n"
                     )
                 end
             end
@@ -244,11 +248,9 @@ function checkMuteClientBegin(vars)
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                string.format(
-                    "qsay ^3Mute: ^7%s ^7has not yet finished his mute sentance.  (%s)\n",
-                    client[vars["clientNum"]]["lastName"],
-                    second2readeableTime(mute["duration"][ip])
-                )
+                "qsay " .. color2 .. "Mute: " .. color1 .. client[vars["clientNum"]]["lastName"] ..
+                color1 .. " has not yet finished his mute sentance.  (" ..
+                second2readeableTime(mute["duration"][ip]) .. ")\n"
             )
 
             et.trap_SendConsoleCommand(
@@ -262,10 +264,8 @@ function checkMuteClientBegin(vars)
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                string.format(
-                    "qsay ^3Mute: ^7%s ^7has been permanently muted\n",
-                    client[vars["clientNum"]]["lastName"]
-                )
+                "qsay " .. color2 .. "Mute: " .. color1 .. client[vars["clientNum"]]["lastName"] ..
+                color1 .. " has been permanently muted\n"
             )
 
             et.trap_SendConsoleCommand(

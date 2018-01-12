@@ -116,7 +116,7 @@ function checkDynamiteTimerPrint(vars)
                 if dynamiteTimer["announcePlant"] == 1 then
                     sayClients(
                         dynamiteTimer["msgPosition"], 
-                        string.format("Dynamite planted at ^8%s^7", location),
+                        "Dynamite planted at " .. color3 .. location,
                         "dynamiteTimerMsg"
                     )
                 end
@@ -145,7 +145,7 @@ function checkDynamiteTimerPrint(vars)
             if action == "defused" then
                 sayClients(
                     dynamiteTimer["msgPosition"], 
-                    string.format("Dynamite defused at ^8%s^7", location),
+                    "Dynamite defused at " .. color3 .. location,
                     "dynamiteTimerMsg"
                 )
 
@@ -222,16 +222,16 @@ function printDynamiteTimer(seconds, location)
     local when
 
     if seconds == 0 then
-        when = "^8now^7"
+        when = color3 .. "now"
     elseif seconds == 1 then
-        when = "in ^81^7 second"
+        when = "in " .. color3 .. "1" .. color1 .. " second"
     else
-        when = string.format("in ^8%d^7 seconds", seconds)
+        when = "in " .. color3 .. seconds .. color1 .. " seconds"
     end
 
     sayClients(
         dynamiteTimer["msgPosition"], 
-        string.format("Dynamite at ^8%s^7 exploding %s", location, when),
+        "Dynamite at " .. color3 .. location .. color1 .. " exploding " .. when,
         "dynamiteTimerMsg"
     )
 end

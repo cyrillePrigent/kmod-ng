@@ -16,7 +16,7 @@ function selfkillDisabledSlashCommand(params)
     if client[params.clientNum]["team"] ~= 3 and et.gentity_get(params.clientNum, "health") > 0 then
         et.trap_SendServerCommand(
             params.clientNum,
-            "cp \"^1Sorry, selfkilling is disabled on this server.\""
+            "cp \"" .. color4 .. "Sorry, selfkilling is disabled on this server.\""
         )
     end
 

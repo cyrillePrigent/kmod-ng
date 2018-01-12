@@ -24,7 +24,8 @@ addSlashCommand("client", "kill", {"function", "selfkillLimitSlashCommand"})
 -- All selfkill following is disabled and a notification is display.
 --  params is parameters passed to the function executed in command file.
 function selfkillLimitSlashCommand(params)
-    if client[params.clientNum]["team"] ~= 3 and et.gentity_get(params.clientNum, "health") > 0 then
+    if client[params.clientNum]["team"] ~= 3
+      and et.gentity_get(params.clientNum, "health") > 0 then
         params.say          = selfkillLimit["msgPosition"]
         params.noDisplayCmd = true
 
@@ -34,12 +35,13 @@ function selfkillLimitSlashCommand(params)
             if client[params.clientNum]["selfkills"] == selfkillLimit["limit"] then
                 printCmdMsg(
                     params,
-                    "You have reached your /kill limit !\n You can no longer /kill for the rest of this map."
+                    "You have reached your /kill limit !\n " ..
+                    "You can no longer /kill for the rest of this map."
                 )
             elseif client[params.clientNum]["selfkills"] == selfkillLimit["limit"] - 1 then
                 printCmdMsg(
                     params,
-                    "You have ^11" .. color1 .. " /kill left for this map."
+                    "You have " .. color4 .. "1" .. color1 .. " /kill left for this map."
                 )
             end
         else

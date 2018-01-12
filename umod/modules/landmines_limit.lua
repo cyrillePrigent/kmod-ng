@@ -64,7 +64,12 @@ function checkLandminesLimitRunFrame(vars)
 
         if landminesLimit["maxMines"] ~= maxMines then
             et.trap_Cvar_Set(landminesLimit["maxLandminesCvar"], maxMines)
-            sayClients(landminesLimit["msgPosition"], string.format("Max. %d mines allowed.", maxMines))
+    
+            sayClients(
+                landminesLimit["msgPosition"],
+                color1 .. "Max. " .. color4 .. maxMines .. " mines allowed."
+            )
+
             landminesLimit["maxMines"] = maxMines
         end
 

@@ -55,7 +55,7 @@ function enabledGameMode(gameModeName, params)
             removeCallbackFunction("RunFrame", "checkLandminesLimitRunFrame")
         end
     end
-    
+
     local umod_gameMode = et.trap_Cvar_Get("umod_gameMode")
 
     if umod_gameMode == "" and params.gameModeSettings then

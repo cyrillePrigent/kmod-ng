@@ -126,7 +126,8 @@ function disableVoteRunFrame(vars)
                 disableVote()
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay XP-Shuffle / Map Restart / Swap Teams / Match Reset and New Campaign votings are now DISABLED\n"
+                    "qsay " .. color1 .. "XP-Shuffle / Map Restart / Swap Teams" ..
+                    " / Match Reset and New Campaign votings are now DISABLED\n"
                 )
             end
         else
@@ -134,7 +135,9 @@ function disableVoteRunFrame(vars)
                 enableVote()
                 et.trap_SendConsoleCommand(
                     et.EXEC_APPEND,
-                    "qsay XP-Shuffle / Map Restart / Swap Teams / Match Reset and New Campaign votings have been reenabled due to timelimit change\n"
+                    "qsay " .. color1 .. "XP-Shuffle / Map Restart / Swap Teams" ..
+                    " / Match Reset and New Campaign votings have been reenabled" ..
+                    " due to timelimit change\n"
                 )
             end
 
