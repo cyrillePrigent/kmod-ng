@@ -270,8 +270,6 @@ color4 = "^1"
 -- Punkbuster status before disable it.
 pbState = false
 
-dateFormat = "%Y-%m-%d, %H:%M:%S" -- for map record dates, see strftime(3) ;->
-
 --floodprotect = 0
 
 -- **********************************************
@@ -311,10 +309,16 @@ function addCallbackFunction(settings)
             if callbackList[callbackType] ~= nil then
                 table.insert(callbackList[callbackType], functionName)
             else
-                et.G_LogPrint("ERROR addCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
+                et.G_LogPrint(
+                    "uMod ERROR addCallbackFunction : CallbackType " ..
+                    callbackType .. " don't exist!\n"
+                )
             end
         else
-            et.G_LogPrint("ERROR addCallbackFunction : Function " .. functionName .. " don't exist!\n")
+            et.G_LogPrint(
+                "uMod ERROR addCallbackFunction : Function " ..
+                functionName .. " don't exist!\n"
+            )
         end
     end
 end
@@ -331,7 +335,10 @@ function removeCallbackFunction(callbackType, removeFunctionName)
             end
         end
     else
-        et.G_LogPrint("ERROR removeCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
+        et.G_LogPrint(
+            "uMod ERROR removeCallbackFunction : CallbackType " ..
+            callbackType .. " don't exist!\n"
+        )
     end
 end
 
@@ -350,7 +357,10 @@ function executeCallbackFunction(callbackType, vars)
             end
         end
     else
-        et.G_LogPrint("ERROR executeCallbackFunction : CallbackType " .. callbackType .. " don't exist!\n")
+        et.G_LogPrint(
+            "uMod ERROR executeCallbackFunction : CallbackType " ..
+            callbackType .. " don't exist!\n"
+        )
     end
 end
 
@@ -366,14 +376,20 @@ function client2id(client, params)
         if clientNum >= 0 and clientNum < clientsLimit then
             if et.gentity_get(clientNum, "pers.connected") ~= 2 then
                 if params ~= nil then
-                    printCmdMsg(params, "There is no client associated with this slot number\n")
+                    printCmdMsg(
+                        params,
+                        "There is no client associated with this slot number\n"
+                    )
                 end
 
                 return nil
             end
         else
             if params ~= nil then
-                printCmdMsg(params, "Please enter a slot number between 0 and " .. clientsLimit .. "\n")
+                printCmdMsg(
+                    params,
+                    "Please enter a slot number between 0 and " .. clientsLimit .. "\n"
+                )
             end
 
             return nil
@@ -384,7 +400,10 @@ function client2id(client, params)
         if client then
             if string.len(client) <= 2 then
                 if params ~= nil then
-                    printCmdMsg(params, "Player name requires more than 2 characters\n")
+                    printCmdMsg(
+                        params,
+                        "Player name requires more than 2 characters\n"
+                    )
                 end
 
                 return nil
@@ -395,7 +414,10 @@ function client2id(client, params)
 
         if not clientNum then
             if params ~= nil then
-                printCmdMsg(params, "Try name again or use slot number\n")
+                printCmdMsg(
+                    params,
+                    "Try name again or use slot number\n"
+                )
             end
 
             return nil
@@ -528,7 +550,10 @@ function runCommandFile(command, params)
             result          = execute_command(params)
             execute_command = nil
         else
-            et.G_LogPrint("ERROR runCommandFile : None `execute_command` function defined in command file\n")
+            et.G_LogPrint(
+                "uMod ERROR runCommandFile : None `execute_command`" ..
+                " function defined in command file\n"
+            )
         end
     end
 
@@ -578,7 +603,11 @@ function removeSlashCommand(cmdType, cmdArg, removeName)
                 if t[arg] then
                     t = t[arg]
                 else
-                    et.G_LogPrint("ERROR removeSlashCommand : Cannot remove slash command '" .. table.concat(cmdArg, " ") .. "'\n")
+                    et.G_LogPrint(
+                        "uMod ERROR removeSlashCommand : Cannot remove slash command '" ..
+                        table.concat(cmdArg, " ") .. "'\n"
+                    )
+
                     return
                 end
             end
@@ -625,10 +654,16 @@ function runSlashCommand(data, params)
             result          = execute_command(params)
             execute_command = nil
         else
-            et.G_LogPrint("ERROR runSlashCommand : None `execute_command` function defined in command file\n")
+            et.G_LogPrint(
+                "uMod ERROR runSlashCommand : None `execute_command`" ..
+                " function defined in command file\n"
+            )
         end
     else
-        et.G_LogPrint("ERROR runSlashCommand : Bad slash command data : " .. tostring(data) .. "\n")
+        et.G_LogPrint(
+            "uMod ERROR runSlashCommand : Bad slash command data : " ..
+            tostring(data) .. "\n"
+        )
     end
 
     return result
@@ -650,7 +685,7 @@ end
 function unPauseSlashCommand(params)
     -- TODO : Why?
     if params.cmdMode == "client" then
-        if pause["startTrigger"] and ((time["frame"] - pause["dummyTime"]) / 1000) >= 5 then
+        if pause["startTrigger"] and (time["frame"] - pause["dummyTime"]) / 1000 >= 5 then
             game["paused"] = false
         end
     elseif params.cmdMode == "console" then
@@ -674,12 +709,15 @@ function teamSlashCommand(params)
     return 0
 end
 
-function getFormatedDate(dateValue, displayTime)
+dateFormat = "%Y-%m-%d, %H:%M:%S" -- for map record dates, see strftime(3) ;->
+
+-- Format a date.
+--  dateValue is the timestamp value of the date to format.
+--  displayTime is if time is add to the formated date.
+function getFormatedDate(dateValue, addTime)
     local str
 
-    -- dateFormat
-
-    if displayTime then
+    if addTime then
         str = dateFormat .. ", %H:%M:%S"
     else
         str = dateFormat
@@ -690,7 +728,11 @@ function getFormatedDate(dateValue, displayTime)
     if returnValue then
         return result
     else
-        return os.date(str, dateValue)
+        et.G_LogPrint(
+            "uMod ERROR getFormatedDate : " .. result .. "\n"
+        )
+
+        return ""
     end
 end
 
@@ -738,7 +780,10 @@ function kick(clientNum, reason, timeout)
         local time = os.date("%x %I:%M:%S%p")
         local ip   = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
         local guid = string.upper(client[clientNum]["guid"])
-        writeLog("(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid .. ") KICK for : " .. reason .. "\n")
+        writeLog(
+            "(" .. time .. ") (IP: " .. ip .. " GUID: " .. guid ..
+            ") KICK for : " .. reason .. "\n"
+        )
     end
 end
 
@@ -954,8 +999,13 @@ function et_InitGame(levelTime, randomSeed, restart)
     game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
 
     local currentVersion = et.trap_Cvar_Get("mod_version")
+
     et.RegisterModname("uMod v" .. version .. releaseStatus .. " " .. et.FindSelf())
-    et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - uMod " .. version .. "\"\n")
+
+    et.trap_SendConsoleCommand(
+        et.EXEC_APPEND,
+        "forcecvar mod_version \"" .. currentVersion .. " - uMod " .. version .. "\"\n"
+    )
 
     for p = 0, clientsLimit, 1 do
         client[p] = {}
@@ -972,7 +1022,9 @@ function et_InitGame(levelTime, randomSeed, restart)
     executeCallbackFunction("InitGame", {["levelTime"] = levelTime, ["restart"] = restart})
     executeCallbackFunction("ReadConfig")
 
-    et.G_Print("uMod version " .. version .. " " .. releaseStatus .. " has been initialized...\n")
+    et.G_Print(
+        "uMod version " .. version .. " " .. releaseStatus .. " has been initialized...\n"
+    )
 end
 
 -- Called when qagame shuts down.
@@ -1157,7 +1209,10 @@ end
 -- Called when a client begins (becomes active, and enters the gameworld).
 --  clientNum is the client slot id.
 function et_ClientBegin(clientNum)
-    et.trap_SendServerCommand(clientNum, "cpm \"This server is running UberMod v" .. version .. " " .. releaseStatus .. "\n\"")
+    et.trap_SendServerCommand(
+        clientNum,
+        "cpm \"This server is running UberMod v" .. version .. " " .. releaseStatus .. "\n\""
+    )
 
     local userinfo = et.trap_GetUserinfo(clientNum)
     local name     = et.Info_ValueForKey(userinfo, "name")
@@ -1434,8 +1489,12 @@ function et_Print(text)
         local vote   = arg[4]
         local target = tonumber(arg[5])
 
-        if (vote == "kick" or vote == "mute") and getAdminLevel(caller) < getAdminLevel(target) then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n")
+        if (vote == "kick" or vote == "mute")
+          and getAdminLevel(caller) < getAdminLevel(target) then
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "cancelvote ; qsay Admins cannot be vote kicked or vote muted!\n"
+            )
         end
     end
 
@@ -1497,7 +1556,7 @@ function et.G_ClientSound(clientNum, soundFile)
 end
 
 -- Set a sound index for a certain client only.
---  clientNum is the client slot id.
+
 --  soundIndex is the sound index to set.
 function setClientSoundIndex(clientNum, soundIndex)
     -- NOTE : EV_GLOBAL_CLIENT_SOUND = 54
@@ -1506,7 +1565,11 @@ function setClientSoundIndex(clientNum, soundIndex)
     et.gentity_set(tmpEntity, "s.eventParm", soundIndex)
 end
 
-
+-- Play a sound to all client if sound is enabled for them (clientNum = nil) or
+-- play a sound to a specific client if sound is enabled for him (with clientNum)
+--  soundFile is the path of the sound file.
+--  playKey is the key in client data to enabled / disabled sound playing.
+--  clientNum is the client slot id for play the sound to a specific client.
 function playSound(soundFile, playKey, clientNum)
     local soundIndex = et.G_SoundIndex(soundFile)
 
@@ -1527,6 +1590,12 @@ function playSound(soundFile, playKey, clientNum)
     end
 end
 
+-- Display a message to a specific client (only if msgKey = nil)
+-- or display a message to all client if message is
+-- enabled for them (with msgKey).
+--  pos is the message cmd to display the message.
+--  msg is the message content.
+--  msgKey is the key in client data to enabled / disabled message displaying.
 function sayClients(pos, msg, msgKey)
     msg = pos .. " \"" .. msg .. "\""
 

@@ -16,6 +16,8 @@ reviveSpree = {
     --   key   -> revive spree amount
     --   value -> revive spree message
     ["list"] = {},
+    -- First revive spree amount for start a revive spree.
+    ["firstSpreeAmount"] = 0,
     -- Revive spree ending by enemy.
     ["endMsgByEnemy"] = et.trap_Cvar_Get("u_rs_end_by_enemy"),
     -- Revive spree ending by selfkill.
@@ -173,6 +175,14 @@ function reviveSpreeInitGame(vars)
         local msg    = et.trap_Cvar_Get("u_rs_message" .. n)
 
         if amount ~= nil and msg ~= "" then
+            if reviveSpree["firstSpreeAmount"] == 0 then
+                reviveSpree["firstSpreeAmount"] = amount
+            else
+                if reviveSpree["firstSpreeAmount"] > amount then
+                    reviveSpree["firstSpreeAmount"] = amount
+                end
+            end
+
             reviveSpree["list"][amount] = msg
         else
             break
@@ -191,7 +201,7 @@ function checkReviveSpreeRunFrameEndRound(vars)
         local endReviveSpree = ""
 
         for p = 0, clientsLimit, 1 do
-            if client[p]["reviveSpree"] >= 5 then
+            if client[p]["reviveSpree"] >= reviveSpree["firstSpreeAmount"] then
                 if endReviveSpree ~= "" then
                     endReviveSpree = endReviveSpree .. color1 .. ", "
                 else
@@ -298,7 +308,7 @@ end
 -- If victim is on revive spree, display revive spree end message.
 --  vars is the local vars passed from et_ClientDisconnect function.
 function reviveSpreeClientDisconnect(vars)
-    if client[vars["clientNum"]]["reviveSpree"] >= 5 then
+    if client[vars["clientNum"]]["reviveSpree"] >= reviveSpree["firstSpreeAmount"] then
         checkReviveSpreeEnd(vars["clientNum"], vars["clientNum"])
     end
 end
@@ -420,7 +430,7 @@ end
 -- Reset revive spree counter of victim.
 --  vars is the local vars of et_Obituary function.
 function reviveSpreeObituary(vars)
-    if client[vars["victim"]]["reviveSpree"] >= 5 then
+    if client[vars["victim"]]["reviveSpree"] >= reviveSpree["firstSpreeAmount"] then
         checkReviveSpreeEnd(vars["victim"], vars["killer"])
     end
 

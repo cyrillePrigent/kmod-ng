@@ -9,6 +9,8 @@ if killingSpreeModule == 1 then
         --  key   => killing spree amount
         --  value => list of killing spree data (message & sound)
         ["list"] = {},
+        -- First killing spree amount for start a killing spree.
+        ["firstSpreeAmount"] = 0,
         -- Killing spree sound status.
         ["enabledSound"] = tonumber(et.trap_Cvar_Get("u_ks_enable_sound")),
         -- Killing spree ended by enemy.
@@ -56,6 +58,14 @@ if killingSpreeModule == 1 then
             local msg    = et.trap_Cvar_Get("u_ks_message" .. n)
 
             if amount ~= nil and sound ~= "" and msg ~= "" then
+                if killingSpree["firstSpreeAmount"] == 0 then
+                    killingSpree["firstSpreeAmount"] = amount
+                else
+                    if killingSpree["firstSpreeAmount"] > amount then
+                        killingSpree["firstSpreeAmount"] = amount
+                    end
+                end
+
                 killingSpree["list"][amount] = {
                     ["sound"]   = sound,
                     ["message"] = msg
@@ -309,7 +319,7 @@ function checkKillingSpreeRunFrameEndRound(vars)
 
         if killingSpreeModule == 1 then
             endRoundfunctionList[1] = function (clientNum)
-                if client[clientNum]["killingSpree"] >= 5 then
+                if client[clientNum]["killingSpree"] >= killingSpree["firstSpreeAmount"] then
                     if endKillingSpree ~= "" then
                         endKillingSpree = endKillingSpree .. color1 .. ", "
                     else
@@ -424,7 +434,7 @@ function checkKillingSpreeObituaryEnemyKill(vars)
             end
         end
 
-        if client[vars["victim"]]["killingSpree"] >= 5 then
+        if client[vars["victim"]]["killingSpree"] >= killingSpree["firstSpreeAmount"] then
             killingSpreeEndProcess(vars, killingSpree["endMsgByEnemy"], vars["victim"])
         end
     end
@@ -437,7 +447,8 @@ end
 -- message and reset killing spree counter of victim.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryWorldKill(vars)
-    if killingSpreeModule == 1 and client[vars["victim"]]["killingSpree"] >= 5 then
+    if killingSpreeModule == 1
+      and client[vars["victim"]]["killingSpree"] >= killingSpree["firstSpreeAmount"] then
         killingSpreeEndProcess(vars, killingSpree["endMsgByWorld"], vars["victim"]) 
     end
 
@@ -449,7 +460,8 @@ end
 -- and reset killing spree counter of killer and victim.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituaryTeamKill(vars)
-    if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
+    if killingSpreeModule == 1
+      and client[vars["killer"]]["killingSpree"] >= killingSpree["firstSpreeAmount"] then
         killingSpreeEndProcess(vars, killingSpree["endMsgByTeamkill"], vars["killer"])
     end
 
@@ -462,7 +474,8 @@ end
 -- and reset his killing spree counter.
 --  vars is the local vars of et_Obituary function.
 function checkKillingSpreeObituarySelfKill(vars)
-    if killingSpreeModule == 1 and client[vars["killer"]]["killingSpree"] >= 5 then
+    if killingSpreeModule == 1
+      and client[vars["killer"]]["killingSpree"] >= killingSpree["firstSpreeAmount"] then
         killingSpreeEndProcess(vars, killingSpree["endMsgBySelfkill"], vars["victim"])
     end
 
