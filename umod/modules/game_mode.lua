@@ -50,7 +50,7 @@ function enabledGameMode(gameModeName, params)
         end
     end
 
-    if landminesLimit == 1 then
+    if landminesLimitModule == 1 then
         if landminesLimit["enabled"] then
             removeCallbackFunction("RunFrame", "checkLandminesLimitRunFrame")
         end
@@ -255,7 +255,7 @@ function disabledGameMode(params)
         end
     end
 
-    if landminesLimit == 1 then
+    if landminesLimitModule == 1 then
         if landminesLimit["enabled"] then
             addCallbackFunction({ ["RunFrame"] = "checkLandminesLimitRunFrame" })
         end

@@ -29,31 +29,31 @@ end
 -- Check if player is inactive and extend his spawn shield.
 --  vars is the local vars passed from et_RunFrame function.
 function checkAdvancedSpawnRunFrame(vars)
-    for i = 0, clientsLimit, 1 do
-        -- TODO : Check if slot is used
+    for p = 0, clientsLimit, 1 do
+        if client[p]["team"] ~= 0 then
+            if client[p]["switchTeam"] == 1 then
+                et.gentity_set(p, "ps.powerups", 1, 0)
+            end
 
-        if client[i]["switchTeam"] == 1 then
-            et.gentity_set(i, "ps.powerups", 1, 0)
-        end
+            client[p]["switchTeam"] = 0
 
-        client[i]["switchTeam"] = 0
+            if client[p]["respawn"] == 1 then
+                if client[p]["switchTeam"] == 0 and et.gentity_get(p, "ps.powerups", 1) > 0 then
+                    if client[p]["invincibleDummy"] == 0 then
+                        client[p]["invincibleStart"] = tonumber(et.gentity_get(p, "client.inactivityTime"))
+                        client[p]["invincibleDummy"] = 1
+                    end
 
-        if client[i]["respawn"] == 1 then
-            if client[i]["switchTeam"] == 0 and et.gentity_get(i, "ps.powerups", 1) > 0 then
-                if client[i]["invincibleDummy"] == 0 then
-                    client[i]["invincibleStart"] = tonumber(et.gentity_get(i, "client.inactivityTime"))
-                    client[i]["invincibleDummy"] = 1
-                end
-
-                if tonumber(et.gentity_get(i, "client.inactivityTime")) == client[i]["invincibleStart"] then
-                    et.gentity_set(i, "ps.powerups", 1, vars["levelTime"] + 3000)
+                    if tonumber(et.gentity_get(p, "client.inactivityTime")) == client[p]["invincibleStart"] then
+                        et.gentity_set(p, "ps.powerups", 1, vars["levelTime"] + 3000)
+                    else
+                        client[p]["respawn"]         = 0
+                        client[p]["invincibleDummy"] = 0
+                    end
                 else
-                    client[i]["respawn"]         = 0
-                    client[i]["invincibleDummy"] = 0
+                    client[p]["respawn"]         = 0
+                    client[p]["invincibleDummy"] = 0
                 end
-            else
-                client[i]["respawn"]         = 0
-                client[i]["invincibleDummy"] = 0
             end
         end
     end

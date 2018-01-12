@@ -19,23 +19,23 @@ function execute_command(params)
         local pteam      = { "^1X" , "^4L" , " " }
         local adminCount = 0
 
-        for i = 0, clientsLimit, 1 do
-            local level = getAdminLevel(i)
+        for p = 0, clientsLimit, 1 do
+            local level = getAdminLevel(p)
 
             if level >= 1 then
-                if et.gentity_get(i, "pers.connected") == 2 then
-                    local name = et.Q_CleanStr(client[i]["name"])
+                if et.gentity_get(p, "pers.connected") == 2 then
+                    local name = et.Q_CleanStr(client[p]["name"])
 
                     printCmdMsg(
                         params,
                         string.format(
                             "%s^7%2s ^1:^7 %s%s ^1:  %5s  ^1:^7  ^7%s\n",
-                            pteam[client[i]['team']],
-                            i,
+                            pteam[client[p]['team']],
+                            p,
                             name,
                             string.rep(" ", 24 - tonumber(string.len(name))),
                             level,
-                            admin['name'][string.upper(client[i]["guid"])]
+                            admin['name'][string.upper(client[p]["guid"])]
                         )
                     )
 

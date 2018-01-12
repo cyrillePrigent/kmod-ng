@@ -55,8 +55,8 @@ function autoPanzerDisableRunFrame(vars)
         if players["active"] < autoPanzerDisable["playerLimit"] then
             local activePanzers = false
 
-            for i = 0, clientsLimit, 1 do
-                if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
+            for p = 0, clientsLimit, 1 do
+                if tonumber(et.gentity_get(p, "sess.latchPlayerWeapon")) == 5 then
                     activePanzers = true
                     break
                 end
@@ -109,13 +109,13 @@ function autoPanzerDisableRunFrame(vars)
 
                 -- After 60 secs...
                 if remainingTime > 60000 then
-                    for i = 0, clientsLimit, 1 do
-                        if tonumber(et.gentity_get(i, "sess.latchPlayerWeapon")) == 5 then
-                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
-                            et.gentity_set(i, "sess.latchPlayerWeapon", 3)
+                    for p = 0, clientsLimit, 1 do
+                        if tonumber(et.gentity_get(p, "sess.latchPlayerWeapon")) == 5 then
+                            et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. p .. "\n")
+                            et.gentity_set(p, "sess.latchPlayerWeapon", 3)
 
                             et.trap_SendServerCommand(
-                                i,
+                                p,
                                 "chat \"" .. color4 .. "You have been moved to spectator " ..
                                 "for having a panzerfaust after being warned twice to switch!\"\n"
                             )

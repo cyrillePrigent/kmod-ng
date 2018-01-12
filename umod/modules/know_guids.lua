@@ -35,7 +35,7 @@
 
 knownGuids = {
     -- Time to wait before join a team on server.
-    ["waitTime"]  = {
+    ["waitTime"] = {
         ["mins"]    = tonumber(et.trap_Cvar_Get("u_kg_wait_time")),
         ["secs"]    = 0,
         ["ms"]      = 0

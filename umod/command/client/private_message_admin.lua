@@ -14,16 +14,16 @@ function execute_command(params)
         local pmContent  = et.ConcatArgs(1)
         local adminCount = 0
 
-        for i = 0, clientsLimit, 1 do
-            if getAdminLevel(i) >= 2 then
+        for p = 0, clientsLimit, 1 do
+            if getAdminLevel(p) >= 2 then
                 et.trap_SendServerCommand(
-                    i,
+                    p,
                     msgCmd["chatArea"] .. "\"^dPm to admins from "
                     .. client[params.clientNum]["name"]
                     .. "^d --> ^3" .. pmContent .. "^7"
                 )
 
-                et.G_ClientSound(i, pmSound)
+                et.G_ClientSound(p, pmSound)
 
                 adminCount = adminCount + 1
             end

@@ -8,11 +8,13 @@
 -- original authors are mentioned.
 --------------------------------------------------------------------------------
 
--- TODO : Make maximum landmines configurable.
-
 -- Global var
 
 landminesLimit = {
+    -- Landmines limit list.
+    --  key   => active players amount
+    --  value => number of landmines allowed
+    ["list"] = {},
     -- Landmines limit status.
     ["enabled"] = false,
     -- Current maximum landmines value.
@@ -37,30 +39,49 @@ function landminesLimitInitGame(vars)
         landminesLimit["maxLandminesCvar"] = "team_maxLandmines"
     end
 
-    if et.trap_Cvar_Get(landminesLimit["maxLandminesCvar"]) == 0 then
-        et.G_LogPrint("Landmines is disabled! Please enable it with " .. landminesLimit["maxLandminesCvar"] .. " cvar.\n")
+    local landminesMin = tonumber(et.trap_Cvar_Get("u_landmines_limit_min"))
+
+    if landminesMin == nil then
+        et.G_LogPrint(
+            "uMod Landmines limit: <u_landmines_limit_min> cvar don't exist !\n"
+        )
+    end
+
+    local nbValue  = 0
+    local lastValue = landminesMin
+
+    for nbPlayers = 1, clientsLimit, 1 do
+        local nbLandmines = tonumber(
+            et.trap_Cvar_Get("u_lm_for_more_than_" .. nbPlayers .. "_players")
+        )
+
+        landminesLimit["list"][nbPlayers] = lastValue
+
+        if nbLandmines ~= nil then
+            nbValue = nbValue + 1
+            lastValue = nbLandmines
+        end
+    end
+
+    if nbValue < 1 then
+        et.G_LogPrint(
+            "uMod Landmines limit: One or more <u_lm_for_more_than_X_players>"
+            " cvar(s) must be set in umod.cfg!\n"
+        )
     else
         landminesLimit["enabled"] = true
+
         addCallbackFunction({["RunFrame"] = "checkLandminesLimitRunFrame"})
     end
 end
+
 
 -- Callback function when qagame runs a server frame.
 -- Check number of players and set the number of mines according.
 --  vars is the local vars passed from et_RunFrame function.
 function checkLandminesLimitRunFrame(vars)
     if vars["levelTime"] - landminesLimit["time"] > landminesLimit["frameCheck"] then
-        local maxMines
-
-        if players["active"] > 8 then
-            maxMines = 15
-        elseif players["active"] > 6 then
-            maxMines = 10
-        elseif players["active"] > 4 then
-            maxMines = 8
-        else
-            maxMines = 5
-        end
+        local maxMines = landminesLimit["list"][players["active"]]
 
         if landminesLimit["maxMines"] ~= maxMines then
             et.trap_Cvar_Set(landminesLimit["maxLandminesCvar"], maxMines)

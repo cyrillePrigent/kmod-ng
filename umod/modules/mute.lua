@@ -157,9 +157,9 @@ end
 -- Check client mute before next map or server restart.
 --  vars is the local vars passed from et_ShutdownGame function.
 function checkMuteShutdownGame(vars)
-    for i = 0, clientsLimit, 1 do
+    for p = 0, clientsLimit, 1 do
         if et.gentity_get(0, "inuse") then
-            checkClientMute(i)
+            checkClientMute(p)
         end
     end
 end
@@ -169,60 +169,60 @@ end
 --  vars is the local vars passed from et_RunFrame function.
 function checkMuteRunFrame(vars)
     if vars["levelTime"] - mute["time"] >= mute["frameCheck"] then
-        for i = 0, clientsLimit, 1 do
+        for p = 0, clientsLimit, 1 do
             -- If client is muted for a certain duration...
-            if client[i]["muteEnd"] > 0 then
+            if client[p]["muteEnd"] > 0 then
                 -- If client has finished his mute sentance...
-                if time["frame"] > client[i]["muteEnd"] then
-                    if et.gentity_get(i, "sess.muted") == 1 then
+                if time["frame"] > client[p]["muteEnd"] then
+                    if et.gentity_get(p, "sess.muted") == 1 then
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "ref unmute \"" .. i .. "\"\n"
+                            "ref unmute \"" .. p .. "\"\n"
                         )
 
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                            "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
                             color1 .. " has been auto unmuted.  Please watch your language!\n"
                         )
                     end
 
-                    client[i]["muteEnd"] = 0
-                    removeMute(i)
+                    client[p]["muteEnd"] = 0
+                    removeMute(p)
 
                 -- If client has not yet finished his mute sentance...
-                elseif time["frame"] < client[i]["muteEnd"] then
-                    if et.gentity_get(i, "sess.muted") == 0 then
-                        client[i]["muteEnd"] = 0
-                        removeMute(i)
+                elseif time["frame"] < client[p]["muteEnd"] then
+                    if et.gentity_get(p, "sess.muted") == 0 then
+                        client[p]["muteEnd"] = 0
+                        removeMute(p)
 
                         et.trap_SendConsoleCommand(
                             et.EXEC_APPEND,
-                            "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                            "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
                             color1 .. " has been unmuted.\n"
                         )
                     end
 
                 -- If client is unmuted...
-                elseif et.gentity_get(i, "sess.muted") == 0 then
-                    client[i]["muteEnd"] = 0
-                    removeMute(i)
+                elseif et.gentity_get(p, "sess.muted") == 0 then
+                    client[p]["muteEnd"] = 0
+                    removeMute(p)
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                        "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
                         color1 .. " has been unmuted.\n"
                     )
                 end
             -- If client is muted permanently...
-            elseif client[i]["muteEnd"] == -1 then
-                if et.gentity_get(i, "sess.muted") == 0 then
-                    client[i]["muteEnd"] = 0
-                    removeMute(i)
+            elseif client[p]["muteEnd"] == -1 then
+                if et.gentity_get(p, "sess.muted") == 0 then
+                    client[p]["muteEnd"] = 0
+                    removeMute(p)
 
                     et.trap_SendConsoleCommand(
                         et.EXEC_APPEND,
-                        "qsay " .. color2 .. "Mute: " .. color1 .. client[i]["name"] ..
+                        "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
                         color1 .. " has been unmuted.\n"
                     )
                 end

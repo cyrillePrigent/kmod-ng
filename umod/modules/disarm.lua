@@ -65,13 +65,13 @@ cmdList["console"]["!disarm_reset"] = "/command/both/disarm_reset.lua"
 --  vars is the local vars passed from et_RunFrame function.
 function checkDisarmRunFrame(vars)
     if vars["levelTime"] - disarm["time"] >= disarm["frameCheck"] then
-        for i = 0, clientsLimit do
-            if client[i]["disarm"] == 1 then
+        for p = 0, clientsLimit do
+            if client[p]["disarm"] == 1 then
                 -- NOTE : et.MAX_WEAPONS = 50
                 for w = 1, 49, 1 do
                     if not disarm["weapons"][w] then
-                        et.gentity_set(i, "ps.ammoclip", w, 0)
-                        et.gentity_set(i, "ps.ammo", w, 0)
+                        et.gentity_set(p, "ps.ammoclip", w, 0)
+                        et.gentity_set(p, "ps.ammo", w, 0)
                     end
                 end
             end

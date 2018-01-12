@@ -5,11 +5,11 @@ function execute_command(params)
     params.say = msgCmd["chatArea"]
     local matches = 0
 
-    for i = 0, clientsLimit, 1 do
-        if client[i]['team'] == 1 or client[i]['team'] == 2 then
-            if tonumber(et.gentity_get(i, "ps.ping")) >= 999 then
+    for p = 0, clientsLimit, 1 do
+        if client[p]['team'] == 1 or client[p]['team'] == 2 then
+            if tonumber(et.gentity_get(p, "ps.ping")) >= 999 then
                 matches = matches + 1
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. i .. "\n")
+                et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. p .. "\n")
             end
         end
     end

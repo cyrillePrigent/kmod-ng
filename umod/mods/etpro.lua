@@ -187,11 +187,11 @@ function etProFixClientConnect(vars)
         return "invalid connection"
     end
 
-    for i = 0, clientsLimit do
+    for p = 0, clientsLimit do
         -- pers.connected is set correctly for fake players
         -- can't rely on userinfo being empty
-        if i ~= vars["clientNum"] and et.gentity_get(i, "pers.connected") > 0 then
-            local _userinfo = et.trap_GetUserinfo(i)
+        if p ~= vars["clientNum"] and et.gentity_get(p, "pers.connected") > 0 then
+            local _userinfo = et.trap_GetUserinfo(p)
 
             if ip == _getClientIp(_userinfo) then
                 count = count + 1
@@ -415,11 +415,11 @@ function etProFixClientUserinfoChanged(vars)
 -- globalconbined.lua start
 --    local guid = string.upper(client[vars["clientNum"]]["guid"])
 --
---    for i = 0, clientsLimit do
+--    for p = 0, clientsLimit do
 --        local player_userinfo = et.trap_GetUserinfo(client)
 --        local player_guid     = string.upper(client[client]["guid"])
 --
---        if player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= i then
+--        if player_guid == guid and player_guid ~= "NO_GUID" and player_guid ~= "UNKNOWN" and vars["clientNum"] ~= p then
 --            badUserinfo(vars["clientNum"], "duplicate guid")
 --        end
 --    end

@@ -6,8 +6,8 @@ function execute_command(params)
     local pteam = { "^1X" , "^4L" , " " }
     local playercount = 0
 
-    for i = 0, clientsLimit, 1 do
-        local userinfo = et.trap_GetUserinfo(i)
+    for p = 0, clientsLimit, 1 do
+        local userinfo = et.trap_GetUserinfo(p)
         local rate     = et.Info_ValueForKey(userinfo, "rate")
         local snaps    = et.Info_ValueForKey(userinfo, "snaps")
         local name     = string.lower(et.Q_CleanStr(et.Info_ValueForKey(userinfo, "name")))
@@ -20,8 +20,8 @@ function execute_command(params)
             ref = "^3REF"
         end
 
-        if et.gentity_get(i,"pers.connected") == 2 then
-            et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[client[i]['team']], i, name, space, rate, snaps, ref))
+        if et.gentity_get(p,"pers.connected") == 2 then
+            et.trap_SendServerCommand(params.clientNum, string.format('print "%s^7%2s ^1:^7 %s%s %5s  %5s %s\n"', pteam[client[p]['team']], p, name, space, rate, snaps, ref))
             playercount = playercount + 1
         end
     end

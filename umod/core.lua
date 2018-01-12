@@ -19,7 +19,7 @@ mapName               = et.trap_Cvar_Get("mapname")
 muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
 curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
 logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
-landminesLimit        = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
+landminesLimitModule  = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
 killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
 spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
 svMaxClients          = tonumber(et.trap_Cvar_Get("sv_maxclients"))
@@ -50,7 +50,6 @@ clientsLimit = svMaxClients - 1
 client = {}
 
 clientDefaultData = {
-    --["slotUsed"]       = 0,
     ["useAdrenaline"]  = 0,
     ["respawn"]        = 0,
     ["switchTeam"]     = 0,
@@ -437,12 +436,12 @@ function getPlayernameToId(name, params)
     local matchCount = 0
     local cleanName  = string.lower(trim(et.Q_CleanStr(name)))
 
-    for i = 0, clientsLimit, 1 do
-        local searchCleanName = string.lower(trim(et.Q_CleanStr(client[i]["name"])))
+    for p = 0, clientsLimit, 1 do
+        local searchCleanName = string.lower(trim(et.Q_CleanStr(client[p]["name"])))
         
         if cleanName == searchCleanName then
             matchCount = 0
-            slot       = i
+            slot       = p
             break
         end
 
@@ -450,7 +449,7 @@ function getPlayernameToId(name, params)
 
         if s and e then
             matchCount = matchCount + 1
-            slot = i
+            slot = p
         end
     end
 
@@ -458,10 +457,8 @@ function getPlayernameToId(name, params)
         if params ~= nil then
             printCmdMsg(
                 params,
-                string.format(
-                    "There are currently ^1%d^7 client\[s\] that match \"%s\"\n",
-                    matchCount, name
-                )
+                "There are currently " .. color4 .. matchCount .. color1 ..
+                " client\[s\] that match \"" .. name .. "\"\n"
             )
         end
 
@@ -901,7 +898,7 @@ if tonumber(et.trap_Cvar_Get("u_birthday")) == 1 then
     dofile(umod_path .. "/modules/birthday.lua")
 end
 
-if landminesLimit == 1 then
+if landminesLimitModule == 1 then
     dofile(umod_path .. "/modules/landmines_limit.lua")
 end
 
@@ -960,15 +957,15 @@ function et_InitGame(levelTime, randomSeed, restart)
     et.RegisterModname("uMod v" .. version .. releaseStatus .. " " .. et.FindSelf())
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar mod_version \"" .. currentVersion .. " - uMod " .. version .. "\"\n")
 
-    for i = 0, clientsLimit, 1 do
-        client[i] = {}
+    for p = 0, clientsLimit, 1 do
+        client[p] = {}
 
         for key, value in pairs(clientDefaultData) do
-            client[i][key] = value
+            client[p][key] = value
         end
 
-        if et.gentity_get(i, "pers.connected") == 2 then
-            client[i]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(i), "name")
+        if et.gentity_get(p, "pers.connected") == 2 then
+            client[p]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(p), "name")
         end
     end
 
@@ -1046,42 +1043,45 @@ function et_RunFrame(levelTime)
     players["active"] = 0
     players["total"]  = 0
 
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
-            client[i]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(i), "name")
+    for p = 0, clientsLimit, 1 do
+        if et.gentity_get(p, "pers.connected") == 2 then
+            client[p]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(p), "name")
 
-            if client[i]["name"] ~= client[i]["lastName"] then
+            if client[p]["name"] ~= client[p]["lastName"] then
                 if logChatModule == 1 then
-                    writeLog("*** " .. client[i]["lastName"] .. " HAS RENAMED TO " .. client[i]["name"] .. " ***\n")
+                    writeLog(
+                        "*** " .. client[p]["lastName"] .. " HAS RENAMED TO " ..
+                        client[p]["name"] .. " ***\n"
+                    )
                 end
 
-                client[i]["lastName"] = client[i]["name"]
+                client[p]["lastName"] = client[p]["name"]
             end
 
-            if client[i]["team"] == 1 then
+            if client[p]["team"] == 1 then
                 players["axis"] = players["axis"] + 1
-            elseif client[i]["team"] == 2 then
+            elseif client[p]["team"] == 2 then
                 players["allies"] = players["allies"] + 1
-            elseif client[i]["team"] == 3 then
+            elseif client[p]["team"] == 3 then
                 players["spectator"] = players["spectator"] + 1
             end
 
-            if client[i]["team"] == 1 or client[i]["team"] == 2 then
+            if client[p]["team"] == 1 or client[p]["team"] == 2 then
                 players["active"] = players["active"] + 1
             end
 
             players["total"] = players["total"] + 1
         else
-            client[i]["name"]     = ""
-            client[i]["lastName"] = ""
+            client[p]["name"]     = ""
+            client[p]["lastName"] = ""
         end
     end
 
     if spectatorInactivity > 0 then
-        for i = 0, clientsLimit, 1 do
-            if client[i]["team"] == 3 and getAdminLevel(i) >= 1 then
-                et.gentity_set(i, "client.inactivityTime", time["frame"])
-                et.gentity_set(i, "client.inactivityWarning", 1)
+        for p = 0, clientsLimit, 1 do
+            if client[p]["team"] == 3 and getAdminLevel(p) >= 1 then
+                et.gentity_set(p, "client.inactivityTime", time["frame"])
+                et.gentity_set(p, "client.inactivityWarning", 1)
             end
         end
     end
@@ -1100,8 +1100,8 @@ function et_RunFrame(levelTime)
     else
         executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
 
-        --for i = 0, clientsLimit, 1 do
-        --    executeCallbackFunction("RunFramePlayerLoop", {["levelTime"] = tonumber(levelTime), ["clientNum"] = i})
+        --for p = 0, clientsLimit, 1 do
+        --    executeCallbackFunction("RunFramePlayerLoop", {["levelTime"] = tonumber(levelTime), ["clientNum"] = p})
         --end
     end
 end
@@ -1144,10 +1144,10 @@ function et_ClientDisconnect(clientNum)
     end
 
 --     if clientNum == _clientsLimit then
---         for i = clientNum - 1, 0, -1 do
---             if client[i]["slotUsed"] == 1 then
---             --if et.gentity_get(i, "pers.connected") == 2 then
---                 _clientsLimit = i
+--         for p = clientNum - 1, 0, -1 do
+--             if client[p]["slotUsed"] == 1 then
+--             --if et.gentity_get(p, "pers.connected") == 2 then
+--                 _clientsLimit = p
 --                 break
 --             end
 --         end
@@ -1515,9 +1515,9 @@ function playSound(soundFile, playKey, clientNum)
     end
 
     if clientNum == nil then
-        for i = 0, clientsLimit, 1 do
-            if client[i][playKey] == 1 then
-                setClientSoundIndex(i, soundIndex)
+        for p = 0, clientsLimit, 1 do
+            if client[p][playKey] == 1 then
+                setClientSoundIndex(p, soundIndex)
             end
         end
     else
@@ -1528,14 +1528,14 @@ function playSound(soundFile, playKey, clientNum)
 end
 
 function sayClients(pos, msg, msgKey)
-    msg = string.format("%s \"%s^7\"", pos, msg)
+    msg = pos .. " \"" .. msg .. "\""
 
     if clientDefaultData[msgKey] == nil then
-        et.trap_SendConsoleCommand(et.EXEC_APPEND, msg)
+        et.trap_SendServerCommand(-1, msg)
     else
-        for i = 0, clientsLimit, 1 do
-            if client[i][msgKey] == 1 then
-                et.trap_SendServerCommand(i, msg)
+        for p = 0, clientsLimit, 1 do
+            if client[p][msgKey] == 1 then
+                et.trap_SendServerCommand(p, msg)
             end
         end
     end

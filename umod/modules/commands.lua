@@ -70,10 +70,10 @@ function randomClientFinder()
     local randomClient = {}
     local m = 0
 
-    for i = 0, clientsLimit, 1 do
-        if et.gentity_get(i, "pers.connected") == 2 then
+    for p = 0, clientsLimit, 1 do
+        if et.gentity_get(p, "pers.connected") == 2 then
             m = m + 1
-            randomClient[m] = i
+            randomClient[m] = p
         end
     end
 

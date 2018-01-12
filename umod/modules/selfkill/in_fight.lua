@@ -23,8 +23,11 @@
 selfkillInFight = {
     -- Punishment level.
     ["punishment"] = tonumber(et.trap_Cvar_Get("u_selfkill_punishment")),
-    -- Time to wait (in seconds) before selfkill
-    ["hitWait"] = tonumber(et.trap_Cvar_Get("u_selfkill_hit_wait")),
+    -- Time to wait before selfkill
+    ["hitWait"] = {
+        ["secs"]    = tonumber(et.trap_Cvar_Get("u_selfkill_hit_wait")),
+        ["ms"]      = 0
+    }
     -- Limit of allowed selkill.
     ["limit"] = tonumber(et.trap_Cvar_Get("u_selfkill_limit")),
     -- Percentage before warning.
@@ -36,6 +39,8 @@ selfkillInFight = {
     -- Interval (in ms) between 2 frame check.
     ["frameCheck"] = 100
 }
+
+selfkillInFight["hitWait"]["ms"] = selfkillInFight["hitWait"]["secs"] * 1000
 
 -- Set default client data.
 --
@@ -72,7 +77,7 @@ function checkSelfkillInFightRunFrame(vars)
 
                 if damageReceived > client[p]["damageReceived"] then
                     -- Damage has been taken in the last <sampleRate> milliseconds -> set switch to 10
-                    client[p]["damageReceivedEnding"] = vars["levelTime"] + (selfkillInFight["hitWait"] * 1000)
+                    client[p]["damageReceivedEnding"] = vars["levelTime"] + selfkillInFight["hitWait"]["ms"]
 
                     -- Save the current damage value to carry across to next iteration
                     client[p]["damageReceived"] = damageReceived
@@ -117,7 +122,7 @@ function selfkillInFightSlashCommand(params)
                 printCmdMsg(
                     params,
                     color2 .. "Server detects you have been hit - selfkill disabled for " ..
-                    selfkillInFight["hitWait"] .. " seconds"
+                    selfkillInFight["hitWait"]["secs"] .. " seconds"
                 )
 
                 return 1
