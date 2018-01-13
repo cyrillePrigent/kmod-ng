@@ -1,9 +1,9 @@
 -- Test your admin level and display result.
+-- From kmod script.
 -- Require : admins module
--- From kmod lua script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     local level = getAdminLevel(params.clientNum)
 

@@ -1,13 +1,13 @@
 -- Move directly your player to another player.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => player ID
 --   * params["arg2"] => target
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 3 then
-        printCmdMsg(params, "Useage: goto \[name/PID\] \[name/PID - Destination\]\n")
+        printCmdMsg(params, "Useage: goto [name/PID] [name/PID - Destination]\n")
     else
         clientNum = client2id(params["arg1"], params)
 

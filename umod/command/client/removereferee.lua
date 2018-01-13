@@ -1,12 +1,12 @@
 -- Remove the referee's rights from the player.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: removereferee \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: removereferee [partname/id#]\n")
     else
         clientNum = client2id(params["arg1"], params)
 
@@ -14,10 +14,8 @@ function execute_command(params)
             if tonumber(et.gentity_get(clientNum, "sess.referee")) == 0 then
                 printCmdMsg(
                     params,
-                    string.format(
-                        "^7%s ^7is not referee.\n",
-                        client[clientNum]["name"]
-                    )
+                    color1 .. client[clientNum]["name"] .. color1 ..
+                    " is not referee.\n"
                 )
             else
                 et.trap_SendConsoleCommand(

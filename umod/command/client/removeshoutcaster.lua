@@ -1,12 +1,12 @@
 -- Remove the shoutcaster spectator type rights from to the player.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: removeshoutcaster \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: removeshoutcaster [partname/id#]\n")
     else
         clientNum = client2id(params["arg1"], params)
 
@@ -15,10 +15,8 @@ function execute_command(params)
             if tonumber(et.Info_ValueForKey(et.trap_GetConfigstring(689 + clientNum), "sc")) == 0 then
                 printCmdMsg(
                     params,
-                    string.format(
-                        "^7%s ^7is not shoutcaster.\n",
-                        client[clientNum]["name"]
-                    )
+                    color1 .. client[clientNum]["name"] .. color1 ..
+                    " is not shoutcaster.\n"
                 )
             else
                 et.trap_SendConsoleCommand(

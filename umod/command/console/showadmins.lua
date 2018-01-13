@@ -1,6 +1,6 @@
 -- Display all admins name and level in server console.
+-- From kmod script.
 -- Require : admins module
--- From kmod lua script.
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
     local fd, len = et.trap_FS_FOpenFile("admins.cfg", et.FS_READ)

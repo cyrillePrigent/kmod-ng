@@ -1,12 +1,12 @@
 -- Sets the time limitation for the map.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => timelimit value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: timelimit \[time\]\n")
+        printCmdMsg(params, "Useage: timelimit [time]\n")
     else
         local timeLimit = tonumber(params["arg1"])
 

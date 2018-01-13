@@ -1,14 +1,14 @@
 -- Enable cheats (for etpro).
 -- You can use god, noclip & nofatigue.
 -- Enable / disable Punkbuster automatically if needed (Cheat-protected).
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => cheats value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: cheats \[0-1\]\n")
+        printCmdMsg(params, "Useage: cheats [0-1]\n")
     else
         local cheat = tonumber(params["arg1"])
 

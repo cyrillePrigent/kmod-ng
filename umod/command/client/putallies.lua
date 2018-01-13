@@ -1,12 +1,12 @@
 -- Put player to allies team.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: putallies \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: putallies [partname/id#]\n")
     else
         clientNum = client2id(params["arg1"], params)
 
@@ -23,12 +23,12 @@ function execute_command(params)
 
                     printCmdMsg(
                         params,
-                        client[clientNum]["name"] .. " ^7has been putted allies\n"
+                        client[clientNum]["name"] .. color1 .. " has been putted allies\n"
                     )
                 else
                     printCmdMsg(
                         params,
-                        client[clientNum]["name"] .. " ^7is already allies\n"
+                        client[clientNum]["name"] .. color1 .. " is already allies\n"
                     )
                 end
             else

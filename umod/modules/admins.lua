@@ -21,6 +21,15 @@ admin = {
 -- Set slash command of admins list display.
 addSlashCommand("client", "admins", {"file", "/command/client/admins.lua"})
 
+-- Set slash command for send private messages to admins.
+addSlashCommand("client", "ma", {"file", "/command/client/private_message_admin.lua"})
+addSlashCommand("client", "pma", {"file", "/command/client/private_message_admin.lua"})
+addSlashCommand("client", "msga", {"file", "/command/client/private_message_admin.lua"})
+
+addSlashCommand("console", "ma", {"file", "/command/console/private_message_admin.lua"})
+addSlashCommand("console", "pma", {"file", "/command/console/private_message_admin.lua"})
+addSlashCommand("console", "msga", {"file", "/command/console/private_message_admin.lua"})
+
 -- Function
 
 -- Callback function when ReadConfig is called in et_InitGame function

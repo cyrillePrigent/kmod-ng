@@ -1,5 +1,6 @@
 -- Send a private message (advanced private message).
--- From kmod lua script.
+-- From kmod script.
+-- Require : advanced private message module
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => private message content
@@ -7,7 +8,7 @@ function execute_command(params)
     if params.nbArg < 3 then
         et.trap_SendServerCommand(
             params.clientNum,
-            "print \"Useage: /" .. params.bangCmd .. " \[pname/ID\] \[message\]\n"
+            "print \"Useage: /" .. params.bangCmd .. " [pname/ID] [message]\n"
         )
     else
         params.displayInConsole = true
@@ -17,16 +18,16 @@ function execute_command(params)
         if targetNum ~= nil then
             et.trap_SendServerCommand(
                 params.clientNum,
-                msgCmd["chatArea"] .. "\"^dPrivate message sent to "
-                .. client[targetNum]["name"] .. "^d --> ^3" .. pmContent .. "^7"
+                "chat \"^dPrivate message sent to "
+                .. client[targetNum]["name"] .. "^d --> " .. color2 .. pmContent
             )
 
             et.G_ClientSound(params.clientNum, pmSound)
 
             et.trap_SendServerCommand(
                 targetNum,
-                msgCmd["chatArea"] .. "\"^dPrivate message from "
-                .. client[params.clientNum]["name"] .. "^d --> ^3" .. pmContent .. "^7"
+                "chat \"^dPrivate message from "
+                .. client[params.clientNum]["name"] .. "^d --> " .. color2 .. pmContent
             )
 
             et.G_ClientSound(targetNum, pmSound)

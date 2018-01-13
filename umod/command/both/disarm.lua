@@ -1,12 +1,12 @@
 -- Disarm a player.
--- From gw_ref lua script.
+-- From gw_ref script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: disarm \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: disarm [partname/id#]\n")
     else
         local clientNum = client2id(params["arg1"], params)
 
@@ -20,7 +20,7 @@ function execute_command(params)
                     if client[clientNum]["disarm"] == 1 then
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7is already Disarmed"
+                            client[clientNum]["name"] .. color1 .. " is already Disarmed"
                         )
                     else
                         client[clientNum]["disarm"] = 1
@@ -31,7 +31,7 @@ function execute_command(params)
 
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7was Disarmed"
+                            client[clientNum]["name"] .. color1 .. " was Disarmed"
                         )
 
                         if disarm["count"] == 0 then

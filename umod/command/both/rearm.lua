@@ -1,12 +1,12 @@
 -- Rearm player.
--- From gw_ref lua script.
+-- From gw_ref script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
     
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: rearm \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: rearm [partname/id#]\n")
     else
         local clientNum = client2id(params["arg1"], params)
 
@@ -20,7 +20,7 @@ function execute_command(params)
                     if client[clientNum]["disarm"] == 0 then
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7is already Armed\n"
+                            client[clientNum]["name"] .. color1 .. " is already Armed\n"
                         )
                     else
                         client[clientNum]["disarm"] = 0
@@ -31,7 +31,7 @@ function execute_command(params)
 
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7was Rearmed"
+                            client[clientNum]["name"] .. color1 .. " was Rearmed"
                         )
 
                         disarm["count"] = disarm["count"] - 1

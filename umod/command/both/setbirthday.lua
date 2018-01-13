@@ -4,12 +4,12 @@
 --   * params["arg1"] => name
 --   * params["arg2"] => birthday
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 3 then
         printCmdMsg(
             params,
-            "Useage: setbirthday \[name\] \[birthday\]\nBirthday format is dd-mm-yyyy.\n"
+            "Useage: setbirthday [name] [birthday]\nBirthday format is dd-mm-yyyy.\n"
         )
     else
         local _, _, d, m, y = string.find(params["arg2"], "(%d+)\-(%d+)\-(%d+)")

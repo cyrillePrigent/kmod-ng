@@ -1,9 +1,9 @@
 -- Rearm all disarmed players.
--- From gw_ref lua script.
+-- From gw_ref script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
     local count = 0
 
     for p = 0, clientsLimit, 1 do
@@ -13,7 +13,7 @@ function execute_command(params)
         end
     end
 
-    printCmdMsg(params, "^1" .. count .. " ^7players rearmed\n")
+    printCmdMsg(params, color4 ..  count .. color1 .. " players rearmed\n")
     disarm["count"] = 0
     removeCallbackFunction("RunFrame", "checkDisarmRunFrame")
 

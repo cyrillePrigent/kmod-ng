@@ -63,7 +63,7 @@ function checkTeamkillRestrictionObituaryTeamKill(vars)
     if tkRestriction["limitLow"] + 1 == client[vars["killer"]]["tkIndex"] then
         et.trap_SendServerCommand(
             vars["killer"],
-            msgCmd["chatArea"] .. " \"" .. color4 .. "You are making to many teamkills" ..
+            "chat \"" .. color4 .. "You are making to many teamkills" ..
             " please be more careful or you will be kicked!\n\""
         )
         

@@ -1,13 +1,13 @@
 -- Set the tracer bullet mode (debugging bullet system in reality).
 -- Enable / disable Punkbuster automatically if needed (Cheat-protected).
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => laser value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: laser \[0-1\]\n")
+        printCmdMsg(params, "Useage: laser [0-1]\n")
     else
         local laser = tonumber(params["arg1"])
 
@@ -19,14 +19,20 @@ function execute_command(params)
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_disable\n")
             end
 
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar g_debugbullets 1\n")
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "forcecvar g_debugbullets 1\n"
+            )
 
             params.broadcast2allClients = true
             params.noDisplayCmd         = true
 
             printCmdMsg(params, "Laser has been Enabled\n")
         elseif laser == 0 then
-            et.trap_SendConsoleCommand(et.EXEC_APPEND, "forcecvar g_debugbullets 0\n")
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "forcecvar g_debugbullets 0\n"
+            )
 
             if pbState then
                 et.trap_SendConsoleCommand(et.EXEC_APPEND, "pb_sv_enable\n")

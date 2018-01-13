@@ -1,5 +1,6 @@
 -- Display all time reviving spree in server console.
--- From rspree lua.
+-- From rspree script.
+-- Require : revive spree module
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
     et.G_Print("---------------------------\n")

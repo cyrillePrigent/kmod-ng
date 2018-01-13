@@ -1,5 +1,5 @@
 -- Read all configuration file and reload mod configuration.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
     et.trap_SendConsoleCommand(et.EXEC_APPEND, "exec umod/umod.cfg\n")

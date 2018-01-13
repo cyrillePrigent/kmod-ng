@@ -1,8 +1,10 @@
 -- Display revive spree, multi revive & monster revive record
 -- from revive spree server record.
--- From rspree lua.
+-- From rspree script.
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
+    params.say = "chat"
+
     local funcStart     = et.trap_Milliseconds()
     local records       = {}
     local revive        = { 0, nil }
@@ -30,20 +32,25 @@ function execute_command(params)
     end
 
     if monsterRevive[2] ~= nil then
-        table.insert(records,
-            string.format("%s ^8(^7%d monster revives^8)^7", monsterRevive[2], monsterRevive[1])
-        ) 
+        table.insert(
+            records,
+            monsterRevive[2] .. color3 .. " (" .. color1 .. monsterRevive[1] ..
+            " monster revives" .. color3 .. ")" .. color1
+        )
     end
 
     if multiRevive[2] ~= nil then
-        table.insert(records,
-            string.format("%s ^8(^7%d multi revives^8)^7", multiRevive[2], multiRevive[1])
+        table.insert(
+            records,
+            multiRevive[2] .. color3 .. " (" .. color1 .. multiRevive[1] ..
+            " multi revives" .. color3 .. ")" .. color1
         )
     end
 
     if revive[2] ~= nil then
-        table.insert(records,
-            string.format("%s^7 with a total of %d revives", revive[2], revive[1])
+        table.insert(
+            records,
+            revive[2] .. color1 .. " with a total of " .. revive[1] .. " revives"
         )
     end
 
@@ -52,10 +59,10 @@ function execute_command(params)
     et.G_Printf("%s: %d ms\n", cmd, et.trap_Milliseconds() - funcStart)
  
     if table.getn(records) ~= 0 then
-        recordMsg = "^7Top revivers since ".. os.date(dateFormat, oldest) ..
+        recordMsg = color1 .. "Top revivers since " .. os.date(dateFormat, oldest) ..
                 " are " .. table.concat(records, ", ")
     else
-        recordMsg = "^7no records found :("
+        recordMsg = color1 .. "no records found :("
     end
 
     printCmdMsg(params, recordMsg)

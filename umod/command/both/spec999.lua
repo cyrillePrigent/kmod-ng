@@ -1,22 +1,29 @@
 -- Put all afk player(999 ping) to spectator.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
     local matches = 0
 
     for p = 0, clientsLimit, 1 do
         if client[p]['team'] == 1 or client[p]['team'] == 2 then
             if tonumber(et.gentity_get(p, "ps.ping")) >= 999 then
                 matches = matches + 1
-                et.trap_SendConsoleCommand(et.EXEC_APPEND, "ref remove " .. p .. "\n")
+
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "ref remove " .. p .. "\n"
+                )
             end
         end
     end
 
     if matches > 0 then
         params.broadcast2allClients = true
-        printCmdMsg(params, "Moving ^1" .. matches .. " ^7players to spectator\n")
+        printCmdMsg(
+            params,
+            "Moving " .. color4 .. matches .. color1 .. " players to spectator\n"
+        )
     else
         printCmdMsg(params, "No players moved to spectator\n")
     end

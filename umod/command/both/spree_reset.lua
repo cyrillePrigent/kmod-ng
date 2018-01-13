@@ -1,8 +1,9 @@
 -- Reset spree record.
+-- From kmod script.
 -- Require : killing spree module
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
     
     local fd, _ = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
     et.trap_FS_Write("", 0, fd)
@@ -11,9 +12,9 @@ function execute_command(params)
     spree = {
         ["killsRecord"] = 0,
         ["msg"]         = {
-            ["oldShort"] = "^3[Old: ^7N/A^3]",
-            ["oldLong"]  = "^3Spree Record: ^7There is no current spree record",
-            ["current"]  = "Current spree record: ^7N/A"
+            ["oldShort"] = color2 .. "[Old: " .. color1 .. "N/A" .. color2 .. "]",
+            ["oldLong"]  = color2 .. "Spree Record: " .. color1 .. "There is no current spree record",
+            ["current"]  = "Current spree record: " .. color1 .. "N/A"
         }
     }
 

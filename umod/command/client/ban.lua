@@ -1,13 +1,13 @@
 -- Ban permanently a player from the server with Punkbuster.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => reason
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 3 then
-        printCmdMsg(params, "Useage: ban \[partname/id#\] \[reason\]\n")
+        printCmdMsg(params, "Useage: ban [partname/id#] [reason]\n")
     else
         clientNum = client2id(params["arg1"], params)
 

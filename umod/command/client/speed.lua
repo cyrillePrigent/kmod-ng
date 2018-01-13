@@ -1,12 +1,12 @@
 -- Sets the speed of player's.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => speed value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: speed \[value\]\nDefault : 320\n")
+        printCmdMsg(params, "Useage: speed [value]\nDefault : 320\n")
     else
         local speed = tonumber(params["arg1"])
 

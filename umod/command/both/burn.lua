@@ -1,12 +1,12 @@
 -- Burn a player.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: burn \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: burn [partname/id#]\n")
     else
         local clientNum = client2id(params["arg1"], params)
 
@@ -24,7 +24,10 @@ function execute_command(params)
                     params.noDisplayCmd         = true
                     params.say                  = "cpm"
 
-                    printCmdMsg(params, client[clientNum]["name"] .. " ^7was Burned\n")
+                    printCmdMsg(
+                        params,
+                        client[clientNum]["name"] .. color1 .. " was Burned\n"
+                    )
                 end
             end
         end

@@ -1,12 +1,12 @@
 -- Own a player.
---  From gw_ref lua script.
+--  From gw_ref script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: own \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: own [partname/id#]\n")
     else
         local clientNum = client2id(params["arg1"], params)
 
@@ -20,7 +20,7 @@ function execute_command(params)
                     if client[clientNum]["own"] == 1 then
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7is already Owned^7"
+                            client[clientNum]["name"] .. color1 .. " is already Owned"
                         )
                     else
                         client[clientNum]["own"] = 1
@@ -31,7 +31,7 @@ function execute_command(params)
 
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7was Owned^7"
+                            client[clientNum]["name"] .. color1 .. " was Owned"
                         )
                     end
                 end

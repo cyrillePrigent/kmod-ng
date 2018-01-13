@@ -1,10 +1,10 @@
 -- Enabled / disabled knifewar game mode.
+-- From kmod script.
 -- Require : game mode module
--- From kmod lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new knifewar value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
         printCmdMsg(params, "Useage: knifewar [0-1]")

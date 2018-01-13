@@ -1,8 +1,9 @@
 -- Display player current spree.
--- Require : killing spree module
+-- From kmod script.
+-- Require : spree module
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     printCmdMsg(
         params,

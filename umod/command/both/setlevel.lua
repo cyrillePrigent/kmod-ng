@@ -1,16 +1,16 @@
 -- Give admin level to a player.
+-- From kmod script.
 -- Require : admins module
--- From kmod lua script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client ID
 --   * params["arg2"] => level
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 3 then
         printCmdMsg(
             params,
-            "Useage: setlevel \[partname/id#\] \[level 0-" .. maxAdminLevel .. "\]\n"
+            "Useage: setlevel [partname/id#] [level 0-" .. maxAdminLevel .. "]\n"
         )
     else
         local clientNum = client2id(params["arg1"], params)
@@ -37,11 +37,10 @@ function execute_command(params)
                 else
                     setAdmin(name, client[clientNum]["guid"], level)
 
-                    if params.cmdMode == "client" then
-                        level = "^1" .. level .. "^7"
-                    end
-
-                    printCmdMsg(params, name .. " is now a level " .. level .. " user!\n")
+                    printCmdMsg(
+                        params,
+                        name .. " is now a level " .. color4 .. level .. color1 .. " user!\n"
+                    )
                 end
             end
         end

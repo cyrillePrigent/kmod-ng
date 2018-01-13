@@ -1,20 +1,21 @@
 -- Mute a player.
 -- If mute module is enabled, you can add a duration to player mute.
--- From kmod lua script.
+-- From kmod script.
+-- Optional : mute module
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => mute duration (in minutes)
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
    
     if params.nbArg < 2 then
         if muteModule == 1 then
             printCmdMsg(
                 params,
-                "Useage: mute \[partname/id#\] \[duration\]\nDuration is optional.\n"
+                "Useage: mute [partname/id#] [duration]\nDuration is optional.\n"
             )
         else
-            printCmdMsg(params, "Useage: mute \[partname/id#\]\n")
+            printCmdMsg(params, "Useage: mute [partname/id#]\n")
         end
     else
         clientNum = client2id(params["arg1"], params)
@@ -38,21 +39,19 @@ function execute_command(params)
 
                         printCmdMsg(
                             params,
-                            string.format(
-                                "%s ^7has been muted for %d minutes\n",
-                                client[clientNum]["name"], duration
-                            )
+                            client[clientNum]["name"] .. color1 .. " has been muted for " ..
+                            duration .. " minutes\n"
                         )
                     else
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7has been muted\n"
+                            client[clientNum]["name"] .. color1 .. " has been muted\n"
                         )
                     end
                 else
                     printCmdMsg(
                         params,
-                        client[clientNum]["name"] .. " ^7has been muted\n"
+                        client[clientNum]["name"] .. color1 .. " has been muted\n"
                     )
                 end
             else

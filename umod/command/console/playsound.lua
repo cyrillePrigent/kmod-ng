@@ -11,6 +11,8 @@
 -- 0.4 rkp: cleaned-up version for etpro 3.2.3
 -- 0.5 rkp: added playsound_env command
 
+-- Require : playsound module
+
 -- Playsound plays a sound that everybody on the server can hear
 --  params is parameters passed from et_ConsoleCommand function.
 --   * params["arg1"] => path to wav sound file

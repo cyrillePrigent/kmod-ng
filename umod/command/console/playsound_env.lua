@@ -11,6 +11,8 @@
 -- 0.4 rkp: cleaned-up version for etpro 3.2.3
 -- 0.5 rkp: added playsound_env command
 
+-- Require : playsound module
+
 -- Plays a sound that you can hear in the proximity of the player with slot -playerslot-
 --  params is parameters passed from et_ConsoleCommand function.
 --   * params["arg1"] => client

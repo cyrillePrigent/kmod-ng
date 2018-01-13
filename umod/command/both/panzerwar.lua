@@ -1,6 +1,6 @@
 -- Panzerwar game mode management
+-- From kmod script.
 -- Require : game mode module
--- From kmod lua script.
 
 -- Function
 
@@ -19,7 +19,7 @@ end
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new panzerwar value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
         printCmdMsg(params, "Useage: panzerwar [0-1]")

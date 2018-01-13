@@ -1,9 +1,9 @@
 -- Display your teamkill index.
+-- From kmod script.
 -- Require : teamkill restriction module
---  From kmod lua script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
     local status
 
     if client[params.clientNum]['tkIndex'] < 0 then
@@ -14,8 +14,9 @@ function execute_command(params)
 
     printCmdMsg(
         params,
-        "^7" .. client[params.clientNum]["name"] .. "^7 has a tk index of ^3"
-        .. client[params.clientNum]['tkIndex'] .. "^7 [" .. status .. "^7]\n"
+        color1 .. client[params.clientNum]["name"] .. color1 .. " has a tk index of " ..
+        color2 .. client[params.clientNum]['tkIndex'] .. color1 .. " [" .. status ..
+        color1 .. "]\n"
     )
 
     return 1

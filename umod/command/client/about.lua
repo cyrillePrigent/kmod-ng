@@ -1,12 +1,11 @@
 -- Display "about" message of umod.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     et.trap_SendServerCommand(
         params.clientNum,
-        string.format(
-            "cpm \"This server is running the Uber Mod version %s %s\n\"",
-            version, releaseStatus
-        )
+        "cpm \"" .. color1 .. "This server is running the Uber Mod version " ..
+        version .. " " .. releaseStatus .. "\n\""
     )
 
     et.trap_SendServerCommand(

@@ -1,12 +1,13 @@
 -- Unmute a player.
--- From kmod lua script.
+-- From kmod script.
+-- Optional : mute module
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: unmute \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: unmute [partname/id#]\n")
     else
         clientNum = client2id(params["arg1"], params)
 
@@ -25,7 +26,7 @@ function execute_command(params)
 
             printCmdMsg(
                 params,
-                client[clientNum]["name"] .. " ^7has been unmuted\n"
+                client[clientNum]["name"] .. color1 .. " has been unmuted\n"
             )
         end
     end

@@ -1,12 +1,12 @@
 -- Stop ownage player.
---  From gw_ref lua script.
+--  From gw_ref script.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => client
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: own_stop \[partname/id#\]\n")
+        printCmdMsg(params, "Useage: own_stop [partname/id#]\n")
     else
         local clientNum = client2id(params["arg1"], params)
 
@@ -20,7 +20,7 @@ function execute_command(params)
                     if client[clientNum]["own"] == 0 then
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7is not Owned^7"
+                            client[clientNum]["name"] .. color1 .. " is not Owned"
                         )
                     else
                         client[clientNum]["own"] = 0
@@ -31,7 +31,7 @@ function execute_command(params)
 
                         printCmdMsg(
                             params,
-                            client[clientNum]["name"] .. " ^7was Ownage stopped^7"
+                            client[clientNum]["name"] .. color1 .. " was Ownage stopped"
                         )
                     end
                 end

@@ -1,12 +1,13 @@
 -- Send a private message (advanced private message).
+-- From kmod script.
+-- Require : admins module
 -- NOTE : In ETpro, m / pm / msg don't work in server console. Use m2 command instead.
--- From kmod lua script.
 --  params is parameters passed from et_ConsoleCommand function.
 --   * params["arg1"] => client
 --   * params["arg2"] => private message content
 function execute_command(params)
     if params.nbArg < 3 then 
-        et.G_Print("Useage: /m2 \[pname/ID\] \[message\]\n")
+        et.G_Print("Useage: /m2 [pname/ID] [message]\n")
     else
         params.displayInConsole = true
         local message   = et.ConcatArgs(2)
@@ -15,13 +16,13 @@ function execute_command(params)
         if targetNum ~= nil then
             et.G_Print(
                 "Private message sent to " .. client[targetNum]["name"]
-                .. "^d --> ^3" .. message .. "^7\n"
+                .. "^d --> ^3" .. message .. "\n"
             )
 
             et.trap_SendServerCommand(
                 targetNum,
-                msgCmd["chatArea"] .. "\"^dPrivate message from ^1SERVER ^d--> ^3"
-                .. message .. "^7"
+                "chat \"^dPrivate message from ^1SERVER ^d--> ^3"
+                .. message
             )
 
             et.G_ClientSound(targetNum, pmSound)

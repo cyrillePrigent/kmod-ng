@@ -1,5 +1,5 @@
--- Display list.
--- From kmod lua script.
+-- Display available commands list.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 function execute_command(params)
     for i = 0, maxAdminLevel, 1 do

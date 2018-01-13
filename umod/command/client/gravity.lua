@@ -1,12 +1,12 @@
 -- Modify gravity value.
--- From kmod lua script.
+-- From kmod script.
 --  params is parameters passed from et_ClientCommand function.
 --   * params["arg1"] => gravity value
 function execute_command(params)
-    params.say = msgCmd["chatArea"]
+    params.say = "chat"
 
     if params.nbArg < 2 then
-        printCmdMsg(params, "Useage: gravity \[value\]\nDefault : 800\n")
+        printCmdMsg(params, "Useage: gravity [value]\nDefault : 800\n")
     else
         local grav = tonumber(params["arg1"])
 

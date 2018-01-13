@@ -1,5 +1,6 @@
 -- Display reviving spree of current players in server console.
--- From rspree lua.
+-- From rspree script.
+-- Require : revive spree module
 --  params is parameters passed from et_ConsoleCommand function.
 function execute_command(params)
     local teamList = { "Axis" , "Allies" , "Spectator" }

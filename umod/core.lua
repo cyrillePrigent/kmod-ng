@@ -495,7 +495,7 @@ end
 --  msg is the message content.
 function printCmdMsg(params, msg)
     if params.cmdMode == "console" then
-        et.G_Print(msg)
+        et.G_Print(et.Q_CleanStr(msg))
         
         if params.broadcast2allClients then
             local cmd = ""
@@ -822,12 +822,6 @@ end
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
 
-msgCmd = {
-    ["chatArea"]   = "chat",
-    ["popupArea"]  = "cpm",
-    ["centerArea"] = "cp"
-}
-
 if modUrl == "http://etpro.anime.net/" then
     etMod = "etpro"
 
@@ -965,14 +959,6 @@ end
 
 dofile(umod_path .. "/modules/commands.lua")
 dofile(umod_path .. "/modules/admins.lua")
-
-addSlashCommand("client", "ma", {"file", "/command/client/private_message_admin.lua"})
-addSlashCommand("client", "pma", {"file", "/command/client/private_message_admin.lua"})
-addSlashCommand("client", "msga", {"file", "/command/client/private_message_admin.lua"})
-
-addSlashCommand("console", "ma", {"file", "/command/console/private_message_admin.lua"})
-addSlashCommand("console", "pma", {"file", "/command/console/private_message_admin.lua"})
-addSlashCommand("console", "msga", {"file", "/command/console/private_message_admin.lua"})
 
 if tonumber(et.trap_Cvar_Get("u_advanced_players")) == 1 then
     addSlashCommand("client", "players", {"file", "/command/client/players.lua"})
@@ -1370,7 +1356,7 @@ function et_ClientCommand(clientNum, command)
     for _, data in ipairs(slashCommandModuleMsg) do
         if data["slashCommand"] == params.cmd then
             --params.noDisplayCmd = true
-            params.say = msgCmd["chatArea"]
+            params.say = "chat"
             params.cmd = "/" .. params.cmd
 
             if params["arg1"] == "" then
