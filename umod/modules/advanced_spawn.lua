@@ -19,42 +19,39 @@ function advancedSpawnInitGame(vars)
     local g_inactivity = tonumber(et.trap_Cvar_Get("g_inactivity"))
 
     if g_inactivity ~= nil and g_inactivity > 0 then
-        addCallbackFunction({["RunFrame"] = "checkAdvancedSpawnRunFrame"})
+        addCallbackFunction({["RunFrame"] = "checkAdvancedSpawnPlayerRunFrame"})
     else
         et.G_LogPrint("uMod Advanced spawn: <g_inactivity> cvar must be > 0.\n")
     end
 end
 
--- Callback function when qagame runs a server frame.
+-- Callback function when qagame runs a server frame in player loop pending warmup and round.
 -- Check if player is inactive and extend his spawn shield.
+--  clientNum is the client slot id.
 --  vars is the local vars passed from et_RunFrame function.
-function checkAdvancedSpawnRunFrame(vars)
-    for p = 0, clientsLimit, 1 do
-        if client[p]["team"] ~= 0 then
-            if client[p]["switchTeam"] == 1 then
-                et.gentity_set(p, "ps.powerups", 1, 0)
+function checkAdvancedSpawnPlayerRunFrame(clientNum, vars)
+    if client[clientNum]["switchTeam"] == 1 then
+        et.gentity_set(clientNum, "ps.powerups", 1, 0)
+    end
+
+    client[clientNum]["switchTeam"] = 0
+
+    if client[clientNum]["respawn"] == 1 then
+        if client[clientNum]["switchTeam"] == 0 and et.gentity_get(clientNum, "ps.powerups", 1) > 0 then
+            if client[clientNum]["invincibleDummy"] == 0 then
+                client[clientNum]["invincibleStart"] = tonumber(et.gentity_get(clientNum, "client.inactivityTime"))
+                client[clientNum]["invincibleDummy"] = 1
             end
 
-            client[p]["switchTeam"] = 0
-
-            if client[p]["respawn"] == 1 then
-                if client[p]["switchTeam"] == 0 and et.gentity_get(p, "ps.powerups", 1) > 0 then
-                    if client[p]["invincibleDummy"] == 0 then
-                        client[p]["invincibleStart"] = tonumber(et.gentity_get(p, "client.inactivityTime"))
-                        client[p]["invincibleDummy"] = 1
-                    end
-
-                    if tonumber(et.gentity_get(p, "client.inactivityTime")) == client[p]["invincibleStart"] then
-                        et.gentity_set(p, "ps.powerups", 1, vars["levelTime"] + 3000)
-                    else
-                        client[p]["respawn"]         = 0
-                        client[p]["invincibleDummy"] = 0
-                    end
-                else
-                    client[p]["respawn"]         = 0
-                    client[p]["invincibleDummy"] = 0
-                end
+            if tonumber(et.gentity_get(clientNum, "client.inactivityTime")) == client[clientNum]["invincibleStart"] then
+                et.gentity_set(clientNum, "ps.powerups", 1, vars["levelTime"] + 3000)
+            else
+                client[clientNum]["respawn"]         = 0
+                client[clientNum]["invincibleDummy"] = 0
             end
+        else
+            client[clientNum]["respawn"]         = 0
+            client[clientNum]["invincibleDummy"] = 0
         end
     end
 end

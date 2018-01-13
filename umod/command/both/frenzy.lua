@@ -2,10 +2,7 @@
 -- From kmod script.
 -- Require : game mode module
 
--- Function
-
 -- Enabled / disabled frenzy game mode.
--- Require : game mode module
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new frenzy value
 function execute_command(params)
@@ -70,7 +67,8 @@ function execute_command(params)
             end
 
             enabledGameMode("frenzy", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkGameModePlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Frenzy has been enabled")
@@ -79,7 +77,8 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkGameModePlayerRunFrame")
             disabledGameMode(params)
 
             params.broadcast2allClients = true

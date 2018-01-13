@@ -50,7 +50,7 @@ function landminesLimitInitGame(vars)
     local nbValue  = 0
     local lastValue = landminesMin
 
-    for nbPlayers = 1, clientsLimit, 1 do
+    for nbPlayers = 0, clientsLimit, 1 do
         local nbLandmines = tonumber(
             et.trap_Cvar_Get("u_lm_for_more_than_" .. nbPlayers .. "_players")
         )
@@ -65,7 +65,7 @@ function landminesLimitInitGame(vars)
 
     if nbValue < 1 then
         et.G_LogPrint(
-            "uMod Landmines limit: One or more <u_lm_for_more_than_X_players>"
+            "uMod Landmines limit: One or more <u_lm_for_more_than_X_players>" ..
             " cvar(s) must be set in umod.cfg!\n"
         )
     else
@@ -85,10 +85,10 @@ function checkLandminesLimitRunFrame(vars)
 
         if landminesLimit["maxMines"] ~= maxMines then
             et.trap_Cvar_Set(landminesLimit["maxLandminesCvar"], maxMines)
-    
+
             sayClients(
                 landminesLimit["msgPosition"],
-                color1 .. "Max. " .. color4 .. maxMines .. " mines allowed."
+                color1 .. "Max. " .. color4 .. maxMines .. color1 .. " landmines allowed."
             )
 
             landminesLimit["maxMines"] = maxMines

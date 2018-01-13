@@ -25,23 +25,31 @@ spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
 svMaxClients          = tonumber(et.trap_Cvar_Get("sv_maxclients"))
 
 callbackList = {
-    ["ReadConfig"]            = {},
-    ["InitGame"]              = {},
-    ["ShutdownGame"]          = {},
-    ["RunFrame"]              = {},
-    ["RunFrameEndRound"]      = {},
-    ["ClientConnect"]         = {},
-    ["ClientDisconnect"]      = {},
-    ["ClientBegin"]           = {},
-    ["ClientUserinfoChanged"] = {},
-    ["ClientSpawn"]           = {},
-    ["ObituaryEnemyKill"]     = {},
-    ["ObituarySelfKill"]      = {},
-    ["ObituaryTeamKill"]      = {},
-    ["ObituaryWorldKill"]     = {},
-    ["Obituary"]              = {},
-    ["Print"]                 = {}
+    ["ReadConfig"]                 = {},
+    ["InitGame"]                   = {},
+    ["ShutdownGame"]               = {},
+    ["RunFramePlayerLoop"]         = {
+        [1] = "corePlayerRunFrame"
+    },
+    ["RunFrame"]                   = {},
+    ["RunFrameEndRound"]           = {},
+    ["RunFramePlayerLoopEndRound"] = {
+        [1] = "corePlayerRunFrame"
+    },
+    ["ClientConnect"]              = {},
+    ["ClientDisconnect"]           = {},
+    ["ClientBegin"]                = {},
+    ["ClientUserinfoChanged"]      = {},
+    ["ClientSpawn"]                = {},
+    ["ObituaryEnemyKill"]          = {},
+    ["ObituarySelfKill"]           = {},
+    ["ObituaryTeamKill"]           = {},
+    ["ObituaryWorldKill"]          = {},
+    ["Obituary"]                   = {},
+    ["Print"]                      = {}
 }
+
+periodicFrameCallback = {}
 
 -- Client
 clientsLimit = svMaxClients - 1
@@ -69,8 +77,7 @@ players = {
     ["allies"]    = 0,
     ["axis"]      = 0,
     ["spectator"] = 0,
-    ["active"]    = 0,
-    ["total"]     = 0
+    ["active"]    = 0
 }
 
 -- Command (client & console)
@@ -270,8 +277,6 @@ color4 = "^1"
 -- Punkbuster status before disable it.
 pbState = false
 
---floodprotect = 0
-
 -- **********************************************
 
 -- Under etpro mod :
@@ -346,11 +351,9 @@ end
 --  callbackType is the callback type list to execute.
 --  vars is the local vars passed to callback function.
 function executeCallbackFunction(callbackType, vars)
-    local result
-    
     if callbackList[callbackType] ~= nil then
         for _, functionName in pairs(callbackList[callbackType]) do
-            result = _G[functionName](vars)
+            local result = _G[functionName](vars)
 
             if result then
                 return result
@@ -361,6 +364,32 @@ function executeCallbackFunction(callbackType, vars)
             "uMod ERROR executeCallbackFunction : CallbackType " ..
             callbackType .. " don't exist!\n"
         )
+    end
+end
+
+-- Execute callback function list of callback type (only player frame loop here).
+--  callbackType is the callback type list to execute.
+--  vars is the local vars passed to callback function.
+function executeCallbackPlayerFrame(callbackType, vars)
+    local frameFunctionList = {}
+
+    for _, functionName in pairs(callbackList[callbackType]) do
+        if periodicFrameCallback[functionName] ~= nil then
+            if vars["levelTime"] - _G[moduleVar]["time"] >= _G[moduleVar]["frameCheck"] then
+                table.insert(frameFunctionList, functionName)
+                _G[moduleVar]["time"] = vars["levelTime"]
+            end
+        else
+            table.insert(frameFunctionList, functionName)
+        end
+    end
+
+    for p = 0, clientsLimit, 1 do
+        if client[p]["team"] ~= 0 then
+            for _, functionName in pairs(frameFunctionList) do
+                _G[functionName](p, vars)
+            end
+        end
     end
 end
 
@@ -819,6 +848,59 @@ function second2readeableTime(value)
     end
 end
 
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup, round and end of round.
+--  * Check player name change.
+--  * Set player team statistic.
+--  clientNum is the client slot id.
+--  vars is the local vars passed from et_RunFrame function.
+function corePlayerRunFrame(clientNum, vars)
+    client[clientNum]["name"] = et.Info_ValueForKey(
+        et.trap_GetUserinfo(clientNum), "name"
+    )
+
+    if client[clientNum]["name"] ~= client[clientNum]["lastName"] then
+        if logChatModule == 1 then
+            writeLog(
+                "*** " .. client[clientNum]["lastName"] .. " HAS RENAMED TO " ..
+                client[clientNum]["name"] .. " ***\n"
+            )
+        end
+
+        client[clientNum]["lastName"] = client[clientNum]["name"]
+    end
+
+    if client[clientNum]["team"] == 1 then
+        players["axis"]   = players["axis"] + 1
+        players["active"] = players["active"] + 1
+    elseif client[clientNum]["team"] == 2 then
+        players["allies"] = players["allies"] + 1
+        players["active"] = players["active"] + 1
+    elseif client[clientNum]["team"] == 3 then
+        players["spectator"] = players["spectator"] + 1
+    end
+end
+
+-- If <g_spectatorInactivity> cvar is defined, check spectator inactivity.
+if spectatorInactivity > 0 then
+    -- Callback function when qagame runs a server frame in player loop
+    -- pending warmup, round and end of round.
+    -- Check and allow admin spectator to be inactive.
+    --  clientNum is the client slot id.
+    --  vars is the local vars passed from et_RunFrame function.
+    function spectatorInactivityAdminRunFrame(clientNum, vars)
+        if client[clientNum]["team"] == 3
+          and getAdminLevel(clientNum) >= 1 then
+            et.gentity_set(clientNum, "client.inactivityTime", vars["levelTime"])
+            et.gentity_set(clientNum, "client.inactivityWarning", 1)
+        end
+    end
+
+    addCallbackFunction({
+        ["RunFramePlayerLoop"] = "spectatorInactivityAdminRunFrame"
+    })
+end
+
 -- Load modules
 local modUrl = et.trap_Cvar_Get("mod_url")
 
@@ -1076,71 +1158,24 @@ function et_RunFrame(levelTime)
         end
     end
 
-    players["axis"]   = 0
-    players["allies"] = 0
-    players["active"] = 0
-    players["total"]  = 0
+    players["axis"]      = 0
+    players["allies"]    = 0
+    players["spectator"] = 0
+    players["active"]    = 0
 
-    for p = 0, clientsLimit, 1 do
-        if et.gentity_get(p, "pers.connected") == 2 then
-            client[p]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(p), "name")
-
-            if client[p]["name"] ~= client[p]["lastName"] then
-                if logChatModule == 1 then
-                    writeLog(
-                        "*** " .. client[p]["lastName"] .. " HAS RENAMED TO " ..
-                        client[p]["name"] .. " ***\n"
-                    )
-                end
-
-                client[p]["lastName"] = client[p]["name"]
-            end
-
-            if client[p]["team"] == 1 then
-                players["axis"] = players["axis"] + 1
-            elseif client[p]["team"] == 2 then
-                players["allies"] = players["allies"] + 1
-            elseif client[p]["team"] == 3 then
-                players["spectator"] = players["spectator"] + 1
-            end
-
-            if client[p]["team"] == 1 or client[p]["team"] == 2 then
-                players["active"] = players["active"] + 1
-            end
-
-            players["total"] = players["total"] + 1
-        else
-            client[p]["name"]     = ""
-            client[p]["lastName"] = ""
-        end
-    end
-
-    if spectatorInactivity > 0 then
-        for p = 0, clientsLimit, 1 do
-            if client[p]["team"] == 3 and getAdminLevel(p) >= 1 then
-                et.gentity_set(p, "client.inactivityTime", time["frame"])
-                et.gentity_set(p, "client.inactivityWarning", 1)
-            end
-        end
-    end
-
---     if floodprotect == 1 then
---         fpPtime = (time["frame"] - fpProt) / 1000
--- 
---         if fpPtime >= 2 then
---             floodprotect = 0
---         end
---     end
+    executeCallbackPlayerFrame("RunFramePlayerLoop", {["levelTime"] = levelTime})
 
     if game["state"] == 3 then
-        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = tonumber(levelTime)})
+        executeCallbackPlayerFrame(
+            "RunFramePlayerLoopEndRound",
+            {["levelTime"] = levelTime}
+        )
+
+        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = levelTime})
+
         game["endRoundTrigger"] = true
     else
-        executeCallbackFunction("RunFrame", {["levelTime"] = tonumber(levelTime)})
-
-        --for p = 0, clientsLimit, 1 do
-        --    executeCallbackFunction("RunFramePlayerLoop", {["levelTime"] = tonumber(levelTime), ["clientNum"] = p})
-        --end
+        executeCallbackFunction("RunFrame", {["levelTime"] = levelTime})
     end
 end
 

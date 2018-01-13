@@ -4,27 +4,36 @@
 
 -- Function
 
--- Custom game mode RunFrame
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup and round.
 --  * Add / remove ammo with weapon list.
 --  * Force player to use M1 Garand / K43 weapon (FG42 is good also).
-gameMode["gameModeRunFrame"] = function()
-    for p = 0, clientsLimit, 1 do
-        setWeaponAmmo(p)
-
-        if tonumber(et.gentity_get(p, "sess.latchPlayerType")) ~= 4 then
-            et.gentity_set(p, "sess.latchPlayerType", 4)
+--  clientNum is the client slot id.
+--  vars is the local vars passed from et_RunFrame function.
+function checkSniperwarPlayerRunFrame(clientNum, vars)
+    for weaponNum, weaponAmmo in pairs(gameMode["weaponsList"]) do
+        if weaponAmmo[1] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammoclip", weaponNum, weaponAmmo[1])
         end
 
-        local latchPlayerWeapon = tonumber(
-            et.gentity_get(p, "sess.latchPlayerWeapon")
-        )
+        if weaponAmmo[2] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammo", weaponNum, weaponAmmo[2])
+        end
+    end
 
-        if not gameMode["weaponsAllowed"][latchPlayerWeapon] then
-            if client[p]["team"] == 1 then
-                et.gentity_set(p, "sess.latchPlayerWeapon", 32)
-            elseif client[p]["team"] == 2 then
-                et.gentity_set(p, "sess.latchPlayerWeapon", 25)
-            end
+    if tonumber(et.gentity_get(clientNum, "sess.latchPlayerType")) ~= 4 then
+        et.gentity_set(clientNum, "sess.latchPlayerType", 4)
+    end
+
+    local latchPlayerWeapon = tonumber(
+        et.gentity_get(clientNum, "sess.latchPlayerWeapon")
+    )
+
+    if not gameMode["weaponsAllowed"][latchPlayerWeapon] then
+        if client[clientNum]["team"] == 1 then
+            et.gentity_set(clientNum, "sess.latchPlayerWeapon", 32)
+        elseif client[clientNum]["team"] == 2 then
+            et.gentity_set(clientNum, "sess.latchPlayerWeapon", 25)
         end
     end
 end
@@ -97,7 +106,8 @@ function execute_command(params)
             end
 
             enabledGameMode("sniperwar", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkSniperwarPlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkSniperwarPlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Sniperwar has been enabled")
@@ -106,13 +116,16 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkSniperwarPlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkSniperwarPlayerRunFrame")
             disabledGameMode(params)
 
-            gameMode["weaponsAllowed"] = nil
+            _G["checkSniperwarPlayerRunFrame"] = nil
+            gameMode["weaponsAllowed"]         = nil
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Sniperwar has been disabled.")
+            collectgarbage()
         else
             printCmdMsg(params, "Valid values are [0-1]")
         end

@@ -4,15 +4,25 @@
 
 -- Function
 
--- Custom game mode RunFrame
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup and round.
 --  * Add / remove ammo with weapon list.
 --  * Force player to use Sten weapon.
-gameMode["gameModeRunFrame"] = function()
-    for p = 0, clientsLimit, 1 do
-        setWeaponAmmo(p)
-        et.gentity_set(p, "sess.latchPlayerType", 4)
-        et.gentity_set(p, "sess.latchPlayerWeapon", 10)
+--  clientNum is the client slot id.
+--  vars is the local vars passed from et_RunFrame function.
+function checkStenwarPlayerRunFrame(clientNum, vars)
+    for weaponNum, weaponAmmo in pairs(gameMode["weaponsList"]) do
+        if weaponAmmo[1] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammoclip", weaponNum, weaponAmmo[1])
+        end
+
+        if weaponAmmo[2] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammo", weaponNum, weaponAmmo[2])
+        end
     end
+
+    et.gentity_set(clientNum, "sess.latchPlayerType", 4)
+    et.gentity_set(clientNum, "sess.latchPlayerWeapon", 10)
 end
 
 -- Enabled / disabled stenwar game mode.
@@ -68,7 +78,8 @@ function execute_command(params)
             end
 
             enabledGameMode("stenwar", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkStenwarPlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkStenwarPlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Stenwar has been enabled")
@@ -77,11 +88,15 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkStenwarPlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkStenwarPlayerRunFrame")
             disabledGameMode(params)
+
+            _G["checkStenwarPlayerRunFrame"] = nil
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Stenwar has been disabled.")
+            collectgarbage()
         else
             printCmdMsg(params, "Valid values are [0-1]")
         end

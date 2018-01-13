@@ -2,8 +2,6 @@
 -- From kmod script.
 -- Require : game mode module
 
--- Function
-
 -- Enabled / disabled grenadewar game mode.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new grenadewar value
@@ -72,7 +70,8 @@ function execute_command(params)
             end
 
             enabledGameMode("grenadewar", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkGameModePlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Grenadewar has been enabled")
@@ -81,7 +80,8 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkGameModePlayerRunFrame")
             disabledGameMode(params)
 
             params.broadcast2allClients = true

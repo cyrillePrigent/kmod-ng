@@ -21,7 +21,9 @@ clientDefaultData["muteEnd"] = 0
 
 -- Set module command.
 cmdList["client"]["!pmute"] = "/command/client/pmute.lua"
-        
+
+periodicFrameCallback["checkMutePlayerRunFrame"] = "mute"
+
 -- Function
 
 -- Callback function when ReadConfig is called in et_InitGame function
@@ -164,72 +166,68 @@ function checkMuteShutdownGame(vars)
     end
 end
 
--- Callback function when qagame runs a server frame (warmup, round & end of round).
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup, round and end of round.
 -- Check muted player if he will be unmuted.
+--  clientNum is the client slot id.
 --  vars is the local vars passed from et_RunFrame function.
-function checkMuteRunFrame(vars)
-    if vars["levelTime"] - mute["time"] >= mute["frameCheck"] then
-        for p = 0, clientsLimit, 1 do
-            -- If client is muted for a certain duration...
-            if client[p]["muteEnd"] > 0 then
-                -- If client has finished his mute sentance...
-                if time["frame"] > client[p]["muteEnd"] then
-                    if et.gentity_get(p, "sess.muted") == 1 then
-                        et.trap_SendConsoleCommand(
-                            et.EXEC_APPEND,
-                            "ref unmute \"" .. p .. "\"\n"
-                        )
+function checkMuteRunPlayerFrame(clientNum, vars)
+    -- If client is muted for a certain duration...
+    if client[clientNum]["muteEnd"] > 0 then
+        -- If client has finished his mute sentance...
+        if time["frame"] > client[clientNum]["muteEnd"] then
+            if et.gentity_get(clientNum, "sess.muted") == 1 then
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "ref unmute \"" .. clientNum .. "\"\n"
+                )
 
-                        et.trap_SendConsoleCommand(
-                            et.EXEC_APPEND,
-                            "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
-                            color1 .. " has been auto unmuted.  Please watch your language!\n"
-                        )
-                    end
-
-                    client[p]["muteEnd"] = 0
-                    removeMute(p)
-
-                -- If client has not yet finished his mute sentance...
-                elseif time["frame"] < client[p]["muteEnd"] then
-                    if et.gentity_get(p, "sess.muted") == 0 then
-                        client[p]["muteEnd"] = 0
-                        removeMute(p)
-
-                        et.trap_SendConsoleCommand(
-                            et.EXEC_APPEND,
-                            "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
-                            color1 .. " has been unmuted.\n"
-                        )
-                    end
-
-                -- If client is unmuted...
-                elseif et.gentity_get(p, "sess.muted") == 0 then
-                    client[p]["muteEnd"] = 0
-                    removeMute(p)
-
-                    et.trap_SendConsoleCommand(
-                        et.EXEC_APPEND,
-                        "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
-                        color1 .. " has been unmuted.\n"
-                    )
-                end
-            -- If client is muted permanently...
-            elseif client[p]["muteEnd"] == -1 then
-                if et.gentity_get(p, "sess.muted") == 0 then
-                    client[p]["muteEnd"] = 0
-                    removeMute(p)
-
-                    et.trap_SendConsoleCommand(
-                        et.EXEC_APPEND,
-                        "qsay " .. color2 .. "Mute: " .. color1 .. client[p]["name"] ..
-                        color1 .. " has been unmuted.\n"
-                    )
-                end
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay " .. color2 .. "Mute: " .. color1 .. client[clientNum]["name"] ..
+                    color1 .. " has been auto unmuted.  Please watch your language!\n"
+                )
             end
-        end
 
-        dynamiteTimer["time"] = vars["levelTime"]
+            client[clientNum]["muteEnd"] = 0
+            removeMute(clientNum)
+
+        -- If client has not yet finished his mute sentance...
+        elseif time["frame"] < client[clientNum]["muteEnd"] then
+            if et.gentity_get(clientNum, "sess.muted") == 0 then
+                client[clientNum]["muteEnd"] = 0
+                removeMute(clientNum)
+
+                et.trap_SendConsoleCommand(
+                    et.EXEC_APPEND,
+                    "qsay " .. color2 .. "Mute: " .. color1 .. client[clientNum]["name"] ..
+                    color1 .. " has been unmuted.\n"
+                )
+            end
+
+        -- If client is unmuted...
+        elseif et.gentity_get(clientNum, "sess.muted") == 0 then
+            client[clientNum]["muteEnd"] = 0
+            removeMute(clientNum)
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "qsay " .. color2 .. "Mute: " .. color1 .. client[clientNum]["name"] ..
+                color1 .. " has been unmuted.\n"
+            )
+        end
+    -- If client is muted permanently...
+    elseif client[clientNum]["muteEnd"] == -1 then
+        if et.gentity_get(clientNum, "sess.muted") == 0 then
+            client[clientNum]["muteEnd"] = 0
+            removeMute(clientNum)
+
+            et.trap_SendConsoleCommand(
+                et.EXEC_APPEND,
+                "qsay " .. color2 .. "Mute: " .. color1 .. client[clientNum]["name"] ..
+                color1 .. " has been unmuted.\n"
+            )
+        end
     end
 end
 
@@ -285,10 +283,10 @@ end
 
 -- Add callback mute function.
 addCallbackFunction({
-    ["InitGame"]         = "loadMutes",
-    ["ShutdownGame"]     = "checkMuteShutdownGame",
-    ["RunFrame"]         = "checkMuteRunFrame",
-    ["RunFrameEndRound"] = "checkMuteRunFrame",
-    ["ClientDisconnect"] = "checkMuteClientDisconnect",
-    ["ClientBegin"]      = "checkMuteClientBegin"
+    ["InitGame"]                   = "loadMutes",
+    ["ShutdownGame"]               = "checkMuteShutdownGame",
+    ["RunFramePlayerLoop"]         = "checkMuteRunPlayerFrame",
+    ["RunFramePlayerLoopEndRound"] = "checkMuteRunPlayerFrame",
+    ["ClientDisconnect"]           = "checkMuteClientDisconnect",
+    ["ClientBegin"]                = "checkMuteClientBegin"
 })

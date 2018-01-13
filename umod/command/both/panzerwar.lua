@@ -4,6 +4,26 @@
 
 -- Function
 
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup and round.
+--  * Add / remove ammo with weapon list.
+--  * Force player to use Panzerfaust weapon.
+--  clientNum is the client slot id.
+--  vars is the local vars passed from et_RunFrame function.
+function checkPanzerwarPlayerRunFrame(clientNum, vars)
+    for weaponNum, weaponAmmo in pairs(gameMode["weaponsList"]) do
+        if weaponAmmo[1] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammoclip", weaponNum, weaponAmmo[1])
+        end
+
+        if weaponAmmo[2] ~= -1 then
+            et.gentity_set(clientNum, "ps.ammo", weaponNum, weaponAmmo[2])
+        end
+    end
+    
+    et.gentity_set(clientNum, "sess.latchPlayerWeapon", 5)
+end
+
 -- Callback function when a client is spawned.
 --  vars is the local vars passed from et_ClientSpawn function.
 function panzerwarClientSpawn(vars)
@@ -30,16 +50,6 @@ function execute_command(params)
             if not checkGameMode("panzerwar", "enabled", params) then
                 return
             end         
-
-            -- Custom game mode RunFrame
-            --  * Add / remove ammo with weapon list.
-            --  * Force player to use Panzerfaust weapon.
-            gameMode["gameModeRunFrame"] = function()
-                for p = 0, clientsLimit, 1 do
-                    setWeaponAmmo(p)
-                    et.gentity_set(p, "sess.latchPlayerWeapon", 5)
-                end
-            end
 
             gameMode["weaponsList"] = {
                 [2]  = { 0, 0 },   -- Luger
@@ -74,10 +84,11 @@ function execute_command(params)
             end
 
             enabledGameMode("panzerwar", params)
+            periodicFrameCallback["checkPanzerwarPlayerRunFrame"] = "gameMode"
 
             addCallbackFunction({
-                ["RunFrame"]    = "checkGameModeRunFrame",
-                ["ClientSpawn"] = "panzerwarClientSpawn"
+                ["RunFramePlayerLoop"] = "checkPanzerwarPlayerRunFrame",
+                ["ClientSpawn"]        = "panzerwarClientSpawn"
             })
 
             params.broadcast2allClients = true
@@ -87,11 +98,13 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkPanzerwarPlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkPanzerwarPlayerRunFrame")
             removeCallbackFunction("ClientSpawn", "panzerwarClientSpawn")
             disabledGameMode(params)
 
-            _G["panzerwarClientSpawn"] = nil
+            _G["panzerwarClientSpawn"]         = nil
+            _G["checkPanzerwarPlayerRunFrame"] = nil
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Panzerwar has been disabled.")

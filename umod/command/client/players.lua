@@ -15,6 +15,9 @@ function execute_command(params)
     local pteam = { "^1X" , "^4L" , " " }
     local playercount = 0
 
+    -- team name / slot / nick / rate / snaps / ref
+    
+    
     for p = 0, clientsLimit, 1 do
         local userinfo = et.trap_GetUserinfo(p)
         local rate     = et.Info_ValueForKey(userinfo, "rate")

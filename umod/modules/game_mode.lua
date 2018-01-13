@@ -293,9 +293,12 @@ function gameModeInitGame(vars)
     end
 end
 
--- Set ammo for each weapon.
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup and round.
+-- Add / remove ammo with weapon list.
 --  clientNum is the client slot id.
-function setWeaponAmmo(clientNum)
+--  vars is the local vars passed from et_RunFrame function.
+function checkGameModePlayerRunFrame(clientNum, vars)
     for weaponNum, weaponAmmo in pairs(gameMode["weaponsList"]) do
         if weaponAmmo[1] ~= -1 then
             et.gentity_set(clientNum, "ps.ammoclip", weaponNum, weaponAmmo[1])
@@ -306,29 +309,6 @@ function setWeaponAmmo(clientNum)
         end
     end
 end
-
--- Callback function when qagame runs a server frame.
--- Run game mode run frame function periodically.
--- Game mode run frame function can be defaultGameModeRunFrame function
--- Or a custom function (see game mode command file).
---  vars is the local vars passed from et_RunFrame function.
-function checkGameModeRunFrame(vars)
-    if vars["levelTime"] - gameMode["time"] >= gameMode["frameCheck"] then
-        gameMode["gameModeRunFrame"]()
-        gameMode["time"] = vars["levelTime"]
-    end
-end
-
--- Default game mode RunFrame
--- Add / remove ammo with weapon list.
-function defaultGameModeRunFrame()
-    for p = 0, clientsLimit, 1 do
-        setWeaponAmmo(p)
-    end
-end
-
--- Set default game mode RunFrame
-gameMode["gameModeRunFrame"] = defaultGameModeRunFrame
 
 -- Check game mode for enabled / disabled it.
 --  gameModeName is the game mode to check.

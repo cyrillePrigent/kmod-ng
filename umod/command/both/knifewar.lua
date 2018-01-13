@@ -1,6 +1,7 @@
 -- Enabled / disabled knifewar game mode.
 -- From kmod script.
 -- Require : game mode module
+
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new knifewar value
 function execute_command(params)
@@ -45,7 +46,8 @@ function execute_command(params)
             end
 
             enabledGameMode("knifewar", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkGameModePlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Knifewar has been enabled")
@@ -58,7 +60,8 @@ function execute_command(params)
 
             et.trap_SendConsoleCommand(et.EXEC_APPEND, "g_knifeonly 0\n")
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkGameModePlayerRunFrame")
             disabledGameMode(params)
 
             params.broadcast2allClients = true

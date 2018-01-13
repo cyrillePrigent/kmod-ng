@@ -62,36 +62,33 @@ end
 -- Override kill slash command.
 addSlashCommand("client", "kill", {"function", "selfkillInFightSlashCommand"})
 
+periodicFrameCallback["checkSelfkillInFightPlayerRunFrame"] = "selfkillInFight"
+
 -- Function
 
--- Callback function when qagame runs a server frame.
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup and round.
 -- Check periodically players is hit.
+--  clientNum is the client slot id.
 --  vars is the local vars passed from et_RunFrame function.
-function checkSelfkillInFightRunFrame(vars)
-    if vars["levelTime"] - selfkillInFight["time"] >= selfkillInFight["frameCheck"] then
-        -- For all clients, check the client's damage received
-        for p = 0, clientsLimit, 1 do
-            if client[p]["team"] == 1 or client[p]["team"] == 2 then
-                -- Compare damage to the last value (check if ~= 0)
-                local damageReceived = et.gentity_get(p, "sess.damage_received")
+function checkSelfkillInFightPlayerRunFrame(clientNum, vars)
+    if client[clientNum]["team"] == 1 or client[clientNum]["team"] == 2 then
+        -- Compare damage to the last value (check if ~= 0)
+        local damageReceived = et.gentity_get(clientNum, "sess.damage_received")
 
-                if damageReceived > client[p]["damageReceived"] then
-                    -- Damage has been taken in the last <sampleRate> milliseconds -> set switch to 10
-                    client[p]["damageReceivedEnding"] = vars["levelTime"] + selfkillInFight["hitWait"]["ms"]
+        if damageReceived > client[clientNum]["damageReceived"] then
+            -- Damage has been taken in the last <sampleRate> milliseconds -> set switch to 10
+            client[clientNum]["damageReceivedEnding"] = vars["levelTime"] + selfkillInFight["hitWait"]["ms"]
 
-                    -- Save the current damage value to carry across to next iteration
-                    client[p]["damageReceived"] = damageReceived
-                else
-                    if client[p]["damageReceivedEnding"] ~= 0 then
-                        if vars["levelTime"] > client[p]["damageReceivedEnding"] then
-                            client[p]["damageReceivedEnding"] = 0
-                        end
-                    end
+            -- Save the current damage value to carry across to next iteration
+            client[clientNum]["damageReceived"] = damageReceived
+        else
+            if client[clientNum]["damageReceivedEnding"] ~= 0 then
+                if vars["levelTime"] > client[clientNum]["damageReceivedEnding"] then
+                    client[clientNum]["damageReceivedEnding"] = 0
                 end
             end
         end
-        
-        selfkillInFight["time"] = vars["levelTime"]
     end
 end
 
@@ -261,5 +258,6 @@ end
 
 -- Add callback selfkill in fight function.
 addCallbackFunction({
-    ["RunFrame"] = "checkSelfkillInFightRunFrame"
+    ["RunFramePlayerLoop"]         = "checkSelfkillInFightPlayerRunFrame",
+    ["RunFramePlayerLoopEndRound"] = "checkSelfkillInFightPlayerRunFrame"
 })

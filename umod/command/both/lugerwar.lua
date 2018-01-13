@@ -2,8 +2,6 @@
 -- From kmod script.
 -- Require : game mode module
 
--- Function
-
 -- Enabled / disabled lugerwar game mode.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 --   * params["arg1"] => new lugerwar value
@@ -71,7 +69,8 @@ function execute_command(params)
             end
 
             enabledGameMode("lugerwar", params)
-            addCallbackFunction({ ["RunFrame"] = "checkGameModeRunFrame" })
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = "gameMode"
+            addCallbackFunction({ ["RunFramePlayerLoop"] = "checkGameModePlayerRunFrame" })
 
             params.broadcast2allClients = true
             printCmdMsg(params, "Lugerwar has been enabled")
@@ -80,7 +79,8 @@ function execute_command(params)
                 return
             end
 
-            removeCallbackFunction("RunFrame", "checkGameModeRunFrame")
+            periodicFrameCallback["checkGameModePlayerRunFrame"] = nil
+            removeCallbackFunction("RunFramePlayerLoop", "checkGameModePlayerRunFrame")
             disabledGameMode(params)
 
             params.broadcast2allClients = true

@@ -62,52 +62,53 @@ function advancedAdrenalineInitGame(vars)
         end
     end
 
-    addCallbackFunction({["RunFrame"] = "checkAdvancedAdrenalineRunFrame"})
+    addCallbackFunction({
+        ["RunFramePlayerLoop"]         = "checkAdvancedAdrenalinePlayerRunFrame",
+        ["RunFramePlayerLoopEndRound"] = "checkAdvancedAdrenalinePlayerRunFrame"
+    })
 end
 
--- Callback function when qagame runs a server frame.
+-- Callback function when qagame runs a server frame in player loop
+-- pending warmup, round and end of round.
 -- Check if player use adrenaline and display counter if needed.
+--  clientNum is the client slot id.
 --  vars is the local vars passed from et_RunFrame function.
-function checkAdvancedAdrenalineRunFrame(vars)
-    for p = 0, clientsLimit, 1 do
-        if client[p]["team"] ~= 0 then
-            local psPowerups = tonumber(et.gentity_get(p, "ps.powerups", 12))
+function checkAdvancedAdrenalinePlayerRunFrame(clientNum, vars)
+    local psPowerups = tonumber(et.gentity_get(clientNum, "ps.powerups", 12))
 
-            if not pause["startTrigger"] or (pause["startTrigger"] and psPowerups == 0) then
-                if psPowerups > 0 then
-                    client[p]["useAdrenaline"] = 1
+    if not pause["startTrigger"] or (pause["startTrigger"] and psPowerups == 0) then
+        if psPowerups > 0 then
+            client[clientNum]["useAdrenaline"] = 1
 
-                    if client[p]["adrenalineMsgTrigger"] == 0 then
-                        client[p]["adrenalineMsgTrigger"] = 1
-                        client[p]["adrenalineMsgTime"]    = vars["levelTime"]
-                        client[p]["adrenalineCounter"]    = client[p]["adrenalineCounter"] + 1
+            if client[clientNum]["adrenalineMsgTrigger"] == 0 then
+                client[clientNum]["adrenalineMsgTrigger"] = 1
+                client[clientNum]["adrenalineMsgTime"]    = vars["levelTime"]
+                client[clientNum]["adrenalineCounter"]    = client[clientNum]["adrenalineCounter"] + 1
 
-                        if client[p]["adrenalineMsg"] == 1 then
-                            if advancedAdrenaline["enabledSound"] == 1 then
-                                et.G_ClientSound(
-                                    p,
-                                    advancedAdrenaline["sound"]
-                                )
-                            end
-
-                            et.trap_SendServerCommand(
-                                p,
-                                "cp \"" .. color2 .. "Adrenaline " .. color4 ..
-                                client[p]["adrenalineCounter"] .. "\n\""
-                            )
-                        end
+                if client[clientNum]["adrenalineMsg"] == 1 then
+                    if advancedAdrenaline["enabledSound"] == 1 then
+                        et.G_ClientSound(
+                            clientNum,
+                            advancedAdrenaline["sound"]
+                        )
                     end
 
-                    if vars["levelTime"] - client[p]["adrenalineMsgTime"] + 50 >= 1000 then
-                        client[p]["adrenalineMsgTrigger"] = 0
-                    end
-                else
-                    client[p]["useAdrenaline"]        = 0
-                    client[p]["adrenalineMsgTrigger"] = 0
-                    client[p]["adrenalineMsgTime"]    = 0
-                    client[p]["adrenalineCounter"]    = 0
+                    et.trap_SendServerCommand(
+                        clientNum,
+                        "cp \"" .. color2 .. "Adrenaline " .. color4 ..
+                        client[clientNum]["adrenalineCounter"] .. "\n\""
+                    )
                 end
             end
+
+            if vars["levelTime"] - client[clientNum]["adrenalineMsgTime"] + 50 >= 1000 then
+                client[clientNum]["adrenalineMsgTrigger"] = 0
+            end
+        else
+            client[clientNum]["useAdrenaline"]        = 0
+            client[clientNum]["adrenalineMsgTrigger"] = 0
+            client[clientNum]["adrenalineMsgTime"]    = 0
+            client[clientNum]["adrenalineCounter"]    = 0
         end
     end
 end
