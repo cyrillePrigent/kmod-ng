@@ -31,8 +31,13 @@ callbackList = {
     ["RunFramePlayerLoop"]         = {
         [1] = "corePlayerRunFrame"
     },
-    ["RunFrame"]                   = {},
-    ["RunFrameEndRound"]           = {},
+    ["RunFrame"]                   = {
+        [1] = "startTimeCounter",
+        [2] = "checkTimeCounter"
+    },
+    ["RunFrameEndRound"]           = {
+        [1] = "checkTimeCounter"
+    },
     ["RunFramePlayerLoopEndRound"] = {
         [1] = "corePlayerRunFrame"
     },
@@ -165,7 +170,11 @@ slashCommandClient = {
     ["single"] = {}
 }
 
-slashCommandConsole   = {}
+slashCommandConsole   = {
+    ["multiple"] = {},
+    ["single"] = {}
+}
+
 slashCommandModuleMsg = {}
 
 meansOfDeathList = {
@@ -244,18 +253,14 @@ game = {
 }
 
 time = {
-    ["trigger"] = false,
-    ["init"]    = 0,
-    ["frame"]   = 0,
-    ["counter"] = 0,
+    ["init"]         = 0,
+    ["startCounter"] = 0,
+    ["frame"]        = 0,
+    ["counter"]      = 0
 }
-
-timedv1 = 0
-timedv2 = 0
 
 pause = {
     ["time"]         = 0,
-    ["dummyTime"]    = 0,
     ["startTrigger"] = false,
     ["endTrigger"]   = false
 }
@@ -591,29 +596,32 @@ end
 
 -- Set function / file to execute when a slash command is executed by client.
 --  cmdType is the command type (client or console).
---  cmdArg is the slash commande name or table with list of command name.
+--  cmdArg is the slash command name or table with list of command name.
 --  cmdData is the slash command data.
 function addSlashCommand(cmdType, cmdArg, cmdData)
+    local varName
+
     if cmdType == "client" then
-        local cmdArgType = type(cmdArg)
-
-        if cmdArgType == "table" then
-            local t = _G["slashCommandClient"]["multiple"]
-
-            for _, arg in ipairs(cmdArg) do
-                t[arg] = t[arg] or {}
-                t = t[arg]
-            end
-
-            t = t or {}
-            table.insert(t, cmdData)
-        elseif cmdArgType == "string" then
-            slashCommandClient["single"][cmdArg] = slashCommandClient["single"][cmdArg] or {}
-            table.insert(slashCommandClient["single"][cmdArg], cmdData)
-        end
+        varName = "slashCommandClient"
     elseif cmdType == "console" then
-        slashCommandConsole[cmdArg] = slashCommandConsole[cmdArg] or {}
-        table.insert(slashCommandConsole[cmdArg], cmdData)
+        varName = "slashCommandConsole"
+    end
+
+    local cmdArgType = type(cmdArg)
+
+    if cmdArgType == "table" then
+        local t = _G[varName]["multiple"]
+
+        for _, arg in ipairs(cmdArg) do
+            t[arg] = t[arg] or {}
+            t = t[arg]
+        end
+
+        t = t or {}
+        table.insert(t, cmdData)
+    elseif cmdArgType == "string" then
+        _G[varName]["single"][cmdArg] = _G[varName]["single"][cmdArg] or {}
+        table.insert(_G[varName]["single"][cmdArg], cmdData)
     end
 end
 
@@ -702,8 +710,10 @@ end
 --  params is parameters passed to the function executed in command file.
 function pauseSlashCommand(params)
     if not pause["startTrigger"] then
-        game["paused"]     = true
-        pause["dummyTime"] = time["frame"]
+        game["paused"] = true
+        pause["time"]  = time["frame"]
+
+        callbackList["RunFrame"][1] = "checkTimeCounterPendingPause"
     end
 
     return 0
@@ -712,15 +722,8 @@ end
 -- Function executed when slash command is called in et_ClientCommand function.
 --  params is parameters passed to the function executed in command file.
 function unPauseSlashCommand(params)
-    -- TODO : Why?
-    if params.cmdMode == "client" then
-        if pause["startTrigger"] and (time["frame"] - pause["dummyTime"]) / 1000 >= 5 then
-            game["paused"] = false
-        end
-    elseif params.cmdMode == "console" then
-        if pause["startTrigger"] then
-            game["paused"] = false
-        end
+    if pause["startTrigger"] then
+        game["paused"] = false
     end
 
     return 0
@@ -870,6 +873,13 @@ function corePlayerRunFrame(clientNum, vars)
         client[clientNum]["lastName"] = client[clientNum]["name"]
     end
 
+    players = {
+        ["allies"]    = 0,
+        ["axis"]      = 0,
+        ["spectator"] = 0,
+        ["active"]    = 0
+    }
+
     if client[clientNum]["team"] == 1 then
         players["axis"]   = players["axis"] + 1
         players["active"] = players["active"] + 1
@@ -899,6 +909,71 @@ if spectatorInactivity > 0 then
     addCallbackFunction({
         ["RunFramePlayerLoop"] = "spectatorInactivityAdminRunFrame"
     })
+end
+
+-- Callback function when qagame runs a server frame
+-- pending warmup and round.
+-- Initialize time counter (in secs) when warmup / round start.
+--  vars is the local vars passed from et_RunFrame function.
+function startTimeCounter(vars)
+    -- et_InitGame and et_RunFrame runs at the same time, time["counter"]
+    -- can't be set in et_InitGame. Wait the next frame to do it.
+    if time["startCounter"] == 0 then
+        time["startCounter"] = 1
+        return
+    end
+
+    -- At the next frame, set time["counter"] with a compensation.
+    if time["startCounter"] == 1 then
+        time["counter"]      = 1.05
+        time["startCounter"] = 0
+        removeCallbackFunction("RunFrame", "startTimeCounter")
+    end
+end
+
+-- Callback function when qagame runs a server frame
+-- pending warmup, round and end of round.
+-- Time counter management.
+--  vars is the local vars passed from et_RunFrame function.
+function checkTimeCounter(vars)
+    time["counter"] = time["counter"] + ((vars["levelTime"] - time["frame"]) / 1000)
+    time["frame"]   = vars["levelTime"]
+end
+
+-- Callback function when qagame runs a server frame
+-- pending warmup and round.
+-- Time counter management pending pause.
+--  vars is the local vars passed from et_RunFrame function.
+function checkTimeCounterPendingPause(vars)
+    -- When game is paused...
+    if game["paused"] then
+        -- Set time when pause start.
+        if not pause["startTrigger"] then
+            pause["startTrigger"] = true
+        end
+
+        -- Server is paused for 3 minutes (180 seconds).
+        if vars["levelTime"] - pause["time"] >= 180000 then
+            game["paused"] = false
+        end
+    -- When game is restart...
+    elseif not game["paused"] and pause["startTrigger"] then
+        -- Set time when pause stop.
+        if not pause["endTrigger"] then
+            pause["time"]       = vars["levelTime"]
+            pause["endTrigger"] = true
+        end
+
+        -- When unpaused before 3 minutes is up it counts down from 10 seconds.
+        if vars["levelTime"] - pause["time"] >= 10000 then
+            pause["startTrigger"] = false
+            pause["endTrigger"]   = false
+
+            callbackList["RunFrame"][1] = "checkTimeCounter"
+        end
+    end
+
+    time["frame"] = vars["levelTime"]
 end
 
 -- Load modules
@@ -1048,9 +1123,12 @@ end
 
 addSlashCommand("client", {"ref", "pause"}, {"function", "pauseSlashCommand"})
 addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"})
+
+addSlashCommand("console", {"ref", "pause"}, {"function", "pauseSlashCommand"})
+addSlashCommand("console", {"ref", "unpause"}, {"function", "unPauseSlashCommand"})
+
 addSlashCommand("client", "team", {"function", "teamSlashCommand"})
-addSlashCommand("console", "pause", {"function", "pauseSlashCommand"})
-addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
+
 
 -- Enemy Territory callbacks
 
@@ -1063,7 +1141,7 @@ addSlashCommand("console", "unpause", {"function", "unPauseSlashCommand"})
 function et_InitGame(levelTime, randomSeed, restart)
     time["init"] = levelTime
 
-    -- 1 : warmup, 0 : match
+    -- 1 : warmup, 0 : round
     game["state"] = tonumber(et.trap_Cvar_Get("gamestate"))
 
     local currentVersion = et.trap_Cvar_Get("mod_version")
@@ -1104,67 +1182,6 @@ end
 -- Called when qagame runs a server frame.
 --  levelTime is the current level time in milliseconds.
 function et_RunFrame(levelTime)
-    time["frame"] = levelTime
-
-    if time["counter"] == 0 then
-        time["counter"] = (time["frame"] - time["init"]) / 1000
-    end
-
-    if game["paused"] then
-        if not pause["startTrigger"] then
-            pause["time"]         = time["frame"]
-            pause["startTrigger"] = true
-        end
-
-        -- Server is paused for 3 minutes (180 seconds)
-        if ((time["frame"] - pause["time"]) / 1000) >= 180 then
-            game["paused"] = false
-        end
-    elseif not game["paused"] and pause["startTrigger"] then
-        if not pause["endTrigger"] then
-            pause["time"]       = time["frame"]
-            pause["endTrigger"] = true
-        end
-
-        -- when unpaused before 3 minutes is up it counts down from 10 seconds
-        if ((time["frame"] - pause["time"]) / 1000) >= 10 then
-            pause["startTrigger"] = false
-            pause["endTrigger"]   = false
-            timedv1 = 0
-            timedv2 = 0
-        end
-    else
-        if not time["trigger"] then
-            timedv1 = time["frame"]
-            time["trigger"] = true
-
-            if timedv2 ~= 0 then
-                time["counter"] = time["counter"] + ((timedv1 - timedv2) / 1000) -- + 0.05
-                local _, _, thous = string.find(time["counter"], "%d*%.%d%d(%d*)")
-
-                if thous == 9999999 then
-                    time["counter"] = time["counter"] + 0.000000001
-                end
-            end
-        else
-            timedv2 = time["frame"]
-            time["trigger"] = false
-            time["counter"] = time["counter"] + ((timedv2 - timedv1) / 1000)
-            local _, _, thous = string.find(time["counter"], "%d*%.%d%d(%d*)")
-
-            if thous == 9999999 then
-                time["counter"] = time["counter"] + 0.000000001
-            end
-        end
-    end
-
-    players["axis"]      = 0
-    players["allies"]    = 0
-    players["spectator"] = 0
-    players["active"]    = 0
-
-    executeCallbackPlayerFrame("RunFramePlayerLoop", {["levelTime"] = levelTime})
-
     if game["state"] == 3 then
         executeCallbackPlayerFrame(
             "RunFramePlayerLoopEndRound",
@@ -1175,6 +1192,7 @@ function et_RunFrame(levelTime)
 
         game["endRoundTrigger"] = true
     else
+        executeCallbackPlayerFrame("RunFramePlayerLoop", {["levelTime"] = levelTime})
         executeCallbackFunction("RunFrame", {["levelTime"] = levelTime})
     end
 end
@@ -1484,10 +1502,22 @@ function et_ConsoleCommand()
         return 1
     end
 
-    if slashCommandConsole[params.cmd] ~= nil then
-        for _, cmdData in ipairs(slashCommandConsole[params.cmd]) do
+    if slashCommandConsole["single"][params.cmd] ~= nil then
+        for _, cmdData in ipairs(slashCommandConsole["single"][params.cmd]) do
             if runSlashCommand(cmdData, params) == 1 then
                 return 1
+            end
+        end
+    end
+
+    if slashCommandConsole["multiple"][params.cmd] ~= nil then
+        local subCmd = string.lower(et.trap_Argv(1))
+
+        if slashCommandConsole["multiple"][params.cmd][subCmd] ~= nil then
+            for _, cmdData in ipairs(slashCommandConsole["multiple"][params.cmd][subCmd]) do
+                if runSlashCommand(cmdData, params) == 1 then
+                    return 1
+                end
             end
         end
     end
