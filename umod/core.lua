@@ -596,7 +596,7 @@ end
 
 -- Set function / file to execute when a slash command is executed by client.
 --  cmdType is the command type (client or console).
---  cmdArg is the slash command name or table with list of command name.
+--  cmdArg is the slash commande name or table with list of command name.
 --  cmdData is the slash command data.
 function addSlashCommand(cmdType, cmdArg, cmdData)
     local varName
@@ -849,6 +849,29 @@ function second2readeableTime(value)
     else
         return trim(str)
     end
+end
+
+-- Called when qagame runs a server frame pending warmup and round.
+--  levelTime is the current level time in milliseconds.
+function roundRunFrame(levelTime)
+    executeCallbackPlayerFrame("RunFramePlayerLoop", {["levelTime"] = levelTime})
+    executeCallbackFunction("RunFrame", {["levelTime"] = levelTime})
+end
+
+-- Set default et_RunFrame function.
+et_RunFrame = roundRunFrame
+
+-- Called when qagame runs a server frame pending end of round.
+--  levelTime is the current level time in milliseconds.
+function endRoundRunFrame(levelTime)
+    executeCallbackPlayerFrame(
+        "RunFramePlayerLoopEndRound",
+        {["levelTime"] = levelTime}
+    )
+
+    executeCallbackFunction("RunFrameEndRound", {["levelTime"] = levelTime})
+
+    game["endRoundTrigger"] = true
 end
 
 -- Callback function when qagame runs a server frame in player loop
@@ -1177,24 +1200,6 @@ end
 --  restart indicates if the shutdown is being called due to a map_restart (1) or not (0).
 function et_ShutdownGame(restart)
     executeCallbackFunction("ShutdownGame", {["restart"] = restart})
-end
-
--- Called when qagame runs a server frame.
---  levelTime is the current level time in milliseconds.
-function et_RunFrame(levelTime)
-    if game["state"] == 3 then
-        executeCallbackPlayerFrame(
-            "RunFramePlayerLoopEndRound",
-            {["levelTime"] = levelTime}
-        )
-
-        executeCallbackFunction("RunFrameEndRound", {["levelTime"] = levelTime})
-
-        game["endRoundTrigger"] = true
-    else
-        executeCallbackPlayerFrame("RunFramePlayerLoop", {["levelTime"] = levelTime})
-        executeCallbackFunction("RunFrame", {["levelTime"] = levelTime})
-    end
 end
 
 -- Client management
@@ -1552,6 +1557,7 @@ function et_Print(text)
     -- Set end of round status when we detect it.
     if text == "Exit: Timelimit hit.\n" or text == "Exit: Wolf EndRound.\n" then
         game["state"] = 3
+        et_RunFrame = endRoundRunFrame
     end
 end
 
