@@ -8,21 +8,20 @@ version       = "0.1"
 releaseStatus = "alpha"
 
 -- Load Uber Mod cvar
-autoPanzerDisable     = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
-panzersPerTeam        = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
-advancedPm            = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
-pmSound               = et.trap_Cvar_Get("u_pm_sound")
-selfkillMode          = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
+autoPanzerDisableModule = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
+advancedPm              = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
+pmSound                 = et.trap_Cvar_Get("u_pm_sound")
+selfkillMode            = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
 --dateFormat            = et.trap_Cvar_Get("u_date_format")
-spectatorInactivity   = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
-mapName               = et.trap_Cvar_Get("mapname")
-muteModule            = tonumber(et.trap_Cvar_Get("u_mute_module"))
-curseMode             = tonumber(et.trap_Cvar_Get("u_cursemode"))
-logChatModule         = tonumber(et.trap_Cvar_Get("u_log_chat"))
-landminesLimitModule  = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
-killingSpreeModule    = tonumber(et.trap_Cvar_Get("u_killing_spree"))
-spreeRecordModule     = tonumber(et.trap_Cvar_Get("u_ks_record"))
-svMaxClients          = tonumber(et.trap_Cvar_Get("sv_maxclients"))
+spectatorInactivity     = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
+mapName                 = et.trap_Cvar_Get("mapname")
+muteModule              = tonumber(et.trap_Cvar_Get("u_mute_module"))
+curseMode               = tonumber(et.trap_Cvar_Get("u_cursemode"))
+logChatModule           = tonumber(et.trap_Cvar_Get("u_log_chat"))
+landminesLimitModule    = tonumber(et.trap_Cvar_Get("u_landmines_limit"))
+killingSpreeModule      = tonumber(et.trap_Cvar_Get("u_killing_spree"))
+spreeRecordModule       = tonumber(et.trap_Cvar_Get("u_ks_record"))
+svMaxClients            = tonumber(et.trap_Cvar_Get("sv_maxclients"))
 
 callbackList = {
     ["ReadConfig"]                 = {},
@@ -310,7 +309,7 @@ pbState = false
 --  lua version 5.3
 
 -- **********************************************
-
+    
 -- Store a settings function list in main callback function list.
 --  settings is the function list to set.
 function addCallbackFunction(settings)
@@ -707,6 +706,7 @@ function runSlashCommand(data, params)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Start pause.
 --  params is parameters passed to the function executed in command file.
 function pauseSlashCommand(params)
     if not pause["startTrigger"] then
@@ -720,6 +720,7 @@ function pauseSlashCommand(params)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Stop pause.
 --  params is parameters passed to the function executed in command file.
 function unPauseSlashCommand(params)
     if pause["startTrigger"] then
@@ -730,11 +731,23 @@ function unPauseSlashCommand(params)
 end
 
 -- Function executed when slash command is called in et_ClientCommand function.
+-- Detect when player is spectator and go to a team (allies / axis).
 --  params is parameters passed to the function executed in command file.
 function teamSlashCommand(params)
+    local allowedArg = {
+        -- axis
+        ["red"]       = true,
+        ["r"]         = true,
+        ["axis"]      = true,
+        -- allies
+        ["blue"]      = true,
+        ["b"]         = true,
+        ["allies"]    = true
+    }
+
     local teamSelect = et.trap_Argv(1)
 
-    if client[params.clientNum]["team"] == 3 and (teamSelect == "r" or teamSelect == "b") then
+    if client[params.clientNum]["team"] == 3 and allowedArg[teamSelect] then
         client[params.clientNum]["switchTeam"] = 1
     end
 
@@ -822,8 +835,13 @@ end
 -- Return player ip.
 --  clientNum is the client slot id.
 function getClientIp(clientNum)
+    -- TODO listen servers may be 'localhost'
     local ip = et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip")
     local _, _, ip = string.find(ip, "(%d+%.%d+%.%d+%.%d+)")
+
+    if ip == nil then
+        ip = ""
+    end
 
     return ip
 end
@@ -848,6 +866,61 @@ function second2readeableTime(value)
         return str .. secs .. " secs"
     else
         return trim(str)
+    end
+end
+
+-- Set a sound index for a certain client only.
+--  clientNum is the client slot id.
+--  soundIndex is the sound index to set.
+function setClientSoundIndex(clientNum, soundIndex)
+    -- NOTE : EV_GLOBAL_CLIENT_SOUND = 54
+    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
+    et.gentity_set(tmpEntity, "s.teamNum", clientNum)
+    et.gentity_set(tmpEntity, "s.eventParm", soundIndex)
+end
+
+-- Play a sound to all client if sound is enabled for them (clientNum = nil) or
+-- play a sound to a specific client if sound is enabled for him (with clientNum)
+--  soundFile is the path of the sound file.
+--  playKey is the key in client data to enabled / disabled sound playing.
+--  clientNum is the client slot id for play the sound to a specific client.
+function playSound(soundFile, playKey, clientNum)
+    local soundIndex = et.G_SoundIndex(soundFile)
+
+    if soundIndex == nil or clientDefaultData[playKey] == nil then
+        return 
+    end
+
+    if clientNum == nil then
+        for p = 0, clientsLimit, 1 do
+            if client[p][playKey] == 1 then
+                setClientSoundIndex(p, soundIndex)
+            end
+        end
+    else
+        if client[clientNum][playKey] == 1 then
+            setClientSoundIndex(clientNum, soundIndex)
+        end
+    end
+end
+
+-- Display a message to a specific client (only if msgKey = nil)
+-- or display a message to all client if message is
+-- enabled for them (with msgKey).
+--  pos is the message cmd to display the message.
+--  msg is the message content.
+--  msgKey is the key in client data to enabled / disabled message displaying.
+function sayClients(pos, msg, msgKey)
+    msg = pos .. " \"" .. msg .. "\""
+
+    if clientDefaultData[msgKey] == nil then
+        et.trap_SendServerCommand(-1, msg)
+    else
+        for p = 0, clientsLimit, 1 do
+            if client[p][msgKey] == 1 then
+                et.trap_SendServerCommand(p, msg)
+            end
+        end
     end
 end
 
@@ -1038,7 +1111,7 @@ if tonumber(et.trap_Cvar_Get("u_advanced_spawn")) == 1 then
     dofile(umod_path .. "/modules/advanced_spawn.lua")
 end
 
-if tonumber(et.trap_Cvar_Get("u_auto_panzer_disable")) == 1 then
+if autoPanzerDisableModule == 1 then
     dofile(umod_path .. "/modules/auto_panzer_disable.lua")
 end
 
@@ -1150,8 +1223,8 @@ addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"
 addSlashCommand("console", {"ref", "pause"}, {"function", "pauseSlashCommand"})
 addSlashCommand("console", {"ref", "unpause"}, {"function", "unPauseSlashCommand"})
 
+-- TODO : Check nextteam command
 addSlashCommand("client", "team", {"function", "teamSlashCommand"})
-
 
 -- Enemy Territory callbacks
 
@@ -1341,7 +1414,7 @@ function et_ClientSpawn(clientNum, revived)
     executeCallbackFunction("ClientSpawn", {["clientNum"] = clientNum, ["revived"] = revived})
 end
 
--- commands
+-- Commands
 
 -- Called when a command is received from a client.
 --  clientNum is the client slot id.
@@ -1530,7 +1603,7 @@ function et_ConsoleCommand()
     return 0
 end
 
--- miscellaneous
+-- Miscellaneous
 
 -- Called whenever the server or qagame prints a string to the console.
 -- WARNING! text may contain a player name + their chat message.
@@ -1610,59 +1683,4 @@ function et.G_ClientSound(clientNum, soundFile)
     local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
     et.gentity_set(tmpEntity, "s.teamNum", clientNum)
     et.gentity_set(tmpEntity, "s.eventParm", et.G_SoundIndex(soundFile))
-end
-
--- Set a sound index for a certain client only.
-
---  soundIndex is the sound index to set.
-function setClientSoundIndex(clientNum, soundIndex)
-    -- NOTE : EV_GLOBAL_CLIENT_SOUND = 54
-    local tmpEntity = et.G_TempEntity(et.gentity_get(clientNum, "r.currentOrigin"), 54)
-    et.gentity_set(tmpEntity, "s.teamNum", clientNum)
-    et.gentity_set(tmpEntity, "s.eventParm", soundIndex)
-end
-
--- Play a sound to all client if sound is enabled for them (clientNum = nil) or
--- play a sound to a specific client if sound is enabled for him (with clientNum)
---  soundFile is the path of the sound file.
---  playKey is the key in client data to enabled / disabled sound playing.
---  clientNum is the client slot id for play the sound to a specific client.
-function playSound(soundFile, playKey, clientNum)
-    local soundIndex = et.G_SoundIndex(soundFile)
-
-    if soundIndex == nil or clientDefaultData[playKey] == nil then
-        return 
-    end
-
-    if clientNum == nil then
-        for p = 0, clientsLimit, 1 do
-            if client[p][playKey] == 1 then
-                setClientSoundIndex(p, soundIndex)
-            end
-        end
-    else
-        if client[clientNum][playKey] == 1 then
-            setClientSoundIndex(clientNum, soundIndex)
-        end
-    end
-end
-
--- Display a message to a specific client (only if msgKey = nil)
--- or display a message to all client if message is
--- enabled for them (with msgKey).
---  pos is the message cmd to display the message.
---  msg is the message content.
---  msgKey is the key in client data to enabled / disabled message displaying.
-function sayClients(pos, msg, msgKey)
-    msg = pos .. " \"" .. msg .. "\""
-
-    if clientDefaultData[msgKey] == nil then
-        et.trap_SendServerCommand(-1, msg)
-    else
-        for p = 0, clientsLimit, 1 do
-            if client[p][msgKey] == 1 then
-                et.trap_SendServerCommand(p, msg)
-            end
-        end
-    end
 end

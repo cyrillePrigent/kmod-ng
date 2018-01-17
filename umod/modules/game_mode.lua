@@ -44,7 +44,7 @@ cmdList["console"]["!knifewar"]   = "/command/both/knifewar.lua"
 --  gameModeName is the game mode name to enabled.
 --  params is parameters passed from et_ClientCommand / et_ConsoleCommand function.
 function enabledGameMode(gameModeName, params)
-    if autoPanzerDisable == 1 then
+    if autoPanzerDisableModule == 1 then
         if autoPanzerDisable["enabled"] then
             removeCallbackFunction("RunFrame", "autoPanzerDisableRunFrame")
         end
@@ -249,7 +249,7 @@ function disabledGameMode(params)
         end
     end
 
-    if autoPanzerDisable == 1 then
+    if autoPanzerDisableModule == 1 then
         if autoPanzerDisable["enabled"] then
             addCallbackFunction({ ["RunFrame"] = "autoPanzerDisableRunFrame" })
         end

@@ -170,7 +170,7 @@ function checkDynamiteTimerPrint(vars)
     end
 end
 
--- Callback function when qagame runs a server frame.
+-- Callback function when qagame runs a server frame (pending warmup and round).
 -- Display step of dynamite timer if needed.
 -- Remove dynamite timer after exploding.
 --  vars is the local vars passed from et_RunFrame function.

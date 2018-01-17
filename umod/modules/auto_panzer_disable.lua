@@ -17,6 +17,8 @@ autoPanzerDisable = {
     ["warningTime"] = 0,
     -- Minimum active players to activate panzers.
     ["playerLimit"] = tonumber(et.trap_Cvar_Get("u_panzer_player_limit")),
+    -- Number of panzer per team.
+    ["allowPerTeam"] = tonumber(et.trap_Cvar_Get("team_maxpanzers")) -- et-legacy : team_maxPanzers
     -- Time (in ms) of last auto panzer disable check.
     ["time"] = 0,
     -- Interval (in ms) between 2 frame check.
@@ -137,7 +139,7 @@ function autoPanzerDisableRunFrame(vars)
 
             et.trap_SendConsoleCommand(
                 et.EXEC_APPEND,
-                "team_maxpanzers " .. panzersPerTeam .. "\n"
+                "team_maxpanzers " .. autoPanzerDisable["allowPerTeam"] .. "\n"
             )
 
             if autoPanzerDisable["msg"]["enabled"] == false then
@@ -147,7 +149,8 @@ function autoPanzerDisableRunFrame(vars)
                     et.EXEC_APPEND,
                     "qsay " .. color2 .. "Panzerlimit: " .. color1 ..
                     "Panzers have been auto-enabled. Each team is allowed only " ..
-                    color4 .. panzersPerTeam .. color1 .. " panzer(s) per team!\n"
+                    color4 .. autoPanzerDisable["allowPerTeam"] .. color1 ..
+                    " panzer(s) per team!\n"
                 )
             end
         end
