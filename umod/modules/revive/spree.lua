@@ -231,7 +231,7 @@ function checkReviveSpreeRunFrameEndRound(vars)
                     saveReviveSpreeStats("revivingspree.txt", reviveSpree["stats"])
                 else 
                     longest = color1 .. " [record: " .. max[1] .. " by " .. max[3] .. 
-                        color1 .. " @" .. os.date(dateFormat, max[2]) .. "]"
+                        color1 .. " @" .. getFormatedDate(max[2], true) .. "]"
                 end
             end
 

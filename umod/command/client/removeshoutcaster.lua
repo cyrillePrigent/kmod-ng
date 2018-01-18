@@ -11,7 +11,7 @@ function execute_command(params)
         clientNum = client2id(params["arg1"], params)
 
         if clientNum ~= nil then
-            -- et.CS_PLAYERS = 689
+            -- NOTE : et.CS_PLAYERS = 689
             if tonumber(et.Info_ValueForKey(et.trap_GetConfigstring(689 + clientNum), "sc")) == 0 then
                 printCmdMsg(
                     params,

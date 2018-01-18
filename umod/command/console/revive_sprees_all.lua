@@ -13,7 +13,7 @@ function execute_command(params)
             map,
             et.Q_CleanStr(reviveStats[3]),
             reviveStats[1],
-            os.date(dateFormat, reviveStats[2])
+            getFormatedDate(reviveStats[2], true)
         )
     end
 

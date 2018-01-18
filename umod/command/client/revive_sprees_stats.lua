@@ -43,7 +43,7 @@ function execute_command(params)
             end
         end
         
-        statsMsg = msg .. " since " .. os.date(dateFormat, reviveSpree["serverRecords"][guid][5])
+        statsMsg = msg .. " since " .. getFormatedDate(reviveSpree["serverRecords"][guid][5], true)
     end
 
     printCmdMsg(params, statsMsg)

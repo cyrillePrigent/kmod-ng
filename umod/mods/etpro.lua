@@ -70,7 +70,7 @@ cmdList["client"]["!makeshoutcaster"]   = "/command/client/makeshoutcaster.lua"
 cmdList["client"]["!removeshoutcaster"] = "/command/client/removeshoutcaster.lua"
 
 addSlashCommand("client", "ws", {"function", "fixWsSlashCommand"})
-addSlashCommand("client", "team", {"function", "fixTeamSlashCommand"}) -- TODO : Check nextteam command
+addSlashCommand("client", "team", {"function", "fixTeamSlashCommand"})
 addSlashCommand("client", "callvote", {"function", "fixCrlfAbuseSlashCommand"})
 addSlashCommand("client", "ref", {"function", "fixCrlfAbuseSlashCommand"})
 addSlashCommand("client", "sa", {"function", "fixCrlfAbuseSlashCommand"})

@@ -7,6 +7,7 @@ function execute_command(params)
     params.say = "chat"
 
     if params.nbArg < 3 then
+        -- TODO : Check for date format
         printCmdMsg(
             params,
             "Useage: setbirthday [name] [birthday]\nBirthday format is dd-mm-yyyy.\n"

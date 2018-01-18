@@ -60,6 +60,8 @@ function execute_command(params)
             end
         end
     end
+    
+    -- TODO : Display available slash command
 
     return 1
 end

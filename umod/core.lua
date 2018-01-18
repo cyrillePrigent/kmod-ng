@@ -12,7 +12,7 @@ autoPanzerDisableModule = tonumber(et.trap_Cvar_Get("u_auto_panzer_disable"))
 advancedPm              = tonumber(et.trap_Cvar_Get("u_advanced_pm"))
 pmSound                 = et.trap_Cvar_Get("u_pm_sound")
 selfkillMode            = tonumber(et.trap_Cvar_Get("u_selfkill_mode"))
---dateFormat            = et.trap_Cvar_Get("u_date_format")
+dateFormat              = et.trap_Cvar_Get("u_date_format")
 spectatorInactivity     = tonumber(et.trap_Cvar_Get("g_spectatorInactivity")) -- et-legacy : ???
 mapName                 = et.trap_Cvar_Get("mapname")
 muteModule              = tonumber(et.trap_Cvar_Get("u_mute_module"))
@@ -120,7 +120,8 @@ cmdList = {
         ["!goto"]              = "/command/both/goto.lua",
         ["!want"]              = "/command/both/want.lua",
         ["!unmute"]            = "/command/client/unmute.lua",
-        ["!mute"]              = "/command/client/mute.lua"
+        ["!mute"]              = "/command/client/mute.lua",
+        ["!colors"]            = "/command/client/colors.lua",
     },
     ["console"] = {
         ["!setlevel"]      = "/command/both/setlevel.lua",
@@ -754,8 +755,6 @@ function teamSlashCommand(params)
     return 0
 end
 
-dateFormat = "%Y-%m-%d, %H:%M:%S" -- for map record dates, see strftime(3) ;->
-
 -- Format a date.
 --  dateValue is the timestamp value of the date to format.
 --  displayTime is if time is add to the formated date.
@@ -763,22 +762,12 @@ function getFormatedDate(dateValue, addTime)
     local str
 
     if addTime then
-        str = dateFormat .. ", %H:%M:%S"
+        str = dateFormat .. " %X"
     else
         str = dateFormat
     end
 
-    local returnValue, result = pcall(os.date, str, dateValue)
-
-    if returnValue then
-        return result
-    else
-        et.G_LogPrint(
-            "uMod ERROR getFormatedDate : " .. result .. "\n"
-        )
-
-        return ""
-    end
+    return os.date(str, dateValue)
 end
 
 -- printf wrapper
@@ -822,7 +811,7 @@ function kick(clientNum, reason, timeout)
     end
 
     if logChatModule == 1 then
-        local time = os.date("%x %I:%M:%S%p")
+        local time = getFormatedDate(os.time(), true)
         local ip   = string.upper(et.Info_ValueForKey(et.trap_GetUserinfo(clientNum), "ip"))
         local guid = string.upper(client[clientNum]["guid"])
         writeLog(
@@ -1223,7 +1212,6 @@ addSlashCommand("client", {"ref", "unpause"}, {"function", "unPauseSlashCommand"
 addSlashCommand("console", {"ref", "pause"}, {"function", "pauseSlashCommand"})
 addSlashCommand("console", {"ref", "unpause"}, {"function", "unPauseSlashCommand"})
 
--- TODO : Check nextteam command
 addSlashCommand("client", "team", {"function", "teamSlashCommand"})
 
 -- Enemy Territory callbacks
@@ -1259,6 +1247,16 @@ function et_InitGame(levelTime, randomSeed, restart)
         if et.gentity_get(p, "pers.connected") == 2 then
             client[p]["name"] = et.Info_ValueForKey(et.trap_GetUserinfo(p), "name")
         end
+    end
+
+    local returnValue, result = pcall(os.date, dateFormat, os.time())
+
+    if not returnValue then
+        et.G_LogPrint(
+            "uMod ERROR <u_date_format> cvar value : Default value used (%m/%d/%Y)\n"
+        )
+
+        dateFormat = "%m/%d/%Y"
     end
 
     executeCallbackFunction("InitGame", {["levelTime"] = levelTime, ["restart"] = restart})

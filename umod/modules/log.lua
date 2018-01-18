@@ -17,7 +17,7 @@ if logPrivateMsg == 1 then
     -- Override team private message slash command for log team private message.
     --  params is parameters passed to the function executed in command file.
     function teamPrivateMessageSlashCommand(params)
-        local time       = os.date("%x %I:%M:%S%p")
+        local time       = getFormatedDate(os.time(), true)
         local clientInfo = et.trap_GetUserinfo(params.clientNum)
         local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
         local from       = "SERVER"
@@ -48,7 +48,7 @@ if logPrivateMsg == 1 then
     --  target is the slot id / partial or complete name of recipiant player.
     --  recipiant is complete name of recipiant player.
     function logPrivateMessage(clientNum, msg, target, recipiant)
-        local time       = os.date("%x %I:%M:%S%p")
+        local time       = getFormatedDate(os.time(), true)
         local clientInfo = et.trap_GetUserinfo(clientNum)
         local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
         local guid       = string.upper(client[clientNum]["guid"] )
@@ -79,7 +79,7 @@ if logPrivateMsg == 1 then
     --  clientNum is the client slot id.
     --  msg is the content of private message.
     function logAdminsPrivateMessage(clientNum, msg)
-        local time = os.date("%x %I:%M:%S%p")
+        local time = getFormatedDate(os.time(), true)
         local ip
         local guid
         local from
@@ -144,7 +144,7 @@ end
 --  msg is the content of chat message.
 --  msgType is the type of log message.
 function logMessage(clientNum, msg, msgType)
-    local time       = os.date("%x %I:%M:%S%p")
+    local time       = getFormatedDate(os.time(), true)
     local clientInfo = et.trap_GetUserinfo(clientNum)
     local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
     local guid       = string.upper(client[clientNum]["guid"] )
@@ -183,7 +183,7 @@ function logChat(clientNum, mode, msg)
 
     if msgType ~= "NONE" then
         local msg        = et.Q_CleanStr(msg)
-        local time       = os.date("%x %I:%M:%S%p")
+        local time       = getFormatedDate(os.time(), true)
         local clientInfo = et.trap_GetUserinfo(clientNum)
         local ip         = string.upper(et.Info_ValueForKey(clientInfo, "ip"))
         local guid       = string.upper(client[clientNum]["guid"] )

@@ -10,7 +10,7 @@ function execute_command(params)
     local revive        = { 0, nil }
     local multiRevive   = { 0, nil } 
     local monsterRevive = { 0, nil }
-    local oldest        = 2147483647 -- 2^31 - 1 FIXME : WHAT !
+    local oldest        = os.time()
     local recordMsg
 
     for guid, arr in pairs(reviveSpree["serverRecords"]) do
@@ -59,7 +59,7 @@ function execute_command(params)
     et.G_Printf("%s: %d ms\n", cmd, et.trap_Milliseconds() - funcStart)
  
     if table.getn(records) ~= 0 then
-        recordMsg = color1 .. "Top revivers since " .. os.date(dateFormat, oldest) ..
+        recordMsg = color1 .. "Top revivers since " .. getFormatedDate(oldest, true) ..
                 " are " .. table.concat(records, ", ")
     else
         recordMsg = color1 .. "no records found :("

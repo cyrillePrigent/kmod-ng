@@ -16,7 +16,7 @@ function execute_command(params)
     if mapMax[3] ~= nil then
         mapMsg = color4 .. "map: " .. color1 .. mapName .. color4 .. ": " ..
                 color1 .. mapMax[3] .. color4 .. " (" .. color1 .. mapMax[1] ..
-                color4 .. ") @ " .. os.date(dateFormat, mapMax[2])
+                color4 .. ") @ " .. getFormatedDate(mapMax[2], true)
     else
         mapMsg = color4 .. "map: " .. color1 .. mapName .. color4 .. ": " ..
                 color1 .. "no record"
@@ -34,7 +34,7 @@ function execute_command(params)
     if allMax[3] ~= nil then
         allMsg = " " .. color4 .. "[" .. color1 .. "overall: " .. allMax[3] ..
             color4 .. " (" .. color1 .. allMax[1] .. color4 .. ") @ " ..
-            os.date(dateFormat, allMax[2]) .. color4 .. "]"
+            getFormatedDate(allMax[2], true) .. color4 .. "]"
     end
 
     printCmdMsg(params, mapMsg .. allMsg)

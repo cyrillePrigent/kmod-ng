@@ -130,7 +130,7 @@ if spreeRecordModule == 1 then
     --  kills is the kill count of spree record.
     function writeSpreeRecord(clientNum, kills)
         local name = et.Q_CleanStr(client[clientNum]["name"])
-        local date = os.date("%x %I:%M:%S%p")
+        local date = getFormatedDate(os.time(), true)
 
         local fd, len = et.trap_FS_FOpenFile("sprees/spree_record.dat", et.FS_WRITE)
 
@@ -175,7 +175,7 @@ if spreeRecordModule == 1 then
     --  kills is the kill count of map spree record.
     function writeMapSpreeRecord(clientNum, kills)
         local name = et.Q_CleanStr(client[clientNum]["name"])
-        local date = os.date("%x %I:%M:%S%p")
+        local date = getFormatedDate(os.time(), true)
 
         local fd, len = et.trap_FS_FOpenFile("sprees/" .. mapName .. ".record", et.FS_WRITE)
 

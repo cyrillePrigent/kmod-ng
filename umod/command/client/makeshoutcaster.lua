@@ -14,7 +14,7 @@ function execute_command(params)
             if client[clientNum]['team'] ~= 3 then
                 printCmdMsg(params, "Only spectators can be shoutcasters.\n")
             else
-                -- et.CS_PLAYERS = 689
+                -- NOTE : et.CS_PLAYERS = 689
                 if tonumber(et.Info_ValueForKey(et.trap_GetConfigstring(689 + clientNum), "sc")) == 1 then
                     printCmdMsg(
                         params,

@@ -5,7 +5,10 @@ function execute_command(params)
     params.noDisplayCmd = true
     params.say          = "chat"
 
-    printCmdMsg(params, os.date("The server date is %x %I:%M:%S%p\n"))
+    printCmdMsg(
+        params,
+        "The server date is " .. getFormatedDate(os.time(), true) .. "\n"
+    )
 
     return 1
 end

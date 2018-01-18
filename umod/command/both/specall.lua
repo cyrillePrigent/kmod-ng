@@ -14,6 +14,7 @@ function execute_command(params)
 
     if matches > 0 then
         params.broadcast2allClients = true
+
         printCmdMsg(
             params,
             "Moving " .. color4 .. matches .. color1 .. " players to spectator\n"
